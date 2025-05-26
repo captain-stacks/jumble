@@ -239,3 +239,30 @@ class LocalStorageService {
 
 const instance = new LocalStorageService()
 export default instance
+
+const SEEN_EVENTS_KEY = 'seen_events_v1';
+const MAX_STORED_EVENTS = 10000;
+
+export const getStoredSeenEvents = (): string[] => {
+  try {
+    const stored = localStorage.getItem(SEEN_EVENTS_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored);
+  } catch (e) {
+    console.error('Error loading seen events:', e);
+    return [];
+  }
+};
+
+export const storeSeenEvents = (seenEvents: Set<string>) => {
+  try {
+    const toStore = Array.from(seenEvents);
+    // Keep only most recent events
+    if (toStore.length > MAX_STORED_EVENTS) {
+      toStore.splice(0, toStore.length - MAX_STORED_EVENTS);
+    }
+    localStorage.setItem(SEEN_EVENTS_KEY, JSON.stringify(toStore));
+  } catch (e) {
+    console.error('Error storing seen events:', e);
+  }
+};

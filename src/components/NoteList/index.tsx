@@ -9,10 +9,11 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
+import { getStoredSeenEvents, storeSeenEvents } from '@/services/local-storage.service'
 import relayInfoService from '@/services/relay-info.service'
 import { TNoteListMode } from '@/types'
 import dayjs from 'dayjs'
-import { Event, Filter, kinds } from 'nostr-tools'
+import { Event, Filter, kinds, SimplePool } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PullToRefresh from 'react-simple-pull-to-refresh'
@@ -23,6 +24,7 @@ import TabSwitcher from '../TabSwitch'
 const LIMIT = 100
 const ALGO_LIMIT = 500
 const SHOW_COUNT = 10
+const REACTION_WEIGHT = 0.5
 
 export default function NoteList({
   relayUrls = [],
@@ -58,6 +60,10 @@ export default function NoteList({
   const [filterType, setFilterType] = useState<Exclude<TNoteListMode, 'postsAndReplies'>>('posts')
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const topRef = useRef<HTMLDivElement | null>(null)
+  const seenEventsRef = useRef<Set<string>>(new Set(getStoredSeenEvents()));
+  const weightedEventCountsRef = useRef<Map<string, number>>(new Map());
+  const poolRef = useRef<SimplePool>();
+
   const filteredNewEvents = useMemo(() => {
     return newEvents.filter((event: Event) => {
       return (
@@ -193,6 +199,76 @@ export default function NoteList({
         }
       }
 
+      if (isMainFeed) {
+        console.log('calling subscribeTimeline', {
+          relayUrls,
+          filter,
+          filterType,
+          author,
+          subRequests
+        });
+
+        // Initialize pool if not exists
+        if (!poolRef.current) {
+          poolRef.current = new SimplePool();
+        }
+        const pool = poolRef.current;
+
+        const sub = pool.subscribeMany(relayUrls, [{
+          kinds: [1, 6, 7],
+          since: Math.floor(Date.now() / 1000) - 1 * 60, // 5 minutes
+        }], {
+          async onevent(note) {
+            const pubkey = note.pubkey;
+            
+            // Add early return for muted pubkeys
+            if (filterMutedNotes && mutePubkeys.includes(pubkey)) return;
+
+            if (note.kind !== 1 || note.tags.some(t => t[3] === 'root')) {
+              const eTag = note.tags.find(t => t[0] === 'e');
+              if (!eTag) return;
+
+              const id = eTag[1];
+              
+              // Only check if we haven't seen this event yet
+              if (!seenEventsRef.current.has(id)) {
+                // Add weight based on event kind
+                const weight = note.kind === 7 ? REACTION_WEIGHT : 1;
+                const newWeight = (weightedEventCountsRef.current.get(id) || 0) + weight;
+                weightedEventCountsRef.current.set(id, newWeight);
+
+                if (newWeight >= 1) {
+                  const [referencedEvent] = await pool.querySync([
+                    'wss://nostr21.com',
+                    'wss://nos.lol',
+                    'wss://relay.damus.io',
+                    'wss://nostr.mom',
+                  ], { ids: [id] });
+                  
+                  if (!referencedEvent) return;
+                  if (referencedEvent.pubkey === pubkey) return;
+
+                  // Only add to seenEvents if we're actually going to add the event
+                  seenEventsRef.current.add(id);
+                  storeSeenEvents(seenEventsRef.current);
+
+                  setEvents((prev) => {
+                    if (prev.some((e) => e.id === referencedEvent.id)) {
+                      return prev;
+                    }
+                    return [referencedEvent, ...prev];
+                  });
+                }
+              }
+            }
+          }
+        });
+        setTimelineKey(Math.random().toString(36).substring(2, 15));
+        return () => {
+          console.log('Unsubscribing from timeline');
+          sub.close();
+        };
+      }
       const { closer, timelineKey } = await client.subscribeTimeline(
         subRequests,
         {

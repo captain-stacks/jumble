@@ -19,6 +19,7 @@ import PullToRefresh from 'react-simple-pull-to-refresh'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
 import { PictureNoteCardMasonry } from '../PictureNoteCardMasonry'
 import TabSwitcher from '../TabSwitch'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 
 const LIMIT = 100
 const ALGO_LIMIT = 500
@@ -45,7 +46,7 @@ export default function NoteList({
 }) {
   const { t } = useTranslation()
   const { isLargeScreen } = useScreenSize()
-  const { pubkey, startLogin } = useNostr()
+  const { pubkey, startLogin, eventList, authorLastPosts } = useNostr()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -60,6 +61,7 @@ export default function NoteList({
   const [filterType, setFilterType] = useState<Exclude<TNoteListMode, 'postsAndReplies'>>('posts')
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const topRef = useRef<HTMLDivElement | null>(null)
+  const { isUserTrusted } = useUserTrust()
   const filteredNewEvents = useMemo(() => {
     return newEvents.filter((event: Event) => {
       return (
@@ -195,6 +197,11 @@ export default function NoteList({
         }
       }
 
+      if (isMainFeed && filter.authors) {
+        handleRefresh()
+        setTimelineKey(Math.random().toString(36).substring(2, 15));
+        return () => {}
+      }
       const { closer, timelineKey } = await client.subscribeTimeline(
         subRequests,
         {
@@ -289,8 +296,27 @@ export default function NoteList({
     }, 0)
   }
 
+  const handleRefresh = () => {
+    const sortedEvents = eventList.current
+      .filter(event => isUserTrusted(event.pubkey))
+      .sort((a, b) => {
+        const aLastPost = authorLastPosts.get(a.pubkey) || Infinity;
+        const bLastPost = authorLastPosts.get(b.pubkey) || Infinity;
+        return aLastPost - bLastPost;
+      });
+
+    if (sortedEvents.length === 0) return;
+    const topEvent = sortedEvents[0];
+    eventList.current = eventList.current.filter(event => event.id !== topEvent.id);
+  
+    setEvents(prev => [topEvent, ...prev.slice(0, 10)]);
+  }
+
   return (
     <div className={className}>
+      { isMainFeed && filter.authors &&
+        <Button onClick={handleRefresh}>Show next note</Button>
+      }
       <TabSwitcher
         value={listMode}
         tabs={

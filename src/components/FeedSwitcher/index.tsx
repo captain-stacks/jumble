@@ -54,6 +54,23 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
         </FeedSwitcherItem>
       )}
 
+      {pubkey && (
+        <FeedSwitcherItem
+          isActive={feedInfo.feedType === 'notstr'}
+          onClick={() => {
+            if (!pubkey) return
+            switchFeed('notstr', { pubkey })
+            close?.()
+          }}
+        >
+          <div className="flex gap-2 items-center">
+            <div className="flex justify-center items-center w-6 h-6 shrink-0">
+            </div>
+            <div>{t('notstr')}</div>
+          </div>
+        </FeedSwitcherItem>
+      )}
+
       {temporaryRelayUrls.length > 0 && (
         <FeedSwitcherItem
           key="temporary"

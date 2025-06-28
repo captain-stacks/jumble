@@ -24,6 +24,7 @@ import Highlight from './Highlight'
 import IValue from './IValue'
 import NsfwNote from './NsfwNote'
 import { UnknownNote } from './UnknownNote'
+import { useNostr } from '@/providers/NostrProvider'
 
 export default function Note({
   event,
@@ -59,6 +60,16 @@ export default function Note({
   } else {
     content = <Content className="mt-2" event={event} />
   }
+  const { eventLastPostTimes } = useNostr()
+  const inactiveTime = (eventId: string) => {
+    const preamble = ' after inactive for '
+    const diff = eventLastPostTimes.get(eventId)
+    if (!diff) return
+    if (diff < 60) return preamble + 'just now'
+    if (diff < 3600) return preamble + `${Math.floor(diff / 60)} minutes`
+    if (diff < 86400) return preamble + `${Math.floor(diff / 3600)} hours`
+    return preamble + `${Math.floor(diff / 86400)} days`
+  }
 
   return (
     <div className={className}>
@@ -83,6 +94,7 @@ export default function Note({
                 className="shrink-0"
                 short={isSmallScreen}
               />
+              {inactiveTime(event.id)}
             </div>
           </div>
         </div>

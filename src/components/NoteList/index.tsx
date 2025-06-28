@@ -19,6 +19,8 @@ import PullToRefresh from 'react-simple-pull-to-refresh'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
 import { PictureNoteCardMasonry } from '../PictureNoteCardMasonry'
 import TabSwitcher from '../TabSwitch'
+import { useUserTrust } from '@/providers/UserTrustProvider'
+import { useFeed } from '@/providers/FeedProvider'
 
 const LIMIT = 100
 const ALGO_LIMIT = 500
@@ -45,7 +47,7 @@ export default function NoteList({
 }) {
   const { t } = useTranslation()
   const { isLargeScreen } = useScreenSize()
-  const { pubkey, startLogin } = useNostr()
+  const { pubkey, startLogin, eventList, setEventList, eventLastPostTimes } = useNostr()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -60,6 +62,8 @@ export default function NoteList({
   const [filterType, setFilterType] = useState<Exclude<TNoteListMode, 'postsAndReplies'>>('posts')
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const topRef = useRef<HTMLDivElement | null>(null)
+  const { isUserTrusted } = useUserTrust()
+  const [showUntrusted, setShowUntrusted] = useState(false)
   const filteredNewEvents = useMemo(() => {
     return newEvents.filter((event: Event) => {
       return (
@@ -68,6 +72,17 @@ export default function NoteList({
       )
     })
   }, [newEvents, listMode, filterMutedNotes, mutePubkeys])
+  const { feedInfo } = useFeed()
+  const filteredEventList = useMemo(
+    () => eventList.filter(event =>
+      (showUntrusted || isUserTrusted(event.pubkey))
+      && (listMode === 'postsAndReplies' || !isReplyNoteEvent(event))),
+    [listMode, eventList, isUserTrusted, showUntrusted]
+  )
+  const showUntrustedRef = useRef(showUntrusted)
+  useEffect(() => {
+    showUntrustedRef.current = showUntrusted
+  }, [showUntrusted])
 
   useEffect(() => {
     switch (listMode) {
@@ -102,6 +117,10 @@ export default function NoteList({
         urls: string[]
         filter: Omit<Filter, 'since' | 'until'> & { limit: number }
       }[] = []
+      if (isMainFeed && feedInfo.feedType === 'notstr') {
+        handleRefresh()
+        return () => {}
+      }
       if (filterType === 'you' && author && pubkey && pubkey !== author) {
         const [myRelayList, targetRelayList] = await Promise.all([
           client.fetchRelayList(pubkey),
@@ -200,7 +219,7 @@ export default function NoteList({
         {
           onEvents: (events, eosed) => {
             if (events.length > 0) {
-              setEvents(events)
+              setEvents(events.filter(event => showUntrustedRef.current || isUserTrusted(event.pubkey)))
             }
             if (areAlgoRelays) {
               setHasMore(false)
@@ -211,6 +230,7 @@ export default function NoteList({
             }
           },
           onNew: (event) => {
+            if (!showUntrustedRef.current && !isUserTrusted(event.pubkey)) return
             setNewEvents((oldEvents) =>
               [event, ...oldEvents].sort((a, b) => b.created_at - a.created_at)
             )
@@ -289,8 +309,48 @@ export default function NoteList({
     }, 0)
   }
 
+  const handleRefresh = () => {
+    const sortedEvents = eventList
+      .filter(event => (showUntrusted || isUserTrusted(event.pubkey))
+        && (listMode === 'postsAndReplies' || !isReplyNoteEvent(event)))
+      .sort((a, b) => {
+        const aLastPost = eventLastPostTimes.get(a.id) || Infinity;
+        const bLastPost = eventLastPostTimes.get(b.id) || Infinity;
+        return bLastPost - aLastPost;
+      });
+    if (sortedEvents.length === 0) return;
+    const topEvent = sortedEvents[0];
+    setEventList(prev => prev.filter(event => event.id !== topEvent.id))
+    setEvents(prev => [topEvent, ...prev.slice(0, 10)]);
+  }
+
   return (
     <div className={className}>
+      { isMainFeed && feedInfo.feedType !== 'following' &&
+        <div className="flex items-center mb-2">
+          <Button
+            size="sm"
+            onClick={() => setShowUntrusted((prev) => !prev)}>
+            {showUntrusted
+              ? "Stop loading notes from untrusted users"
+              : "Start loading notes from untrusted users"}
+          </Button>
+        </div>
+      }
+      { isMainFeed && feedInfo.feedType === 'notstr' &&
+      <>
+        &nbsp;&nbsp;
+        <Button
+          disabled={filteredEventList.length === 0}
+          onClick={handleRefresh}
+          size="sm">
+          Show next note
+        </Button>
+        &nbsp;&nbsp;
+        {filteredEventList.length}
+        {' '}notes available
+      </>
+      }
       <TabSwitcher
         value={listMode}
         tabs={
@@ -301,11 +361,16 @@ export default function NoteList({
                 { value: 'pictures', label: 'Pictures' },
                 { value: 'you', label: 'YouTabName' }
               ]
-            : [
-                { value: 'posts', label: 'Notes' },
-                { value: 'postsAndReplies', label: 'Replies' },
-                { value: 'pictures', label: 'Pictures' }
-              ]
+            : isMainFeed && feedInfo.feedType === 'notstr'
+              ? [
+                  { value: 'posts', label: 'Notes' },
+                  { value: 'postsAndReplies', label: 'Replies' },
+                ]
+              : [
+                  { value: 'posts', label: 'Notes' },
+                  { value: 'postsAndReplies', label: 'Replies' },
+                  { value: 'pictures', label: 'Pictures' }
+                ]
         }
         onTabChange={(listMode) => {
           setListMode(listMode as TNoteListMode)
@@ -313,9 +378,11 @@ export default function NoteList({
           if (isMainFeed) {
             storage.setNoteListMode(listMode as TNoteListMode)
           }
-          setTimeout(() => {
-            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }, 0)
+          if (!isMainFeed || feedInfo.feedType !== 'notstr') {
+            setTimeout(() => {
+              topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 0)
+          }
         }}
         threshold={Math.max(800, topSpace)}
       />

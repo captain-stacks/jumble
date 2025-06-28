@@ -99,6 +99,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       if (feedInfo.feedType === 'bookmarks' && pubkey) {
         return await switchFeed('bookmarks', { pubkey })
       }
+
+      if (feedInfo.feedType === 'notstr' && pubkey) {
+        return await switchFeed('notstr', { pubkey })
+      }
     }
 
     init()
@@ -224,6 +228,22 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         urls.filter((_, i) => !relayInfos[i] || !checkAlgoRelay(relayInfos[i]))
       )
       return
+    }
+    if (feedType === 'notstr') {
+      if (!options.pubkey) {
+        return setIsReady(true)
+      }
+      const newFeedInfo = { feedType }
+      setFeedInfo(newFeedInfo)
+      feedInfoRef.current = newFeedInfo
+      storage.setFeedInfo(newFeedInfo, pubkey)
+
+      const followings = await client.fetchFollowings(options.pubkey)
+      setRelayUrls([])
+      setFilter({
+        authors: followings.includes(options.pubkey) ? followings : [...followings, options.pubkey]
+      })
+      return setIsReady(true)
     }
     setIsReady(true)
   }

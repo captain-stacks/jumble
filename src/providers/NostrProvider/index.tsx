@@ -17,7 +17,7 @@ import dayjs from 'dayjs'
 import { Event, kinds, VerifiedEvent } from 'nostr-tools'
 import * as nip19 from 'nostr-tools/nip19'
 import * as nip49 from 'nostr-tools/nip49'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { BunkerSigner } from './bunker.signer'
@@ -66,6 +66,9 @@ type TNostrContext = {
   updateBookmarkListEvent: (bookmarkListEvent: Event) => Promise<void>
   updateFavoriteRelaysEvent: (favoriteRelaysEvent: Event) => Promise<void>
   updateNotificationsSeenAt: () => Promise<void>
+  eventList: Event[]
+  setEventList: React.Dispatch<React.SetStateAction<Event[]>>
+  eventLastPostTimes: Map<string, number>
 }
 
 const NostrContext = createContext<TNostrContext | undefined>(undefined)
@@ -94,8 +97,16 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
   const [favoriteRelaysEvent, setFavoriteRelaysEvent] = useState<Event | null>(null)
   const [notificationsSeenAt, setNotificationsSeenAt] = useState(-1)
   const [isInitialized, setIsInitialized] = useState(false)
+  const mounted = useRef(false)
+  const muteListRef = useRef<Event | undefined>()
+  const queue = useRef(new Queue())
+  const [eventList, setEventList] = useState<Event[]>([]);
+  const eventLastPostTimes = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
+    if (mounted.current) return
+    mounted.current = true
+    
     const init = async () => {
       if (hasNostrLoginHash()) {
         return await loginByNostrLoginHash()
@@ -109,6 +120,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
     }
     init().then(() => {
       setIsInitialized(true)
+      mentionProducer()
+      mentionConsumer()
     })
 
     const handleHashChange = () => {
@@ -280,6 +293,63 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       client.signer = undefined
     }
   }, [signer])
+
+  useEffect(() => {
+    muteListRef.current = muteListEvent
+  }, [muteListEvent])
+
+  const mentionProducer = async () => {
+    client.getPool().subscribeMany(BIG_RELAY_URLS, [{
+      kinds: [1],
+      since: Math.floor(Date.now() / 1000) - 60 * 30,
+    }], {
+      onevent(event) {
+        queue.current.enqueue([event.id, event])
+      }
+    });
+  }
+
+  const mentionConsumer = async () => {
+    while (true) {
+      try {
+        const eventListFromQueue: Event[] = []
+        
+        do {
+          const [_, event] = await queue.current.dequeue()
+          eventListFromQueue.push(event)
+        } while (!queue.current.isEmpty());
+
+        const authors = new Set(eventListFromQueue.map(event => event.pubkey));
+
+        for (const pubkey of authors) {
+          const mutedPubkeys = muteListRef.current?.tags.filter(tag => tag[0] === 'p').map(tag => tag[1]) ?? []
+          if (mutedPubkeys.includes(pubkey)) continue
+
+          try {
+            const events = await client.getPool().querySync(BIG_RELAY_URLS, {
+              kinds: [1],
+              authors: [pubkey],
+              limit: 2
+            });
+            
+            if (events.length > 1) {
+              events.sort((a, b) => b.created_at - a.created_at);
+              const timeElapsedSinceLastPost = dayjs().unix() - events[1].created_at;
+              if (timeElapsedSinceLastPost > 60 * 60 * 10) {
+                const event = events[0];
+                eventLastPostTimes.current.set(event.id, timeElapsedSinceLastPost);
+                setEventList(prev => [...prev, event]);
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching history for ${pubkey}:`, error);
+          }
+        }
+      } catch (error) {
+        Promise.reject(error)
+      }
+    }
+  }
 
   const hasNostrLoginHash = () => {
     return window.location.hash && window.location.hash.startsWith('#nostr-login')
@@ -678,11 +748,44 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         updateMuteListEvent,
         updateBookmarkListEvent,
         updateFavoriteRelaysEvent,
-        updateNotificationsSeenAt
+        updateNotificationsSeenAt,
+        eventList,
+        setEventList,
+        eventLastPostTimes: eventLastPostTimes.current,
       }}
     >
       {children}
       <LoginDialog open={openLoginDialog} setOpen={setOpenLoginDialog} />
     </NostrContext.Provider>
   )
+}
+
+class Queue {
+  private queue: any[];
+  private resolvers: any[];
+
+  constructor() {
+    this.queue = []
+    this.resolvers = []
+  }
+
+  enqueue(item: any) {
+    if (this.resolvers.length > 0) {
+      const resolve = this.resolvers.shift()
+      resolve(item)
+    } else {
+      this.queue.push(item)
+    }
+  }
+
+  dequeue() {
+    if (this.queue.length > 0) {
+      return Promise.resolve(this.queue.shift())
+    }
+    return new Promise(resolve => this.resolvers.push(resolve))
+  }
+
+  isEmpty() {
+    return this.queue.length === 0
+  }
 }

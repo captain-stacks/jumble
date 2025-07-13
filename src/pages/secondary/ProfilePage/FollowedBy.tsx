@@ -4,12 +4,14 @@ import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 
 export default function FollowedBy({ pubkey }: { pubkey: string }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const [followedBy, setFollowedBy] = useState<string[]>([])
   const { pubkey: accountPubkey } = useNostr()
+  const { userTrustScore } = useUserTrust()
 
   useEffect(() => {
     if (!pubkey || !accountPubkey) return
@@ -22,7 +24,7 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
         })
       )
       const _followedBy: string[] = []
-      const limit = isSmallScreen ? 3 : 5
+      const limit = isSmallScreen ? 3 : 500
       for (const [index, following] of followings.entries()) {
         if (following === pubkey) continue
         if (followingsOfFollowings[index].includes(pubkey)) {
@@ -41,8 +43,11 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
 
   return (
     <div className="flex items-center gap-1">
-      <div className="text-muted-foreground">{t('Followed by')}</div>
-      {followedBy.map((p) => (
+      <div className="text-muted-foreground">{t('Followed by=')}
+        {followedBy.length},
+        {userTrustScore(pubkey)}
+      </div>
+      {followedBy.slice(0, 10).map((p) => (
         <UserAvatar userId={p} key={p} size="xSmall" />
       ))}
     </div>

@@ -17,6 +17,7 @@ import { ScreenSizeProvider } from './providers/ScreenSizeProvider'
 import { TranslationServiceProvider } from './providers/TranslationServiceProvider'
 import { UserTrustProvider } from './providers/UserTrustProvider'
 import { ZapProvider } from './providers/ZapProvider'
+import { FeedAlgorithmsProvider } from './providers/FeedAlgorithmsProvider'
 
 export default function App(): JSX.Element {
   return (
@@ -34,8 +35,10 @@ export default function App(): JSX.Element {
                           <FeedProvider>
                             <ReplyProvider>
                               <MediaUploadServiceProvider>
-                                <PageManager />
-                                <Toaster />
+                                <FeedAlgorithmsProvider>
+                                  <PageManager />
+                                  <Toaster />
+                                </FeedAlgorithmsProvider>
                               </MediaUploadServiceProvider>
                             </ReplyProvider>
                           </FeedProvider>

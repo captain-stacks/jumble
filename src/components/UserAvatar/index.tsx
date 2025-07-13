@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { SecondaryPageLink } from '@/PageManager'
 import ProfileCard from '../ProfileCard'
 import { useMemo } from 'react'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 
 const UserAvatarSizeCnMap = {
   large: 'w-24 h-24',
@@ -30,10 +31,14 @@ export default function UserAvatar({
   size?: 'large' | 'big' | 'semiBig' | 'normal' | 'medium' | 'small' | 'xSmall' | 'tiny'
 }) {
   const { profile } = useFetchProfile(userId)
+  const { isUserFollowed, isUserTrusted } = useUserTrust()
   const defaultAvatar = useMemo(
     () => (profile?.pubkey ? generateImageByPubkey(profile.pubkey) : ''),
     [profile]
   )
+
+  const isFollowed = profile?.pubkey ? isUserFollowed(profile.pubkey) : false
+  const isTrusted = profile?.pubkey ? isUserTrusted(profile.pubkey) : true
 
   if (!profile) {
     return (
@@ -46,7 +51,16 @@ export default function UserAvatar({
     <HoverCard>
       <HoverCardTrigger>
         <SecondaryPageLink to={toProfile(pubkey)} onClick={(e) => e.stopPropagation()}>
-          <Avatar className={cn('shrink-0', UserAvatarSizeCnMap[size], className)}>
+          <Avatar
+            className={cn(
+              'shrink-0',
+              UserAvatarSizeCnMap[size],
+              'relative',
+              className,
+              isFollowed && 'ring-2 ring-green-500 ring-offset-2',
+              !isTrusted && 'ring-2 ring-red-500 ring-offset-2'
+            )}
+          >
             <AvatarImage src={avatar} className="object-cover object-center" />
             <AvatarFallback>
               <img src={defaultAvatar} alt={pubkey} />
@@ -73,10 +87,14 @@ export function SimpleUserAvatar({
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }) {
   const { profile } = useFetchProfile(userId)
+  const { isUserFollowed, isUserTrusted } = useUserTrust()
   const defaultAvatar = useMemo(
     () => (profile?.pubkey ? generateImageByPubkey(profile.pubkey) : ''),
     [profile]
   )
+
+  const isFollowed = profile?.pubkey ? isUserFollowed(profile.pubkey) : false
+  const isTrusted = profile?.pubkey ? isUserTrusted(profile.pubkey) : true
 
   if (!profile) {
     return (
@@ -86,7 +104,17 @@ export function SimpleUserAvatar({
   const { avatar, pubkey } = profile
 
   return (
-    <Avatar className={cn('shrink-0', UserAvatarSizeCnMap[size], className)} onClick={onClick}>
+    <Avatar
+      className={cn(
+        'shrink-0',
+        UserAvatarSizeCnMap[size],
+        'relative',
+        className,
+        isFollowed && 'ring-2 ring-green-500 ring-offset-2',
+        !isTrusted && 'ring-2 ring-red-500 ring-offset-2'
+      )}
+      onClick={onClick}
+    >
       <AvatarImage src={avatar} className="object-cover object-center" />
       <AvatarFallback>
         <img src={defaultAvatar} alt={pubkey} />

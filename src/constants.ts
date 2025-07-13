@@ -37,7 +37,6 @@ export const ApplicationDataKey = {
 export const BIG_RELAY_URLS = [
   'wss://relay.damus.io/',
   'wss://nos.lol/',
-  'wss://relay.nostr.band/',
   'wss://nostr.mom/'
 ]
 

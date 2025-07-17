@@ -51,7 +51,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               kinds: [
                 kinds.ShortTextNote,
                 ExtendedKind.COMMENT,
-                kinds.Reaction,
                 kinds.Repost,
                 kinds.Zap
               ],

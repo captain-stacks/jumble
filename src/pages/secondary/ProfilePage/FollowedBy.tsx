@@ -4,14 +4,12 @@ import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useUserTrust } from '@/providers/UserTrustProvider'
 
 export default function FollowedBy({ pubkey }: { pubkey: string }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const [followedBy, setFollowedBy] = useState<string[]>([])
   const { pubkey: accountPubkey } = useNostr()
-  const { userTrustScore } = useUserTrust()
 
   useEffect(() => {
     if (!pubkey || !accountPubkey) return

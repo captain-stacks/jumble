@@ -9,6 +9,7 @@ import { Loader } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { useMemo, useState } from 'react'
 import Emoji from '../Emoji'
+import UserAvatar from '../UserAvatar'
 
 export default function Likes({ event }: { event: Event }) {
   const { pubkey, checkLogin, publish } = useNostr()
@@ -53,7 +54,7 @@ export default function Likes({ event }: { event: Event }) {
 
   return (
     <ScrollArea className="pb-2 mb-1">
-      <div className="flex gap-1">
+      <div className="gap-1">
         {likes.map(({ key, emoji, pubkeys }) => (
           <div
             key={key}
@@ -70,6 +71,13 @@ export default function Likes({ event }: { event: Event }) {
           >
             {liking === key ? <Loader className="animate-spin size-4" /> : <Emoji emoji={emoji} />}
             <div className="text-sm">{pubkeys.size}</div>
+            {pubkeys.size > 0 && (
+              <div className="flex items-center gap-1">
+                {Array.from(pubkeys).map((p) => (
+                  <UserAvatar userId={p} key={p} size="xSmall" />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

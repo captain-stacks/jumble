@@ -188,7 +188,7 @@ const ProfilePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
                   </SecondaryPageLink>
                 )}
               </div>
-              {!isSelf && <FollowedBy pubkey={pubkey} />}
+              {<FollowedBy pubkey={pubkey} />}
             </div>
           </div>
         </div>

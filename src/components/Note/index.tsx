@@ -31,7 +31,7 @@ import LongFormArticle from './LongFormArticle'
 import MutedNote from './MutedNote'
 import NsfwNote from './NsfwNote'
 import { UnknownNote } from './UnknownNote'
-import { useNostr } from '@/providers/NostrProvider'
+import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
 
 export default function Note({
   event,
@@ -95,7 +95,7 @@ export default function Note({
   } else {
     content = <Content className="mt-2" event={event} />
   }
-  const { eventLastPostTimes } = useNostr()
+  const { eventLastPostTimes } = useFeedAlgorithms()
   const inactiveTime = (eventId: string) => {
     const preamble = ' after inactive for'
     const diff = eventLastPostTimes.get(eventId)

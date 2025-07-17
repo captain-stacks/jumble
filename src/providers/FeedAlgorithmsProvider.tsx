@@ -11,6 +11,7 @@ import { useMuteList } from './MuteListProvider'
 type TFeedAlgorithmsContext = {
   eventLastPostTimes: Map<string, number>
   events: Event[]
+  notstrEvents: Event[]
 }
 
 const FeedAlgorithmsContext = createContext<TFeedAlgorithmsContext | undefined>(undefined)
@@ -27,10 +28,6 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const { pubkey: currentPubkey } = useNostr()
   const { userTrustScore, isUserTrusted, isUserFollowed } = useUserTrust()
   const { mutePubkeys } = useMuteList()
-  const mutedPubkeysRef = useRef<string[]>([])
-  useEffect(() => {
-    mutedPubkeysRef.current = mutePubkeys
-  }, [mutePubkeys])
   const mounted = useRef(false)
   const queue = useRef(new Queue())
   const eventLastPostTimes = useRef<Map<string, number>>(new Map())
@@ -40,6 +37,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const eventMap = useRef<Map<string, Event>>(new Map())
   let sub: SubCloser | undefined
   const [events, setEvents] = useState<Event[]>([])
+  const [notstrEvents, setNostrEvents] = useState<Event[]>([])
 
   useEffect(() => {
     if (!currentPubkey) return
@@ -62,15 +60,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const mentionProducer = async () => {
     const now = Math.floor(Date.now() / 1000)
     sub = client.getPool().subscribeMany(BIG_RELAY_URLS, [{
-      kinds: [1],
-      since: now
-    },
-    {
-      kinds: [6],
-      since: now
-    },
-    {
-      kinds: [7],
+      kinds: [1, 6, 7],
       since: now
     }], { 
       onevent(event) {
@@ -91,101 +81,57 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
 
         for (const event of eventListFromQueue) {
           if (!isUserTrusted(event.pubkey)) continue
+
           for (const [tag, eventId] of event.tags) {
             if (tag === 'e') {
               if (!shownEvents.current.has(eventId)) {
-
-                // If the event is already in eventMap, just update the mention counts
                 if (eventMap.current.has(eventId)) {
-                  // All unique pubkeys
                   let pubkeySet = eventMentionCount.current.get(eventId)
                   if (!pubkeySet) pubkeySet = new Set<string>()
                   pubkeySet.add(event.pubkey)
                   eventMentionCount.current.set(eventId, pubkeySet)
-
-                  // Only pubkeys I follow
                   if (isUserFollowed(event.pubkey)) {
                     let followedSet = eventMentionCountFollowed.current.get(eventId)
                     if (!followedSet) followedSet = new Set<string>()
                     followedSet.add(event.pubkey)
                     eventMentionCountFollowed.current.set(eventId, followedSet)
                   }
-                  continue // Skip fetching and publishing logic
+                  continue
                 }
-
-                // If not in eventMap, look up all mentioning events
                 const referencedEvent = (await client.getPool().querySync(BIG_RELAY_URLS, {
                   ids: [eventId]
                 }))[0]
-                if (referencedEvent) {
-                  eventMap.current.set(eventId, referencedEvent)
-                  // skip if muted
-                  if (mutedPubkeysRef.current.includes(referencedEvent.pubkey)) {
-                    console.warn(`Skipping muted event from ${referencedEvent.pubkey}`)
-                    continue
-                  }
-                  // Now look up all mentioning events
-                  const mentioningEvents = await client.getPool().querySync(BIG_RELAY_URLS, {
-                    kinds: [1, 6, 7],
-                    '#e': [eventId]
-                  })
-                  // All unique pubkeys, excluding the original poster
-                  const uniquePubkeys = new Set<string>(
-                    mentioningEvents
-                      .map(e => e.pubkey)
-                      .filter(pubkey => isUserTrusted(pubkey) && pubkey !== referencedEvent.pubkey)
-                  )
-                  eventMentionCount.current.set(eventId, uniquePubkeys)
+                if (!referencedEvent) continue
+                eventMap.current.set(eventId, referencedEvent)
+                if (mutePubkeys.includes(referencedEvent.pubkey)) continue
+                const mentioningEvents = await client.getPool().querySync(BIG_RELAY_URLS, {
+                  kinds: [1, 6, 7],
+                  '#e': [eventId]
+                })
+                const uniquePubkeys = new Set<string>(
+                  mentioningEvents
+                    .map(e => e.pubkey)
+                    .filter(pubkey => isUserTrusted(pubkey) && pubkey !== referencedEvent.pubkey)
+                )
+                eventMentionCount.current.set(eventId, uniquePubkeys)
+                const followedPubkeys = new Set<string>(
+                  mentioningEvents.filter(e => isUserFollowed(e.pubkey)).map(e => e.pubkey)
+                )
+                eventMentionCountFollowed.current.set(eventId, followedPubkeys)
 
-                  // Only pubkeys I follow
-                  const followedPubkeys = new Set<string>(
-                    mentioningEvents.filter(e => isUserFollowed(e.pubkey)).map(e => e.pubkey)
-                  )
-                  eventMentionCountFollowed.current.set(eventId, followedPubkeys)
-
-                  const exponent = 1.75
-                  if (
-                    Math.pow(uniquePubkeys.size - 0, exponent) > userTrustScore(referencedEvent.pubkey) ||
-                    followedPubkeys.size >= 2
-                  ) {
-                    // Publish if not already shown
-                    if (!shownEvents.current.has(eventId)) {
-                      const existingEvent = (await client.getPool().querySync(['ws://localhost:4848'], {
-                        ids: [referencedEvent.id]
-                      }))[0]
-                      console.log(JSON.parse(localStorage.shownEvents).length, existingEvent)
-                      console.log(
-                        `|event ${eventId} mentioned by ${uniquePubkeys.size} distinct pubkeys ` +
-                        `(${followedPubkeys.size} by followed users) ` +
-                        `with trust score ${userTrustScore(referencedEvent.pubkey)}`,
-                        referencedEvent
-                      )
-                      if (existingEvent) {
-                        console.log(`|Event already exists, skipping publish`)
-                        continue
-                      }
-                      shownEvents.current.add(eventId)
-                      setEvents(prev => [referencedEvent, ...prev])
-                      localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents.current)))
-                      const result = client.getPool().publish(['ws://localhost:4848'], referencedEvent)
-                      Promise.all(result).then(resolved => console.log('|',resolved))
-                      ;(window as any).pool = client.getPool()
-                    }
-                  } else {
-                    // console.log(
-                    //   `event ${eventId} only mentioned by ${uniquePubkeys.size} pubkey(s) ` +
-                    //   `(${followedPubkeys.size} by followed users), not publishing ` +
-                    //   `exponent: ${exponent}, `
-                    // )
+                if ( Math.pow(uniquePubkeys.size - 3, 1.75) > userTrustScore(referencedEvent.pubkey)
+                  || followedPubkeys.size >= 2
+                ) {
+                  if (!shownEvents.current.has(eventId)) {
+                    shownEvents.current.add(eventId)
+                    setEvents(prev => [referencedEvent, ...prev])
+                    localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents.current)))
                   }
-                } else {
-                  console.warn(`Referenced event ${eventId} not found`)
                 }
               }
             }
           }
         }
-
         const authors = new Set(
           eventListFromQueue
             .filter(event => event.kind === 1 && isUserTrusted(event.pubkey))
@@ -193,7 +139,6 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
 
         for (const pubkey of authors) {
           if (mutePubkeys.includes(pubkey)) continue
-
           try {
             const events = await client.getPool().querySync(BIG_RELAY_URLS, {
               kinds: [1],
@@ -207,10 +152,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                 (Math.floor(Date.now() / 1000) - events[1].created_at) / (60 * 60 * 24)
               if (timeElapsedSinceLastPost > 20) {
                 eventLastPostTimes.current.set(event.id, timeElapsedSinceLastPost)
-                client.getPool().publish(['ws://localhost:4848'], event)
-              } else if (timeElapsedSinceLastPost > 2) {
-                // console.log('|event', event)
-                // console.log(`|Skipping event due to recent activity (${timeElapsedSinceLastPost.toFixed(2)} days ago)`)
+                setNostrEvents(prev => [event, ...prev])
               }
             }
           } catch (error) {
@@ -228,6 +170,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
       value={{
         eventLastPostTimes: eventLastPostTimes.current,
         events,
+        notstrEvents,
       }}
     >
       {children}

@@ -103,6 +103,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       if (feedInfo.feedType === 'notstr' && pubkey) {
         return await switchFeed('notstr', { pubkey })
       }
+
+      if (feedInfo.feedType === 'algo' && pubkey) {
+        return await switchFeed('algo', { pubkey })
+      }
     }
 
     init()
@@ -229,7 +233,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       )
       return
     }
-    if (feedType === 'notstr') {
+    if (feedType === 'notstr' || feedType === 'algo') {
       if (!options.pubkey) {
         return setIsReady(true)
       }
@@ -237,12 +241,6 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       setFeedInfo(newFeedInfo)
       feedInfoRef.current = newFeedInfo
       storage.setFeedInfo(newFeedInfo, pubkey)
-
-      const followings = await client.fetchFollowings(options.pubkey)
-      setRelayUrls([])
-      setFilter({
-        authors: followings.includes(options.pubkey) ? followings : [...followings, options.pubkey]
-      })
       return setIsReady(true)
     }
     setIsReady(true)

@@ -117,7 +117,6 @@ export default function NoteList({
           filter: {
             kinds: [
               kinds.ShortTextNote,
-              kinds.Repost,
               kinds.Highlights,
               ExtendedKind.COMMENT,
               kinds.LongFormArticle
@@ -132,7 +131,6 @@ export default function NoteList({
           filter: {
             kinds: [
               kinds.ShortTextNote,
-              kinds.Repost,
               kinds.Highlights,
               ExtendedKind.COMMENT,
               kinds.LongFormArticle
@@ -154,7 +152,6 @@ export default function NoteList({
               ? [ExtendedKind.PICTURE]
               : [
                   kinds.ShortTextNote,
-                  kinds.Repost,
                   kinds.Highlights,
                   ExtendedKind.COMMENT,
                   kinds.LongFormArticle

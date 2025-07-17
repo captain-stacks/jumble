@@ -32,6 +32,7 @@ import MutedNote from './MutedNote'
 import NsfwNote from './NsfwNote'
 import { UnknownNote } from './UnknownNote'
 import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
+import { useNostr } from '@/providers/NostrProvider'
 
 export default function Note({
   event,

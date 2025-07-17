@@ -58,6 +58,9 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
       if (feedInfo.feedType === 'bookmarks') {
         return t('Bookmarks')
       }
+      if (feedInfo.feedType === 'notstr') {
+        return t('notstr')
+      }
       if (relayUrls.length === 0) {
         return t('Choose a relay')
       }

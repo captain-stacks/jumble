@@ -20,6 +20,10 @@ import PullToRefresh from 'react-simple-pull-to-refresh'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
 import { PictureNoteCardMasonry } from '../PictureNoteCardMasonry'
 import Tabs from '../Tabs'
+import { useUserTrust } from '@/providers/UserTrustProvider'
+import { useFeed } from '@/providers/FeedProvider'
+import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
+import { set } from 'zod'
 
 const LIMIT = 100
 const ALGO_LIMIT = 500
@@ -48,7 +52,8 @@ export default function NoteList({
 }) {
   const { t } = useTranslation()
   const { isLargeScreen } = useScreenSize()
-  const { pubkey, startLogin } = useNostr()
+  const { pubkey, startLogin, eventList, setEventList, eventLastPostTimes } = useNostr()
+  const { events: algoEvents } = useFeedAlgorithms()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -94,6 +99,14 @@ export default function NoteList({
   }, [listMode, pubkey])
 
   useEffect(() => {
+    if (loading) return
+    const newAlgoEvents = algoEvents.filter((event) => !events.some((e) => e.id === event.id))
+    if (newAlgoEvents.length > 0) {
+      setNewEvents((prev) => [...newAlgoEvents, ...prev])
+    }
+  }, [algoEvents])
+
+  useEffect(() => {
     if (relayUrls.length === 0 && !filter.authors?.length && !author) return
 
     async function init() {
@@ -107,6 +120,12 @@ export default function NoteList({
         urls: string[]
         filter: Omit<Filter, 'since' | 'until'> & { limit: number }
       }[] = []
+      if (feedInfo.feedType === 'notstr') {
+        setEvents(algoEvents)
+        setLoading(false)
+        setHasMore(false)
+        return () => {}
+      }
       if (filterType === 'you' && author && pubkey && pubkey !== author) {
         const [myRelayList, targetRelayList] = await Promise.all([
           client.fetchRelayList(pubkey),
@@ -321,11 +340,16 @@ export default function NoteList({
                 { value: 'pictures', label: 'Pictures' },
                 { value: 'you', label: 'YouTabName' }
               ]
-            : [
-                { value: 'posts', label: 'Notes' },
-                { value: 'postsAndReplies', label: 'Replies' },
-                { value: 'pictures', label: 'Pictures' }
-              ]
+            : isMainFeed && feedInfo.feedType === 'notstr'
+              ? [
+                  { value: 'posts', label: 'Notes' },
+                  { value: 'postsAndReplies', label: 'Replies' },
+                ]
+              : [
+                  { value: 'posts', label: 'Notes' },
+                  { value: 'postsAndReplies', label: 'Replies' },
+                  { value: 'pictures', label: 'Pictures' }
+                ]
         }
         onTabChange={(listMode) => {
           setListMode(listMode as TNoteListMode)
@@ -333,9 +357,11 @@ export default function NoteList({
           if (isMainFeed) {
             storage.setNoteListMode(listMode as TNoteListMode)
           }
-          setTimeout(() => {
-            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }, 0)
+          if (!isMainFeed || feedInfo.feedType !== 'notstr') {
+            setTimeout(() => {
+              topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 0)
+          }
         }}
         threshold={Math.max(800, topSpace)}
       />

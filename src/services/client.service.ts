@@ -469,7 +469,7 @@ class ClientService extends EventTarget {
       ).filter((evt) => !!evt && !(evt instanceof Error)) as NEvent[]
       if (cachedEvents.length) {
         onEvents([...cachedEvents], false)
-        //since = cachedEvents[0].created_at + 1
+        since = cachedEvents[0].created_at + 1
       }
     }
 
@@ -486,7 +486,7 @@ class ClientService extends EventTarget {
           return events.push(evt)
         }
         // new event
-        if (true) {
+        if (evt.created_at > eosedAt) {
           onNew(evt)
         }
 
@@ -508,7 +508,7 @@ class ClientService extends EventTarget {
           idx++
         }
         // the event is too old, ignore it
-        //if (idx >= timeline.refs.length) return
+        if (idx >= timeline.refs.length) return
 
         // insert the event to the right position
         timeline.refs.splice(idx, 0, [evt.id, evt.created_at])

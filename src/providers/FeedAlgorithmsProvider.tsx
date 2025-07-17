@@ -10,6 +10,7 @@ import { useMuteList } from './MuteListProvider'
 
 type TFeedAlgorithmsContext = {
   eventLastPostTimes: Map<string, number>
+  events: Event[]
 }
 
 const FeedAlgorithmsContext = createContext<TFeedAlgorithmsContext | undefined>(undefined)
@@ -38,6 +39,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const eventMentionCountFollowed = useRef<Map<string, Set<string>>>(new Map())
   const eventMap = useRef<Map<string, Event>>(new Map())
   let sub: SubCloser | undefined
+  const [events, setEvents] = useState<Event[]>([])
 
   useEffect(() => {
     if (!currentPubkey) return
@@ -143,7 +145,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
 
                   const exponent = 1.75
                   if (
-                    Math.pow(uniquePubkeys.size - 2, exponent) > userTrustScore(referencedEvent.pubkey) ||
+                    Math.pow(uniquePubkeys.size - 0, exponent) > userTrustScore(referencedEvent.pubkey) ||
                     followedPubkeys.size >= 2
                   ) {
                     // Publish if not already shown
@@ -158,7 +160,12 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                         `with trust score ${userTrustScore(referencedEvent.pubkey)}`,
                         referencedEvent
                       )
+                      if (existingEvent) {
+                        console.log(`|Event already exists, skipping publish`)
+                        continue
+                      }
                       shownEvents.current.add(eventId)
+                      setEvents(prev => [referencedEvent, ...prev])
                       localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents.current)))
                       const result = client.getPool().publish(['ws://localhost:4848'], referencedEvent)
                       Promise.all(result).then(resolved => console.log('|',resolved))
@@ -219,7 +226,8 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   return (
     <FeedAlgorithmsContext.Provider
       value={{
-        eventLastPostTimes: eventLastPostTimes.current
+        eventLastPostTimes: eventLastPostTimes.current,
+        events,
       }}
     >
       {children}

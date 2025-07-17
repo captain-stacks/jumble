@@ -149,6 +149,7 @@ export default function NoteList({
               kinds.ShortTextNote,
               kinds.Highlights,
               ExtendedKind.COMMENT,
+              ExtendedKind.POLL,
               kinds.LongFormArticle
             ],
             authors: [pubkey],
@@ -163,6 +164,7 @@ export default function NoteList({
               kinds.ShortTextNote,
               kinds.Highlights,
               ExtendedKind.COMMENT,
+              ExtendedKind.POLL,
               kinds.LongFormArticle
             ],
             authors: [author],
@@ -184,6 +186,7 @@ export default function NoteList({
                   kinds.ShortTextNote,
                   kinds.Highlights,
                   ExtendedKind.COMMENT,
+                  ExtendedKind.POLL,
                   kinds.LongFormArticle
                 ],
           limit: areAlgoRelays ? ALGO_LIMIT : LIMIT

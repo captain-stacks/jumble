@@ -58,7 +58,6 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
     if (mounted.current) return
     mounted.current = true
     
-    if (!window.location.host.startsWith('localhost')) return
     mentionProducer()
     mentionConsumer()
 

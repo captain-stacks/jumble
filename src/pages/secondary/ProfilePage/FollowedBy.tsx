@@ -20,6 +20,23 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
     isMounted.current = true
     const init = async () => {
       if (!accountPubkey) return
+
+      const followers = client.fetchFollowedBy(pubkey)
+      const muters = client.fetchMutedBy(pubkey)
+
+      Promise.all([followers, muters]).then(([followers, muters]) => {
+        const trustedFollowers = followers.filter(isUserTrusted)
+        const trustedMuters = muters.filter(isUserTrusted)
+
+        const F = trustedFollowers.length
+        const M = trustedMuters.length
+        let score = 0
+        if (F > 0) {
+          score = 100 * F / (F + M)
+        }
+        setTrustScore(score)
+      })
+
       const followings = await client.fetchFollowings(accountPubkey)
       const followingsOfFollowings = await Promise.all(
         followings.map(async (following) => {
@@ -38,26 +55,6 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
         }
       }
       setFollowedBy(_followedBy)
-
-      //if (_followedBy.length) return
-
-      // Get all users who follow the given npub (depth-2 connections)
-      const followers = await client.fetchFollowedBy(pubkey)
-      // Get all users who mute the given npub
-      const muters = await client.fetchMutedBy(pubkey)
-      
-      // Filter both lists to only trusted users
-      const trustedFollowers = followers.filter(isUserTrusted)
-      const trustedMuters = muters.filter(isUserTrusted)
-
-      // Calculate score
-      const F = trustedFollowers.length
-      const M = trustedMuters.length
-      let score = 0
-      if (F > 0) {
-        score = 100 * F / (F + M)
-      }
-      setTrustScore(score)
     }
     init()
   }, [pubkey, accountPubkey])
@@ -73,7 +70,7 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
         ))}
       </>}
       <span className="ml-2 text-muted-foreground">
-        Trust score: {trustScore.toFixed(0)}%
+        Trust score: {trustScore.toFixed(1)}%
       </span>
     </div>
   )

@@ -16,7 +16,7 @@ export default function NoteCard({
 }) {
   const { mutePubkeys } = useMuteList()
   if (filterMutedNotes && mutePubkeys.includes(event.pubkey)) {
-    return null
+    //return null
   }
 
   if (event.kind === kinds.Repost) {

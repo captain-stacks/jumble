@@ -3,7 +3,7 @@ import client from '@/services/client.service'
 import { kinds } from 'nostr-tools'
 import { SubCloser } from 'nostr-tools/abstract-pool'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { useMuteList } from './MuteListProvider'
+// import { useMuteList } from './MuteListProvider'
 import { useNostr } from './NostrProvider'
 import { useUserTrust } from './UserTrustProvider'
 
@@ -26,7 +26,7 @@ export const useNotification = () => {
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { pubkey, notificationsSeenAt, updateNotificationsSeenAt } = useNostr()
   const { hideUntrustedNotifications, isUserTrusted } = useUserTrust()
-  const { mutePubkeys } = useMuteList()
+  // const { mutePubkeys } = useMuteList()
   const [newNotificationIds, setNewNotificationIds] = useState(new Set<string>())
   const subCloserRef = useRef<SubCloser | null>(null)
 

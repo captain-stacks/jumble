@@ -29,7 +29,7 @@ export default function LikeButton({ event }: { event: Event }) {
   const { myLastEmoji, likeCount } = useMemo(() => {
     const stats = noteStats || {}
     const like = stats.likes?.find((like) => like.pubkey === pubkey)
-    return { myLastEmoji: like?.emoji, likeCount: stats.likes?.length }
+    return { myLastEmoji: like?.emoji, likeCount: event.pubkey !== pubkey && stats.likes?.length }
   }, [noteStats, pubkey])
 
   const like = async (emoji: string) => {

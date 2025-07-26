@@ -30,7 +30,7 @@ export default function RepostButton({ event }: { event: Event }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { repostCount, hasReposted } = useMemo(() => {
     return {
-      repostCount: noteStats?.repostPubkeySet?.size,
+      repostCount: event.pubkey !== pubkey && noteStats?.repostPubkeySet?.size,
       hasReposted: pubkey ? noteStats?.repostPubkeySet?.has(pubkey) : false
     }
   }, [noteStats, event.id])

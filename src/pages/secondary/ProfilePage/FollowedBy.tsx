@@ -36,6 +36,7 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
         }
         setTrustScore(score)
       })
+      if (pubkey === accountPubkey) return
 
       const followings = await client.fetchFollowings(accountPubkey)
       const followingsOfFollowings = await Promise.all(

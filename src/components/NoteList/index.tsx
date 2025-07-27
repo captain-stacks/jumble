@@ -196,7 +196,7 @@ export default function NoteList({
             const relayLists = await client.fetchRelayLists(_filter.authors)
             const group: Record<string, Set<string>> = {}
             relayLists.forEach((relayList, index) => {
-              relayList.write.slice(0, 4).forEach((url) => {
+              relayList.write.forEach((url) => {
                 if (!group[url]) {
                   group[url] = new Set()
                 }

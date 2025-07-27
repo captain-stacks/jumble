@@ -42,9 +42,10 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const [events, setEvents] = useState<Event[]>([])
   const [notstrEvents, setNostrEvents] = useState<Event[]>([])
   const [postThreshold, setPostThreshold] = useState(0)
-  const [inactivityThreshold, setInactivityThreshold] = useState(1)
+  const [inactivityThreshold, setInactivityThreshold] = useState(30)
   const inactivityThresholdRef = useRef(inactivityThreshold)
   const postThresholdRef = useRef(postThreshold)
+  ;(window as any).pool = client.getPool()
   useEffect(() => {
     postThresholdRef.current = postThreshold
   }, [postThreshold])
@@ -94,6 +95,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
 
         for (const event of eventListFromQueue) {
           if (!isUserTrusted(event.pubkey)) continue
+          if (event.pubkey === currentPubkey) continue
 
           for (const [tag, eventId] of event.tags) {
             if (tag === 'e') {
@@ -117,31 +119,54 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                 }))[0]
                 if (!referencedEvent) continue
                 eventMap.current.set(eventId, referencedEvent)
-                if (mutePubkeys.includes(referencedEvent.pubkey)) continue
+                //if (mutePubkeys.includes(referencedEvent.pubkey)) continue
                 
                 const mentioningEvents = await client.getPool().querySync(BIG_RELAY_URLS, {
                   kinds: [kinds.ShortTextNote, kinds.Repost, kinds.Reaction],
                   '#e': [eventId]
                 })
                 const uniquePubkeys = new Set<string>(
-                  mentioningEvents
-                    .map(e => e.pubkey)
-                    .filter(pubkey => isUserTrusted(pubkey) && pubkey !== referencedEvent.pubkey)
-                )
+                  mentioningEvents.map(e => e.pubkey).filter(pubkey =>
+                    isUserTrusted(pubkey) &&
+                    pubkey !== referencedEvent.pubkey &&
+                    pubkey !== currentPubkey)
+                  )
                 eventMentionCount.current.set(eventId, uniquePubkeys)
                 const followedPubkeys = new Set<string>(
                   mentioningEvents.filter(e => isUserFollowed(e.pubkey)).map(e => e.pubkey)
                 )
                 eventMentionCountFollowed.current.set(eventId, followedPubkeys)
                 if (
-                  Math.pow(uniquePubkeys.size - postThresholdRef.current, 1.75) >
+                  Math.pow(uniquePubkeys.size - postThresholdRef.current, 1.3) >
                     userTrustScore(referencedEvent.pubkey)
                   || followedPubkeys.size >= 2
                 ) {
                   if (!shownEvents.current.has(eventId)) {
                     shownEvents.current.add(eventId)
-                    setEvents(prev => [referencedEvent, ...prev])
                     localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents.current)))
+
+                    if (isUserTrusted(referencedEvent.pubkey)) {
+                      setEvents(prev => [referencedEvent, ...prev])
+                    } else {
+                      const pubkey = referencedEvent.pubkey
+                      const followers = client.fetchFollowedBy(pubkey)
+                      const muters = client.fetchMutedBy(pubkey)
+                      
+                      Promise.all([followers, muters]).then(([followers, muters]) => {
+                        const trustedFollowers = followers.filter(isUserTrusted)
+                        const trustedMuters = muters.filter(isUserTrusted)
+
+                        const F = trustedFollowers.length
+                        const M = trustedMuters.length
+                        let score = -1
+                        if (F > 0) {
+                          score = 100 * F / (F + M)
+                        }
+                        if (score < 0 || score > 90) {
+                          setEvents(prev => [referencedEvent, ...prev])
+                        }
+                      })
+                    }
                   }
                 }
               }

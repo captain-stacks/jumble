@@ -26,7 +26,6 @@ const ALGO_LIMIT = 500
 const SHOW_COUNT = 10
 const KINDS = [
   kinds.ShortTextNote,
-  kinds.Repost,
   kinds.Highlights,
   kinds.LongFormArticle,
   ExtendedKind.COMMENT,

@@ -20,9 +20,8 @@ import PullToRefresh from 'react-simple-pull-to-refresh'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
 import { PictureNoteCardMasonry } from '../PictureNoteCardMasonry'
 import Tabs from '../Tabs'
-import { useUserTrust } from '@/providers/UserTrustProvider'
-import { useFeed } from '@/providers/FeedProvider'
 import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
+import { useFeed } from '@/providers/FeedProvider'
 
 const LIMIT = 100
 const ALGO_LIMIT = 500
@@ -59,6 +58,7 @@ export default function NoteList({
   const { t } = useTranslation()
   const { isLargeScreen } = useScreenSize()
   const { pubkey, startLogin } = useNostr()
+  const { feedInfo } = useFeed()
   const { events: algoEvents, notstrEvents } = useFeedAlgorithms()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
@@ -410,15 +410,15 @@ export default function NoteList({
             <div className="text-center text-sm text-muted-foreground mt-2">
               {t('no more notes')}
             </div>
-          ) : (feedInfo.feedType !== 'notstr' && feedInfo.feedType !== 'algo') ? (
+          ) : isMainFeed && (feedInfo.feedType === 'notstr' || feedInfo.feedType === 'algo') ? (
+            <div className="flex justify-center w-full mt-2">
+              please wait for the algorithm to discover notes
+            </div>
+          ) : (
             <div className="flex justify-center w-full mt-2">
               <Button size="lg" onClick={() => setRefreshCount((pre) => pre + 1)}>
                 {t('reload notes')}
               </Button>
-            </div>
-          ) : (
-            <div className="flex justify-center w-full mt-2">
-              please wait for the algorithm to discover notes
             </div>
           )}
         </div>

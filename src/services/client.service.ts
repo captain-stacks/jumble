@@ -111,7 +111,7 @@ class ClientService extends EventTarget {
   }
 
   getCurrentRelayUrls() {
-    return this.currentRelayUrls
+    return this.currentRelayUrls.length ? this.currentRelayUrls : BIG_RELAY_URLS
   }
 
   getPool() {
@@ -817,6 +817,34 @@ class ClientService extends EventTarget {
     })
 
     return events.sort((a, b) => b.created_at - a.created_at)[0]
+  }
+
+  async fetchFollowedBy(pubkey: string) {
+    const events = await this.fetchEvents(BIG_RELAY_URLS, {
+      kinds: [kinds.Contacts],
+      '#p': [pubkey],
+    })
+    const uniqueEvents = new Map<string, NEvent>()
+    events.forEach(event => {
+      if (!uniqueEvents.has(event.pubkey) || event.created_at > uniqueEvents.get(event.pubkey)!.created_at) {
+        uniqueEvents.set(event.pubkey, event)
+      }
+    })
+    return Array.from(uniqueEvents.values()).map(event => event.pubkey)
+  }
+
+  async fetchMutedBy(pubkey: string) {
+    const events = await this.fetchEvents(BIG_RELAY_URLS, {
+      kinds: [kinds.Mutelist],
+      '#p': [pubkey],
+    })
+    const uniqueEvents = new Map<string, NEvent>()
+    events.forEach(event => {
+      if (!uniqueEvents.has(event.pubkey) || event.created_at > uniqueEvents.get(event.pubkey)!.created_at) {
+        uniqueEvents.set(event.pubkey, event)
+      }
+    })
+    return Array.from(uniqueEvents.values()).map(event => event.pubkey)
   }
 
   async fetchFollowings(pubkey: string) {

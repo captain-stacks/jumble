@@ -32,6 +32,7 @@ import NsfwNote from './NsfwNote'
 import Poll from './Poll'
 import UnknownNote from './UnknownNote'
 import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
+import { useNostr } from '@/providers/NostrProvider'
 
 export default function Note({
   event,

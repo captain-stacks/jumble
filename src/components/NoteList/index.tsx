@@ -59,7 +59,13 @@ export default function NoteList({
   const { isLargeScreen } = useScreenSize()
   const { pubkey, startLogin } = useNostr()
   const { feedInfo } = useFeed()
-  const { events: algoEvents, notstrEvents } = useFeedAlgorithms()
+  const {
+    events: algoEvents,
+    notstrEvents,
+    shownEvents,
+    setPostThreshold,
+    setInactivityThreshold,
+   } = useFeedAlgorithms()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -124,6 +130,10 @@ export default function NoteList({
 
   useEffect(() => {
     if (isMainFeed && (feedInfo.feedType === 'notstr' || feedInfo.feedType === 'algo')) {
+      if (feedInfo.feedType === 'algo') {
+        algoEvents.forEach(event => shownEvents.add(event.id))
+        localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents)))
+      }
       setEvents(feedInfo.feedType === 'notstr' ? notstrEvents : algoEvents)
       setNewEvents([])
       setLoading(false)
@@ -321,6 +331,10 @@ export default function NoteList({
   }, [timelineKey, loading, hasMore, events, filterType, showCount])
 
   const showNewEvents = () => {
+    if (isMainFeed && feedInfo.feedType === 'algo') {
+      newEvents.forEach(event => shownEvents.add(event.id))
+      localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents)))
+    }
     setEvents((oldEvents) => [...newEvents, ...oldEvents])
     setNewEvents([])
     setTimeout(() => {
@@ -340,7 +354,14 @@ export default function NoteList({
   }, [skipTimeWindow])
 
   const hour = now.getHours()
-  const inWindow = hour === 18 // 6pm to 6:59pm
+  const inWindow = hour === 18
+
+  useEffect(() => {
+    if (!inWindow && !skipTimeWindow) {
+      setPostThreshold(9)
+      setInactivityThreshold(30)
+    }
+  }, [inWindow])
 
   if (!inWindow && !skipTimeWindow) {
     return (

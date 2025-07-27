@@ -15,6 +15,7 @@ type TFeedAlgorithmsContext = {
   setPostThreshold: (value: number) => void,
   inactivityThreshold: number,
   setInactivityThreshold: (value: number) => void,
+  shownEvents: Set<string>,
 }
 
 const FeedAlgorithmsContext = createContext<TFeedAlgorithmsContext | undefined>(undefined)
@@ -34,13 +35,14 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const mounted = useRef(false)
   const queue = useRef(new Queue())
   const eventLastPostTimes = useRef<Map<string, number>>(new Map())
-  const shownEvents = useRef(new Set(JSON.parse(localStorage.getItem('shownEvents') || '[]')))
+  const shownEvents = useRef<Set<string>>(
+    new Set(JSON.parse(localStorage.getItem('shownEvents') || '[]')))
   const eventMentionCount = useRef<Map<string, Set<string>>>(new Map())
   const eventMentionCountFollowed = useRef<Map<string, Set<string>>>(new Map())
   const eventMap = useRef<Map<string, Event>>(new Map())
   let sub: SubCloser | undefined
   const [events, setEvents] = useState<Event[]>([])
-  const [notstrEvents, setNostrEvents] = useState<Event[]>([])
+  const [notstrEvents, setNotstrEvents] = useState<Event[]>([])
   const [postThreshold, setPostThreshold] = useState(0)
   const [inactivityThreshold, setInactivityThreshold] = useState(30)
   const inactivityThresholdRef = useRef(inactivityThreshold)
@@ -95,6 +97,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
         for (const event of eventListFromQueue) {
           if (!isUserTrusted(event.pubkey)) continue
           if (event.pubkey === currentPubkey) continue
+          if (event.kind === kinds.Reaction && event.content === '⚠️') continue
 
           for (const [tag, eventId] of event.tags) {
             if (tag === 'e') {
@@ -141,11 +144,13 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                   || followedPubkeys.size >= 2
                 ) {
                   if (!shownEvents.current.has(eventId)) {
-                    shownEvents.current.add(eventId)
-                    localStorage.setItem('shownEvents', JSON.stringify(Array.from(shownEvents.current)))
-
                     if (isUserTrusted(referencedEvent.pubkey)) {
-                      setEvents(prev => [referencedEvent, ...prev])
+                      setEvents(prev => {
+                        if (prev.some(e => e.id === referencedEvent.id)) {
+                          return prev
+                        }
+                        return [referencedEvent, ...prev]
+                      })
                     } else {
                       const pubkey = referencedEvent.pubkey
                       const followers = client.fetchFollowedBy(pubkey)
@@ -193,7 +198,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                 (Math.floor(Date.now() / 1000) - events[1].created_at) / (60 * 60 * 24)
               if (timeElapsedSinceLastPost > inactivityThresholdRef.current) {
                 eventLastPostTimes.current.set(event.id, timeElapsedSinceLastPost)
-                setNostrEvents(prev => [event, ...prev])
+                setNotstrEvents(prev => [event, ...prev])
               }
             }
           } catch (error) {
@@ -216,6 +221,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
         setPostThreshold,
         inactivityThreshold,
         setInactivityThreshold,
+        shownEvents: shownEvents.current,
       }}
     >
       {children}

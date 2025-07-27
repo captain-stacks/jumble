@@ -114,6 +114,10 @@ class ClientService extends EventTarget {
     return this.currentRelayUrls
   }
 
+  getPool() {
+    return this.pool
+  }
+
   async publishEvent(relayUrls: string[], event: NEvent) {
     const uniqueRelayUrls = Array.from(new Set(relayUrls))
     const result = await Promise.any(

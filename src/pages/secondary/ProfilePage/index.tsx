@@ -11,7 +11,7 @@ import NpubQrCode from '@/components/NpubQrCode'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useFetchFollowings, useFetchProfile } from '@/hooks'
+import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { toMuteList, toProfileEditor } from '@/lib/link'
 import { generateImageByPubkey } from '@/lib/pubkey'
@@ -33,12 +33,6 @@ const ProfilePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
   const { profile, isFetching } = useFetchProfile(id)
   const { pubkey: accountPubkey } = useNostr()
   const { mutePubkeys } = useMuteList()
-  const { followings } = useFetchFollowings(profile?.pubkey)
-  const isFollowingYou = useMemo(() => {
-    return (
-      !!accountPubkey && accountPubkey !== profile?.pubkey && followings.includes(accountPubkey)
-    )
-  }, [followings, profile, accountPubkey])
   const defaultImage = useMemo(
     () => (profile?.pubkey ? generateImageByPubkey(profile?.pubkey) : ''),
     [profile]
@@ -142,11 +136,6 @@ const ProfilePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
           <div className="pt-2">
             <div className="flex gap-2 items-center">
               <div className="text-xl font-semibold truncate select-text">{username}</div>
-              {isFollowingYou && (
-                <div className="text-muted-foreground rounded-full bg-muted text-xs h-fit px-2 shrink-0">
-                  {t('Follows you')}
-                </div>
-              )}
             </div>
             <Nip05 pubkey={pubkey} />
             {lightningAddress && (

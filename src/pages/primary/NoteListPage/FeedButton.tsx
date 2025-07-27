@@ -61,6 +61,9 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
       if (feedInfo.feedType === 'notstr') {
         return t('notstr')
       }
+      if (feedInfo.feedType === 'algo') {
+        return t('algo')
+      }
       if (relayUrls.length === 0) {
         return t('Choose a relay')
       }

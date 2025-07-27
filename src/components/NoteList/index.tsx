@@ -23,7 +23,6 @@ import Tabs from '../Tabs'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useFeedAlgorithms } from '@/providers/FeedAlgorithmsProvider'
-import { set } from 'zod'
 
 const LIMIT = 100
 const ALGO_LIMIT = 500
@@ -59,8 +58,8 @@ export default function NoteList({
 }) {
   const { t } = useTranslation()
   const { isLargeScreen } = useScreenSize()
-  const { pubkey, startLogin, eventList, setEventList, eventLastPostTimes } = useNostr()
-  const { events: algoEvents } = useFeedAlgorithms()
+  const { pubkey, startLogin } = useNostr()
+  const { events: algoEvents, notstrEvents } = useFeedAlgorithms()
   const { mutePubkeys } = useMuteList()
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -106,14 +105,31 @@ export default function NoteList({
   }, [listMode, pubkey])
 
   useEffect(() => {
-    if (loading) return
+    if (!isMainFeed || feedInfo.feedType !== 'algo') return
+
     const newAlgoEvents = algoEvents.filter((event) => !events.some((e) => e.id === event.id))
     if (newAlgoEvents.length > 0) {
-      setNewEvents((prev) => [...newAlgoEvents, ...prev])
+      setNewEvents(newAlgoEvents)
     }
   }, [algoEvents])
 
   useEffect(() => {
+    if (!isMainFeed || feedInfo.feedType !== 'notstr') return
+    
+    const newNotstrEvents = notstrEvents.filter((event) => !events.some((e) => e.id === event.id))
+    if (newNotstrEvents.length > 0) {
+      setNewEvents(newNotstrEvents)
+    }
+  }, [notstrEvents])
+
+  useEffect(() => {
+    if (isMainFeed && (feedInfo.feedType === 'notstr' || feedInfo.feedType === 'algo')) {
+      setEvents(feedInfo.feedType === 'notstr' ? notstrEvents : algoEvents)
+      setNewEvents([])
+      setLoading(false)
+      setHasMore(false)
+      return () => {}
+    }
     if (relayUrls.length === 0 && !filter.authors?.length && !author) return
 
     async function init() {
@@ -127,12 +143,7 @@ export default function NoteList({
         urls: string[]
         filter: Omit<Filter, 'since' | 'until'> & { limit: number }
       }[] = []
-      if (feedInfo.feedType === 'notstr') {
-        setEvents(algoEvents)
-        setLoading(false)
-        setHasMore(false)
-        return () => {}
-      }
+
       if (filterType === 'you' && author && pubkey && pubkey !== author) {
         const [myRelayList, targetRelayList] = await Promise.all([
           client.fetchRelayList(pubkey),
@@ -257,7 +268,7 @@ export default function NoteList({
     return () => {
       promise.then((closer) => closer())
     }
-  }, [JSON.stringify(relayUrls), filterType, refreshCount, JSON.stringify(filter)])
+  }, [JSON.stringify(relayUrls), filterType, refreshCount, JSON.stringify(filter), feedInfo.feedType])
 
   useEffect(() => {
     const options = {
@@ -329,7 +340,7 @@ export default function NoteList({
                 { value: 'pictures', label: 'Pictures' },
                 { value: 'you', label: 'YouTabName' }
               ]
-            : isMainFeed && feedInfo.feedType === 'notstr'
+            : isMainFeed && (feedInfo.feedType === 'notstr' || feedInfo.feedType === 'algo')
               ? [
                   { value: 'posts', label: 'Notes' },
                   { value: 'postsAndReplies', label: 'Replies' },
@@ -399,11 +410,15 @@ export default function NoteList({
             <div className="text-center text-sm text-muted-foreground mt-2">
               {t('no more notes')}
             </div>
-          ) : (
+          ) : (feedInfo.feedType !== 'notstr' && feedInfo.feedType !== 'algo') ? (
             <div className="flex justify-center w-full mt-2">
               <Button size="lg" onClick={() => setRefreshCount((pre) => pre + 1)}>
                 {t('reload notes')}
               </Button>
+            </div>
+          ) : (
+            <div className="flex justify-center w-full mt-2">
+              please wait for the algorithm to discover notes
             </div>
           )}
         </div>

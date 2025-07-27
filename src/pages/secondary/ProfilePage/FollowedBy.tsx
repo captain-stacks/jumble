@@ -43,9 +43,8 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
 
   return (
     <div className="flex items-center gap-1">
-      <div className="text-muted-foreground">{t('Followed by=')}
-        {followedBy.length},
-        {userTrustScore(pubkey)}
+      <div className="text-muted-foreground">{t('Followed by')}
+        {' ' + followedBy.length}&nbsp;
       </div>
       {followedBy.slice(0, 10).map((p) => (
         <UserAvatar userId={p} key={p} size="xSmall" />

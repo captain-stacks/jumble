@@ -328,6 +328,28 @@ export default function NoteList({
     }, 0)
   }
 
+  const skipTimeWindow =
+    pubkey !== '4b5ebf446764e330644d4162924a86a73c5173098cbb00db0a690b097006a08e'
+
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    if (skipTimeWindow) return
+    const interval = setInterval(() => setNow(new Date()), 1000 * 30)
+    return () => clearInterval(interval)
+  }, [skipTimeWindow])
+
+  const hour = now.getHours()
+  const inWindow = hour === 18 // 6pm to 6:59pm
+
+  if (!inWindow && !skipTimeWindow) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-2xl text-muted-foreground">
+        go touch grass
+      </div>
+    )
+  }
+
   return (
     <div className={className}>
       <Tabs

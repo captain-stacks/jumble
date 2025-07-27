@@ -66,12 +66,8 @@ export default function Likes({ event }: { event: Event }) {
               'flex h-7 w-fit gap-2 px-2 rounded-full items-center border shrink-0',
               pubkey && pubkeys.has(pubkey)
                 ? 'border-primary bg-primary/20 text-foreground cursor-not-allowed'
-                : 'transition-colors bg-muted/80 text-muted-foreground cursor-pointer hover:bg-primary/40 hover:border-primary hover:text-foreground'
+                : 'transition-colors bg-muted/80 text-muted-foreground'
             )}
-            onClick={(e) => {
-              e.stopPropagation()
-              like(key, emoji)
-            }}
           >
             {liking === key ? <Loader className="animate-spin size-4" /> : <Emoji emoji={emoji} />}
             <div className="text-sm">{pubkeys.size}</div>

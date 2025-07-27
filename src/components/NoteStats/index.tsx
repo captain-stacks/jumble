@@ -81,7 +81,6 @@ export default function NoteStats({
         >
           <ReplyButton event={event} />
           <RepostButton event={event} />
-          <LikeButton event={event} />
           <ZapButton event={event} />
         </div>
         <div className="flex items-center" onClick={(e) => e.stopPropagation()}>

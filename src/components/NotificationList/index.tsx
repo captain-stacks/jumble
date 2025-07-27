@@ -41,11 +41,11 @@ const NotificationList = forwardRef((_, ref) => {
       case 'mentions':
         return [kinds.ShortTextNote, ExtendedKind.COMMENT]
       case 'reactions':
-        return [kinds.Reaction, kinds.Repost]
+        return [kinds.Repost]
       case 'zaps':
         return [kinds.Zap]
       default:
-        return [kinds.ShortTextNote, kinds.Repost, kinds.Reaction, kinds.Zap, ExtendedKind.COMMENT]
+        return [kinds.ShortTextNote, kinds.Repost, kinds.Zap, ExtendedKind.COMMENT]
     }
   }, [notificationType])
   useImperativeHandle(

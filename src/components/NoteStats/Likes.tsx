@@ -15,6 +15,10 @@ export default function Likes({ event }: { event: Event }) {
   const { pubkey, checkLogin, publish } = useNostr()
   const noteStats = useNoteStatsById(event.id)
   const [liking, setLiking] = useState<string | null>(null)
+
+  // Hide if the note author is the current user
+  if (event.pubkey === pubkey) return null
+
   const likes = useMemo(() => {
     const _likes = noteStats?.likes
     if (!_likes) return []

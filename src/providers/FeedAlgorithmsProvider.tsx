@@ -1,17 +1,20 @@
 import client from '@/services/client.service'
-import storage from '@/services/local-storage.service'
-import { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { useUserTrust } from './UserTrustProvider'
 import { useNostr } from './NostrProvider'
 import { BIG_RELAY_URLS } from '@/constants'
-import { Event, kinds, VerifiedEvent } from 'nostr-tools'
+import { Event, kinds } from 'nostr-tools'
 import { SubCloser } from 'nostr-tools/abstract-pool'
 import { useMuteList } from './MuteListProvider'
 
 type TFeedAlgorithmsContext = {
   eventLastPostTimes: Map<string, number>
   events: Event[]
-  notstrEvents: Event[]
+  notstrEvents: Event[],
+  postThreshold: number,
+  setPostThreshold: (value: number) => void,
+  inactivityThreshold: number,
+  setInactivityThreshold: (value: number) => void,
 }
 
 const FeedAlgorithmsContext = createContext<TFeedAlgorithmsContext | undefined>(undefined)
@@ -38,6 +41,16 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   let sub: SubCloser | undefined
   const [events, setEvents] = useState<Event[]>([])
   const [notstrEvents, setNostrEvents] = useState<Event[]>([])
+  const [postThreshold, setPostThreshold] = useState(0)
+  const [inactivityThreshold, setInactivityThreshold] = useState(1)
+  const inactivityThresholdRef = useRef(inactivityThreshold)
+  const postThresholdRef = useRef(postThreshold)
+  useEffect(() => {
+    postThresholdRef.current = postThreshold
+  }, [postThreshold])
+  useEffect(() => {
+    inactivityThresholdRef.current = inactivityThreshold
+  }, [inactivityThreshold])
 
   useEffect(() => {
     if (!currentPubkey) return
@@ -60,7 +73,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
   const mentionProducer = async () => {
     const now = Math.floor(Date.now() / 1000)
     sub = client.getPool().subscribeMany(BIG_RELAY_URLS, [{
-      kinds: [1, 6, 7],
+      kinds: [kinds.ShortTextNote, kinds.Repost, kinds.Reaction],
       since: now
     }], { 
       onevent(event) {
@@ -90,6 +103,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                   if (!pubkeySet) pubkeySet = new Set<string>()
                   pubkeySet.add(event.pubkey)
                   eventMentionCount.current.set(eventId, pubkeySet)
+                  
                   if (isUserFollowed(event.pubkey)) {
                     let followedSet = eventMentionCountFollowed.current.get(eventId)
                     if (!followedSet) followedSet = new Set<string>()
@@ -104,8 +118,9 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                 if (!referencedEvent) continue
                 eventMap.current.set(eventId, referencedEvent)
                 if (mutePubkeys.includes(referencedEvent.pubkey)) continue
+                
                 const mentioningEvents = await client.getPool().querySync(BIG_RELAY_URLS, {
-                  kinds: [1, 6, 7],
+                  kinds: [kinds.ShortTextNote, kinds.Repost, kinds.Reaction],
                   '#e': [eventId]
                 })
                 const uniquePubkeys = new Set<string>(
@@ -118,8 +133,9 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
                   mentioningEvents.filter(e => isUserFollowed(e.pubkey)).map(e => e.pubkey)
                 )
                 eventMentionCountFollowed.current.set(eventId, followedPubkeys)
-
-                if ( Math.pow(uniquePubkeys.size - 3, 1.75) > userTrustScore(referencedEvent.pubkey)
+                if (
+                  Math.pow(uniquePubkeys.size - postThresholdRef.current, 1.75) >
+                    userTrustScore(referencedEvent.pubkey)
                   || followedPubkeys.size >= 2
                 ) {
                   if (!shownEvents.current.has(eventId)) {
@@ -132,10 +148,11 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
             }
           }
         }
-        const authors = new Set(
-          eventListFromQueue
-            .filter(event => event.kind === 1 && isUserTrusted(event.pubkey))
-            .map(event => event.pubkey))
+        const authors = new Set(eventListFromQueue
+          .filter(event =>
+            event.kind === kinds.ShortTextNote &&
+            isUserTrusted(event.pubkey))
+          .map(event => event.pubkey))
 
         for (const pubkey of authors) {
           if (mutePubkeys.includes(pubkey)) continue
@@ -150,7 +167,7 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
               const event = events[0]
               const timeElapsedSinceLastPost =
                 (Math.floor(Date.now() / 1000) - events[1].created_at) / (60 * 60 * 24)
-              if (timeElapsedSinceLastPost > 20) {
+              if (timeElapsedSinceLastPost > inactivityThresholdRef.current) {
                 eventLastPostTimes.current.set(event.id, timeElapsedSinceLastPost)
                 setNostrEvents(prev => [event, ...prev])
               }
@@ -171,6 +188,10 @@ export function FeedAlgorithmsProvider({ children }: { children: React.ReactNode
         eventLastPostTimes: eventLastPostTimes.current,
         events,
         notstrEvents,
+        postThreshold,
+        setPostThreshold,
+        inactivityThreshold,
+        setInactivityThreshold,
       }}
     >
       {children}

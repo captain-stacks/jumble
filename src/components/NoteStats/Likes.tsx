@@ -1,20 +1,16 @@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useNoteStatsById } from '@/hooks/useNoteStatsById'
-import { createReactionDraftEvent } from '@/lib/draft-event'
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
-import noteStatsService from '@/services/note-stats.service'
 import { TEmoji } from '@/types'
-import { Loader } from 'lucide-react'
 import { Event } from 'nostr-tools'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import Emoji from '../Emoji'
 import UserAvatar from '../UserAvatar'
 
 export default function Likes({ event }: { event: Event }) {
-  const { pubkey, checkLogin, publish } = useNostr()
+  const { pubkey } = useNostr()
   const noteStats = useNoteStatsById(event.id)
-  const [liking, setLiking] = useState<string | null>(null)
 
   // Hide if the note author is the current user
   if (event.pubkey === pubkey) return null
@@ -36,26 +32,6 @@ export default function Likes({ event }: { event: Event }) {
 
   if (!likes.length) return null
 
-  const like = async (key: string, emoji: TEmoji | string) => {
-    checkLogin(async () => {
-      if (liking || !pubkey) return
-
-      setLiking(key)
-      const timer = setTimeout(() => setLiking((prev) => (prev === key ? null : prev)), 5000)
-
-      try {
-        const reaction = createReactionDraftEvent(event, emoji)
-        const evt = await publish(reaction)
-        noteStatsService.updateNoteStatsByEvents([evt])
-      } catch (error) {
-        console.error('like failed', error)
-      } finally {
-        setLiking(null)
-        clearTimeout(timer)
-      }
-    })
-  }
-
   return (
     <ScrollArea className="pb-2 mb-1">
       <div className="gap-1">
@@ -69,7 +45,7 @@ export default function Likes({ event }: { event: Event }) {
                 : 'transition-colors bg-muted/80 text-muted-foreground'
             )}
           >
-            {liking === key ? <Loader className="animate-spin size-4" /> : <Emoji emoji={emoji} />}
+            <Emoji emoji={emoji} />
             <div className="text-sm">{pubkeys.size}</div>
             {pubkeys.size > 0 && (
               <div className="flex items-center gap-1">

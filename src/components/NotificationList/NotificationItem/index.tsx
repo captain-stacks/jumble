@@ -16,7 +16,7 @@ export function NotificationItem({
 }) {
   const { mutePubkeys } = useMuteList()
   if (mutePubkeys.includes(notification.pubkey)) {
-    return null
+    //return null
   }
   if (notification.kind === kinds.Reaction) {
     return <ReactionNotification notification={notification} isNew={isNew} />

@@ -64,7 +64,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               // Only show notification if not from self and not muted
               if (
                 evt.pubkey !== pubkey &&
-                !mutePubkeys.includes(evt.pubkey) &&
+                //!mutePubkeys.includes(evt.pubkey) &&
                 (!hideUntrustedNotifications || isUserTrusted(evt.pubkey))
               ) {
                 setNewNotificationIds((prev) => {

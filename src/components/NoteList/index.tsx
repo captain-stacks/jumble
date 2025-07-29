@@ -349,12 +349,13 @@ export default function NoteList({
 
   useEffect(() => {
     if (skipTimeWindow) return
-    const interval = setInterval(() => setNow(new Date()), 1000 * 30)
+    const interval = setInterval(() => setNow(new Date()), 1000 * 2)
     return () => clearInterval(interval)
-  }, [skipTimeWindow])
+  }, [])
 
   const hour = now.getHours()
-  const inWindow = hour === 18
+  const minute = now.getMinutes()
+  const inWindow = hour === 18 && minute < 10
 
   useEffect(() => {
     if (!inWindow && !skipTimeWindow) {

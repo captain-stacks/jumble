@@ -1,13 +1,29 @@
 import { SecondaryPageLink } from '@/PageManager'
+import { X_URL_REGEX, YOUTUBE_URL_REGEX } from '@/constants'
 import { toNote, toProfile } from '@/lib/link'
+import { getEmojiInfosFromEmojiTags } from '@/lib/tag'
 import { Event } from 'nostr-tools'
 import { useMemo } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { EmbeddedHashtag, EmbeddedLNInvoice } from '../Embedded'
+import Emoji from '../Emoji'
+import ExternalLink from '../ExternalLink'
 import ImageWithLightbox from '../ImageWithLightbox'
 import NostrNode from '../Note/LongFormArticle/NostrNode'
 import { remarkNostr } from '../Note/LongFormArticle/remarkNostr'
-import { Components } from '../Note/LongFormArticle/types'
+import { Components as BaseComponents } from '../Note/LongFormArticle/types'
+
+type InlineComponent = React.ComponentType<{ value: string }>
+
+interface Components extends BaseComponents {
+  hashtag: InlineComponent
+  emoji: InlineComponent
+  invoice: InlineComponent
+}
+import XEmbeddedPost from '../XEmbeddedPost'
+import YoutubeEmbeddedPlayer from '../YoutubeEmbeddedPlayer'
+import { remarkInlineContent } from './remarkInlineContent'
 
 export default function MarkdownContent({
   content,
@@ -16,10 +32,20 @@ export default function MarkdownContent({
   content: string
   event?: Event
 }) {
+  const emojiInfos = useMemo(() => getEmojiInfosFromEmojiTags(event?.tags), [event?.tags])
+
   const components = useMemo(
     () =>
       ({
         nostr: ({ rawText, bech32Id }) => <NostrNode rawText={rawText} bech32Id={bech32Id} />,
+        hashtag: ({ value }) => <EmbeddedHashtag hashtag={value} />,
+        emoji: ({ value }) => {
+          const shortcode = value.slice(1, -1)
+          const emojiInfo = emojiInfos.find((e) => e.shortcode === shortcode)
+          if (!emojiInfo) return value
+          return <Emoji classNames={{ img: 'mb-1' }} emoji={emojiInfo} />
+        },
+        invoice: ({ value }) => <EmbeddedLNInvoice invoice={value} className="mt-2" />,
         a: ({ href, children }) => {
           if (!href) return <span>{children}</span>
           if (href.startsWith('note1') || href.startsWith('nevent1') || href.startsWith('naddr1')) {
@@ -36,16 +62,14 @@ export default function MarkdownContent({
               </SecondaryPageLink>
             )
           }
+          if (YOUTUBE_URL_REGEX.test(href)) {
+            return <YoutubeEmbeddedPlayer url={href} className="mt-2" />
+          }
+          if (X_URL_REGEX.test(href)) {
+            return <XEmbeddedPost url={href} className="mt-2" />
+          }
           return (
-            <a
-              href={href}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-primary hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {children}
-            </a>
+            <ExternalLink url={href} justOpenLink />
           )
         },
         h1: ({ children }) => <p className="font-bold">{children}</p>,
@@ -66,7 +90,6 @@ export default function MarkdownContent({
           <pre className="overflow-x-auto rounded-md bg-muted p-3 text-sm">{children}</pre>
         ),
         code: ({ children, className }) => {
-          // If inside a <pre>, render as block code (className contains language info)
           if (className) {
             return <code className="whitespace-pre-wrap break-words">{children}</code>
           }
@@ -95,13 +118,13 @@ export default function MarkdownContent({
         ),
         hr: () => <hr className="border-border" />
       }) as Components,
-    [event?.pubkey]
+    [event?.pubkey, emojiInfos]
   )
 
   return (
     <div className="space-y-3">
       <Markdown
-        remarkPlugins={[remarkGfm, remarkNostr]}
+        remarkPlugins={[remarkGfm, remarkNostr, remarkInlineContent]}
         urlTransform={(url) => {
           if (url.startsWith('nostr:')) {
             return url.slice(6)

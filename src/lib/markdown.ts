@@ -11,7 +11,8 @@ export function containsMarkdown(content: string): boolean {
   // Strong signals — any single one triggers markdown
   const strongPatterns = [
     /^```/m, // code fence
-    /\|[\s]*:?-+:?[\s]*\|/ // table separator |---|
+    /\|[\s]*:?-+:?[\s]*\|/, // table separator |---|
+    /!\[[^\]]*\]\(/ // image ![alt](
   ]
 
   for (const pattern of strongPatterns) {

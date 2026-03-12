@@ -168,7 +168,7 @@ export default {
     'Send only to r': 'Отправить только на {{r}}',
     'Send only to these relays': 'Отправить только на эти ретрансляторы',
     Explore: 'Обзор',
-    'Search relays': 'Поиск ретрансляторов',
+    'Search relays': 'Ретрансляторы для поиска',
     relayInfoBadgeAuth: 'Авторизация',
     relayInfoBadgeSearch: 'Поиск',
     relayInfoBadgePayment: 'Платежи',
@@ -687,6 +687,7 @@ export default {
     'Hide indirect': 'Скрыть косвенные',
     'Copy note content': 'Скопировать содержимое заметки',
     'Video loop': 'Зацикливание видео',
-    'Automatically replay videos when they end': 'Автоматически воспроизводить видео заново после окончания'
+    'Automatically replay videos when they end': 'Автоматически воспроизводить видео заново после окончания',
+    'Relays used for searching notes (NIP-50)': 'Ретрансляторы для поиска заметок (NIP-50)'
   }
 }

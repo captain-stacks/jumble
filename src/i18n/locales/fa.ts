@@ -165,7 +165,7 @@ export default {
     'Send only to r': 'فقط به {{r}} ارسال شود',
     'Send only to these relays': 'فقط به این رله‌ها ارسال شود',
     Explore: 'کاوش',
-    'Search relays': 'جستجو رله‌ها',
+    'Search relays': 'رله‌های جستجو',
     relayInfoBadgeAuth: 'احراز هویت',
     relayInfoBadgeSearch: 'جستجو',
     relayInfoBadgePayment: 'پرداخت',
@@ -682,6 +682,7 @@ export default {
     'Hide indirect': 'پنهان کردن غیرمستقیم',
     'Copy note content': 'کپی محتوای یادداشت',
     'Video loop': 'تکرار ویدیو',
-    'Automatically replay videos when they end': 'پخش خودکار ویدیوها پس از پایان'
+    'Automatically replay videos when they end': 'پخش خودکار ویدیوها پس از پایان',
+    'Relays used for searching notes (NIP-50)': 'رله‌هایی که برای جستجوی یادداشت‌ها استفاده می‌شوند (NIP-50)'
   }
 }

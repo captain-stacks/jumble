@@ -166,7 +166,7 @@ export default {
     'Send only to r': '{{r}}에만 전송',
     'Send only to these relays': '이 릴레이에만 전송',
     Explore: '탐색',
-    'Search relays': '릴레이 검색',
+    'Search relays': '검색 릴레이',
     relayInfoBadgeAuth: '로그인 필요',
     relayInfoBadgeSearch: '검색 지원',
     relayInfoBadgePayment: '유료',
@@ -676,6 +676,7 @@ export default {
     'Hide indirect': '간접 숨기기',
     'Copy note content': '노트 내용 복사',
     'Video loop': '비디오 반복',
-    'Automatically replay videos when they end': '비디오가 끝나면 자동으로 다시 재생'
+    'Automatically replay videos when they end': '비디오가 끝나면 자동으로 다시 재생',
+    'Relays used for searching notes (NIP-50)': '노트 검색에 사용되는 릴레이 (NIP-50)'
   }
 }

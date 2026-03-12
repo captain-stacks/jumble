@@ -654,6 +654,7 @@ export default {
     'Hide indirect': '隱藏間接通知',
     'Copy note content': '複製筆記內容',
     'Video loop': '影片循環',
-    'Automatically replay videos when they end': '影片播放結束後自動重新播放'
+    'Automatically replay videos when they end': '影片播放結束後自動重新播放',
+    'Relays used for searching notes (NIP-50)': '用於搜尋筆記的伺服器 (NIP-50)'
   }
 }

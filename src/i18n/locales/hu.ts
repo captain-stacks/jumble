@@ -165,7 +165,7 @@ export default {
     'Send only to r': 'Küldés csak a {{r}} csomópontra',
     'Send only to these relays': 'Küldés csak ezekre a csomópontokra',
     Explore: 'Felderítés',
-    'Search relays': 'Csomópontok kereséshez',
+    'Search relays': 'Keresési csomópontok',
     relayInfoBadgeAuth: 'Auth',
     relayInfoBadgeSearch: 'Keresés',
     relayInfoBadgePayment: 'Fizetés',
@@ -676,6 +676,7 @@ export default {
     'Hide indirect': 'Közvetettek elrejtése',
     'Copy note content': 'Jegyzet tartalmának másolása',
     'Video loop': 'Videó ismétlése',
-    'Automatically replay videos when they end': 'Videók automatikus újrajátszása, amikor véget érnek'
+    'Automatically replay videos when they end': 'Videók automatikus újrajátszása, amikor véget érnek',
+    'Relays used for searching notes (NIP-50)': 'Jegyzetek kereséséhez használt csomópontok (NIP-50)'
   }
 }

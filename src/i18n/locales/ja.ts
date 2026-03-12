@@ -165,7 +165,7 @@ export default {
     'Send only to r': '{{r}} にのみ送信',
     'Send only to these relays': 'これらのリレイにのみ送信',
     Explore: '探索',
-    'Search relays': 'リレイを検索',
+    'Search relays': '検索リレー',
     relayInfoBadgeAuth: '認証',
     relayInfoBadgeSearch: '検索',
     relayInfoBadgePayment: '支払い',
@@ -682,6 +682,7 @@ export default {
     'Hide indirect': '間接通知を非表示',
     'Copy note content': 'ノート内容をコピー',
     'Video loop': 'ビデオループ',
-    'Automatically replay videos when they end': 'ビデオ終了時に自動的にリプレイする'
+    'Automatically replay videos when they end': 'ビデオ終了時に自動的にリプレイする',
+    'Relays used for searching notes (NIP-50)': 'ノート検索に使用するリレー (NIP-50)'
   }
 }

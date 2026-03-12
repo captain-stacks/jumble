@@ -166,7 +166,7 @@ export default {
     'Send only to r': 'Envoyer uniquement à {{r}}',
     'Send only to these relays': 'Envoyer uniquement à ces relais',
     Explore: 'Explorer',
-    'Search relays': 'Rechercher des relais',
+    'Search relays': 'Relais de recherche',
     relayInfoBadgeAuth: 'Auth',
     relayInfoBadgeSearch: 'Recherche',
     relayInfoBadgePayment: 'Paiement',
@@ -691,6 +691,7 @@ export default {
     'Hide indirect': 'Masquer indirects',
     'Copy note content': 'Copier le contenu de la note',
     'Video loop': 'Boucle vidéo',
-    'Automatically replay videos when they end': 'Rejouer automatiquement les vidéos à la fin'
+    'Automatically replay videos when they end': 'Rejouer automatiquement les vidéos à la fin',
+    'Relays used for searching notes (NIP-50)': 'Relais utilisés pour rechercher des notes (NIP-50)'
   }
 }

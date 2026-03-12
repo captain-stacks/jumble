@@ -166,7 +166,7 @@ export default {
     'Send only to r': 'केवल {{r}} को भेजें',
     'Send only to these relays': 'केवल इन रिले को भेजें',
     Explore: 'एक्सप्लोर करें',
-    'Search relays': 'रिले खोजें',
+    'Search relays': 'खोज रिले',
     relayInfoBadgeAuth: 'प्रमाणीकरण',
     relayInfoBadgeSearch: 'खोज',
     relayInfoBadgePayment: 'भुगतान',
@@ -682,6 +682,7 @@ export default {
     'Hide indirect': 'अप्रत्यक्ष छुपाएं',
     'Copy note content': 'नोट सामग्री कॉपी करें',
     'Video loop': 'वीडियो लूप',
-    'Automatically replay videos when they end': 'वीडियो समाप्त होने पर स्वचालित रूप से दोबारा चलाएं'
+    'Automatically replay videos when they end': 'वीडियो समाप्त होने पर स्वचालित रूप से दोबारा चलाएं',
+    'Relays used for searching notes (NIP-50)': 'नोट्स खोजने के लिए उपयोग किए जाने वाले रिले (NIP-50)'
   }
 }

@@ -163,7 +163,7 @@ export default {
     'Send only to r': 'ส่งเฉพาะไปยัง {{r}}',
     'Send only to these relays': 'ส่งเฉพาะไปยังรีเลย์เหล่านี้',
     Explore: 'สำรวจ',
-    'Search relays': 'ค้นหารีเลย์',
+    'Search relays': 'รีเลย์สำหรับค้นหา',
     relayInfoBadgeAuth: 'ยืนยันตัวตน',
     relayInfoBadgeSearch: 'ค้นหา',
     relayInfoBadgePayment: 'ชำระเงิน',
@@ -672,6 +672,7 @@ export default {
     'Hide indirect': 'ซ่อนทางอ้อม',
     'Copy note content': 'คัดลอกเนื้อหาโน้ต',
     'Video loop': 'เล่นวิดีโอซ้ำ',
-    'Automatically replay videos when they end': 'เล่นวิดีโอซ้ำอัตโนมัติเมื่อจบ'
+    'Automatically replay videos when they end': 'เล่นวิดีโอซ้ำอัตโนมัติเมื่อจบ',
+    'Relays used for searching notes (NIP-50)': 'รีเลย์ที่ใช้สำหรับค้นหาโน้ต (NIP-50)'
   }
 }

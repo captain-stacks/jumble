@@ -1040,7 +1040,7 @@ class ClientService extends EventTarget {
   /** =========== Profile =========== */
 
   async searchNpubsFromLocal(query: string, limit: number = 100) {
-    const result = await this.userIndex.searchAsync(query, { limit })
+    const result = await this.userIndex.searchAsync(query.normalize('NFKD'), { limit })
     return result.map((pubkey) => pubkeyToNpub(pubkey as string)).filter(Boolean) as string[]
   }
 
@@ -1060,7 +1060,9 @@ class ClientService extends EventTarget {
           ?.split('@')
           .map((s: string) => s.trim())
           .join(' ') ?? ''
-      ].join(' ')
+      ]
+        .join(' ')
+        .normalize('NFKD')
       if (!text) return
 
       await this.userIndex.addAsync(profileEvent.pubkey, text)

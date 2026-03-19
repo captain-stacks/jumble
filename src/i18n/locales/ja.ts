@@ -685,6 +685,7 @@ export default {
     'Automatically replay videos when they end': 'ビデオ終了時に自動的にリプレイする',
     'Relays used for searching notes (NIP-50)': 'ノート検索に使用するリレー (NIP-50)',
     'Protected event (NIP-70)': '保護されたイベント (NIP-70)',
-    'Protected': '保護'
+    'Protected': '保護',
+    'Protected event hint': '保護されたイベント（NIP-70）は作成者のみが公開できます。リレーは第三者からのこれらのイベントを拒否し、他者によるコンテンツの再配信を防ぎます。 注意：すべてのリレーが保護されたイベントに対応しているわけではありません。'
   }
 }

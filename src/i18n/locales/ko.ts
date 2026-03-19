@@ -679,6 +679,7 @@ export default {
     'Automatically replay videos when they end': '비디오가 끝나면 자동으로 다시 재생',
     'Relays used for searching notes (NIP-50)': '노트 검색에 사용되는 릴레이 (NIP-50)',
     'Protected event (NIP-70)': '보호된 이벤트 (NIP-70)',
-    'Protected': '보호됨'
+    'Protected': '보호됨',
+    'Protected event hint': '보호된 이벤트(NIP-70)는 작성자만 게시할 수 있습니다. 릴레이는 제3자의 이벤트를 거부하여 다른 사람이 콘텐츠를 재배포하는 것을 방지합니다. 참고: 모든 릴레이가 보호된 이벤트를 지원하는 것은 아닙니다.'
   }
 }

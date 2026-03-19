@@ -679,6 +679,7 @@ export default {
     'Automatically replay videos when they end': 'Videók automatikus újrajátszása, amikor véget érnek',
     'Relays used for searching notes (NIP-50)': 'Jegyzetek kereséséhez használt csomópontok (NIP-50)',
     'Protected event (NIP-70)': 'Védett esemény (NIP-70)',
-    'Protected': 'Védett'
+    'Protected': 'Védett',
+    'Protected event hint': 'A védett eseményeket (NIP-70) csak a szerző teheti közzé. A csomópontok elutasítják ezeket az eseményeket harmadik felektől, megakadályozva, hogy mások újraközvetítsék a tartalmadat. Megjegyzés: nem minden csomópont támogatja a védett eseményeket.'
   }
 }

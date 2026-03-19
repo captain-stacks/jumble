@@ -691,6 +691,7 @@ export default {
     'Automatically replay videos when they end': 'Reproduzir automaticamente os vídeos quando terminarem',
     'Relays used for searching notes (NIP-50)': 'Relés usados para pesquisar notas (NIP-50)',
     'Protected event (NIP-70)': 'Evento protegido (NIP-70)',
-    'Protected': 'Protegido'
+    'Protected': 'Protegido',
+    'Protected event hint': 'Eventos protegidos (NIP-70) só podem ser publicados pelo autor. Os relés rejeitarão estes eventos de terceiros, impedindo que outros retransmitam o seu conteúdo. Nota: nem todos os relés suportam eventos protegidos.'
   }
 }

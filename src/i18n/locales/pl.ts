@@ -691,6 +691,7 @@ export default {
     'Automatically replay videos when they end': 'Automatycznie powtarzaj filmy po zakończeniu',
     'Relays used for searching notes (NIP-50)': 'Przekaźniki używane do wyszukiwania notatek (NIP-50)',
     'Protected event (NIP-70)': 'Chronione zdarzenie (NIP-70)',
-    'Protected': 'Chronione'
+    'Protected': 'Chronione',
+    'Protected event hint': 'Chronione zdarzenia (NIP-70) mogą być publikowane tylko przez autora. Przekaźniki odrzucą te zdarzenia od osób trzecich, uniemożliwiając innym retransmisję Twoich treści. Uwaga: nie wszystkie przekaźniki obsługują chronione zdarzenia.'
   }
 }

@@ -673,6 +673,7 @@ export default {
     'Automatically replay videos when they end': 'إعادة تشغيل مقاطع الفيديو تلقائيًا عند انتهائها',
     'Relays used for searching notes (NIP-50)': 'الريلايات المستخدمة للبحث عن الملاحظات (NIP-50)',
     'Protected event (NIP-70)': 'حدث محمي (NIP-70)',
-    'Protected': 'محمي'
+    'Protected': 'محمي',
+    'Protected event hint': 'الأحداث المحمية (NIP-70) لا يمكن نشرها إلا من قبل المؤلف. سترفض الخوادم هذه الأحداث من أطراف ثالثة، مما يمنع الآخرين من إعادة بث محتواك. ملاحظة: لا تدعم جميع الخوادم الأحداث المحمية.'
   }
 }

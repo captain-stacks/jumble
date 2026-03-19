@@ -679,6 +679,8 @@ export default {
     'Automatically replay videos when they end': 'Automatically replay videos when they end',
     'Relays used for searching notes (NIP-50)': 'Relays used for searching notes (NIP-50)',
     'Protected event (NIP-70)': 'Protected event (NIP-70)',
-    'Protected': 'Protected'
+    'Protected': 'Protected',
+    'Protected event hint':
+      'Protected events (NIP-70) can only be published by the author. Relays will reject these events from third parties, preventing others from rebroadcasting your content. Note: not all relays support protected events.'
   }
 }

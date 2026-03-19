@@ -671,6 +671,8 @@ export default {
     'Copy note content': 'نسخ محتوى الملاحظة',
     'Video loop': 'تكرار الفيديو',
     'Automatically replay videos when they end': 'إعادة تشغيل مقاطع الفيديو تلقائيًا عند انتهائها',
-    'Relays used for searching notes (NIP-50)': 'الريلايات المستخدمة للبحث عن الملاحظات (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'الريلايات المستخدمة للبحث عن الملاحظات (NIP-50)',
+    'Protected event (NIP-70)': 'حدث محمي (NIP-70)',
+    'Protected': 'محمي'
   }
 }

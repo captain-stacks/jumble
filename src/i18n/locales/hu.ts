@@ -677,6 +677,8 @@ export default {
     'Copy note content': 'Jegyzet tartalmának másolása',
     'Video loop': 'Videó ismétlése',
     'Automatically replay videos when they end': 'Videók automatikus újrajátszása, amikor véget érnek',
-    'Relays used for searching notes (NIP-50)': 'Jegyzetek kereséséhez használt csomópontok (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'Jegyzetek kereséséhez használt csomópontok (NIP-50)',
+    'Protected event (NIP-70)': 'Védett esemény (NIP-70)',
+    'Protected': 'Védett'
   }
 }

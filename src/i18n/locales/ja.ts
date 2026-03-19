@@ -683,6 +683,8 @@ export default {
     'Copy note content': 'ノート内容をコピー',
     'Video loop': 'ビデオループ',
     'Automatically replay videos when they end': 'ビデオ終了時に自動的にリプレイする',
-    'Relays used for searching notes (NIP-50)': 'ノート検索に使用するリレー (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'ノート検索に使用するリレー (NIP-50)',
+    'Protected event (NIP-70)': '保護されたイベント (NIP-70)',
+    'Protected': '保護'
   }
 }

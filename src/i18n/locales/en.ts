@@ -677,6 +677,8 @@ export default {
     'Copy note content': 'Copy note content',
     'Video loop': 'Video loop',
     'Automatically replay videos when they end': 'Automatically replay videos when they end',
-    'Relays used for searching notes (NIP-50)': 'Relays used for searching notes (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'Relays used for searching notes (NIP-50)',
+    'Protected event (NIP-70)': 'Protected event (NIP-70)',
+    'Protected': 'Protected'
   }
 }

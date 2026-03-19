@@ -683,6 +683,8 @@ export default {
     'Copy note content': 'کپی محتوای یادداشت',
     'Video loop': 'تکرار ویدیو',
     'Automatically replay videos when they end': 'پخش خودکار ویدیوها پس از پایان',
-    'Relays used for searching notes (NIP-50)': 'رله‌هایی که برای جستجوی یادداشت‌ها استفاده می‌شوند (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'رله‌هایی که برای جستجوی یادداشت‌ها استفاده می‌شوند (NIP-50)',
+    'Protected event (NIP-70)': 'رویداد محافظت‌شده (NIP-70)',
+    'Protected': 'محافظت‌شده'
   }
 }

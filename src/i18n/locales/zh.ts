@@ -660,6 +660,8 @@ export default {
     'Copy note content': '复制笔记内容',
     'Video loop': '视频循环',
     'Automatically replay videos when they end': '视频播放结束后自动重新播放',
-    'Relays used for searching notes (NIP-50)': '用于搜索笔记的服务器 (NIP-50)'
+    'Relays used for searching notes (NIP-50)': '用于搜索笔记的服务器 (NIP-50)',
+    'Protected event (NIP-70)': '受保护的事件 (NIP-70)',
+    'Protected': '受保护'
   }
 }

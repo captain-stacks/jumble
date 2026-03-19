@@ -673,6 +673,8 @@ export default {
     'Copy note content': 'คัดลอกเนื้อหาโน้ต',
     'Video loop': 'เล่นวิดีโอซ้ำ',
     'Automatically replay videos when they end': 'เล่นวิดีโอซ้ำอัตโนมัติเมื่อจบ',
-    'Relays used for searching notes (NIP-50)': 'รีเลย์ที่ใช้สำหรับค้นหาโน้ต (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'รีเลย์ที่ใช้สำหรับค้นหาโน้ต (NIP-50)',
+    'Protected event (NIP-70)': 'เหตุการณ์ที่ได้รับการป้องกัน (NIP-70)',
+    'Protected': 'ป้องกัน'
   }
 }

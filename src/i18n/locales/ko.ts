@@ -677,6 +677,8 @@ export default {
     'Copy note content': '노트 내용 복사',
     'Video loop': '비디오 반복',
     'Automatically replay videos when they end': '비디오가 끝나면 자동으로 다시 재생',
-    'Relays used for searching notes (NIP-50)': '노트 검색에 사용되는 릴레이 (NIP-50)'
+    'Relays used for searching notes (NIP-50)': '노트 검색에 사용되는 릴레이 (NIP-50)',
+    'Protected event (NIP-70)': '보호된 이벤트 (NIP-70)',
+    'Protected': '보호됨'
   }
 }

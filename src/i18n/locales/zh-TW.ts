@@ -655,6 +655,8 @@ export default {
     'Copy note content': '複製筆記內容',
     'Video loop': '影片循環',
     'Automatically replay videos when they end': '影片播放結束後自動重新播放',
-    'Relays used for searching notes (NIP-50)': '用於搜尋筆記的伺服器 (NIP-50)'
+    'Relays used for searching notes (NIP-50)': '用於搜尋筆記的伺服器 (NIP-50)',
+    'Protected event (NIP-70)': '受保護的事件 (NIP-70)',
+    'Protected': '受保護'
   }
 }

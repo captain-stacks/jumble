@@ -689,6 +689,8 @@ export default {
     'Copy note content': 'Kopiuj treść notatki',
     'Video loop': 'Zapętlanie wideo',
     'Automatically replay videos when they end': 'Automatycznie powtarzaj filmy po zakończeniu',
-    'Relays used for searching notes (NIP-50)': 'Przekaźniki używane do wyszukiwania notatek (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'Przekaźniki używane do wyszukiwania notatek (NIP-50)',
+    'Protected event (NIP-70)': 'Chronione zdarzenie (NIP-70)',
+    'Protected': 'Chronione'
   }
 }

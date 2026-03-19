@@ -688,6 +688,8 @@ export default {
     'Copy note content': 'Скопировать содержимое заметки',
     'Video loop': 'Зацикливание видео',
     'Automatically replay videos when they end': 'Автоматически воспроизводить видео заново после окончания',
-    'Relays used for searching notes (NIP-50)': 'Ретрансляторы для поиска заметок (NIP-50)'
+    'Relays used for searching notes (NIP-50)': 'Ретрансляторы для поиска заметок (NIP-50)',
+    'Protected event (NIP-70)': 'Защищённое событие (NIP-70)',
+    'Protected': 'Защищённый'
   }
 }

@@ -686,6 +686,9 @@ export default {
     'Relays used for searching notes (NIP-50)': 'ノート検索に使用するリレー (NIP-50)',
     'Protected event (NIP-70)': '保護されたイベント (NIP-70)',
     'Protected': '保護',
-    'Protected event hint': '保護されたイベント（NIP-70）は作成者のみが公開できます。リレーは第三者からのこれらのイベントを拒否し、他者によるコンテンツの再配信を防ぎます。 注意：すべてのリレーが保護されたイベントに対応しているわけではありません。'
+    'Protected event hint': '保護されたイベント（NIP-70）は作成者のみが公開できます。リレーは第三者からのこれらのイベントを拒否し、他者によるコンテンツの再配信を防ぎます。 注意：すべてのリレーが保護されたイベントに対応しているわけではありません。',
+    'Allow insecure connections': '安全でない接続を許可',
+    'Allow insecure connections description':
+      'http:// リソースの読み込みと ws:// リレーへの接続を許可します。ブラウザの混合コンテンツ警告が表示される場合があります。'
   }
 }

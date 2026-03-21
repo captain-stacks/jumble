@@ -691,6 +691,9 @@ export default {
     'Relays used for searching notes (NIP-50)': 'Relés utilizados para buscar notas (NIP-50)',
     'Protected event (NIP-70)': 'Evento protegido (NIP-70)',
     'Protected': 'Protegido',
-    'Protected event hint': 'Los eventos protegidos (NIP-70) solo pueden ser publicados por el autor. Los relés rechazarán estos eventos de terceros, evitando que otros redistribuyan tu contenido. Nota: no todos los relés admiten eventos protegidos.'
+    'Protected event hint': 'Los eventos protegidos (NIP-70) solo pueden ser publicados por el autor. Los relés rechazarán estos eventos de terceros, evitando que otros redistribuyan tu contenido. Nota: no todos los relés admiten eventos protegidos.',
+    'Allow insecure connections': 'Permitir conexiones inseguras',
+    'Allow insecure connections description':
+      'Permitir cargar recursos http:// y conectar a relays ws://. Puede activar advertencias de contenido mixto del navegador.'
   }
 }

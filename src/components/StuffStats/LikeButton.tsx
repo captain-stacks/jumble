@@ -31,7 +31,7 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
   const { isSmallScreen } = useScreenSize()
   const { pubkey, publish, checkLogin } = useNostr()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
-  const { quickReaction, quickReactionEmoji } = useUserPreferences()
+  const { quickReaction, quickReactionEmoji, disableReactions } = useUserPreferences()
   const { event, externalContent, stuffKey } = useStuff(stuff)
   const [liking, setLiking] = useState(false)
   const [isEmojiReactionsOpen, setIsEmojiReactionsOpen] = useState(false)
@@ -134,6 +134,20 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
     } else {
       setIsEmojiReactionsOpen(true)
     }
+  }
+
+  if (disableReactions) {
+    if (!likeCount && !myLastEmoji) return null
+    return (
+      <div className="flex h-full items-center gap-1 px-3 text-muted-foreground">
+        {myLastEmoji ? (
+          <Emoji emoji={myLastEmoji} classNames={{ img: 'size-4' }} />
+        ) : (
+          <SmilePlus />
+        )}
+        {!!likeCount && <div className="text-sm">{formatCount(likeCount)}</div>}
+      </div>
+    )
   }
 
   const trigger = (

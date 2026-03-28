@@ -40,8 +40,14 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     profilePictureAutoLoadPolicy,
     setProfilePictureAutoLoadPolicy
   } = useContentPolicy()
-  const { quickReaction, updateQuickReaction, quickReactionEmoji, updateQuickReactionEmoji } =
-    useUserPreferences()
+  const {
+    quickReaction,
+    updateQuickReaction,
+    quickReactionEmoji,
+    updateQuickReactionEmoji,
+    disableReactions,
+    updateDisableReactions
+  } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -174,6 +180,19 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="quick-reaction"
             checked={quickReaction}
             onCheckedChange={updateQuickReaction}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="disable-reactions" className="text-base font-normal">
+            <div>{t('Disable reactions')}</div>
+            <div className="text-muted-foreground">
+              {t("Don't create new reactions and suppress reaction notifications")}
+            </div>
+          </Label>
+          <Switch
+            id="disable-reactions"
+            checked={disableReactions}
+            onCheckedChange={updateDisableReactions}
           />
         </SettingItem>
         {quickReaction && (

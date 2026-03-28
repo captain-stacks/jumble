@@ -9,6 +9,7 @@ import { formatError } from '@/lib/error'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
 import stuffStatsService from '@/services/stuff-stats.service'
 import { TEmoji } from '@/types'
@@ -20,6 +21,7 @@ import Emoji from '../Emoji'
 
 export default function Likes({ stuff }: { stuff: Event | string }) {
   const { pubkey, checkLogin, publish } = useNostr()
+  const { disableReactions } = useUserPreferences()
   const { event, externalContent, stuffKey } = useStuff(stuff)
   const noteStats = useStuffStatsById(stuffKey)
   const [liking, setLiking] = useState<string | null>(null)
@@ -131,19 +133,21 @@ export default function Likes({ stuff }: { stuff: Event | string }) {
             key={key}
             className={cn(
               'relative flex h-7 w-fit shrink-0 select-none items-center gap-2 overflow-hidden rounded-full border px-2 transition-all duration-200',
-              pubkey && pubkeys.has(pubkey)
-                ? 'cursor-not-allowed border-primary bg-primary/20 text-foreground'
-                : 'cursor-pointer bg-muted/80 text-muted-foreground hover:border-primary hover:bg-primary/40 hover:text-foreground',
-              (isLongPressing === key || isCompleted === key) && 'border-primary bg-primary/20'
+              disableReactions
+                ? 'cursor-default bg-muted/80 text-muted-foreground'
+                : pubkey && pubkeys.has(pubkey)
+                  ? 'cursor-not-allowed border-primary bg-primary/20 text-foreground'
+                  : 'cursor-pointer bg-muted/80 text-muted-foreground hover:border-primary hover:bg-primary/40 hover:text-foreground',
+              !disableReactions && (isLongPressing === key || isCompleted === key) && 'border-primary bg-primary/20'
             )}
             onClick={(e) => e.stopPropagation()}
-            onMouseDown={() => handleMouseDown(key)}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={() => handleMouseDown(key)}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleMouseUp}
-            onTouchCancel={handleMouseLeave}
+            onMouseDown={() => !disableReactions && handleMouseDown(key)}
+            onMouseUp={() => !disableReactions && handleMouseUp()}
+            onMouseLeave={() => !disableReactions && handleMouseLeave()}
+            onTouchStart={() => !disableReactions && handleMouseDown(key)}
+            onTouchMove={(e) => !disableReactions && handleTouchMove(e)}
+            onTouchEnd={() => !disableReactions && handleMouseUp()}
+            onTouchCancel={() => !disableReactions && handleMouseLeave()}
           >
             {(isLongPressing === key || isCompleted === key) && (
               <div className="absolute inset-0 overflow-hidden rounded-full">

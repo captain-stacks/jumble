@@ -10,6 +10,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useContentPolicy } from './ContentPolicyProvider'
 import { useMuteList } from './MuteListProvider'
 import { useNostr } from './NostrProvider'
+import { useUserPreferences } from './UserPreferencesProvider'
 import { useUserTrust } from './UserTrustProvider'
 
 type TNotificationContext = {
@@ -36,6 +37,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const { mutePubkeySet } = useMuteList()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
+  const { disableReactions } = useUserPreferences()
   const [newNotifications, setNewNotifications] = useState<NostrEvent[]>([])
   const [readNotificationIdSet, setReadNotificationIdSet] = useState<Set<string>>(new Set())
   const [filteredNewNotifications, setFilteredNewNotifications] = useState<NostrEvent[]>([])
@@ -51,6 +53,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       await Promise.allSettled(
         newNotifications.map(async (notification) => {
           if (notification.created_at <= notificationsSeenAt || filtered.length >= 10) {
+            return
+          }
+          if (disableReactions && notification.kind === kinds.Reaction) {
             return
           }
           if (
@@ -77,7 +82,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     notificationsSeenAt,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
-    meetsMinTrustScore
+    meetsMinTrustScore,
+    disableReactions
   ])
 
   useEffect(() => {

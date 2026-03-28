@@ -41,8 +41,14 @@ const NotificationList = forwardRef((_, ref) => {
   const active = useMemo(() => current === 'notifications' && display, [current, display])
   const { pubkey } = useNostr()
   const { getNotificationsSeenAt } = useNotification()
-  const { notificationListStyle } = useUserPreferences()
+  const { notificationListStyle, disableReactions } = useUserPreferences()
   const [notificationType, setNotificationType] = useState<TNotificationType>('all')
+
+  useEffect(() => {
+    if (disableReactions && notificationType === 'reactions') {
+      setNotificationType('all')
+    }
+  }, [disableReactions, notificationType])
   const [lastReadTime, setLastReadTime] = useState(0)
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -63,15 +69,16 @@ const NotificationList = forwardRef((_, ref) => {
           ExtendedKind.POLL
         ]
       case 'reactions':
-        return [kinds.Reaction, kinds.Repost, kinds.GenericRepost, ExtendedKind.POLL_RESPONSE]
+        return disableReactions
+          ? [kinds.Repost, kinds.GenericRepost, ExtendedKind.POLL_RESPONSE]
+          : [kinds.Reaction, kinds.Repost, kinds.GenericRepost, ExtendedKind.POLL_RESPONSE]
       case 'zaps':
         return [kinds.Zap]
-      default:
-        return [
+      default: {
+        const base = [
           kinds.ShortTextNote,
           kinds.Repost,
           kinds.GenericRepost,
-          kinds.Reaction,
           kinds.Zap,
           kinds.Highlights,
           ExtendedKind.COMMENT,
@@ -79,8 +86,10 @@ const NotificationList = forwardRef((_, ref) => {
           ExtendedKind.VOICE_COMMENT,
           ExtendedKind.POLL
         ]
+        return disableReactions ? base : [kinds.Reaction, ...base]
+      }
     }
-  }, [notificationType])
+  }, [notificationType, disableReactions])
   useImperativeHandle(
     ref,
     () => ({
@@ -285,7 +294,7 @@ const NotificationList = forwardRef((_, ref) => {
         tabs={[
           { value: 'all', label: 'All' },
           { value: 'mentions', label: 'Mentions' },
-          { value: 'reactions', label: 'Reactions' },
+          ...(!disableReactions ? [{ value: 'reactions', label: 'Reactions' }] : []),
           { value: 'zaps', label: 'Zaps' }
         ]}
         onTabChange={(type) => {

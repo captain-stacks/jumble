@@ -21,6 +21,9 @@ type TUserPreferencesContext = {
 
   quickReactionEmoji: string | TEmoji
   updateQuickReactionEmoji: (emoji: string | TEmoji) => void
+
+  disableReactions: boolean
+  updateDisableReactions: (disable: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -45,6 +48,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   )
   const [quickReaction, setQuickReaction] = useState(storage.getQuickReaction())
   const [quickReactionEmoji, setQuickReactionEmoji] = useState(storage.getQuickReactionEmoji())
+  const [disableReactions, setDisableReactions] = useState(storage.getDisableReactions())
 
   useEffect(() => {
     if (!isSmallScreen && enableSingleColumnLayout) {
@@ -79,6 +83,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setQuickReactionEmoji(emoji)
   }
 
+  const updateDisableReactions = (disable: boolean) => {
+    setDisableReactions(disable)
+    storage.setDisableReactions(disable)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -93,7 +102,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         quickReaction,
         updateQuickReaction,
         quickReactionEmoji,
-        updateQuickReactionEmoji
+        updateQuickReactionEmoji,
+        disableReactions,
+        updateDisableReactions
       }}
     >
       {children}

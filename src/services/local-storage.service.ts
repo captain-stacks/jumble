@@ -73,6 +73,7 @@ class LocalStorageService {
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
   private hideIndirectNotifications: boolean = false
+  private disableReactions: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -346,6 +347,9 @@ class LocalStorageService {
 
     this.hideIndirectNotifications =
       window.localStorage.getItem(StorageKey.HIDE_INDIRECT_NOTIFICATIONS) === 'true'
+
+    this.disableReactions =
+      window.localStorage.getItem(StorageKey.DISABLE_REACTIONS) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -747,6 +751,15 @@ class LocalStorageService {
   setHideIndirectNotifications(onlyShow: boolean) {
     this.hideIndirectNotifications = onlyShow
     window.localStorage.setItem(StorageKey.HIDE_INDIRECT_NOTIFICATIONS, onlyShow.toString())
+  }
+
+  getDisableReactions() {
+    return this.disableReactions
+  }
+
+  setDisableReactions(disable: boolean) {
+    this.disableReactions = disable
+    window.localStorage.setItem(StorageKey.DISABLE_REACTIONS, disable.toString())
   }
 }
 

@@ -20,7 +20,8 @@ const SecondaryPageLayout = forwardRef(
       hideBackButton = false,
       hideTitlebarBottomBorder = false,
       displayScrollToTopButton = false,
-      titlebar
+      titlebar,
+      footer
     }: {
       children?: React.ReactNode
       index?: number
@@ -30,6 +31,7 @@ const SecondaryPageLayout = forwardRef(
       hideTitlebarBottomBorder?: boolean
       displayScrollToTopButton?: boolean
       titlebar?: React.ReactNode
+      footer?: React.ReactNode
     },
     ref
   ) => {
@@ -65,7 +67,7 @@ const SecondaryPageLayout = forwardRef(
           <DeepBrowsingProvider active={currentIndex === index}>
             <div
               style={{
-                paddingBottom: 'calc(env(safe-area-inset-bottom) + 3rem)'
+                paddingBottom: footer ? undefined : 'calc(env(safe-area-inset-bottom) + 3rem)'
               }}
             >
               <SecondaryPageTitlebar
@@ -77,6 +79,11 @@ const SecondaryPageLayout = forwardRef(
               />
               {children}
             </div>
+            {footer && (
+              <div className="sticky bottom-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                {footer}
+              </div>
+            )}
             {displayScrollToTopButton && <ScrollToTopButton />}
           </DeepBrowsingProvider>
         </PageActiveContext.Provider>
@@ -86,21 +93,24 @@ const SecondaryPageLayout = forwardRef(
     return (
       <PageActiveContext.Provider value={currentIndex === index}>
         <DeepBrowsingProvider active={currentIndex === index} scrollAreaRef={scrollAreaRef}>
-          <ScrollArea
-            className="h-full overflow-auto"
-            scrollBarClassName="z-30 pt-12"
-            ref={scrollAreaRef}
-          >
-            <SecondaryPageTitlebar
-              title={title}
-              controls={controls}
-              hideBackButton={hideBackButton}
-              hideBottomBorder={hideTitlebarBottomBorder}
-              titlebar={titlebar}
-            />
-            {children}
-            <div className="h-4" />
-          </ScrollArea>
+          <div className="flex h-full flex-col">
+            <ScrollArea
+              className="min-h-0 flex-1 overflow-auto"
+              scrollBarClassName="z-30 pt-12"
+              ref={scrollAreaRef}
+            >
+              <SecondaryPageTitlebar
+                title={title}
+                controls={controls}
+                hideBackButton={hideBackButton}
+                hideBottomBorder={hideTitlebarBottomBorder}
+                titlebar={titlebar}
+              />
+              {children}
+              <div className="h-4" />
+            </ScrollArea>
+            {footer && <div className="shrink-0">{footer}</div>}
+          </div>
           {displayScrollToTopButton && <ScrollToTopButton scrollAreaRef={scrollAreaRef} />}
         </DeepBrowsingProvider>
       </PageActiveContext.Provider>

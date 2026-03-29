@@ -117,7 +117,7 @@ export default function TrustScoreFilter({
           onValueChange={([value]) => handleScoreChange(value)}
           min={0}
           max={100}
-          step={5}
+          step={1}
           className="w-full"
         />
       </div>

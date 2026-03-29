@@ -9,13 +9,15 @@ import { useTranslation } from 'react-i18next'
 export default function TrustScoreBadge({
   pubkey,
   className,
-  classNames
+  classNames,
+  numeric = false
 }: {
   pubkey: string
   className?: string
   classNames?: {
     container?: string
   }
+  numeric?: boolean
 }) {
   const { t } = useTranslation()
   const { isUserTrusted } = useUserTrust()
@@ -23,14 +25,18 @@ export default function TrustScoreBadge({
   const [percentile, setPercentile] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const isSelf = currentPubkey === pubkey
+  const inWoT = !isSelf && isUserTrusted(pubkey)
+
   useEffect(() => {
-    if (currentPubkey === pubkey) {
+    if (isSelf) {
       setLoading(false)
       setPercentile(null)
       return
     }
-
-    if (isUserTrusted(pubkey)) {
+    // Non-numeric badge skips WoT users (they're trusted, no need for a warning icon).
+    // Numeric badge always fetches so it can show the actual score.
+    if (!numeric && inWoT) {
       setLoading(false)
       setPercentile(null)
       return
@@ -50,7 +56,21 @@ export default function TrustScoreBadge({
     }
 
     fetchScore()
-  }, [pubkey, currentPubkey, isUserTrusted])
+  }, [pubkey, isSelf, inWoT, numeric])
+
+  if (numeric) {
+    if (isSelf || loading || percentile === null) return null
+
+    const color = inWoT ? 'text-green-500' : 'text-red-500'
+    return (
+      <span
+        title={t('Trust score: {{percentile}}%', { percentile })}
+        className={cn('text-xs font-medium tabular-nums', color, className)}
+      >
+        {percentile}%
+      </span>
+    )
+  }
 
   if (loading || percentile === null) return null
 

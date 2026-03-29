@@ -1,42 +1,85 @@
 import { useSecondaryPage } from '@/PageManager'
-import ContentPreview from '@/components/ContentPreview'
 import Note from '@/components/Note'
+import NoteCard, { NoteCardLoadingSkeleton } from '@/components/NoteCard'
 import NoteInteractions from '@/components/NoteInteractions'
 import StuffStats from '@/components/StuffStats'
-import UserAvatar from '@/components/UserAvatar'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ExtendedKind } from '@/constants'
 import { useFetchEvent } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import {
-  getEventKey,
-  getKeyFromTag,
-  getParentBech32Id,
-  getParentTag,
-  getRootBech32Id
-} from '@/lib/event'
-import { toExternalContent, toNote } from '@/lib/link'
+import { getParentBech32Id } from '@/lib/event'
+import { createShortTextNoteDraftEvent } from '@/lib/draft-event'
+import { toExternalContent } from '@/lib/link'
 import { tagNameEquals } from '@/lib/tag'
-import { cn } from '@/lib/utils'
-import { Ellipsis } from 'lucide-react'
+import { useNostr } from '@/providers/NostrProvider'
+import client from '@/services/client.service'
+import { Send } from 'lucide-react'
 import { Event } from 'nostr-tools'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFound from './NotFound'
 
+
 const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
+  const { pop } = useSecondaryPage()
   const { event, isFetching } = useFetchEvent(id)
-  const parentEventId = useMemo(() => getParentBech32Id(event), [event])
-  const rootEventId = useMemo(() => getRootBech32Id(event), [event])
   const rootITag = useMemo(
     () => (event?.kind === ExtendedKind.COMMENT ? event.tags.find(tagNameEquals('I')) : undefined),
     [event]
   )
-  const { isFetching: isFetchingRootEvent, event: rootEvent } = useFetchEvent(rootEventId)
-  const { isFetching: isFetchingParentEvent, event: parentEvent } = useFetchEvent(parentEventId)
+  const [parentChain, setParentChain] = useState<Event[]>([])
+  const [chainLoading, setChainLoading] = useState(false)
+
+  useEffect(() => {
+    if (!event) return
+    const firstParentId = getParentBech32Id(event)
+    if (!firstParentId) {
+      setParentChain([])
+      return
+    }
+    setChainLoading(true)
+    const fetchChain = async () => {
+      const chain: Event[] = []
+      let currentId: string | undefined = firstParentId
+      for (let i = 0; i < 20; i++) {
+        if (!currentId) break
+        const parent = await client.fetchEvent(currentId)
+        if (!parent) break
+        chain.unshift(parent)
+        currentId = getParentBech32Id(parent)
+      }
+      setParentChain(chain)
+      setChainLoading(false)
+    }
+    fetchChain()
+  }, [event?.id])
+  const { pubkey, publish, checkLogin } = useNostr()
+  const [replyInput, setReplyInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (event) inputRef.current?.focus()
+  }, [!!event])
+
+  const handleSend = async () => {
+    const text = replyInput.trim()
+    if (!text || !event) return
+    await checkLogin(async () => {
+      setSending(true)
+      try {
+        const draft = await createShortTextNoteDraftEvent(text, [], { parentEvent: event })
+        await publish(draft)
+        setReplyInput('')
+        pop()
+      } finally {
+        setSending(false)
+      }
+    })
+  }
 
   if (!event && isFetching) {
     return (
@@ -73,27 +116,45 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
     )
   }
 
+  const replyBar = (
+    <div className="flex items-center gap-2 border-t bg-background px-3 py-2">
+      <input
+        ref={inputRef}
+        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+        placeholder={pubkey ? t('Reply...') : t('Login to reply')}
+        value={replyInput}
+        disabled={!pubkey || sending}
+        onChange={(e) => setReplyInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+          }
+        }}
+        autoComplete="off"
+      />
+      <button
+        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
+        onClick={handleSend}
+        disabled={!pubkey || sending || !replyInput.trim()}
+      >
+        <Send className="size-4" />
+      </button>
+    </div>
+  )
+
   return (
-    <SecondaryPageLayout ref={ref} index={index} title={t('Note')} displayScrollToTopButton>
+    <SecondaryPageLayout ref={ref} index={index} title={t('Note')} displayScrollToTopButton footer={replyBar}>
+      {rootITag && (
+        <div className="px-4 pt-3">
+          <ExternalRoot value={rootITag[1]} />
+        </div>
+      )}
+      {chainLoading && <NoteCardLoadingSkeleton />}
+      {parentChain.map((parent) => (
+        <ParentNote key={parent.id} event={parent} />
+      ))}
       <div className="px-4 pt-3">
-        {rootITag && <ExternalRoot value={rootITag[1]} />}
-        {rootEventId && rootEventId !== parentEventId && (
-          <ParentNote
-            key={`root-note-${event.id}`}
-            isFetching={isFetchingRootEvent}
-            event={rootEvent}
-            eventBech32Id={rootEventId}
-            isConsecutive={isConsecutive(rootEvent, parentEvent)}
-          />
-        )}
-        {parentEventId && (
-          <ParentNote
-            key={`parent-note-${event.id}`}
-            isFetching={isFetchingParentEvent}
-            event={parentEvent}
-            eventBech32Id={parentEventId}
-          />
-        )}
         <Note
           key={`note-${event.id}`}
           event={event}
@@ -101,6 +162,7 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
           hideParentNotePreview
           originalNoteId={id}
           showFull
+          showMutedContent
         />
         <StuffStats className="mt-3" stuff={event} fetchIfNotExisting displayTopZapsAndLikes />
       </div>
@@ -128,61 +190,12 @@ function ExternalRoot({ value }: { value: string }) {
   )
 }
 
-function ParentNote({
-  event,
-  eventBech32Id,
-  isFetching,
-  isConsecutive = true
-}: {
-  event?: Event
-  eventBech32Id: string
-  isFetching: boolean
-  isConsecutive?: boolean
-}) {
-  const { push } = useSecondaryPage()
-
-  if (isFetching) {
-    return (
-      <div>
-        <div className="clickable flex items-center space-x-1 rounded-full border px-[0.4375rem] py-1 text-sm text-muted-foreground">
-          <Skeleton className="h-4 w-4 shrink rounded-full" />
-          <div className="flex-1 py-1">
-            <Skeleton className="h-3" />
-          </div>
-        </div>
-        <div className="ml-5 h-3 w-px bg-border" />
-      </div>
-    )
-  }
-
+function ParentNote({ event }: { event: Event }) {
   return (
-    <div>
-      <div
-        className={cn(
-          'clickable flex items-center space-x-1 rounded-full border px-[0.4375rem] py-1 text-sm text-muted-foreground',
-          event && 'hover:text-foreground'
-        )}
-        onClick={() => {
-          push(toNote(event ?? eventBech32Id))
-        }}
-      >
-        {event && <UserAvatar userId={event.pubkey} size="tiny" className="shrink-0" />}
-        <ContentPreview className="truncate" event={event} />
-      </div>
-      {isConsecutive ? (
-        <div className="ml-5 h-3 w-px bg-border" />
-      ) : (
-        <Ellipsis className="ml-3.5 size-3 text-muted-foreground/60" />
-      )}
-    </div>
+    <>
+      <NoteCard event={event} filterMutedNotes={false} showMutedContent />
+      <div className="ml-9 h-3 w-px bg-border" />
+    </>
   )
 }
 
-function isConsecutive(rootEvent?: Event, parentEvent?: Event) {
-  if (!rootEvent || !parentEvent) return false
-
-  const tag = getParentTag(parentEvent)
-  if (!tag) return false
-
-  return getEventKey(rootEvent) === getKeyFromTag(tag.tag)
-}

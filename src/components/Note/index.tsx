@@ -4,7 +4,9 @@ import { getParentStuff, isNsfwEvent } from '@/lib/event'
 import { toExternalContent, toNote } from '@/lib/link'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
+import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
+import { BellOff } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo, useState } from 'react'
 import AudioPlayer from '../AudioPlayer'
@@ -42,7 +44,8 @@ export default function Note({
   size = 'normal',
   className,
   hideParentNotePreview = false,
-  showFull = false
+  showFull = false,
+  showMutedContent = false
 }: {
   event: Event
   originalNoteId?: string
@@ -50,6 +53,7 @@ export default function Note({
   className?: string
   hideParentNotePreview?: boolean
   showFull?: boolean
+  showMutedContent?: boolean
 }) {
   const { push } = useSecondaryPage()
   const { isSmallScreen } = useScreenSize()
@@ -58,7 +62,8 @@ export default function Note({
   }, [event])
   const { nsfwDisplayPolicy } = useContentPolicy()
   const [showNsfw, setShowNsfw] = useState(false)
-  const { mutePubkeySet } = useMuteList()
+  const { mutePubkeySet, mutePubkeyPrivately } = useMuteList()
+  const { pubkey } = useNostr()
   const [showMuted, setShowMuted] = useState(false)
   const isNsfw = useMemo(
     () => (nsfwDisplayPolicy === NSFW_DISPLAY_POLICY.SHOW ? false : isNsfwEvent(event)),
@@ -75,7 +80,7 @@ export default function Note({
     ].includes(event.kind)
   ) {
     content = <UnknownNote className="mt-2" event={event} />
-  } else if (mutePubkeySet.has(event.pubkey) && !showMuted) {
+  } else if (mutePubkeySet.has(event.pubkey) && !showMuted && !showMutedContent) {
     content = <MutedNote show={() => setShowMuted(true)} />
   } else if (isNsfw && !showNsfw) {
     content = <NsfwNote show={() => setShowNsfw(true)} />
@@ -134,9 +139,12 @@ export default function Note({
                 skeletonClassName={size === 'small' ? 'h-3' : 'h-4'}
               />
               <FollowingBadge pubkey={event.pubkey} />
-              <TrustScoreBadge pubkey={event.pubkey} />
+              <TrustScoreBadge pubkey={event.pubkey} numeric />
               <ProtectedBadge event={event} />
               <ClientTag event={event} />
+              {showMutedContent && mutePubkeySet.has(event.pubkey) && (
+                <span className="text-xs font-medium text-red-500">🚫 muted</span>
+              )}
             </div>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Nip05 pubkey={event.pubkey} append="·" />
@@ -150,6 +158,18 @@ export default function Note({
         </div>
         <div className="flex items-center">
           <TranslateButton event={event} className={size === 'normal' ? '' : 'pr-0'} />
+          {size === 'normal' && pubkey && event.pubkey !== pubkey && !mutePubkeySet.has(event.pubkey) && (
+            <button
+              className="shrink-0 p-1 text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation()
+                mutePubkeyPrivately(event.pubkey)
+              }}
+              title="Mute user"
+            >
+              <BellOff className="size-5" />
+            </button>
+          )}
           {size === 'normal' && (
             <NoteOptions event={event} className="shrink-0 py-1 [&_svg]:size-5" />
           )}

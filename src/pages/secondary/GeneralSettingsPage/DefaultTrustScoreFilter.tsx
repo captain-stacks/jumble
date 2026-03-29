@@ -21,7 +21,7 @@ export default function DefaultTrustScoreFilter() {
         }
         min={0}
         max={100}
-        step={5}
+        step={1}
         className="w-full"
       />
     </SettingItem>

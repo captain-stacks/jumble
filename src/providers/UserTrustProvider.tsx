@@ -108,7 +108,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
       // Get percentile from reputation system
       const percentile = await fayan.fetchUserPercentile(pubkey)
-      if (percentile === null) return true // If no data, indicate the trust server is down, so allow the user
+      if (percentile === null) return false
       return percentile >= minScore
     },
     [currentPubkey]

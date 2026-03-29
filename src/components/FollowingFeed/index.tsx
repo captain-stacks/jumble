@@ -31,7 +31,7 @@ export default function FollowingFeed() {
 
       const followings = await client.fetchFollowings(pubkey)
       setHasFollowings(followings.length > 0)
-      setSubRequests(await client.generateSubRequestsForPubkeys([pubkey, ...followings], pubkey))
+      setSubRequests(await client.generateSubRequestsForPubkeys(followings, pubkey))
 
       if (followings.length) {
         initializedRef.current = true

@@ -14,21 +14,24 @@ export default function NoteCard({
   className,
   filterMutedNotes = true,
   pinned = false,
-  reposters
+  reposters,
+  showMutedContent = false
 }: {
   event: Event
   className?: string
   filterMutedNotes?: boolean
   pinned?: boolean
   reposters?: string[]
+  showMutedContent?: boolean
 }) {
   const { mutePubkeySet } = useMuteList()
   const { hideContentMentioningMutedUsers, nsfwDisplayPolicy } = useContentPolicy()
+
   const shouldHide = useMemo(() => {
     if (filterMutedNotes && mutePubkeySet.has(event.pubkey)) {
       return true
     }
-    if (hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) {
+    if (filterMutedNotes && hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) {
       return true
     }
     if (nsfwDisplayPolicy === NSFW_DISPLAY_POLICY.HIDE && isNsfwEvent(event)) {
@@ -36,6 +39,7 @@ export default function NoteCard({
     }
     return false
   }, [event, filterMutedNotes, mutePubkeySet, nsfwDisplayPolicy])
+
   if (shouldHide) return null
 
   if (event.kind === kinds.Repost || event.kind === kinds.GenericRepost) {
@@ -49,7 +53,7 @@ export default function NoteCard({
       />
     )
   }
-  return <MainNoteCard event={event} className={className} pinned={pinned} reposters={reposters} />
+  return <MainNoteCard event={event} className={className} pinned={pinned} reposters={reposters} showMutedContent={showMutedContent} />
 }
 
 export function NoteCardLoadingSkeleton({ className }: { className?: string }) {

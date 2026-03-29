@@ -20,24 +20,26 @@ import VideoNotePreview from './VideoNotePreview'
 
 export default function ContentPreview({
   event,
-  className
+  className,
+  bypassMuteFilter = false
 }: {
   event?: Event
   className?: string
+  bypassMuteFilter?: boolean
 }) {
   const { t } = useTranslation()
   const { mutePubkeySet } = useMuteList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const isMuted = useMemo(
-    () => (event ? mutePubkeySet.has(event.pubkey) : false),
-    [mutePubkeySet, event]
+    () => (!bypassMuteFilter && event ? mutePubkeySet.has(event.pubkey) : false),
+    [bypassMuteFilter, mutePubkeySet, event]
   )
   const isMentioningMuted = useMemo(
     () =>
-      hideContentMentioningMutedUsers && event
+      !bypassMuteFilter && hideContentMentioningMutedUsers && event
         ? isMentioningMutedUsers(event, mutePubkeySet)
         : false,
-    [event, mutePubkeySet]
+    [bypassMuteFilter, event, mutePubkeySet]
   )
 
   if (!event) {

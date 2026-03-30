@@ -135,7 +135,7 @@ export type TPublishOptions = {
 
 export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you' | '24h'
 
-export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps'
+export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps' | 'muted'
 
 export type TPageRef = { scrollToTop: (behavior?: ScrollBehavior) => void }
 

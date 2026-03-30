@@ -4,6 +4,7 @@ import { tagNameEquals } from '@/lib/tag'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useNotificationUserPreference } from '@/providers/NotificationUserPreferenceProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { Event, kinds } from 'nostr-tools'
 import { useEffect, useState } from 'react'
@@ -25,12 +26,21 @@ export function NotificationItem({
   const { mutePubkeySet } = useMuteList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
+  const { showMuted } = useNotificationUserPreference()
   const [canShow, setCanShow] = useState(false)
 
   useEffect(() => {
     const checkCanShow = async () => {
-      // Check muted users
-      if (mutePubkeySet.has(notification.pubkey)) {
+      const isMuted = mutePubkeySet.has(notification.pubkey)
+
+      if (showMuted) {
+        // On the muted tab: only show notifications from muted users
+        setCanShow(isMuted)
+        return
+      }
+
+      // Hide notifications from muted users
+      if (isMuted) {
         setCanShow(false)
         return
       }
@@ -68,6 +78,7 @@ export function NotificationItem({
     pubkey,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    showMuted,
     getMinTrustScore,
     meetsMinTrustScore
   ])

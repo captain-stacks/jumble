@@ -8,16 +8,19 @@ import {
   useNotificationUserPreference
 } from '@/providers/NotificationUserPreferenceProvider'
 import localStorage from '@/services/local-storage.service'
-import { TPageRef } from '@/types'
+import { TNotificationType, TPageRef } from '@/types'
 import { Bell } from 'lucide-react'
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const NotificationListPage = forwardRef<TPageRef>((_, ref) => {
   const { current } = usePrimaryPage()
   const [hideIndirect, setHideIndirect] = useState(localStorage.getHideIndirectNotifications())
+  const [notificationType, setNotificationType] = useState<TNotificationType>('all')
   const firstRenderRef = useRef(true)
   const notificationListRef = useRef<{ refresh: () => void }>(null)
+
+  const showMuted = useMemo(() => notificationType === 'muted', [notificationType])
 
   useEffect(() => {
     if (current === 'notifications' && !firstRenderRef.current) {
@@ -38,7 +41,8 @@ const NotificationListPage = forwardRef<TPageRef>((_, ref) => {
     <NotificationUserPreferenceContext.Provider
       value={{
         hideIndirect,
-        updateHideIndirect
+        updateHideIndirect,
+        showMuted
       }}
     >
       <PrimaryPageLayout
@@ -47,7 +51,11 @@ const NotificationListPage = forwardRef<TPageRef>((_, ref) => {
         titlebar={<NotificationListPageTitlebar />}
         displayScrollToTopButton
       >
-        <NotificationList ref={notificationListRef} />
+        <NotificationList
+          ref={notificationListRef}
+          notificationType={notificationType}
+          onNotificationTypeChange={setNotificationType}
+        />
       </PrimaryPageLayout>
     </NotificationUserPreferenceContext.Provider>
   )

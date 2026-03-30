@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
 import { useNotification } from '@/providers/NotificationProvider'
+import { useNotificationUserPreference } from '@/providers/NotificationUserPreferenceProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { NostrEvent } from 'nostr-tools'
 import { useMemo } from 'react'
@@ -42,6 +43,7 @@ export default function Notification({
   const { pubkey } = useNostr()
   const { isNotificationRead, markNotificationAsRead } = useNotification()
   const { notificationListStyle } = useUserPreferences()
+  const { showMuted } = useNotificationUserPreference()
   const unread = useMemo(
     () => isNew && !isNotificationRead(notificationId),
     [isNew, isNotificationRead, notificationId]
@@ -82,6 +84,7 @@ export default function Notification({
                 unread ? 'font-semibold' : 'text-muted-foreground'
               )}
               event={targetEvent}
+              bypassMuteFilter={showMuted}
             />
           )}
         </div>
@@ -128,6 +131,7 @@ export default function Notification({
           <ContentPreview
             className={cn('line-clamp-2', !unread && 'text-muted-foreground')}
             event={targetEvent}
+            bypassMuteFilter={showMuted}
           />
         )}
         <FormattedTimestamp timestamp={sentAt} className="shrink-0 text-sm text-muted-foreground" />

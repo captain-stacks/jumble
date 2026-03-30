@@ -35,20 +35,29 @@ import { NotificationSkeleton } from './NotificationItem/Notification'
 const LIMIT = 100
 const SHOW_COUNT = 30
 
-const NotificationList = forwardRef((_, ref) => {
+const NotificationList = forwardRef(
+  (
+    {
+      notificationType,
+      onNotificationTypeChange
+    }: {
+      notificationType: TNotificationType
+      onNotificationTypeChange: (type: TNotificationType) => void
+    },
+    ref
+  ) => {
   const { t } = useTranslation()
   const { current, display } = usePrimaryPage()
   const active = useMemo(() => current === 'notifications' && display, [current, display])
   const { pubkey } = useNostr()
   const { getNotificationsSeenAt } = useNotification()
   const { notificationListStyle, disableReactions } = useUserPreferences()
-  const [notificationType, setNotificationType] = useState<TNotificationType>('all')
 
   useEffect(() => {
     if (disableReactions && notificationType === 'reactions') {
-      setNotificationType('all')
+      onNotificationTypeChange('all')
     }
-  }, [disableReactions, notificationType])
+  }, [disableReactions, notificationType, onNotificationTypeChange])
   const [lastReadTime, setLastReadTime] = useState(0)
   const [refreshCount, setRefreshCount] = useState(0)
   const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
@@ -90,6 +99,7 @@ const NotificationList = forwardRef((_, ref) => {
       }
     }
   }, [notificationType, disableReactions])
+
   useImperativeHandle(
     ref,
     () => ({
@@ -295,11 +305,12 @@ const NotificationList = forwardRef((_, ref) => {
           { value: 'all', label: 'All' },
           { value: 'mentions', label: 'Mentions' },
           ...(!disableReactions ? [{ value: 'reactions', label: 'Reactions' }] : []),
-          { value: 'zaps', label: 'Zaps' }
+          { value: 'zaps', label: 'Zaps' },
+          { value: 'muted', label: 'Muted' }
         ]}
         onTabChange={(type) => {
           setShowCount(SHOW_COUNT)
-          setNotificationType(type as TNotificationType)
+          onNotificationTypeChange(type as TNotificationType)
         }}
         options={
           <>

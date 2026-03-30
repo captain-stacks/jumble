@@ -14,6 +14,7 @@ import { createShortTextNoteDraftEvent } from '@/lib/draft-event'
 import { toExternalContent } from '@/lib/link'
 import { tagNameEquals } from '@/lib/tag'
 import { useNostr } from '@/providers/NostrProvider'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
 import { Send } from 'lucide-react'
 import { Event } from 'nostr-tools'
@@ -57,12 +58,13 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
     fetchChain()
   }, [event?.id])
   const { pubkey, publish, checkLogin } = useNostr()
+  const { isSmallScreen } = useScreenSize()
   const [replyInput, setReplyInput] = useState('')
   const [sending, setSending] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (event) inputRef.current?.focus()
+    if (event && !isSmallScreen) inputRef.current?.focus()
   }, [!!event])
 
   const handleSend = async () => {

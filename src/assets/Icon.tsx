@@ -1,24 +1,72 @@
 export default function Icon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 1080 1228"
-      version="1.1"
+      viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      xmlSpace="preserve"
-      style={{
-        fill: 'currentcolor',
-        fillRule: 'evenodd',
-        clipRule: 'evenodd',
-        strokeLinejoin: 'round',
-        strokeMiterlimit: 2
-      }}
       className={className}
     >
+      <defs>
+        <filter id="wisp-bloom" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="7" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="wisp-glow" x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <radialGradient id="wisp-body" cx="42%" cy="54%" r="54%">
+          <stop offset="0%"   stopColor="#ffffff"/>
+          <stop offset="22%"  stopColor="#e0f2fe"/>
+          <stop offset="52%"  stopColor="#38bdf8"/>
+          <stop offset="85%"  stopColor="#0369a1"/>
+          <stop offset="100%" stopColor="#0c2a4a"/>
+        </radialGradient>
+        <radialGradient id="wisp-halo" cx="50%" cy="52%" r="50%">
+          <stop offset="0%"   stopColor="#7dd3fc" stopOpacity="0.55"/>
+          <stop offset="60%"  stopColor="#0ea5e9" stopOpacity="0.15"/>
+          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0"/>
+        </radialGradient>
+        <radialGradient id="wisp-bg" cx="50%" cy="45%" r="62%">
+          <stop offset="0%"   stopColor="#0d1f38"/>
+          <stop offset="100%" stopColor="#060b14"/>
+        </radialGradient>
+      </defs>
+
+      <rect width="100" height="100" rx="20" fill="url(#wisp-bg)"/>
+
+      <ellipse cx="50" cy="55" rx="34" ry="31" fill="url(#wisp-halo)" filter="url(#wisp-bloom)"/>
+
+      {/* Left curl tendril */}
       <path
-        id="Icon-Curve-Cut"
-        d="M360.047,1225.75c-31.046,-3.901 -75.11,-14.46 -106.756,-25.58c-101.676,-35.727 -175.164,-93.066 -215.387,-168.055c-12.079,-22.521 -30.071,-71.422 -27.297,-74.195c0.736,-0.736 11.648,5.578 24.249,14.031c135.436,90.86 301.047,169.043 465.056,219.547l32.77,10.091l-20.27,7.416c-43.455,15.896 -105.159,22.678 -152.365,16.745Zm166.293,-59.234c-168.523,-50.004 -331.475,-126.514 -481.755,-226.196c-37.737,-25.031 -41.489,-28.372 -43.419,-38.663c-3.585,-19.109 1.498,-83.894 9.798,-124.886c7.343,-36.266 27.664,-106.034 32.278,-110.818c2.023,-2.099 217.924,48.207 221.274,51.557c0.975,0.975 -1.132,11.339 -4.682,23.032c-24.542,80.842 -27.217,127.586 -9.935,173.593c22.507,59.917 114.521,99.888 177.281,77.012c29.23,-10.654 56.593,-41.085 82.629,-91.894c29.288,-57.155 32.348,-64.988 196.483,-503.076c81.138,-216.562 148.499,-394.821 149.692,-396.131c2.1,-2.304 217.949,76.926 223.076,81.884c2.056,1.988 -262.476,712.505 -307.806,826.747c-18.422,46.426 -56.939,123.045 -77.918,154.993c-10.157,15.469 -30.753,40.901 -45.769,56.515c-27.821,28.93 -66.46,58.952 -75.447,58.621c-2.738,-0.106 -23.339,-5.631 -45.78,-12.29Z"
+        d="M38 34 C32 27 29 18 34 11 C34 19 36 25 39 31 C36 26 34 19 38 13 C39 22 39 29 38 34Z"
+        fill="#7dd3fc" opacity="0.75" filter="url(#wisp-glow)"
       />
+      {/* Right curl tendril */}
+      <path
+        d="M62 34 C68 27 71 18 66 11 C66 19 64 25 61 31 C64 26 66 19 62 13 C61 22 61 29 62 34Z"
+        fill="#7dd3fc" opacity="0.75" filter="url(#wisp-glow)"
+      />
+
+      {/* Main body: flame teardrop */}
+      <path
+        d="M50 16 C53 20, 62 30, 64 44 C66 57, 62 68, 55 74 C52 76, 50 80, 50 84
+           C50 80, 48 76, 45 74 C38 68, 34 57, 36 44 C38 30, 47 20, 50 16 Z"
+        fill="url(#wisp-body)" filter="url(#wisp-glow)"
+      />
+
+      {/* Inner core layers */}
+      <ellipse cx="49" cy="53" rx="13" ry="14" fill="white" opacity="0.55"/>
+      <ellipse cx="49" cy="51" rx="7.5" ry="8.5" fill="white" opacity="0.9"/>
+      <ellipse cx="48" cy="49" rx="4"   ry="4.5" fill="white"/>
+
+      {/* Tip sparkle */}
+      <circle cx="50" cy="18" r="1.4" fill="#bae6fd" opacity="0.9" filter="url(#wisp-glow)"/>
     </svg>
   )
 }

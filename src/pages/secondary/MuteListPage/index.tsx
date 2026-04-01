@@ -7,7 +7,7 @@ import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
-import { Loader, Lock, Unlock } from 'lucide-react'
+import { Loader, Lock, LockKeyhole, Unlock } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFoundPage from '../NotFoundPage'
@@ -15,8 +15,12 @@ import NotFoundPage from '../NotFoundPage'
 const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { profile, pubkey } = useNostr()
-  const { getMutePubkeys } = useMuteList()
+  const { getMutePubkeys, makeAllPrivate, changing, getMuteType } = useMuteList()
   const mutePubkeys = useMemo(() => getMutePubkeys(), [pubkey])
+  const hasPublicMutes = useMemo(
+    () => mutePubkeys.some((pk) => getMuteType(pk) === 'public'),
+    [mutePubkeys, getMuteType]
+  )
   const [visibleMutePubkeys, setVisibleMutePubkeys] = useState<string[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -63,6 +67,20 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
       title={t("username's muted", { username: profile.username })}
       displayScrollToTopButton
     >
+      {hasPublicMutes && (
+        <div className="px-4 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={changing}
+            onClick={makeAllPrivate}
+          >
+            {changing ? <Loader className="animate-spin" /> : <LockKeyhole />}
+            {t('Make all private')}
+          </Button>
+        </div>
+      )}
       <div className="space-y-2 px-4 pt-2">
         {visibleMutePubkeys.map((pubkey, index) => (
           <UserItem key={`${index}-${pubkey}`} pubkey={pubkey} />

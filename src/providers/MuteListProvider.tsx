@@ -21,6 +21,7 @@ type TMuteListContext = {
   unmutePubkey: (pubkey: string) => Promise<void>
   switchToPublicMute: (pubkey: string) => Promise<void>
   switchToPrivateMute: (pubkey: string) => Promise<void>
+  makeAllPrivate: () => Promise<void>
 }
 
 const MuteListContext = createContext<TMuteListContext | undefined>(undefined)
@@ -274,6 +275,40 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const makeAllPrivate = async () => {
+    if (!accountPubkey || changing) return
+
+    setChanging(true)
+    try {
+      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+      if (!muteListEvent) return
+
+      const publicPubkeys = getPubkeysFromPTags(muteListEvent.tags)
+      if (publicPubkeys.length === 0) return
+
+      const existingPrivateTags = await getPrivateTags(muteListEvent)
+      const existingPrivatePubkeys = new Set(getPubkeysFromPTags(existingPrivateTags))
+
+      const newPublicTags = muteListEvent.tags.filter((tag) => tag[0] !== 'p')
+      const mergedPrivateTags = [
+        ...existingPrivateTags,
+        ...publicPubkeys
+          .filter((pk) => !existingPrivatePubkeys.has(pk))
+          .map((pk) => ['p', pk])
+      ]
+      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(mergedPrivateTags))
+      const newMuteListEvent = await publishNewMuteListEvent(newPublicTags, cipherText)
+      await updateMuteListEvent(newMuteListEvent, mergedPrivateTags)
+    } catch (error) {
+      const errors = formatError(error)
+      errors.forEach((err) => {
+        toast.error(t('Failed to make all mutes private') + ': ' + err, { duration: 10_000 })
+      })
+    } finally {
+      setChanging(false)
+    }
+  }
+
   return (
     <MuteListContext.Provider
       value={{
@@ -285,7 +320,8 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         mutePubkeyPrivately,
         unmutePubkey,
         switchToPublicMute,
-        switchToPrivateMute
+        switchToPrivateMute,
+        makeAllPrivate
       }}
     >
       {children}

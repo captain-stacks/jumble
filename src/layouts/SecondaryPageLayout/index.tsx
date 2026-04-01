@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSecondaryPage } from '@/PageManager'
 import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { PageActiveContext } from '@/providers/PageActiveProvider'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { ChevronLeft } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
@@ -37,6 +38,7 @@ const SecondaryPageLayout = forwardRef(
   ) => {
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const { enableSingleColumnLayout } = useUserPreferences()
+    const { isSmallScreen } = useScreenSize()
     const { currentIndex } = useSecondaryPage()
 
     useImperativeHandle(
@@ -67,7 +69,10 @@ const SecondaryPageLayout = forwardRef(
           <DeepBrowsingProvider active={currentIndex === index}>
             <div
               style={{
-                paddingBottom: 'calc(env(safe-area-inset-bottom) + 3rem)'
+                paddingBottom:
+                  footer && isSmallScreen
+                    ? 'calc(env(safe-area-inset-bottom) + 6rem)'
+                    : 'calc(env(safe-area-inset-bottom) + 3rem)'
               }}
             >
               <SecondaryPageTitlebar
@@ -80,7 +85,13 @@ const SecondaryPageLayout = forwardRef(
               {children}
             </div>
             {footer && (
-              <div className="fixed bottom-0 z-40 w-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+              <div
+                className="fixed z-40 w-full"
+                style={{
+                  bottom: isSmallScreen ? 'calc(env(safe-area-inset-bottom) + 3rem)' : 0,
+                  paddingBottom: isSmallScreen ? 0 : 'env(safe-area-inset-bottom)'
+                }}
+              >
                 {footer}
               </div>
             )}

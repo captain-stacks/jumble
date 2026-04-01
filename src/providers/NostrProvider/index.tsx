@@ -79,8 +79,8 @@ type TNostrContext = {
   attemptDelete: (targetEvent: Event) => Promise<void>
   signHttpAuth: (url: string, method: string) => Promise<string>
   signEvent: (draftEvent: TDraftEvent) => Promise<VerifiedEvent>
-  nip04Encrypt: (pubkey: string, plainText: string) => Promise<string>
-  nip04Decrypt: (pubkey: string, cipherText: string) => Promise<string>
+  nip44Encrypt: (pubkey: string, plainText: string) => Promise<string>
+  nip44Decrypt: (pubkey: string, cipherText: string) => Promise<string>
   startLogin: () => void
   checkLogin: <T>(cb?: () => T) => Promise<T | void>
   updateRelayListEvent: (relayListEvent: Event) => Promise<void>
@@ -722,12 +722,12 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
     return 'Nostr ' + btoa(JSON.stringify(event))
   }
 
-  const nip04Encrypt = async (pubkey: string, plainText: string) => {
-    return signer?.nip04Encrypt(pubkey, plainText) ?? ''
+  const nip44Encrypt = async (pubkey: string, plainText: string) => {
+    return signer?.nip44Encrypt(pubkey, plainText) ?? ''
   }
 
-  const nip04Decrypt = async (pubkey: string, cipherText: string) => {
-    return signer?.nip04Decrypt(pubkey, cipherText) ?? ''
+  const nip44Decrypt = async (pubkey: string, cipherText: string) => {
+    return signer?.nip44Decrypt(pubkey, cipherText) ?? ''
   }
 
   const checkLogin = async <T,>(cb?: () => T): Promise<T | void> => {
@@ -855,8 +855,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         publish,
         attemptDelete,
         signHttpAuth,
-        nip04Encrypt,
-        nip04Decrypt,
+        nip44Encrypt,
+        nip44Decrypt,
         startLogin: () => setOpenLoginDialog(true),
         checkLogin,
         signEvent,

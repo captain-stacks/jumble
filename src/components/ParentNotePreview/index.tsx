@@ -1,6 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchEvent } from '@/hooks'
 import { cn } from '@/lib/utils'
+import { useMuteList } from '@/providers/MuteListProvider'
+import { BellOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ContentPreview from '../ContentPreview'
 import UserAvatar from '../UserAvatar'
@@ -18,6 +20,8 @@ export default function ParentNotePreview({
 }) {
   const { t } = useTranslation()
   const { event, isFetching } = useFetchEvent(eventId)
+  const { mutePubkeySet } = useMuteList()
+  const isMuted = !!event && mutePubkeySet.has(event.pubkey)
 
   if (externalContent) {
     return (
@@ -66,7 +70,8 @@ export default function ParentNotePreview({
     >
       <div className="shrink-0">{t('reply to')}</div>
       {event && <UserAvatar className="shrink-0" userId={event.pubkey} size="tiny" />}
-      <ContentPreview className="truncate" event={event} />
+      {isMuted && <BellOff className="shrink-0 size-3 text-red-500" />}
+      <ContentPreview className="truncate" event={event} bypassMuteFilter={isMuted} />
     </div>
   )
 }

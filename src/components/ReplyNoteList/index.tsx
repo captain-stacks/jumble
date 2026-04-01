@@ -46,7 +46,7 @@ export default function ReplyNoteList({ stuff }: { stuff: NEvent | string }) {
   })
 
   return (
-    <div className="min-h-[80vh]">
+    <div>
       {(loading || initialLoading) && <LoadingBar />}
       <div>
         {visibleItems.map((reply) => (

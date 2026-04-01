@@ -13,6 +13,7 @@ import { getParentBech32Id } from '@/lib/event'
 import { createShortTextNoteDraftEvent } from '@/lib/draft-event'
 import { toExternalContent } from '@/lib/link'
 import { tagNameEquals } from '@/lib/tag'
+import { StorageKey } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
@@ -33,15 +34,19 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
   )
   const [parentChain, setParentChain] = useState<Event[]>([])
   const [chainLoading, setChainLoading] = useState(false)
+  const [chainLoaded, setChainLoaded] = useState(false)
+  const selectedNoteRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!event) return
     const firstParentId = getParentBech32Id(event)
     if (!firstParentId) {
       setParentChain([])
+      setChainLoaded(true)
       return
     }
     setChainLoading(true)
+    setChainLoaded(false)
     const fetchChain = async () => {
       const chain: Event[] = []
       let currentId: string | undefined = firstParentId
@@ -54,9 +59,27 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
       }
       setParentChain(chain)
       setChainLoading(false)
+      setChainLoaded(true)
     }
     fetchChain()
   }, [event?.id])
+
+  useEffect(() => {
+    if (!event || !chainLoaded) return
+    setTimeout(() => {
+      const el = selectedNoteRef.current
+      if (!el) return
+      const scrollParent = el.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null
+      if (scrollParent) {
+        const headerHeight = 48
+        const elTop = el.getBoundingClientRect().top
+        const containerTop = scrollParent.getBoundingClientRect().top
+        scrollParent.scrollBy({ top: elTop - containerTop - headerHeight, behavior: 'smooth' })
+      } else {
+        window.scrollBy({ top: el.getBoundingClientRect().top - 48, behavior: 'smooth' })
+      }
+    }, 100)
+  }, [event?.id, chainLoaded])
   const { pubkey, publish, checkLogin } = useNostr()
   const { isSmallScreen } = useScreenSize()
   const [replyInput, setReplyInput] = useState('')
@@ -73,7 +96,8 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
     await checkLogin(async () => {
       setSending(true)
       try {
-        const draft = await createShortTextNoteDraftEvent(text, [], { parentEvent: event })
+        const addClientTag = window.localStorage.getItem(StorageKey.ADD_CLIENT_TAG) === 'true'
+        const draft = await createShortTextNoteDraftEvent(text, [], { parentEvent: event, addClientTag })
         await publish(draft)
         setReplyInput('')
         pop()
@@ -156,7 +180,7 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
       {parentChain.map((parent) => (
         <ParentNote key={parent.id} event={parent} />
       ))}
-      <div className="px-4 pt-3">
+      <div ref={selectedNoteRef} className="px-4 pt-3">
         <Note
           key={`note-${event.id}`}
           event={event}

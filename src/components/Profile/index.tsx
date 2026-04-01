@@ -148,6 +148,11 @@ export default function Profile({ id }: { id?: string }) {
                 className="select-text truncate text-xl font-semibold"
               />
               <TrustScoreBadge pubkey={pubkey} />
+              {mutePubkeySet.has(pubkey) && (
+                <div className="h-fit shrink-0 rounded-full bg-muted px-2 text-xs text-muted-foreground">
+                  {t('Muted')}
+                </div>
+              )}
               {isFollowingYou && (
                 <div className="h-fit shrink-0 rounded-full bg-muted px-2 text-xs text-muted-foreground">
                   {t('Follows you')}

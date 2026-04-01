@@ -6,6 +6,7 @@ import { getDefaultRelayUrls, getSearchRelayUrls } from '@/lib/relay'
 import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
+import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
@@ -25,6 +26,8 @@ export default function ProfileFeed({
   search?: string
 }) {
   const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
+  const { mutePubkeySet } = useMuteList()
+  const isMuted = mutePubkeySet.has(pubkey)
   const { showKinds } = useKindFilter()
   const [temporaryShowKinds, setTemporaryShowKinds] = useState(showKinds)
   const [listMode, setListMode] = useState<TNoteListMode>(() => {
@@ -175,6 +178,7 @@ export default function ProfileFeed({
         showKinds={temporaryShowKinds}
         hideReplies={listMode === 'posts'}
         filterMutedNotes={false}
+        showMutedContent={isMuted}
         pinnedEventIds={listMode === 'you' || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
       />

@@ -49,6 +49,7 @@ const NoteList = forwardRef<
     subRequests: TFeedSubRequest[]
     showKinds?: number[]
     filterMutedNotes?: boolean
+    showMutedContent?: boolean
     hideReplies?: boolean
     hideSpam?: boolean
     trustScoreThreshold?: number
@@ -65,6 +66,7 @@ const NoteList = forwardRef<
       subRequests,
       showKinds,
       filterMutedNotes = true,
+      showMutedContent = false,
       hideReplies = false,
       hideSpam = false,
       trustScoreThreshold,
@@ -485,6 +487,7 @@ const NoteList = forwardRef<
             className="w-full"
             event={event}
             filterMutedNotes={filterMutedNotes}
+            showMutedContent={showMutedContent}
             reposters={reposters}
           />
         ))}

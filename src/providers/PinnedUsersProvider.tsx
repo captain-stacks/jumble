@@ -41,8 +41,8 @@ export function PinnedUsersProvider({ children }: { children: React.ReactNode })
     pinnedUsersEvent,
     updatePinnedUsersEvent,
     publish,
-    nip04Decrypt,
-    nip04Encrypt
+    nip44Decrypt,
+    nip44Encrypt
   } = useNostr()
   const [privateTags, setPrivateTags] = useState<string[][]>([])
   const pinnedPubkeySet = useMemo(() => {
@@ -76,7 +76,7 @@ export function PinnedUsersProvider({ children }: { children: React.ReactNode })
         if (storedPlainText) {
           plainText = storedPlainText
         } else {
-          plainText = await nip04Decrypt(event.pubkey, event.content)
+          plainText = await nip44Decrypt(event.pubkey, event.content)
           await indexedDb.putDecryptedContent(event.id, plainText)
         }
 
@@ -87,7 +87,7 @@ export function PinnedUsersProvider({ children }: { children: React.ReactNode })
         return []
       }
     },
-    [nip04Decrypt]
+    [nip44Decrypt]
   )
 
   const isPinned = useCallback(
@@ -129,7 +129,7 @@ export function PinnedUsersProvider({ children }: { children: React.ReactNode })
         )
         let newContent = pinnedUsersEvent.content
         if (newPrivateTags.length !== privateTags.length) {
-          newContent = await nip04Encrypt(pinnedUsersEvent.pubkey, JSON.stringify(newPrivateTags))
+          newContent = await nip44Encrypt(pinnedUsersEvent.pubkey, JSON.stringify(newPrivateTags))
         }
         const draftEvent = createPinnedUsersListDraftEvent(newTags, newContent)
         const newEvent = await publish(draftEvent)
@@ -148,7 +148,7 @@ export function PinnedUsersProvider({ children }: { children: React.ReactNode })
       publish,
       updatePinnedUsersEvent,
       privateTags,
-      nip04Encrypt
+      nip44Encrypt
     ]
   )
 

@@ -40,8 +40,8 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     muteListEvent,
     publish,
     updateMuteListEvent,
-    nip04Decrypt,
-    nip04Encrypt
+    nip44Decrypt,
+    nip44Encrypt
   } = useNostr()
   const [tags, setTags] = useState<string[][]>([])
   const [privateTags, setPrivateTags] = useState<string[][]>([])
@@ -66,7 +66,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         if (storedPlainText) {
           plainText = storedPlainText
         } else {
-          plainText = await nip04Decrypt(muteListEvent.pubkey, muteListEvent.content)
+          plainText = await nip44Decrypt(muteListEvent.pubkey, muteListEvent.content)
           await indexedDb.putDecryptedContent(muteListEvent.id, plainText)
         }
 
@@ -77,7 +77,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         return []
       }
     },
-    [nip04Decrypt]
+    [nip44Decrypt]
   )
 
   useEffect(() => {
@@ -169,7 +169,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
       }
 
       const newPrivateTags = privateTags.concat([['p', pubkey]])
-      const cipherText = await nip04Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
       const newMuteListEvent = await publishNewMuteListEvent(muteListEvent?.tags ?? [], cipherText)
       await updateMuteListEvent(newMuteListEvent, newPrivateTags)
     } catch (error) {
@@ -194,7 +194,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
       const newPrivateTags = privateTags.filter((tag) => tag[0] !== 'p' || tag[1] !== pubkey)
       let cipherText = muteListEvent.content
       if (newPrivateTags.length !== privateTags.length) {
-        cipherText = await nip04Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+        cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
       }
 
       const newMuteListEvent = await publishNewMuteListEvent(
@@ -226,7 +226,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const cipherText = await nip04Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
       const newMuteListEvent = await publishNewMuteListEvent(
         muteListEvent.tags
           .filter((tag) => tag[0] !== 'p' || tag[1] !== pubkey)
@@ -261,7 +261,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
       const newPrivateTags = privateTags
         .filter((tag) => tag[0] !== 'p' || tag[1] !== pubkey)
         .concat([['p', pubkey]])
-      const cipherText = await nip04Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
       const newMuteListEvent = await publishNewMuteListEvent(newTags, cipherText)
       await updateMuteListEvent(newMuteListEvent, newPrivateTags)
     } catch (error) {

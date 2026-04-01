@@ -1,5 +1,5 @@
 import { ISigner, TDraftEvent } from '@/types'
-import { finalizeEvent, getPublicKey as nGetPublicKey, nip04, nip19 } from 'nostr-tools'
+import { finalizeEvent, getPublicKey as nGetPublicKey, nip19, nip44 } from 'nostr-tools'
 
 export class NsecSigner implements ISigner {
   private privkey: Uint8Array | null = null
@@ -37,17 +37,19 @@ export class NsecSigner implements ISigner {
     return finalizeEvent(draftEvent, this.privkey)
   }
 
-  async nip04Encrypt(pubkey: string, plainText: string) {
+  async nip44Encrypt(pubkey: string, plainText: string) {
     if (!this.privkey) {
       throw new Error('Not logged in')
     }
-    return nip04.encrypt(this.privkey, pubkey, plainText)
+    const conversationKey = nip44.getConversationKey(this.privkey, pubkey)
+    return nip44.encrypt(plainText, conversationKey)
   }
 
-  async nip04Decrypt(pubkey: string, cipherText: string) {
+  async nip44Decrypt(pubkey: string, cipherText: string) {
     if (!this.privkey) {
       throw new Error('Not logged in')
     }
-    return nip04.decrypt(this.privkey, pubkey, cipherText)
+    const conversationKey = nip44.getConversationKey(this.privkey, pubkey)
+    return nip44.decrypt(cipherText, conversationKey)
   }
 }

@@ -146,7 +146,7 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
     <div className="flex items-center gap-2 border-t bg-background px-3 py-2">
       <input
         ref={inputRef}
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+        className="min-w-0 flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
         placeholder={pubkey ? t('Reply...') : t('Login to reply')}
         value={replyInput}
         disabled={!pubkey || sending}

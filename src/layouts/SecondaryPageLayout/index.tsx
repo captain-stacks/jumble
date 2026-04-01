@@ -67,7 +67,7 @@ const SecondaryPageLayout = forwardRef(
           <DeepBrowsingProvider active={currentIndex === index}>
             <div
               style={{
-                paddingBottom: footer ? undefined : 'calc(env(safe-area-inset-bottom) + 3rem)'
+                paddingBottom: 'calc(env(safe-area-inset-bottom) + 3rem)'
               }}
             >
               <SecondaryPageTitlebar
@@ -80,7 +80,7 @@ const SecondaryPageLayout = forwardRef(
               {children}
             </div>
             {footer && (
-              <div className="sticky bottom-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+              <div className="fixed bottom-0 z-40 w-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                 {footer}
               </div>
             )}

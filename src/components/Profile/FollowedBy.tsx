@@ -1,4 +1,5 @@
 import UserAvatar from '@/components/UserAvatar'
+import { useFollowList } from '@/providers/FollowListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
@@ -10,12 +11,13 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
   const { isSmallScreen } = useScreenSize()
   const [followedBy, setFollowedBy] = useState<string[]>([])
   const { pubkey: accountPubkey } = useNostr()
+  const { followingSet } = useFollowList()
 
   useEffect(() => {
     if (!pubkey || !accountPubkey) return
 
     const init = async () => {
-      const followings = (await client.fetchFollowings(accountPubkey)).reverse()
+      const followings = Array.from(followingSet).reverse()
       const followingsOfFollowings = await Promise.all(
         followings.map(async (following) => {
           return client.fetchFollowings(following, false)
@@ -35,7 +37,7 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
       setFollowedBy(_followedBy)
     }
     init()
-  }, [pubkey, accountPubkey])
+  }, [pubkey, accountPubkey, followingSet])
 
   if (followedBy.length === 0) return null
 

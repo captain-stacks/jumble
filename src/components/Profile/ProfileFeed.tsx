@@ -1,8 +1,9 @@
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import Tabs from '@/components/Tabs'
-import { MAX_PINNED_NOTES } from '@/constants'
+import { ExtendedKind, MAX_PINNED_NOTES } from '@/constants'
 import { getDefaultRelayUrls, getSearchRelayUrls } from '@/lib/relay'
+import { isImage } from '@/lib/url'
 import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
@@ -42,7 +43,9 @@ export default function ProfileFeed({
   const tabs = useMemo(() => {
     const _tabs = [
       { value: 'posts', label: 'Notes' },
-      { value: 'postsAndReplies', label: 'Replies' }
+      { value: 'postsAndReplies', label: 'Replies' },
+      { value: 'images', label: 'Images' },
+      { value: 'gallery', label: 'Gallery' }
     ]
 
     if (myPubkey && myPubkey !== pubkey) {
@@ -120,6 +123,16 @@ export default function ProfileFeed({
 
       const relayList = await client.fetchRelayList(pubkey)
 
+      if (listMode === 'gallery') {
+        setSubRequests([
+          {
+            urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
+            filter: { authors: [pubkey], kinds: [ExtendedKind.PICTURE] }
+          }
+        ])
+        return
+      }
+
       if (search) {
         const writeRelays = relayList.write.slice(0, 8)
         const relayInfos = await relayInfoService.getRelayInfos(writeRelays)
@@ -166,21 +179,25 @@ export default function ProfileFeed({
         }}
         threshold={Math.max(800, topSpace)}
         options={
-          <>
-            {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
-            <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
-          </>
+          listMode !== 'gallery' ? (
+            <>
+              {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
+              <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
+            </>
+          ) : undefined
         }
       />
       <NoteList
         ref={noteListRef}
         subRequests={subRequests}
-        showKinds={temporaryShowKinds}
-        hideReplies={listMode === 'posts'}
+        showKinds={listMode === 'gallery' ? [ExtendedKind.PICTURE] : temporaryShowKinds}
+        hideReplies={listMode === 'posts' || listMode === 'images'}
         filterMutedNotes={false}
         showMutedContent={isMuted}
         pinnedEventIds={listMode === 'you' || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
+        filterFn={listMode === 'images' ? (e) => e.content.split(/\s+/).some((word) => isImage(word)) : undefined}
+        fetchLimit={listMode === 'images' ? 1000 : undefined}
       />
     </>
   )

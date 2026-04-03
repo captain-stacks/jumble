@@ -59,6 +59,7 @@ const NoteList = forwardRef<
     filterFn?: (event: Event) => boolean
     showNewNotesDirectly?: boolean
     isPubkeyFeed?: boolean
+    fetchLimit?: number
   }
 >(
   (
@@ -75,7 +76,8 @@ const NoteList = forwardRef<
       pinnedEventIds,
       filterFn,
       showNewNotesDirectly = false,
-      isPubkeyFeed = false
+      isPubkeyFeed = false,
+      fetchLimit
     },
     ref
   ) => {
@@ -369,7 +371,7 @@ const NoteList = forwardRef<
               filter: {
                 kinds: showKinds ?? [],
                 ...filter,
-                limit: areAlgoRelays ? ALGO_LIMIT : LIMIT
+                limit: areAlgoRelays ? ALGO_LIMIT : (fetchLimit ?? LIMIT)
               }
             }
           })
@@ -453,7 +455,7 @@ const NoteList = forwardRef<
       const newEvents = await client.loadMoreTimeline(
         timelineKey,
         events.length ? events[events.length - 1].created_at - 1 : dayjs().unix(),
-        LIMIT
+        fetchLimit ?? LIMIT
       )
       if (newEvents.length === 0) {
         return false

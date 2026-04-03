@@ -3,6 +3,7 @@ import client from '@/services/client.service'
 import fayan from '@/services/fayan.service'
 import storage from '@/services/local-storage.service'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { useFollowList } from './FollowListProvider'
 import { useNostr } from './NostrProvider'
 
 type TUserTrustContext = {
@@ -29,6 +30,7 @@ const wotSet = new Set<string>()
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const { pubkey: currentPubkey } = useNostr()
+  const { followingSet } = useFollowList()
   const [minTrustScore, setMinTrustScore] = useState(() => storage.getMinTrustScore())
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
     storage.getMinTrustScoreMap()
@@ -38,7 +40,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     if (!currentPubkey) return
 
     const initWoT = async () => {
-      const followings = await client.fetchFollowings(currentPubkey, false)
+      wotSet.clear()
+      const followings = Array.from(followingSet)
       followings.forEach((pubkey) => wotSet.add(pubkey))
 
       const batchSize = 20
@@ -56,7 +59,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       }
     }
     initWoT()
-  }, [currentPubkey])
+  }, [currentPubkey, followingSet])
 
   const isUserTrusted = useCallback(
     (pubkey: string) => {

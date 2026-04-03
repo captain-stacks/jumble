@@ -1,5 +1,7 @@
 import Sidebar from '@/components/Sidebar'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
 import { TPageRef } from '@/types'
 import {
@@ -435,12 +437,22 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                   </div>
                   <div
                     className={cn(
-                      'overflow-hidden bg-background',
+                      'relative overflow-hidden bg-background',
                       themeSetting === 'pure-black' ? 'border-l' : 'rounded-2xl',
                       themeSetting !== 'pure-black' && secondaryStack.length > 0 && 'shadow-lg',
                       secondaryStack.length === 0 ? 'bg-surface' : ''
                     )}
                   >
+                    {secondaryStack.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1 z-50 size-8 rounded-full"
+                        onClick={clearSecondaryPages}
+                      >
+                        <X />
+                      </Button>
+                    )}
                     {secondaryStack.map((item, index) => (
                       <div
                         key={item.index}

@@ -16,6 +16,7 @@ import { tagNameEquals } from '@/lib/tag'
 import { StorageKey } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
 import { Send } from 'lucide-react'
 import { Event } from 'nostr-tools'
@@ -82,6 +83,7 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
   }, [event?.id, chainLoaded])
   const { pubkey, publish, checkLogin } = useNostr()
   const { isSmallScreen } = useScreenSize()
+  const { enableSingleColumnLayout } = useUserPreferences()
   const [replyInput, setReplyInput] = useState('')
   const [sending, setSending] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -100,7 +102,7 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
         const draft = await createShortTextNoteDraftEvent(text, [], { parentEvent: event, addClientTag })
         await publish(draft)
         setReplyInput('')
-        pop()
+        if (enableSingleColumnLayout) pop()
       } finally {
         setSending(false)
       }

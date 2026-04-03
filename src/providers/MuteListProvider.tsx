@@ -144,15 +144,24 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         return
       }
       const newTags = (muteListEvent?.tags ?? []).concat([['p', pubkey]])
-      const newMuteListEvent = await publishNewMuteListEvent(newTags, muteListEvent?.content)
-      const privateTags = await getPrivateTags(newMuteListEvent)
-      await updateMuteListEvent(newMuteListEvent, privateTags)
+      // Update local state immediately
+      setTags(newTags)
+      setChanging(false)
+      // Publish in background
+      publishNewMuteListEvent(newTags, muteListEvent?.content).then(async (newMuteListEvent) => {
+        const privateTags = await getPrivateTags(newMuteListEvent)
+        await updateMuteListEvent(newMuteListEvent, privateTags)
+      }).catch((error) => {
+        const errors = formatError(error)
+        errors.forEach((err) => {
+          toast.error(t('Failed to mute user publicly') + ': ' + err, { duration: 10_000 })
+        })
+      })
     } catch (error) {
       const errors = formatError(error)
       errors.forEach((err) => {
         toast.error(t('Failed to mute user publicly') + ': ' + err, { duration: 10_000 })
       })
-    } finally {
       setChanging(false)
     }
   }
@@ -164,21 +173,30 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     try {
       const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
       checkMuteListEvent(muteListEvent)
-      const privateTags = muteListEvent ? await getPrivateTags(muteListEvent) : []
-      if (privateTags.some(([tagName, tagValue]) => tagName === 'p' && tagValue === pubkey)) {
+      const existingPrivateTags = muteListEvent ? await getPrivateTags(muteListEvent) : []
+      if (existingPrivateTags.some(([tagName, tagValue]) => tagName === 'p' && tagValue === pubkey)) {
         return
       }
 
-      const newPrivateTags = privateTags.concat([['p', pubkey]])
-      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
-      const newMuteListEvent = await publishNewMuteListEvent(muteListEvent?.tags ?? [], cipherText)
-      await updateMuteListEvent(newMuteListEvent, newPrivateTags)
+      const newPrivateTags = existingPrivateTags.concat([['p', pubkey]])
+      // Update local state immediately
+      setPrivateTags(newPrivateTags)
+      setChanging(false)
+      // Publish in background
+      nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags)).then(async (cipherText) => {
+        const newMuteListEvent = await publishNewMuteListEvent(muteListEvent?.tags ?? [], cipherText)
+        await updateMuteListEvent(newMuteListEvent, newPrivateTags)
+      }).catch((error) => {
+        const errors = formatError(error)
+        errors.forEach((err) => {
+          toast.error(t('Failed to mute user privately') + ': ' + err, { duration: 10_000 })
+        })
+      })
     } catch (error) {
       const errors = formatError(error)
       errors.forEach((err) => {
         toast.error(t('Failed to mute user privately') + ': ' + err, { duration: 10_000 })
       })
-    } finally {
       setChanging(false)
     }
   }

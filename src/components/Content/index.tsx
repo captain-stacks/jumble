@@ -14,6 +14,7 @@ import { containsMarkdown } from '@/lib/markdown'
 import { getEmojiInfosFromEmojiTags, getImetaInfoFromImetaTag } from '@/lib/tag'
 import { EMOJI_REGEX } from '@/constants'
 import { cn } from '@/lib/utils'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import mediaUpload from '@/services/media-upload.service'
 import { TImetaInfo } from '@/types'
 import { Event } from 'nostr-tools'
@@ -53,7 +54,13 @@ export default function Content({
   const [showHighlightEditor, setShowHighlightEditor] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const translatedEvent = useTranslatedEvent(event?.id)
-  const resolvedContent = translatedEvent?.content ?? event?.content ?? content
+  const { satsToBitcoins } = useUserPreferences()
+  const rawContent = translatedEvent?.content ?? event?.content ?? content
+  const resolvedContent = satsToBitcoins && rawContent
+    ? rawContent.replace(/\bsats\b/gi, (match) =>
+        match[0] === match[0].toUpperCase() ? 'Bitcoins' : 'bitcoins'
+      )
+    : rawContent
   const isMarkdown = useMemo(() => resolvedContent ? containsMarkdown(resolvedContent) : false, [resolvedContent])
   const { nodes, allImages, lastNormalUrl, emojiInfos } = useMemo(() => {
     if (!resolvedContent || isMarkdown) return {}

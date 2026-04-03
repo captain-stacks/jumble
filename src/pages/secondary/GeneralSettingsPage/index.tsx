@@ -46,7 +46,11 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     quickReactionEmoji,
     updateQuickReactionEmoji,
     disableReactions,
-    updateDisableReactions
+    updateDisableReactions,
+    hideBookmarks,
+    updateHideBookmarks,
+    satsToBitcoins,
+    updateSatsToBitcoins
   } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
@@ -222,6 +226,32 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             </div>
           </SettingItem>
         )}
+        <SettingItem>
+          <Label htmlFor="sats-to-bitcoins" className="text-base font-normal">
+            <div>{t('Sats to bitcoins')}</div>
+            <div className="text-muted-foreground">
+              {t('Display "sats" as "bitcoins" in all content')}
+            </div>
+          </Label>
+          <Switch
+            id="sats-to-bitcoins"
+            checked={satsToBitcoins}
+            onCheckedChange={updateSatsToBitcoins}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-bookmarks" className="text-base font-normal">
+            <div>{t('Hide bookmarks')}</div>
+            <div className="text-muted-foreground">
+              {t('Hide the bookmarks button and sidebar entry')}
+            </div>
+          </Label>
+          <Switch
+            id="hide-bookmarks"
+            checked={hideBookmarks}
+            onCheckedChange={updateHideBookmarks}
+          />
+        </SettingItem>
         <MutedWords />
       </div>
     </SecondaryPageLayout>

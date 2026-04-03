@@ -74,6 +74,8 @@ class LocalStorageService {
   private minTrustScoreMap: Record<string, number> = {}
   private hideIndirectNotifications: boolean = false
   private disableReactions: boolean = false
+  private hideBookmarks: boolean = false
+  private satsToBitcoins: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -350,6 +352,12 @@ class LocalStorageService {
 
     this.disableReactions =
       window.localStorage.getItem(StorageKey.DISABLE_REACTIONS) === 'true'
+
+    this.hideBookmarks =
+      window.localStorage.getItem(StorageKey.HIDE_BOOKMARKS) === 'true'
+
+    this.satsToBitcoins =
+      window.localStorage.getItem(StorageKey.SATS_TO_BITCOINS) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -760,6 +768,24 @@ class LocalStorageService {
   setDisableReactions(disable: boolean) {
     this.disableReactions = disable
     window.localStorage.setItem(StorageKey.DISABLE_REACTIONS, disable.toString())
+  }
+
+  getHideBookmarks() {
+    return this.hideBookmarks
+  }
+
+  setHideBookmarks(hide: boolean) {
+    this.hideBookmarks = hide
+    window.localStorage.setItem(StorageKey.HIDE_BOOKMARKS, hide.toString())
+  }
+
+  getSatsToBitcoins() {
+    return this.satsToBitcoins
+  }
+
+  setSatsToBitcoins(value: boolean) {
+    this.satsToBitcoins = value
+    window.localStorage.setItem(StorageKey.SATS_TO_BITCOINS, value.toString())
   }
 }
 

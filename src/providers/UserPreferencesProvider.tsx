@@ -24,6 +24,12 @@ type TUserPreferencesContext = {
 
   disableReactions: boolean
   updateDisableReactions: (disable: boolean) => void
+
+  hideBookmarks: boolean
+  updateHideBookmarks: (hide: boolean) => void
+
+  satsToBitcoins: boolean
+  updateSatsToBitcoins: (value: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -49,6 +55,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [quickReaction, setQuickReaction] = useState(storage.getQuickReaction())
   const [quickReactionEmoji, setQuickReactionEmoji] = useState(storage.getQuickReactionEmoji())
   const [disableReactions, setDisableReactions] = useState(storage.getDisableReactions())
+  const [hideBookmarks, setHideBookmarks] = useState(storage.getHideBookmarks())
+  const [satsToBitcoins, setSatsToBitcoins] = useState(storage.getSatsToBitcoins())
 
   useEffect(() => {
     if (!isSmallScreen && enableSingleColumnLayout) {
@@ -88,6 +96,16 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setDisableReactions(disable)
   }
 
+  const updateHideBookmarks = (hide: boolean) => {
+    setHideBookmarks(hide)
+    storage.setHideBookmarks(hide)
+  }
+
+  const updateSatsToBitcoins = (value: boolean) => {
+    setSatsToBitcoins(value)
+    storage.setSatsToBitcoins(value)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -104,7 +122,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         quickReactionEmoji,
         updateQuickReactionEmoji,
         disableReactions,
-        updateDisableReactions
+        updateDisableReactions,
+        hideBookmarks,
+        updateHideBookmarks,
+        satsToBitcoins,
+        updateSatsToBitcoins
       }}
     >
       {children}

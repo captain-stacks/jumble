@@ -2,6 +2,7 @@ import { useStuff } from '@/hooks/useStuff'
 import { getReplaceableCoordinateFromEvent, isReplaceableEvent } from '@/lib/event'
 import { useBookmarks } from '@/providers/BookmarksProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { BookmarkIcon, Loader } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { useMemo, useState } from 'react'
@@ -11,6 +12,7 @@ export default function BookmarkButton({ stuff }: { stuff: Event | string }) {
   const { t } = useTranslation()
   const { pubkey: accountPubkey, bookmarkListEvent, checkLogin } = useNostr()
   const { addBookmark, removeBookmark } = useBookmarks()
+  const { hideBookmarks } = useUserPreferences()
   const [updating, setUpdating] = useState(false)
   const { event } = useStuff(stuff)
   const isBookmarked = useMemo(() => {
@@ -24,7 +26,7 @@ export default function BookmarkButton({ stuff }: { stuff: Event | string }) {
     )
   }, [bookmarkListEvent, event])
 
-  if (!accountPubkey) return null
+  if (!accountPubkey || hideBookmarks) return null
 
   const handleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation()

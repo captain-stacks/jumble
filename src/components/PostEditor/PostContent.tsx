@@ -1,6 +1,7 @@
 import Note from '@/components/Note'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useMuteList } from '@/providers/MuteListProvider'
 import {
   createCommentDraftEvent,
   createHighlightDraftEvent,
@@ -46,6 +47,7 @@ export default function PostContent({
 }) {
   const { t } = useTranslation()
   const { pubkey, publish, checkLogin } = useNostr()
+  const { mutePubkeySet } = useMuteList()
   const [text, setText] = useState('')
   const textareaRef = useRef<TPostTextareaHandle>(null)
   const [posting, setPosting] = useState(false)
@@ -219,7 +221,7 @@ export default function PostContent({
                 <div className="whitespace-pre-line italic">{highlightedText}</div>
               </div>
             ) : (
-              <Note size="small" event={parentEvent} hideParentNotePreview />
+              <Note size="small" event={parentEvent} hideParentNotePreview showMutedContent={mutePubkeySet.has(parentEvent.pubkey)} />
             )}
           </div>
         </ScrollArea>

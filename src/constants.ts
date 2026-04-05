@@ -12,6 +12,7 @@ export const RECOMMENDED_BLOSSOM_SERVERS = [
 export const StorageKey = {
   VERSION: 'version',
   THEME_SETTING: 'themeSetting',
+  PURE_BLACK: 'pureBlack',
   RELAY_SETS: 'relaySets',
   ACCOUNTS: 'accounts',
   CURRENT_ACCOUNT: 'currentAccount',
@@ -53,6 +54,7 @@ export const StorageKey = {
   DISABLE_REACTIONS: 'disableReactions',
   HIDE_BOOKMARKS: 'hideBookmarks',
   SATS_TO_BITCOINS: 'satsToBitcoins',
+  HIDE_RELAY_EXPLORE: 'hideRelayExplore',
   ENABLE_LIVE_FEED: 'enableLiveFeed', // deprecated
   HIDE_UNTRUSTED_NOTES: 'hideUntrustedNotes', // deprecated
   HIDE_UNTRUSTED_INTERACTIONS: 'hideUntrustedInteractions', // deprecated
@@ -468,6 +470,21 @@ export const PRIMARY_COLORS = {
       'primary-hover': '350 80% 70%',
       'primary-foreground': '240 5.9% 10%',
       ring: '350 80% 60%'
+    }
+  },
+  WINE: {
+    name: 'Wine',
+    light: {
+      primary: '270 55% 30%',
+      'primary-hover': '270 55% 40%',
+      'primary-foreground': '0 0% 98%',
+      ring: '270 55% 30%'
+    },
+    dark: {
+      primary: '270 50% 42%',
+      'primary-hover': '270 50% 52%',
+      'primary-foreground': '0 0% 98%',
+      ring: '270 50% 42%'
     }
   }
 } as const

@@ -9,6 +9,7 @@ import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import AccountButton from './AccountButton'
+import AIAgentButton from './AIAgentButton'
 import BookmarkButton from './BookmarkButton'
 import RelaysButton from './ExploreButton'
 import FollowingButton from './FollowingButton'
@@ -22,8 +23,8 @@ import SettingsButton from './SettingsButton'
 
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
-  const { themeSetting } = useTheme()
-  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout } = useUserPreferences()
+  const { theme } = useTheme()
+  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout, hideRelayExplore } = useUserPreferences()
   const { pubkey } = useNostr()
   const { navigate } = usePrimaryPage()
 
@@ -55,12 +56,13 @@ export default function PrimaryPageSidebar() {
           </button>
         )}
         <HomeButton collapse={sidebarCollapse} />
-        {!IS_COMMUNITY_MODE && <RelaysButton collapse={sidebarCollapse} />}
+        {!IS_COMMUNITY_MODE && !hideRelayExplore && <RelaysButton collapse={sidebarCollapse} />}
         {IS_COMMUNITY_MODE && <FollowingButton collapse={sidebarCollapse} />}
         <NotificationsButton collapse={sidebarCollapse} />
         <SearchButton collapse={sidebarCollapse} />
         <ProfileButton collapse={sidebarCollapse} />
         {pubkey && <BookmarkButton collapse={sidebarCollapse} />}
+        <AIAgentButton collapse={sidebarCollapse} />
         <SettingsButton collapse={sidebarCollapse} />
         <PostButton collapse={sidebarCollapse} />
       </div>
@@ -71,7 +73,7 @@ export default function PrimaryPageSidebar() {
       <button
         className={cn(
           'absolute flex h-6 w-5 flex-col items-center justify-center rounded-l-md p-0 text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-md [&_svg]:size-4',
-          themeSetting === 'pure-black' || enableSingleColumnLayout
+          theme === 'pure-black' || enableSingleColumnLayout
             ? 'right-0 top-3'
             : '-right-0.5 top-5'
         )}

@@ -78,7 +78,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
   ])
   const [secondaryStack, setSecondaryStack] = useState<TStackItem[]>([])
   const { isSmallScreen } = useScreenSize()
-  const { themeSetting } = useTheme()
+  const { theme } = useTheme()
   const { enableSingleColumnLayout } = useUserPreferences()
   const ignorePopStateRef = useRef(false)
 
@@ -90,12 +90,19 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         e.preventDefault()
         navigatePrimaryPage('search')
       }
+      if (
+        e.key === 'Escape' &&
+        !enableSingleColumnLayout &&
+        !document.querySelector('[role="dialog"]')
+      ) {
+        clearSecondaryPages()
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isSmallScreen])
+  }, [isSmallScreen, enableSingleColumnLayout, secondaryStack])
 
   useEffect(() => {
     if (['/npub1', '/nprofile1'].some((prefix) => window.location.pathname.startsWith(prefix))) {
@@ -414,13 +421,13 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                 <div
                   className={cn(
                     'grid w-full grid-cols-2',
-                    themeSetting === 'pure-black' ? '' : 'gap-2 py-2 pr-2'
+                    theme === 'pure-black' ? '' : 'gap-2 py-2 pr-2'
                   )}
                 >
                   <div
                     className={cn(
                       'overflow-hidden bg-background',
-                      themeSetting === 'pure-black' ? 'border-l' : 'rounded-2xl shadow-lg'
+                      theme === 'pure-black' ? 'border-l' : 'rounded-2xl shadow-lg'
                     )}
                   >
                     {primaryPages.map(({ name, element, props }) => (
@@ -438,8 +445,8 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                   <div
                     className={cn(
                       'relative overflow-hidden bg-background',
-                      themeSetting === 'pure-black' ? 'border-l' : 'rounded-2xl',
-                      themeSetting !== 'pure-black' && secondaryStack.length > 0 && 'shadow-lg',
+                      theme === 'pure-black' ? 'border-l' : 'rounded-2xl',
+                      theme !== 'pure-black' && secondaryStack.length > 0 && 'shadow-lg',
                       secondaryStack.length === 0 ? 'bg-surface' : ''
                     )}
                   >

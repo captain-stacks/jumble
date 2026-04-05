@@ -38,7 +38,7 @@ const NewAIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [activeTab, setActiveTab] = useState<'api' | 'prompt'>('api')
   const [tempApiKey, setTempApiKey] = useState('')
   const [tempSystemPrompt, setTempSystemPrompt] = useState('')
-  const [executingIndex, setExecutingIndex] = useState<number | null>(null)
+  const [, setExecutingIndex] = useState<number | null>(null)
   const [consoleLogs, setConsoleLogs] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const consoleEndRef = useRef<HTMLDivElement>(null)

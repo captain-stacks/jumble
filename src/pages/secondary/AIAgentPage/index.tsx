@@ -178,7 +178,7 @@ function deduplicateReplaceableEvents(events: TNostrEvent[]): TNostrEvent[] {
 
 // ── Process step execution ────────────────────────────────────────────────────
 
-function runProcessStep(
+async function runProcessStep(
   action: TProcessAction,
   events: TNostrEvent[],
   apiKey: string,
@@ -238,7 +238,7 @@ function runProcessStep(
       content: e.content.slice(0, 300),
       created_at: new Date(e.created_at * 1000).toISOString()
     }))
-    return callOpenAI(apiKey, [
+    const result = await callOpenAI(apiKey, [
       {
         role: 'system',
         content:
@@ -253,6 +253,7 @@ function runProcessStep(
         )}\n\nProvide a clear summary answering the question.`
       }
     ])
+    return result.response.choices[0].message.content as string
   }
   if (operation === 'customScript') {
     return new Promise((resolve, reject) => {

@@ -780,7 +780,6 @@ const PROCESSING_OPERATIONS: TProcessingOperation[] = [
 
 function ActionCard({
   result,
-  stepNumber,
   onExecute,
   onUpdate,
   onDelete,

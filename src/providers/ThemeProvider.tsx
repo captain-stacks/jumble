@@ -7,6 +7,8 @@ type ThemeProviderState = {
   theme: TTheme
   themeSetting: TThemeSetting
   setThemeSetting: (themeSetting: TThemeSetting) => void
+  pureBlack: boolean
+  setPureBlack: (value: boolean) => void
   primaryColor: TPrimaryColor
   setPrimaryColor: (color: TPrimaryColor) => void
 }
@@ -25,55 +27,80 @@ const updateCSSVariables = (color: TPrimaryColor, currentTheme: TTheme) => {
   root.style.setProperty('--ring', config.ring)
 }
 
+function loadThemeSetting(): TThemeSetting {
+  const stored = localStorage.getItem(StorageKey.THEME_SETTING)
+  // migrate legacy 'pure-black' value
+  if (stored === 'pure-black') return 'dark'
+  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored
+  return 'system'
+}
+
+function loadPureBlack(migratedFromPureBlack: boolean): boolean {
+  const stored = localStorage.getItem(StorageKey.PURE_BLACK)
+  if (stored !== null) return stored === 'true'
+  // migrate: if old theme was pure-black, enable pureBlack
+  return migratedFromPureBlack
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeSetting, setThemeSetting] = useState<TThemeSetting>(
-    (localStorage.getItem(StorageKey.THEME_SETTING) as TThemeSetting) ?? 'system'
-  )
+  const rawStored = localStorage.getItem(StorageKey.THEME_SETTING)
+  const wasPureBlack = rawStored === 'pure-black'
+
+  const [themeSetting, setThemeSetting] = useState<TThemeSetting>(loadThemeSetting)
+  const [pureBlack, setPureBlack] = useState<boolean>(() => loadPureBlack(wasPureBlack))
   const [theme, setTheme] = useState<TTheme>('light')
   const [primaryColor, setPrimaryColor] = useState<TPrimaryColor>(
     (localStorage.getItem(StorageKey.PRIMARY_COLOR) as TPrimaryColor) ?? 'DEFAULT'
   )
 
   useEffect(() => {
-    if (themeSetting !== 'system') {
-      setTheme(themeSetting)
-      return
-    }
+    let resolvedTheme: 'light' | 'dark'
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? 'dark' : 'light')
-    }
-    mediaQuery.addEventListener('change', handleChange)
-    setTheme(mediaQuery.matches ? 'dark' : 'light')
+    if (themeSetting === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = (e: MediaQueryListEvent) => {
+        const resolved: 'light' | 'dark' = e.matches ? 'dark' : 'light'
+        setTheme(pureBlack && resolved === 'dark' ? 'pure-black' : resolved)
+      }
+      mediaQuery.addEventListener('change', handleChange)
+      resolvedTheme = mediaQuery.matches ? 'dark' : 'light'
 
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange)
+      const computed = pureBlack && resolvedTheme === 'dark' ? 'pure-black' : resolvedTheme
+      setTheme(computed)
+
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange)
+      }
+    } else {
+      resolvedTheme = themeSetting
+      setTheme(pureBlack && resolvedTheme === 'dark' ? 'pure-black' : resolvedTheme)
     }
-  }, [themeSetting])
+  }, [themeSetting, pureBlack])
 
   useEffect(() => {
-    const updateTheme = async () => {
-      const root = window.document.documentElement
-      root.classList.remove('light', 'dark')
-      root.classList.add(theme === 'pure-black' ? 'dark' : theme)
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
+    root.classList.add(theme === 'pure-black' ? 'dark' : theme)
 
-      if (theme === 'pure-black') {
-        root.classList.add('pure-black')
-      } else {
-        root.classList.remove('pure-black')
-      }
+    if (theme === 'pure-black') {
+      root.classList.add('pure-black')
+    } else {
+      root.classList.remove('pure-black')
     }
-    updateTheme()
   }, [theme])
 
   useEffect(() => {
     updateCSSVariables(primaryColor, theme)
   }, [theme, primaryColor])
 
-  const updateThemeSetting = (themeSetting: TThemeSetting) => {
-    storage.setThemeSetting(themeSetting)
-    setThemeSetting(themeSetting)
+  const updateThemeSetting = (value: TThemeSetting) => {
+    storage.setThemeSetting(value)
+    setThemeSetting(value)
+  }
+
+  const updatePureBlack = (value: boolean) => {
+    localStorage.setItem(StorageKey.PURE_BLACK, value.toString())
+    setPureBlack(value)
   }
 
   const updatePrimaryColor = (color: TPrimaryColor) => {
@@ -87,6 +114,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         theme,
         themeSetting,
         setThemeSetting: updateThemeSetting,
+        pureBlack,
+        setPureBlack: updatePureBlack,
         primaryColor,
         setPrimaryColor: updatePrimaryColor
       }}

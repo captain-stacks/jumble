@@ -15,6 +15,7 @@ import { getEmojiInfosFromEmojiTags, getImetaInfoFromImetaTag } from '@/lib/tag'
 import { EMOJI_REGEX } from '@/constants'
 import { cn } from '@/lib/utils'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
+import { useTranslationService } from '@/providers/TranslationServiceProvider'
 import mediaUpload from '@/services/media-upload.service'
 import { TImetaInfo } from '@/types'
 import { Event } from 'nostr-tools'
@@ -54,6 +55,8 @@ export default function Content({
   const [showHighlightEditor, setShowHighlightEditor] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const translatedEvent = useTranslatedEvent(event?.id)
+  const { getSourceLang } = useTranslationService()
+  const sourceLang = translatedEvent && event?.id ? getSourceLang(event.id) : null
   const { satsToBitcoins } = useUserPreferences()
   const rawContent = translatedEvent?.content ?? event?.content ?? content
   const resolvedContent = satsToBitcoins && rawContent
@@ -61,6 +64,7 @@ export default function Content({
         match[0] === match[0].toUpperCase() ? 'Bitcoins' : 'bitcoins'
       )
     : rawContent
+  const wasConverted = satsToBitcoins && rawContent !== resolvedContent
   const isMarkdown = useMemo(() => resolvedContent ? containsMarkdown(resolvedContent) : false, [resolvedContent])
   const { nodes, allImages, lastNormalUrl, emojiInfos } = useMemo(() => {
     if (!resolvedContent || isMarkdown) return {}
@@ -144,6 +148,10 @@ export default function Content({
   if (isMarkdown) {
     return (
       <>
+        {wasConverted && <Bip177Badge />}
+        {sourceLang && (
+          <div className="mb-1 text-xs text-muted-foreground">Translated from {sourceLang}</div>
+        )}
         <div ref={contentRef} className={cn('text-wrap break-words', className)}>
           <MarkdownContent content={resolvedContent} event={event} />
         </div>
@@ -169,6 +177,10 @@ export default function Content({
   let imageIndex = 0
   return (
     <>
+      {wasConverted && <Bip177Badge />}
+      {sourceLang && (
+        <div className="mb-1 text-xs text-muted-foreground">Translated from {sourceLang}</div>
+      )}
       <div ref={contentRef} className={cn('whitespace-pre-wrap text-wrap break-words', isEmojiOnly && 'flex items-end gap-1', className)}>
         {nodes.map((node, index) => {
           if (node.type === 'text') {
@@ -258,5 +270,17 @@ export default function Content({
         />
       )}
     </>
+  )
+}
+
+function Bip177Badge() {
+  return (
+    <div
+      title="BIP-177: sats displayed as bitcoins"
+      className="mt-3 mb-1 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-semibold"
+      style={{ background: 'rgba(251,146,60,0.15)', color: '#d97706' }}
+    >
+      ₿ BIP-177
+    </div>
   )
 }

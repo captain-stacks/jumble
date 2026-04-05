@@ -18,6 +18,7 @@ import { FormattedTimestamp } from '../FormattedTimestamp'
 import Nip05 from '../Nip05'
 import NoteOptions from '../NoteOptions'
 import ParentNotePreview from '../ParentNotePreview'
+import { AISummaryButton, AISummaryPanel, useAISummary } from '../AISummaryButton'
 import TranslateButton from '../TranslateButton'
 import TrustScoreBadge from '../TrustScoreBadge'
 import UserAvatar from '../UserAvatar'
@@ -65,6 +66,7 @@ export default function Note({
   const { mutePubkeySet, mutePubkeyPrivately } = useMuteList()
   const { pubkey } = useNostr()
   const [showMuted, setShowMuted] = useState(false)
+  const aiSummary = useAISummary(event)
   const isNsfw = useMemo(
     () => (nsfwDisplayPolicy === NSFW_DISPLAY_POLICY.SHOW ? false : isNsfwEvent(event)),
     [event, nsfwDisplayPolicy]
@@ -158,6 +160,7 @@ export default function Note({
         </div>
         <div className="flex items-center">
           <TranslateButton event={event} className={size === 'normal' ? '' : 'pr-0'} />
+          <AISummaryButton {...aiSummary} />
           {size === 'normal' && pubkey && event.pubkey !== pubkey && !mutePubkeySet.has(event.pubkey) && (
             <button
               className="shrink-0 p-1 text-muted-foreground hover:text-foreground"
@@ -191,6 +194,7 @@ export default function Note({
         />
       )}
       {content}
+      <AISummaryPanel {...aiSummary} />
     </div>
   )
 }

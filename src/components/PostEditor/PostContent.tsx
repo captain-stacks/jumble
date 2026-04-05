@@ -15,7 +15,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import postEditorCache from '@/services/post-editor-cache.service'
 import threadService from '@/services/thread.service'
 import { TPollCreateData } from '@/types'
-import { CircleHelp, ImageUp, ListTodo, LoaderCircle, Settings, Smile, X } from 'lucide-react'
+import { CircleHelp, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, X } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +31,7 @@ import PostRelaySelector from './PostRelaySelector'
 import PostTextarea, { TPostTextareaHandle } from './PostTextarea'
 import Uploader from './Uploader'
 import { formatError } from '@/lib/error'
+import openaiService from '@/services/openai.service'
 
 export default function PostContent({
   defaultContent = '',
@@ -72,6 +73,33 @@ export default function PostContent({
     relays: []
   })
   const [minPow, setMinPow] = useState(0)
+  const [translatingReply, setTranslatingReply] = useState(false)
+  const [translatedReplyLang, setTranslatedReplyLang] = useState<string | null>(null)
+
+  const [openaiReady, setOpenaiReady] = useState(() => openaiService.isInitialized())
+  useEffect(() => {
+    return openaiService.subscribe(() => setOpenaiReady(openaiService.isInitialized()))
+  }, [])
+
+  const showTranslateReplyButton = !!parentEvent && openaiReady
+
+  const handleTranslateReply = async () => {
+    if (!parentEvent || !text.trim() || translatingReply) return
+    setTranslatingReply(true)
+    try {
+      const result = await openaiService.translateReply(text, parentEvent.content)
+      // Only replace if target language isn't English
+      if (result.targetLanguage.toLowerCase() !== 'english') {
+        textareaRef.current?.replaceText(result.translated)
+        setTranslatedReplyLang(result.targetLanguage)
+      }
+    } catch (err) {
+      toast.error('Translation failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setTranslatingReply(false)
+    }
+  }
+
   const userDismissedProtected = useRef(false)
   const handleProtectedSuggestionChange = useCallback((suggested: boolean) => {
     if (suggested && !userDismissedProtected.current) {
@@ -357,6 +385,17 @@ export default function PostContent({
           >
             <Settings />
           </Button>
+          {showTranslateReplyButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={translatingReply || !text.trim()}
+              onClick={handleTranslateReply}
+              title={translatedReplyLang ? `Translated to ${translatedReplyLang}` : 'Translate reply to match original language'}
+            >
+              {translatingReply ? <LoaderCircle className="animate-spin" /> : <Languages className={translatedReplyLang ? 'text-pink-400' : ''} />}
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Mentions

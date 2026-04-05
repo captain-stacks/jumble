@@ -684,6 +684,15 @@ export default {
       'Protected events (NIP-70) can only be published by the author. Relays will reject these events from third parties, preventing others from rebroadcasting your content. Note: not all relays support protected events.',
     'Allow insecure connections': 'Allow insecure connections',
     'Allow insecure connections description':
-      'Allow loading http:// resources and connecting to ws:// relays. May trigger browser mixed content warnings.'
+      'Allow loading http:// resources and connecting to ws:// relays. May trigger browser mixed content warnings.',
+    'AI Agent': 'AI Agent',
+    'OpenAI API key not configured': 'OpenAI API key not configured',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.',
+    'Type a message...': 'Type a message...',
+    'Failed to get response': 'Failed to get response',
+    'OpenAI API key is configured. Translation will use gpt-5.':
+      'OpenAI API key is configured. Translation will use gpt-5.',
+    'AI Summary': 'AI Summary'
   }
 }

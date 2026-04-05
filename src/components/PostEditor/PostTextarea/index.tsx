@@ -26,6 +26,7 @@ export type TPostTextareaHandle = {
   appendText: (text: string, addNewline?: boolean) => void
   insertText: (text: string) => void
   insertEmoji: (emoji: string | TEmoji) => void
+  replaceText: (text: string) => void
 }
 
 const PostTextarea = forwardRef<
@@ -141,6 +142,12 @@ const PostTextarea = forwardRef<
       insertText: (text: string) => {
         if (editor) {
           editor.chain().focus().insertContent(text).run()
+        }
+      },
+      replaceText: (newText: string) => {
+        if (editor) {
+          editor.commands.setContent(newText)
+          setText(newText)
         }
       },
       insertEmoji: (emoji: string | TEmoji) => {

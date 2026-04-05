@@ -12,24 +12,35 @@ import { toBookmarks, toProfile, toRelaySettings, toSettings, toWallet } from '@
 import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
+import { useTheme } from '@/providers/ThemeProvider'
 import { TPageRef } from '@/types'
 import {
   ArrowDownUp,
   Bookmark,
   ChevronRight,
   LogOut,
+  Monitor,
+  Moon,
   Server,
   Settings,
+  Sun,
   UserRound,
   Wallet
 } from 'lucide-react'
 import { forwardRef, HTMLProps, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const THEMES = [
+  { key: 'system', icon: <Monitor className="size-4" />, label: 'System' },
+  { key: 'light', icon: <Sun className="size-4" />, label: 'Light' },
+  { key: 'dark', icon: <Moon className="size-4" />, label: 'Dark' }
+] as const
+
 const MePage = forwardRef<TPageRef>((_, ref) => {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
   const { pubkey } = useNostr()
+  const { themeSetting, setThemeSetting, pureBlack, setPureBlack } = useTheme()
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
 
@@ -68,6 +79,33 @@ const MePage = forwardRef<TPageRef>((_, ref) => {
             <NpubQrCode pubkey={pubkey} />
           </div>
         </div>
+      </div>
+      <div className="flex items-center gap-2 px-4 pb-2">
+        {THEMES.map(({ key, icon, label }) => (
+          <button
+            key={key}
+            onClick={() => setThemeSetting(key)}
+            className={cn(
+              'flex flex-1 flex-col items-center gap-1 rounded-lg border-2 py-2 text-xs font-medium transition-all',
+              themeSetting === key ? 'border-primary' : 'border-border'
+            )}
+            title={t(label)}
+          >
+            {icon}
+            {t(label)}
+          </button>
+        ))}
+        <button
+          onClick={() => setPureBlack(!pureBlack)}
+          className={cn(
+            'flex flex-1 flex-col items-center gap-1 rounded-lg border-2 py-2 text-xs font-medium transition-all',
+            pureBlack ? 'border-primary' : 'border-border'
+          )}
+          title={t('Pure Black')}
+        >
+          <Moon className={cn('size-4', pureBlack && 'fill-current')} />
+          {t('Pure Black')}
+        </button>
       </div>
       <div className="mt-4">
         <Item onClick={() => push(toProfile(pubkey))}>

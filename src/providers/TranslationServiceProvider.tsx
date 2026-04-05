@@ -2,6 +2,7 @@ import { ExtendedKind } from '@/constants'
 import { getPollMetadataFromEvent } from '@/lib/event-metadata'
 import libreTranslate from '@/services/libre-translate.service'
 import storage from '@/services/local-storage.service'
+import openai from '@/services/openai.service'
 import translation from '@/services/translation.service'
 import { TTranslationAccount, TTranslationServiceConfig } from '@/types'
 import { Event, kinds } from 'nostr-tools'
@@ -11,6 +12,7 @@ import { useNostr } from './NostrProvider'
 
 const translatedEventCache: Map<string, Event> = new Map()
 const translatedTextCache: Map<string, string> = new Map()
+const sourceLangCache: Map<string, string> = new Map()
 
 type TTranslationServiceContext = {
   config: TTranslationServiceConfig
@@ -18,6 +20,7 @@ type TTranslationServiceContext = {
   translateText: (text: string) => Promise<string>
   translateEvent: (event: Event) => Promise<Event | void>
   getTranslatedEvent: (eventId: string) => Event | null
+  getSourceLang: (eventId: string) => string | null
   showOriginalEvent: (eventId: string) => void
   getAccount: () => Promise<TTranslationAccount | void>
   regenerateApiKey: () => Promise<string | undefined>
@@ -70,11 +73,16 @@ export function TranslationServiceProvider({ children }: { children: React.React
     return translatedEventCache.get(cacheKey) ?? null
   }
 
-  const translate = async (text: string, target: string): Promise<string> => {
-    if (config.service === 'jumble') {
-      return await translation.translate(text, target)
+  const translate = async (text: string, target: string): Promise<{ text: string; sourceLang: string }> => {
+    if (openai.isInitialized()) {
+      const result = await openai.translateText(text, target)
+      return { text: result.translated, sourceLang: result.sourceLang }
+    } else if (config.service === 'libre_translate') {
+      const text_ = await libreTranslate.translate(text, target, config.server, config.api_key)
+      return { text: text_, sourceLang: '' }
     } else {
-      return await libreTranslate.translate(text, target, config.server, config.api_key)
+      const text_ = await translation.translate(text, target)
+      return { text: text_, sourceLang: '' }
     }
   }
 
@@ -90,12 +98,12 @@ export function TranslationServiceProvider({ children }: { children: React.React
       return cache
     }
 
-    const translatedText = await translate(text, target)
-    translatedTextCache.set(cacheKey, translatedText)
-    return translatedText
+    const result = await translate(text, target)
+    translatedTextCache.set(cacheKey, result.text)
+    return result.text
   }
 
-  const translateHighlightEvent = async (event: Event): Promise<Event> => {
+  const translateHighlightEvent = async (event: Event): Promise<{ event: Event; sourceLang: string }> => {
     const target = i18n.language
     const comment = event.tags.find((tag) => tag[0] === 'comment')?.[1]
 
@@ -104,20 +112,23 @@ export function TranslationServiceProvider({ children }: { children: React.React
       comment
     }
     const joinedText = joinTexts(texts)
-    if (!joinedText) return event
+    if (!joinedText) return { event, sourceLang: '' }
 
-    const translatedText = await translate(joinedText, target)
-    const translatedTexts = splitTranslatedText(translatedText)
+    const result = await translate(joinedText, target)
+    const translatedTexts = splitTranslatedText(result.text)
     return {
-      ...event,
-      content: translatedTexts.content ?? event.content,
-      tags: event.tags.map((tag) =>
-        tag[0] === 'comment' ? ['comment', translatedTexts.comment ?? tag[1]] : tag
-      )
+      event: {
+        ...event,
+        content: translatedTexts.content ?? event.content,
+        tags: event.tags.map((tag) =>
+          tag[0] === 'comment' ? ['comment', translatedTexts.comment ?? tag[1]] : tag
+        )
+      },
+      sourceLang: result.sourceLang
     }
   }
 
-  const translatePollEvent = async (event: Event): Promise<Event> => {
+  const translatePollEvent = async (event: Event): Promise<{ event: Event; sourceLang: string }> => {
     const target = i18n.language
     const pollMetadata = getPollMetadataFromEvent(event)
 
@@ -132,21 +143,28 @@ export function TranslationServiceProvider({ children }: { children: React.React
       )
     }
     const joinedText = joinTexts(texts)
-    if (!joinedText) return event
+    if (!joinedText) return { event, sourceLang: '' }
 
-    const translatedText = await translate(joinedText, target)
-    const translatedTexts = splitTranslatedText(translatedText)
+    const result = await translate(joinedText, target)
+    const translatedTexts = splitTranslatedText(result.text)
     return {
-      ...event,
-      content: translatedTexts.question ?? '',
-      tags: event.tags.map((tag) =>
-        tag[0] === 'option' ? ['option', tag[1], translatedTexts[tag[1]] ?? tag[2]] : tag
-      )
+      event: {
+        ...event,
+        content: translatedTexts.question ?? '',
+        tags: event.tags.map((tag) =>
+          tag[0] === 'option' ? ['option', tag[1], translatedTexts[tag[1]] ?? tag[2]] : tag
+        )
+      },
+      sourceLang: result.sourceLang
     }
   }
 
+  const getSourceLang = (eventId: string): string | null => {
+    return sourceLangCache.get(eventId) ?? null
+  }
+
   const translateEvent = async (event: Event): Promise<Event | void> => {
-    if (config.service === 'jumble' && !pubkey) {
+    if (config.service === 'jumble' && !openai.isInitialized() && !pubkey) {
       startLogin()
       return
     }
@@ -160,19 +178,26 @@ export function TranslationServiceProvider({ children }: { children: React.React
     }
 
     let translatedEvent: Event | undefined
+    let sourceLang = ''
     if (event.kind === kinds.Highlights) {
-      translatedEvent = await translateHighlightEvent(event)
+      const r = await translateHighlightEvent(event)
+      translatedEvent = r.event
+      sourceLang = r.sourceLang
     } else if (event.kind === ExtendedKind.POLL) {
-      translatedEvent = await translatePollEvent(event)
+      const r = await translatePollEvent(event)
+      translatedEvent = r.event
+      sourceLang = r.sourceLang
     } else {
-      const translatedText = await translate(event.content, target)
-      if (!translatedText) {
+      const result = await translate(event.content, target)
+      if (!result.text) {
         return
       }
-      translatedEvent = { ...event, content: translatedText }
+      translatedEvent = { ...event, content: result.text }
+      sourceLang = result.sourceLang
     }
 
     translatedEventCache.set(cacheKey, translatedEvent)
+    if (sourceLang) sourceLangCache.set(event.id, sourceLang)
     setTranslatedEventIdSet((prev) => new Set(prev.add(event.id)))
     return translatedEvent
   }
@@ -200,6 +225,7 @@ export function TranslationServiceProvider({ children }: { children: React.React
         translateText,
         translateEvent,
         getTranslatedEvent,
+        getSourceLang,
         showOriginalEvent,
         updateConfig
       }}

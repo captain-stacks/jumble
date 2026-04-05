@@ -14,6 +14,7 @@ import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import JumbleTranslate from './JumbleTranslate'
 import LibreTranslate from './LibreTranslate'
+import openaiService from '@/services/openai.service'
 
 const TranslationPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t, i18n } = useTranslation()
@@ -53,7 +54,7 @@ const TranslationPage = forwardRef(({ index }: { index?: number }, ref) => {
             defaultValue={config.service}
             value={config.service}
             onValueChange={(newService) => {
-              updateConfig({ service: newService as 'jumble' | 'libre_translate' })
+              updateConfig({ service: newService as 'jumble' | 'libre_translate' | 'openai' })
             }}
           >
             <SelectTrigger id="translation-service-select" className="w-[180px]">
@@ -62,10 +63,19 @@ const TranslationPage = forwardRef(({ index }: { index?: number }, ref) => {
             <SelectContent>
               <SelectItem value="jumble">Jumble</SelectItem>
               <SelectItem value="libre_translate">LibreTranslate</SelectItem>
+              <SelectItem value="openai">OpenAI (gpt-5)</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        {config.service === 'jumble' ? <JumbleTranslate /> : <LibreTranslate />}
+        {config.service === 'jumble' && <JumbleTranslate />}
+        {config.service === 'libre_translate' && <LibreTranslate />}
+        {config.service === 'openai' && (
+          <div className="rounded-md border p-3 text-sm text-muted-foreground">
+            {openaiService.isInitialized()
+              ? t('OpenAI API key is configured. Translation will use gpt-5.')
+              : t('OpenAI API key not configured')}
+          </div>
+        )}
       </div>
     </SecondaryPageLayout>
   )

@@ -29,6 +29,7 @@ export default function Image({
   hideIfError?: boolean
   errorPlaceholder?: React.ReactNode
 }) {
+  const isVideo = useMemo(() => /\.(mp4|webm)(\?|$)/i.test(url ?? ''), [url])
   const [isLoading, setIsLoading] = useState(true)
   const [displaySkeleton, setDisplaySkeleton] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -129,7 +130,22 @@ export default function Image({
           )}
         </div>
       )}
-      {!hasError && (
+      {!hasError && isVideo ? (
+        <video
+          src={imageUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onLoadedData={handleLoad}
+          onError={handleError}
+          className={cn(
+            'pointer-events-none h-full w-full object-cover transition-opacity',
+            isLoading ? 'absolute inset-0 opacity-0' : '',
+            className
+          )}
+        />
+      ) : !hasError ? (
         <img
           src={imageUrl}
           alt={alt}
@@ -144,7 +160,7 @@ export default function Image({
             className
           )}
         />
-      )}
+      ) : null}
       {hasError &&
         (typeof errorPlaceholder === 'string' ? (
           <img

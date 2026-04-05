@@ -31,13 +31,15 @@ export default function ReplyNote({
   parentEventId,
   onClickParent = () => {},
   highlight = false,
-  className = ''
+  className = '',
+  showMutedContent = false
 }: {
   event: Event
   parentEventId?: string
   onClickParent?: () => void
   highlight?: boolean
   className?: string
+  showMutedContent?: boolean
 }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
@@ -51,7 +53,7 @@ export default function ReplyNote({
   const [hasReplies, setHasReplies] = useState(false)
 
   const show = useMemo(() => {
-    if (showMuted) {
+    if (showMuted || showMutedContent) {
       return true
     }
     if (mutePubkeySet.has(event.pubkey)) {
@@ -61,7 +63,7 @@ export default function ReplyNote({
       return false
     }
     return true
-  }, [showMuted, mutePubkeySet, event, hideContentMentioningMutedUsers])
+  }, [showMuted, showMutedContent, mutePubkeySet, event, hideContentMentioningMutedUsers])
 
   useEffect(() => {
     const checkHasReplies = async () => {

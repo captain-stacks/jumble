@@ -695,6 +695,12 @@ export default {
     'Protected event hint': 'Chronione zdarzenia (NIP-70) mogą być publikowane tylko przez autora. Transmitery odrzucą publikację tych zdarzeń przez osoby trzecie, uniemożliwiając innym retransmisję Twoich treści. Uwaga: nie wszystkie transmitery obsługują ochronę zdarzeń.',
     'Allow insecure connections': 'Zezwól na niezabezpieczone połączenia',
     'Allow insecure connections description':
-      'Zezwól na ładowanie zasobów http:// i łączenie z transmiterami ws://. Może to wywołać ostrzeżenia przeglądarki o mieszanej zawartości.'
+      'Zezwól na ładowanie zasobów http:// i łączenie z transmiterami ws://. Może to wywołać ostrzeżenia przeglądarki o mieszanej zawartości.',
+    'AI Agent': 'Agent AI',
+    'OpenAI API key not configured': 'Klucz API OpenAI nie jest skonfigurowany',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'Ustaw zmienną środowiskową VITE_OPENAI_API_KEY, aby korzystać z tej funkcji.',
+    'Type a message...': 'Wpisz wiadomość...',
+    'Failed to get response': 'Nie udało się uzyskać odpowiedzi'
   }
 }

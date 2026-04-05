@@ -666,6 +666,12 @@ export default {
     'Protected event hint': '受保护的事件（NIP-70）只能由作者发布。服务器将拒绝来自第三方的这些事件，防止他人转播你的内容。 注意：并非所有服务器都支持受保护的事件。',
     'Allow insecure connections': '允许不安全的连接',
     'Allow insecure connections description':
-      '允许加载 http:// 资源和连接 ws:// relay。可能会触发浏览器混合内容警告。'
+      '允许加载 http:// 资源和连接到 ws:// relay。可能会触发浏览器mixed content警告。',
+    'AI Agent': 'AI 助手',
+    'OpenAI API key not configured': 'OpenAI API 密钥未配置',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      '请设置 VITE_OPENAI_API_KEY 环境变量以使用此功能。',
+    'Type a message...': '输入消息...',
+    'Failed to get response': '获取响应失败'
   }
 }

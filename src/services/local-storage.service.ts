@@ -76,6 +76,7 @@ class LocalStorageService {
   private disableReactions: boolean = false
   private hideBookmarks: boolean = false
   private satsToBitcoins: boolean = false
+  private hideRelayExplore: boolean = true
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -358,6 +359,9 @@ class LocalStorageService {
 
     this.satsToBitcoins =
       window.localStorage.getItem(StorageKey.SATS_TO_BITCOINS) === 'true'
+
+    const storedHideRelayExplore = window.localStorage.getItem(StorageKey.HIDE_RELAY_EXPLORE)
+    this.hideRelayExplore = storedHideRelayExplore === null ? true : storedHideRelayExplore === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -786,6 +790,15 @@ class LocalStorageService {
   setSatsToBitcoins(value: boolean) {
     this.satsToBitcoins = value
     window.localStorage.setItem(StorageKey.SATS_TO_BITCOINS, value.toString())
+  }
+
+  getHideRelayExplore() {
+    return this.hideRelayExplore
+  }
+
+  setHideRelayExplore(value: boolean) {
+    this.hideRelayExplore = value
+    window.localStorage.setItem(StorageKey.HIDE_RELAY_EXPLORE, value.toString())
   }
 }
 

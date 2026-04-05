@@ -683,6 +683,12 @@ export default {
     'Protected event hint': 'A védett eseményeket (NIP-70) csak a szerző teheti közzé. A csomópontok elutasítják ezeket az eseményeket harmadik felektől, megakadályozva, hogy mások újraközvetítsék a tartalmadat. Megjegyzés: nem minden csomópont támogatja a védett eseményeket.',
     'Allow insecure connections': 'Nem biztonságos kapcsolatok engedélyezése',
     'Allow insecure connections description':
-      'http:// erőforrások betöltésének és ws:// relékhez való csatlakozás engedélyezése. Böngésző vegyes tartalom figyelmeztetéseket válthat ki.'
+      'http:// erőforrások betöltésének és ws:// relékhez való csatlakozásnak az engedélyezése. Böngészőkeverékűrtalom-figyelmeztetéseket indíthat.',
+    'AI Agent': 'AI Ügynök',
+    'OpenAI API key not configured': 'OpenAI API kulcs nincs konfigurálva',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'Kérjük, állítsa be a VITE_OPENAI_API_KEY környezeti változót a funkció használatához.',
+    'Type a message...': 'Írjon üzenetet...',
+    'Failed to get response': 'Nem sikerült válasznak a lekérése'
   }
 }

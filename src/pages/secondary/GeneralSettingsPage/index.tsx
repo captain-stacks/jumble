@@ -50,7 +50,9 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     hideBookmarks,
     updateHideBookmarks,
     satsToBitcoins,
-    updateSatsToBitcoins
+    updateSatsToBitcoins,
+    hideRelayExplore,
+    updateHideRelayExplore
   } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
@@ -250,6 +252,19 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="hide-bookmarks"
             checked={hideBookmarks}
             onCheckedChange={updateHideBookmarks}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-relay-explore" className="text-base font-normal">
+            <div>{t('Hide relay explore')}</div>
+            <div className="text-muted-foreground">
+              {t('Hide the relay explore button from navigation')}
+            </div>
+          </Label>
+          <Switch
+            id="hide-relay-explore"
+            checked={hideRelayExplore}
+            onCheckedChange={updateHideRelayExplore}
           />
         </SettingItem>
         <MutedWords />

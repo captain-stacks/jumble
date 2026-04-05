@@ -689,6 +689,12 @@ export default {
     'Protected event hint': '保護されたイベント（NIP-70）は作成者のみが公開できます。リレーは第三者からのこれらのイベントを拒否し、他者によるコンテンツの再配信を防ぎます。 注意：すべてのリレーが保護されたイベントに対応しているわけではありません。',
     'Allow insecure connections': '安全でない接続を許可',
     'Allow insecure connections description':
-      'http:// リソースの読み込みと ws:// リレーへの接続を許可します。ブラウザの混合コンテンツ警告が表示される場合があります。'
+      'http:// リソースの読み込みと ws:// リレーへの接続を許可します。ブラウザの混合コンテンツ警告をトリガーする可能性があります。',
+    'AI Agent': 'AI エージェント',
+    'OpenAI API key not configured': 'OpenAI APIキーが設定されていません',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'この機能を使用するにはVITE_OPENAI_API_KEY環境変数を設定してください。',
+    'Type a message...': 'メッセージを入力...',
+    'Failed to get response': '応答の取得に失敗しました'
   }
 }

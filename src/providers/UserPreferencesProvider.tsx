@@ -30,6 +30,9 @@ type TUserPreferencesContext = {
 
   satsToBitcoins: boolean
   updateSatsToBitcoins: (value: boolean) => void
+
+  hideRelayExplore: boolean
+  updateHideRelayExplore: (value: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -57,6 +60,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [disableReactions, setDisableReactions] = useState(storage.getDisableReactions())
   const [hideBookmarks, setHideBookmarks] = useState(storage.getHideBookmarks())
   const [satsToBitcoins, setSatsToBitcoins] = useState(storage.getSatsToBitcoins())
+  const [hideRelayExplore, setHideRelayExplore] = useState(storage.getHideRelayExplore())
 
   useEffect(() => {
     if (!isSmallScreen && enableSingleColumnLayout) {
@@ -106,6 +110,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setSatsToBitcoins(value)
   }
 
+  const updateHideRelayExplore = (value: boolean) => {
+    setHideRelayExplore(value)
+    storage.setHideRelayExplore(value)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -126,7 +135,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         hideBookmarks,
         updateHideBookmarks,
         satsToBitcoins,
-        updateSatsToBitcoins
+        updateSatsToBitcoins,
+        hideRelayExplore,
+        updateHideRelayExplore
       }}
     >
       {children}

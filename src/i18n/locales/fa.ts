@@ -689,6 +689,12 @@ export default {
     'Protected event hint': 'رویدادهای محافظت‌شده (NIP-70) فقط توسط نویسنده قابل انتشار هستند. رله‌ها این رویدادها را از اشخاص ثالث رد می‌کنند و از بازنشر محتوای شما توسط دیگران جلوگیری می‌کنند. توجه: همه رله‌ها از رویدادهای محافظت‌شده پشتیبانی نمی‌کنند.',
     'Allow insecure connections': 'اجازه اتصالات ناامن',
     'Allow insecure connections description':
-      'اجازه بارگذاری منابع http:// و اتصال به رله‌های ws://. ممکن است هشدارهای محتوای مختلط مرورگر را فعال کند.'
+      'اجازه بارگذاری منابع http:// و اتصال به رله‌های ws://. ممکن است هشدارهای محتوای مختلط مرورگر را فعال کند.',
+    'AI Agent': 'Agent هوش مصنوعی',
+    'OpenAI API key not configured': 'کلید OpenAI API پیکربندی نشده است',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'لطفا متغیر محیطی VITE_OPENAI_API_KEY را برای استفاده از این ویژگی تنظیم کنید.',
+    'Type a message...': 'پیامی تایپ کنید...',
+    'Failed to get response': 'دریافت پاسخ ناموفق بود'
   }
 }

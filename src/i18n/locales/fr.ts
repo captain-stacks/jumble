@@ -698,6 +698,12 @@ export default {
     'Protected event hint': 'Les événements protégés (NIP-70) ne peuvent être publiés que par l\'auteur. Les relais rejetteront ces événements provenant de tiers, empêchant les autres de rediffuser votre contenu. Remarque : tous les relais ne prennent pas en charge les événements protégés.',
     'Allow insecure connections': 'Autoriser les connexions non sécurisées',
     'Allow insecure connections description':
-      'Autoriser le chargement des ressources http:// et la connexion aux relais ws://. Peut déclencher des avertissements de contenu mixte du navigateur.'
+      'Autoriser le chargement des ressources http:// et la connexion aux relais ws://. Peut déclencher des avertissements de contenu mixte du navigateur.',
+    'AI Agent': 'Agent IA',
+    'OpenAI API key not configured': 'Clé API OpenAI non configurée',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'Veuillez définir la variable d\'environnement VITE_OPENAI_API_KEY pour utiliser cette fonctionnalité.',
+    'Type a message...': 'Tapez un message...',
+    'Failed to get response': 'Échec de la récupération de la réponse'
   }
 }

@@ -695,6 +695,12 @@ export default {
     'Protected event hint': 'Eventos protegidos (NIP-70) só podem ser publicados pelo autor. Os relés rejeitarão estes eventos de terceiros, impedindo que outros retransmitam o seu conteúdo. Nota: nem todos os relés suportam eventos protegidos.',
     'Allow insecure connections': 'Permitir ligações inseguras',
     'Allow insecure connections description':
-      'Permitir carregar recursos http:// e ligar a relays ws://. Pode acionar avisos de conteúdo misto do navegador.'
+      'Permitir carregar recursos http:// e ligar a relays ws://. Pode acionar avisos de conteúdo misto do navegador.',
+    'AI Agent': 'Agente de IA',
+    'OpenAI API key not configured': 'Chave de API OpenAI não configurada',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'Por favor, defina a variável de ambiente VITE_OPENAI_API_KEY para utilizar esta funcionalidade.',
+    'Type a message...': 'Digite uma mensagem...',
+    'Failed to get response': 'Falha ao obter resposta'
   }
 }

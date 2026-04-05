@@ -892,7 +892,7 @@ function buildResponseTag(value: string) {
 }
 
 function buildClientTag() {
-  return ['client', 'Wisp']
+  return ['client', 'jumblewisp']
 }
 
 function buildNsfwTag() {

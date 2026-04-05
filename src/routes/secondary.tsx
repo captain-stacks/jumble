@@ -1,3 +1,4 @@
+import NewAIAgentPage from '@/pages/secondary/NewAIAgentPage'
 import AppearanceSettingsPage from '@/pages/secondary/AppearanceSettingsPage'
 import BookmarkPage from '@/pages/secondary/BookmarkPage'
 import EmojiPackSettingsPage from '@/pages/secondary/EmojiPackSettingsPage'
@@ -52,7 +53,8 @@ const SECONDARY_ROUTE_CONFIGS = [
   { path: '/rizful', element: <RizfulPage /> },
   { path: '/bookmarks', element: <BookmarkPage /> },
   { path: '/follow-packs/:id', element: <FollowPackPage /> },
-  { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> }
+  { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
+  { path: '/ai-agent', element: <NewAIAgentPage /> }
 ]
 
 export const SECONDARY_ROUTES = SECONDARY_ROUTE_CONFIGS.map(({ path, element }) => ({

@@ -677,6 +677,12 @@ export default {
     'Protected event hint': 'الأحداث المحمية (NIP-70) لا يمكن نشرها إلا من قبل المؤلف. سترفض الخوادم هذه الأحداث من أطراف ثالثة، مما يمنع الآخرين من إعادة بث محتواك. ملاحظة: لا تدعم جميع الخوادم الأحداث المحمية.',
     'Allow insecure connections': 'السماح بالاتصالات غير الآمنة',
     'Allow insecure connections description':
-      'السماح بتحميل موارد http:// والاتصال بمرحلات ws://. قد يؤدي إلى تحذيرات المحتوى المختلط في المتصفح.'
+      'السماح بتحميل موارد http:// والاتصال بمرحلات ws://. قد يؤدي إلى تحذيرات المحتوى المختلط في المتصفح.',
+    'AI Agent': 'وكيل ذكي',
+    'OpenAI API key not configured': 'مفتاح OpenAI API لم يتم تكوينه',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'يرجى تعيين متغير بيئة VITE_OPENAI_API_KEY لاستخدام هذه الميزة.',
+    'Type a message...': 'اكتب رسالة...',
+    'Failed to get response': 'فشل في الحصول على الرد'
   }
 }

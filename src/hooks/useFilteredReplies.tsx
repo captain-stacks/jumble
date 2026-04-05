@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useAllDescendantThreads } from './useThread'
 import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 
-export function useFilteredReplies(stuffKey: string) {
+export function useFilteredReplies(stuffKey: string, showMutedContent = false) {
   const { pubkey } = useNostr()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { mutePubkeySet } = useMuteList()
@@ -30,8 +30,8 @@ export function useFilteredReplies(stuffKey: string) {
           if (replyKeySet.has(key)) return
           replyKeySet.add(key)
 
-          if (mutePubkeySet.has(evt.pubkey)) return
-          if (hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet)) return
+          if (!showMutedContent && mutePubkeySet.has(evt.pubkey)) return
+          if (!showMutedContent && hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet)) return
 
           const meetsTrust = await meetsMinTrustScore(evt.pubkey, trustScoreThreshold)
           if (!meetsTrust) {
@@ -66,7 +66,8 @@ export function useFilteredReplies(stuffKey: string) {
     mutePubkeySet,
     hideContentMentioningMutedUsers,
     getMinTrustScore,
-    meetsMinTrustScore
+    meetsMinTrustScore,
+    showMutedContent
   ])
 
   useEffect(() => {

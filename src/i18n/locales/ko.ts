@@ -683,6 +683,12 @@ export default {
     'Protected event hint': '보호된 이벤트(NIP-70)는 작성자만 게시할 수 있습니다. 릴레이는 제3자의 이벤트를 거부하여 다른 사람이 콘텐츠를 재배포하는 것을 방지합니다. 참고: 모든 릴레이가 보호된 이벤트를 지원하는 것은 아닙니다.',
     'Allow insecure connections': '안전하지 않은 연결 허용',
     'Allow insecure connections description':
-      'http:// 리소스 로드 및 ws:// 릴레이 연결을 허용합니다. 브라우저 혼합 콘텐츠 경고가 발생할 수 있습니다.'
+      'http:// 리소스 로드 및 ws:// 릴레이 연결 허용. 브라우저 혼합 콘텐츠 경고를 유발할 수 있습니다.',
+    'AI Agent': 'AI 에이전트',
+    'OpenAI API key not configured': 'OpenAI API 키가 구성되지 않았습니다',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      '이 기능을 사용하려면 VITE_OPENAI_API_KEY 환경 변수를 설정하세요.',
+    'Type a message...': '메시지 입력...',
+    'Failed to get response': '응답을 얻지 못했습니다'
   }
 }

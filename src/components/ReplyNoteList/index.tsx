@@ -13,11 +13,11 @@ import SubReplies from './SubReplies'
 const LIMIT = 100
 const SHOW_COUNT = 10
 
-export default function ReplyNoteList({ stuff }: { stuff: NEvent | string }) {
+export default function ReplyNoteList({ stuff, showMutedContent = false }: { stuff: NEvent | string; showMutedContent?: boolean }) {
   const { t } = useTranslation()
   const { stuffKey } = useStuff(stuff)
   const [initialLoading, setInitialLoading] = useState(false)
-  const { replies } = useFilteredReplies(stuffKey)
+  const { replies } = useFilteredReplies(stuffKey, showMutedContent)
 
   // Initial subscription
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function ReplyNoteList({ stuff }: { stuff: NEvent | string }) {
       {(loading || initialLoading) && <LoadingBar />}
       <div>
         {visibleItems.map((reply) => (
-          <Item key={reply.id} reply={reply} />
+          <Item key={reply.id} reply={reply} showMutedContent={showMutedContent} />
         ))}
       </div>
       <div ref={bottomRef} />
@@ -65,12 +65,12 @@ export default function ReplyNoteList({ stuff }: { stuff: NEvent | string }) {
   )
 }
 
-function Item({ reply }: { reply: NEvent }) {
+function Item({ reply, showMutedContent }: { reply: NEvent; showMutedContent: boolean }) {
   const key = useMemo(() => getEventKey(reply), [reply])
 
   return (
     <div className="relative border-b">
-      <ReplyNote event={reply} />
+      <ReplyNote event={reply} showMutedContent={showMutedContent} />
       <SubReplies parentKey={key} />
     </div>
   )

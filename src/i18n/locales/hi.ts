@@ -689,6 +689,12 @@ export default {
     'Protected event hint': 'संरक्षित इवेंट (NIP-70) केवल लेखक द्वारा प्रकाशित किए जा सकते हैं। रिले तीसरे पक्ष से इन इवेंट को अस्वीकार कर देंगे, जिससे दूसरों को आपकी सामग्री को पुनः प्रसारित करने से रोका जा सके। नोट: सभी रिले संरक्षित इवेंट का समर्थन नहीं करते।',
     'Allow insecure connections': 'असुरक्षित कनेक्शन की अनुमति दें',
     'Allow insecure connections description':
-      'http:// संसाधन लोड करने और ws:// रिले से कनेक्ट करने की अनुमति दें। ब्राउज़र मिश्रित सामग्री चेतावनियाँ ट्रिगर हो सकती हैं।'
+      'http:// संसाधनों को लोड करने और ws:// relays से कनेक्ट करने की अनुमति दें। ब्राउज़र मिश्रित सामग्री चेतावनी को ट्रिगर कर सकता है।',
+    'AI Agent': 'AI एजेंट',
+    'OpenAI API key not configured': 'OpenAI API key कॉन्फ़िगर नहीं है',
+    'Please set the VITE_OPENAI_API_KEY environment variable to use this feature.':
+      'इस सुविधा का उपयोग करने के लिए VITE_OPENAI_API_KEY environment variable सेट करें।',
+    'Type a message...': 'एक संदेश टाइप करें...',
+    'Failed to get response': 'प्रतिक्रिया प्राप्त करने में विफल'
   }
 }

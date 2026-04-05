@@ -5,12 +5,13 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import AccountList from '../AccountList'
+import EasyLogin from './EasyLogin'
 import NostrConnectLogin from './NostrConnectionLogin'
 import NpubLogin from './NpubLogin'
 import PrivateKeyLogin from './PrivateKeyLogin'
 import Signup from './Signup'
 
-type TAccountManagerPage = 'nsec' | 'bunker' | 'npub' | 'signup' | null
+type TAccountManagerPage = 'easy' | 'advanced' | 'nsec' | 'bunker' | 'npub' | 'signup' | null
 
 export default function AccountManager({ close }: { close?: () => void }) {
   const [page, setPage] = useState<TAccountManagerPage>(null)
@@ -18,15 +19,17 @@ export default function AccountManager({ close }: { close?: () => void }) {
   return (
     <>
       {page === 'nsec' ? (
-        <PrivateKeyLogin back={() => setPage(null)} onLoginSuccess={() => close?.()} />
+        <PrivateKeyLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
       ) : page === 'bunker' ? (
-        <NostrConnectLogin back={() => setPage(null)} onLoginSuccess={() => close?.()} />
+        <NostrConnectLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
       ) : page === 'npub' ? (
-        <NpubLogin back={() => setPage(null)} onLoginSuccess={() => close?.()} />
+        <NpubLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
       ) : page === 'signup' ? (
-        <Signup back={() => setPage(null)} onSignupSuccess={() => close?.()} />
-      ) : (
+        <Signup back={() => setPage('advanced')} onSignupSuccess={() => close?.()} />
+      ) : page === 'advanced' ? (
         <AccountManagerNav setPage={setPage} close={close} />
+      ) : (
+        <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} />
       )}
     </>
   )
@@ -46,7 +49,7 @@ function AccountManagerNav({
     <div onClick={(e) => e.stopPropagation()} className="flex flex-col gap-8">
       <div>
         <div className="text-center text-sm font-semibold text-muted-foreground">
-          {t('Add an Account')}
+          {t('Advanced Login')}
         </div>
         <div className="mt-4 space-y-2">
           {!!window.nostr && (
@@ -87,6 +90,15 @@ function AccountManagerNav({
           </div>
         </>
       )}
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={() => setPage(null)}
+          className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+        >
+          ← {t('Back')}
+        </button>
+      </div>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import AccountList from '../AccountList'
-import EasyLogin from './EasyLogin'
+import EasyLogin, { EASY_LOGIN_ENABLED } from './EasyLogin'
 import NostrConnectLogin from './NostrConnectionLogin'
 import NpubLogin from './NpubLogin'
 import PrivateKeyLogin from './PrivateKeyLogin'
@@ -26,7 +26,7 @@ export default function AccountManager({ close }: { close?: () => void }) {
         <NpubLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
       ) : page === 'signup' ? (
         <Signup back={() => setPage('advanced')} onSignupSuccess={() => close?.()} />
-      ) : page === 'advanced' ? (
+      ) : page === 'advanced' || !EASY_LOGIN_ENABLED ? (
         <AccountManagerNav setPage={setPage} close={close} />
       ) : (
         <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} />

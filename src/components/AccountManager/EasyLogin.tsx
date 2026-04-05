@@ -2,15 +2,24 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useNostr } from '@/providers/NostrProvider'
+import { nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
+export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
+
 async function emailToNsec(email: string): Promise<string> {
+  if (!MASTER_PUBKEY) throw new Error('Easy login is not configured (missing VITE_EASY_LOGIN_MASTER_PUBKEY)')
   const normalized = email.trim().toLowerCase()
+  // Step 1: hash email to get a deterministic ephemeral private key
   const encoded = new TextEncoder().encode(`nostr:easy-login:${normalized}`)
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
-  const sk = new Uint8Array(hashBuffer)
+  const ephemeralPrivkey = new Uint8Array(hashBuffer)
+  // Step 2: ECDH with master pubkey → conversation key becomes the actual private key
+  // getConversationKey expects pubkey as hex string
+  const sk = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
   return nsecEncode(sk)
 }
 

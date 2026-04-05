@@ -12,8 +12,7 @@ import { useTranslation } from 'react-i18next'
 const THEMES = [
   { key: 'system', label: 'System', icon: <Monitor className="size-5" /> },
   { key: 'light', label: 'Light', icon: <Sun className="size-5" /> },
-  { key: 'dark', label: 'Dark', icon: <Moon className="size-5" /> },
-  { key: 'pure-black', label: 'Pure Black', icon: <Moon className="size-5 fill-current" /> }
+  { key: 'dark', label: 'Dark', icon: <Moon className="size-5" /> }
 ] as const
 
 const LAYOUTS = [
@@ -29,7 +28,7 @@ const NOTIFICATION_STYLES = [
 const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
-  const { themeSetting, setThemeSetting, primaryColor, setPrimaryColor } = useTheme()
+  const { themeSetting, setThemeSetting, pureBlack, setPureBlack, primaryColor, setPrimaryColor } = useTheme()
   const {
     enableSingleColumnLayout,
     updateEnableSingleColumnLayout,
@@ -42,7 +41,7 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
       <div className="my-3 space-y-4">
         <div className="flex flex-col gap-2 px-4">
           <Label className="text-base">{t('Theme')}</Label>
-          <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid w-full grid-cols-3 gap-4">
             {THEMES.map(({ key, label, icon }) => (
               <OptionButton
                 key={key}
@@ -52,6 +51,23 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 onClick={() => setThemeSetting(key)}
               />
             ))}
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 px-4">
+          <Label className="text-base">{t('Pure Black')}</Label>
+          <div className="grid w-full grid-cols-2 gap-4">
+            <OptionButton
+              isSelected={!pureBlack}
+              icon={<Moon className="size-5" />}
+              label={t('Off')}
+              onClick={() => setPureBlack(false)}
+            />
+            <OptionButton
+              isSelected={pureBlack}
+              icon={<Moon className="size-5 fill-current" />}
+              label={t('On')}
+              onClick={() => setPureBlack(true)}
+            />
           </div>
         </div>
         {!isSmallScreen && (

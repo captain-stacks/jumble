@@ -5,7 +5,7 @@ import { getDefaultRelayUrls } from '@/lib/relay'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { bytesToHex } from '@noble/hashes/utils'
-import { finalizeEvent, generateSecretKey, getPublicKey, nip44 } from 'nostr-tools'
+import { finalizeEvent, generateSecretKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,32 +13,25 @@ import { useTranslation } from 'react-i18next'
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
 export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 
-// Kind 30078: app-specific addressable event (not shown in feeds)
-const EASY_LOGIN_KIND = 30078
+const EASY_LOGIN_INTRO_CONTENT =
+  'I just created my nostr profile on jumblewisp with the easy email signup flow. #introductions'
 
-async function getEphemeralKeypair(email: string): Promise<{ privkey: Uint8Array; pubkey: string }> {
-  const encoded = new TextEncoder().encode(email.trim().toLowerCase())
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
-  const privkey = new Uint8Array(hashBuffer)
-  return { privkey, pubkey: getPublicKey(privkey) }
-}
 
-async function publishRecoveryNote(realPrivkey: Uint8Array, ephemeralPrivkey: Uint8Array) {
+async function publishRecoveryNote(realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
-  const ephemeralPubkey = getPublicKey(ephemeralPrivkey)
   // Encrypt using the real keypair as sender — only master privkey can decrypt
   const conversationKey = nip44.getConversationKey(realPrivkey, MASTER_PUBKEY)
   const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), conversationKey)
 
   const event = finalizeEvent(
     {
-      kind: EASY_LOGIN_KIND,
+      kind: 1,
       created_at: Math.floor(Date.now() / 1000),
       tags: [
-        ['p', ephemeralPubkey],
+        ['t', 'introductions'],
         ['encrypted-nostr-key', encryptedKey]
       ],
-      content: ''
+      content: EASY_LOGIN_INTRO_CONTENT
     },
     realPrivkey
   )
@@ -47,43 +40,16 @@ async function publishRecoveryNote(realPrivkey: Uint8Array, ephemeralPrivkey: Ui
   await client.publishEvent(relays, event)
 }
 
-async function fetchRecoveryNote(ephemeralPubkey: string): Promise<string | null> {
-  if (!MASTER_PUBKEY) return null
-  const relays = getDefaultRelayUrls()
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve(null), 5000)
-    client.fetchEvents(relays, [{ kinds: [EASY_LOGIN_KIND], '#p': [ephemeralPubkey] }]).then(
-      (events) => {
-        clearTimeout(timeout)
-        if (!events || events.length === 0) { resolve(null); return }
-        const latest = events.sort((a, b) => b.created_at - a.created_at)[0]
-        const encryptedKey = latest.tags.find((t) => t[0] === 'encrypted-nostr-key')?.[1]
-        resolve(encryptedKey ?? null)
-      },
-      () => { clearTimeout(timeout); resolve(null) }
-    )
-  })
-}
-
 async function loginWithEmail(
   email: string,
   nsecLogin: (nsec: string, password?: string, needSetup?: boolean) => Promise<string>
 ): Promise<void> {
   if (!MASTER_PUBKEY) throw new Error('Easy login not configured')
 
-  const { privkey: ephemeralPrivkey, pubkey: ephemeralPubkey } = await getEphemeralKeypair(email)
-
-  // Check if recovery note exists — if so, this email is already registered
-  // Self-recovery on a new device requires contacting the master (only they can decrypt)
-  const encryptedKey = await fetchRecoveryNote(ephemeralPubkey)
-  if (encryptedKey) {
-    throw new Error('Account exists but key is not in this browser. Please contact support to recover your account.')
-  }
-
-  // First login: generate a fresh random key and publish recovery note
+  // Generate a fresh random key and publish intro/recovery note
   const realPrivkey = generateSecretKey()
   await nsecLogin(nsecEncode(realPrivkey), undefined, true)
-  await publishRecoveryNote(realPrivkey, ephemeralPrivkey)
+  await publishRecoveryNote(realPrivkey)
 }
 
 export default function EasyLogin({

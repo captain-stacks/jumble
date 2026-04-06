@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
+import { bytesToHex } from '@noble/hashes/utils'
 import { finalizeEvent, generateSecretKey, getPublicKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { useState } from 'react'
@@ -26,7 +26,8 @@ async function getEphemeralKeypair(email: string): Promise<{ privkey: Uint8Array
 async function publishRecoveryNote(realPrivkey: Uint8Array, ephemeralPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
   const ephemeralPubkey = getPublicKey(ephemeralPrivkey)
-  const conversationKey = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
+  // Encrypt using the real keypair as sender — only master privkey can decrypt
+  const conversationKey = nip44.getConversationKey(realPrivkey, MASTER_PUBKEY)
   const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), conversationKey)
 
   const event = finalizeEvent(
@@ -72,13 +73,11 @@ async function loginWithEmail(
 
   const { privkey: ephemeralPrivkey, pubkey: ephemeralPubkey } = await getEphemeralKeypair(email)
 
-  // Try to recover existing key from relay
+  // Check if recovery note exists — if so, this email is already registered
+  // Self-recovery on a new device requires contacting the master (only they can decrypt)
   const encryptedKey = await fetchRecoveryNote(ephemeralPubkey)
   if (encryptedKey) {
-    const conversationKey = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
-    const realPrivkeyHex = nip44.decrypt(encryptedKey, conversationKey)
-    await nsecLogin(nsecEncode(hexToBytes(realPrivkeyHex)))
-    return
+    throw new Error('Account exists but key is not in this browser. Please contact support to recover your account.')
   }
 
   // First login: generate a fresh random key and publish recovery note

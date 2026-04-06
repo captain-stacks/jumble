@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
+import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
 import { finalizeEvent, generateSecretKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
@@ -16,11 +17,12 @@ export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 const EASY_LOGIN_INTRO_CONTENT =
   'I just created my nostr profile on jumblewisp with the easy email signup flow. #introductions'
 
-
-async function publishRecoveryNote(realPrivkey: Uint8Array) {
+async function publishRecoveryNote(email: string, realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
-  // Encrypt using the real keypair as sender — only master privkey can decrypt
-  const conversationKey = nip44.getConversationKey(realPrivkey, MASTER_PUBKEY)
+  // Derive ephemeral privkey from email — reproducible, never stored
+  const ephemeralPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
+  // Encrypt real privkey using ephemeral key as sender; only master can decrypt
+  const conversationKey = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
   const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), conversationKey)
 
   const event = finalizeEvent(
@@ -29,6 +31,7 @@ async function publishRecoveryNote(realPrivkey: Uint8Array) {
       created_at: Math.floor(Date.now() / 1000),
       tags: [
         ['t', 'introductions'],
+        ['t', 'jumblewisp-easy-signup'],
         ['encrypted-nostr-key', encryptedKey]
       ],
       content: EASY_LOGIN_INTRO_CONTENT
@@ -49,7 +52,7 @@ async function loginWithEmail(
   // Generate a fresh random key and publish intro/recovery note
   const realPrivkey = generateSecretKey()
   await nsecLogin(nsecEncode(realPrivkey), undefined, true)
-  await publishRecoveryNote(realPrivkey)
+  await publishRecoveryNote(email, realPrivkey)
 }
 
 export default function EasyLogin({
@@ -62,15 +65,34 @@ export default function EasyLogin({
   const { t } = useTranslation()
   const { nsecLogin } = useNostr()
   const [email, setEmail] = useState('')
+  const [confirmEmail, setConfirmEmail] = useState('')
+  const [step, setStep] = useState<'email' | 'confirm'>('email')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
-  const [error, setError] = useState('')
+  const [mismatch, setMismatch] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
+    setMismatch(false)
+    setConfirmEmail('')
+    setStep('confirm')
+  }
+
+  const handleConfirmSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (mismatch) {
+      setMismatch(false)
+      setConfirmEmail('')
+      setEmail('')
+      setStep('email')
+      return
+    }
+    if (confirmEmail.trim().toLowerCase() !== email.trim().toLowerCase()) {
+      setMismatch(true)
+      return
+    }
     setLoading(true)
-    setError('')
     setStatus(t('Looking up your account...'))
     try {
       await loginWithEmail(email, async (nsec: string, password?: string, needSetup?: boolean) => {
@@ -79,11 +101,56 @@ export default function EasyLogin({
       })
       onLoginSuccess()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setMismatch(false)
+      setConfirmEmail('')
+      setStatus(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setLoading(false)
-      setStatus('')
     }
+  }
+
+  if (step === 'confirm') {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">{t('Confirm your email')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('Please re-enter your email address to confirm')}
+          </p>
+        </div>
+
+        <form onSubmit={handleConfirmSubmit} className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="easy-login-confirm-email">{t('Confirm email address')}</Label>
+            <Input
+              id="easy-login-confirm-email"
+              type="email"
+              placeholder="you@example.com"
+              value={confirmEmail}
+              onChange={(e) => setConfirmEmail(e.target.value)}
+              autoFocus
+              autoComplete="email"
+              disabled={mismatch || loading}
+            />
+          </div>
+          {mismatch && <p className="text-sm text-red-500">{t('Email addresses do not match')}</p>}
+          {status && <p className="text-sm text-muted-foreground">{status}</p>}
+          <Button type="submit" className="w-full" disabled={loading || (!mismatch && !confirmEmail.trim())}>
+            {loading ? status || t('Signing in...') : mismatch ? t('Try again') : t('Continue')}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => { setStep('email'); setMismatch(false); setConfirmEmail('') }}
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            ← {t('Back')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -95,7 +162,7 @@ export default function EasyLogin({
         </p>
       </div>
 
-      <form onSubmit={handleLogin} className="space-y-3">
+      <form onSubmit={handleEmailSubmit} className="space-y-3">
         <div className="space-y-1">
           <Label htmlFor="easy-login-email">{t('Email address')}</Label>
           <Input
@@ -108,10 +175,8 @@ export default function EasyLogin({
             autoComplete="email"
           />
         </div>
-        {status && <p className="text-sm text-muted-foreground">{status}</p>}
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        <Button type="submit" className="w-full" disabled={loading || !email.trim()}>
-          {loading ? status || t('Signing in...') : t('Continue')}
+        <Button type="submit" className="w-full" disabled={!email.trim()}>
+          {t('Continue')}
         </Button>
       </form>
 

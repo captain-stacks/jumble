@@ -631,8 +631,15 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
 
   const setupNewUser = async (signer: ISigner) => {
     const defaultRelays = getDefaultRelayUrls()
+    const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
+    const masterFollowListEvent = followSourcePubkey
+      ? await client.fetchFollowListEvent(followSourcePubkey)
+      : null
+    const followListTags = masterFollowListEvent
+      ? masterFollowListEvent.tags.filter(([t]) => t === 'p')
+      : []
     await Promise.allSettled([
-      client.publishEvent(defaultRelays, await signer.signEvent(createFollowListDraftEvent([]))),
+      client.publishEvent(defaultRelays, await signer.signEvent(createFollowListDraftEvent(followListTags))),
       client.publishEvent(defaultRelays, await signer.signEvent(createMuteListDraftEvent([]))),
       client.publishEvent(
         defaultRelays,

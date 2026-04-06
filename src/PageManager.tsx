@@ -93,7 +93,8 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
       if (
         e.key === 'Escape' &&
         !enableSingleColumnLayout &&
-        !document.querySelector('[role="dialog"]')
+        !document.querySelector('[role="dialog"]') &&
+        !modalManager.pop()
       ) {
         clearSecondaryPages()
       }

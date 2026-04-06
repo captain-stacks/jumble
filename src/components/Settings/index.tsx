@@ -2,6 +2,7 @@ import AboutInfoDialog from '@/components/AboutInfoDialog'
 import Donation from '@/components/Donation'
 import {
   toAppearanceSettings,
+  toEasyLoginRecovery,
   toEmojiPackSettings,
   toGeneralSettings,
   toPostSettings,
@@ -13,6 +14,8 @@ import {
 import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
+
+const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
 import {
   Check,
   ChevronRight,
@@ -26,6 +29,7 @@ import {
   Server,
   Settings2,
   Smile,
+  UserSearch,
   Wallet
 } from 'lucide-react'
 import { forwardRef, HTMLProps, useState } from 'react'
@@ -127,6 +131,15 @@ export default function Settings() {
             <div>{t('Copy private key')} (ncryptsec)</div>
           </div>
           {copiedNcryptsec ? <Check /> : <Copy />}
+        </SettingItem>
+      )}
+      {MASTER_PUBKEY && pubkey === MASTER_PUBKEY && (
+        <SettingItem className="clickable" onClick={() => push(toEasyLoginRecovery())}>
+          <div className="flex items-center gap-4">
+            <UserSearch />
+            <div>Account Recovery</div>
+          </div>
+          <ChevronRight />
         </SettingItem>
       )}
       <SettingItem className="clickable" onClick={() => push(toSystemSettings())}>

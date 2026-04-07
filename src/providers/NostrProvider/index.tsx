@@ -632,15 +632,33 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
   const setupNewUser = async (signer: ISigner) => {
     const defaultRelays = getDefaultRelayUrls()
     const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
-    const masterFollowListEvent = followSourcePubkey
-      ? await client.fetchFollowListEvent(followSourcePubkey)
-      : null
+
+    const [masterFollowListEvent, spicyListEvent] = followSourcePubkey
+      ? await Promise.all([
+          client.fetchFollowListEvent(followSourcePubkey),
+          client.fetchParameterizedReplaceableEvent(followSourcePubkey, 30001, 'spicy')
+        ])
+      : [null, null]
+
     const followListTags = masterFollowListEvent
       ? masterFollowListEvent.tags.filter(([t]) => t === 'p')
       : []
+
+    const spicyPubkeys = spicyListEvent
+      ? spicyListEvent.tags.filter(([t]) => t === 'p').map(([, pubkey]) => pubkey)
+      : []
+
+    const newUserPubkey = await signer.getPublicKey()
+    const muteListContent = spicyPubkeys.length > 0
+      ? await signer.nip44Encrypt(
+          newUserPubkey,
+          JSON.stringify(spicyPubkeys.map((pk) => ['p', pk]))
+        )
+      : ''
+
     await Promise.allSettled([
       client.publishEvent(defaultRelays, await signer.signEvent(createFollowListDraftEvent(followListTags))),
-      client.publishEvent(defaultRelays, await signer.signEvent(createMuteListDraftEvent([]))),
+      client.publishEvent(defaultRelays, await signer.signEvent(createMuteListDraftEvent([], muteListContent))),
       client.publishEvent(
         defaultRelays,
         await signer.signEvent(

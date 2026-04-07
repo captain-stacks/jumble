@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useFetchProfile } from '@/hooks'
 import { toProfile } from '@/lib/link'
-import { generateImageByPubkey } from '@/lib/pubkey'
+import { generateImageByPubkey, pubkeyToNpub } from '@/lib/pubkey'
 import { cn, isTouchDevice } from '@/lib/utils'
 import { SecondaryPageLink } from '@/PageManager'
 import { useMemo } from 'react'
@@ -87,6 +87,7 @@ export function SimpleUserAvatar({
       classNames={{
         wrapper: cn('shrink-0 rounded-full bg-background', UserAvatarSizeCnMap[size], className)
       }}
+      data-npub={pubkeyToNpub(pubkey)}
       onClick={onClick}
     />
   )

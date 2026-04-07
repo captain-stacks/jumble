@@ -1445,6 +1445,10 @@ class ClientService extends EventTarget {
     return this.fetchReplaceableEvent(pubkey, ExtendedKind.PINNED_USERS)
   }
 
+  async fetchParameterizedReplaceableEvent(pubkey: string, kind: number, d: string) {
+    return this.fetchReplaceableEvent(pubkey, kind, d)
+  }
+
   async updateBlossomServerListEventCache(evt: NEvent) {
     await this.updateReplaceableEventCache(evt)
   }

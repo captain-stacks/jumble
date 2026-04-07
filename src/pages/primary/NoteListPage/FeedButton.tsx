@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { ChevronDown, Server, Star, UsersRound } from 'lucide-react'
+import { ChevronDown, Globe, Server, Star, UsersRound } from 'lucide-react'
 import { forwardRef, HTMLAttributes, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -77,6 +77,9 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
       if (feedInfo?.feedType === 'pinned') {
         return t('Special Follow')
       }
+      if (feedInfo?.feedType === 'global') {
+        return t('Global')
+      }
       if (relayUrls.length === 0) {
         return t('Choose a feed')
       }
@@ -91,6 +94,7 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
     const icon = useMemo(() => {
       if (feedInfo?.feedType === 'following') return <UsersRound />
       if (feedInfo?.feedType === 'pinned') return <Star />
+      if (feedInfo?.feedType === 'global') return <Globe />
       if (feedInfo?.feedType === 'relay' && feedInfo.id) {
         return <RelayIcon url={feedInfo.id} />
       }

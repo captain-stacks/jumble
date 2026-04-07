@@ -7,7 +7,7 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinnedUsers } from '@/providers/PinnedUsersProvider'
-import { Settings2, Star, UsersRound } from 'lucide-react'
+import { Globe, Settings2, Star, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import RelayIcon from '../RelayIcon'
@@ -101,22 +101,36 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
       </div>
 
       {/* Relay Feeds Section */}
-      {hasRelays && (
-        <div className="space-y-2">
-          <SectionHeader
-            title={t('Relay Feeds')}
-            action={
-              <SecondaryPageLink
-                to={toRelaySettings()}
-                className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
-                onClick={() => close?.()}
-              >
-                <Settings2 className="size-3" />
-                {t('edit')}
-              </SecondaryPageLink>
-            }
-          />
-          <div className="space-y-1.5">
+      <div className="space-y-2">
+        <SectionHeader
+          title={t('Relay Feeds')}
+          action={
+            <SecondaryPageLink
+              to={toRelaySettings()}
+              className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
+              onClick={() => close?.()}
+            >
+              <Settings2 className="size-3" />
+              {t('edit')}
+            </SecondaryPageLink>
+          }
+        />
+        <div className="space-y-1.5">
+          <FeedSwitcherItem
+            isActive={feedInfo?.feedType === 'global'}
+            onClick={() => {
+              switchFeed('global')
+              close?.()
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex size-6 shrink-0 items-center justify-center">
+                <Globe className="size-5" />
+              </div>
+              <div className="flex-1">{t('Global')}</div>
+            </div>
+          </FeedSwitcherItem>
+          {hasRelays && <>
             {filteredRelaySets.map((set) => (
               <RelaySetCard
                 key={set.id}
@@ -144,9 +158,9 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 </div>
               </FeedSwitcherItem>
             ))}
-          </div>
+          </>}
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -13,6 +13,8 @@ export default function RelaysFeed() {
       return `relay-${feedInfo.id}`
     } else if (feedInfo?.feedType === 'relays' && feedInfo.id) {
       return `relays-${feedInfo.id}`
+    } else if (feedInfo?.feedType === 'global') {
+      return 'relays-global'
     }
     return 'relays-default'
   }, [feedInfo])

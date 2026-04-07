@@ -67,6 +67,8 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
     content = <FollowingFeed />
   } else if (feedInfo.feedType === 'pinned') {
     content = <PinnedFeed />
+  } else if (feedInfo.feedType === 'global') {
+    content = <RelaysFeed />
   } else {
     content = (
       <>

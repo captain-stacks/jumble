@@ -127,7 +127,7 @@ function buildHistory(msgs: TMessage[]): { role: string; content: string }[] {
       let text = m.content
       try {
         text = JSON.parse(m.content).message ?? m.content
-      } catch {}
+      } catch { /* invalid JSON, use raw content */ }
       if (m.actions?.some((a) => a.status === 'done' || a.status === 'error')) {
         const summary = m.actions
           .map((a) => {
@@ -315,7 +315,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
         }))
       }))
       localStorage.setItem('ai_agent_history', JSON.stringify(sanitized))
-    } catch {}
+    } catch (_e) { /* storage unavailable */ }
   }, [messages])
 
   const scrollToBottom = () =>

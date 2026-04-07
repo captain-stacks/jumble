@@ -1,4 +1,5 @@
 import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import { getDefaultRelayUrls } from '@/lib/relay'
 import { getRelaySetFromEvent } from '@/lib/event-metadata'
 import { isWebsocketUrl, normalizeUrl } from '@/lib/url'
 import indexedDb from '@/services/indexed-db.service'
@@ -81,6 +82,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       // update pinned feed if pubkey changes
       if (feedInfo?.feedType === 'pinned' && pubkey) {
         return await switchFeed('pinned', { pubkey })
+      }
+
+      if (feedInfo?.feedType === 'global') {
+        return await switchFeed('global')
       }
 
       setIsReady(true)
@@ -185,6 +190,15 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       storage.setFeedInfo(newFeedInfo, pubkey)
 
       setRelayUrls([])
+      setIsReady(true)
+      return
+    }
+    if (feedType === 'global') {
+      const newFeedInfo = { feedType }
+      setFeedInfo(newFeedInfo)
+      feedInfoRef.current = newFeedInfo
+      storage.setFeedInfo(newFeedInfo, pubkey)
+      setRelayUrls(getDefaultRelayUrls())
       setIsReady(true)
       return
     }

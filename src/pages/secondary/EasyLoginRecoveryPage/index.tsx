@@ -11,8 +11,6 @@ import { forwardRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
-const EASY_LOGIN_INTRO_CONTENT =
-  'I just created my nostr profile on jumblewisp with the easy email signup flow. #introductions'
 
 
 type TRecoveredAccount = {

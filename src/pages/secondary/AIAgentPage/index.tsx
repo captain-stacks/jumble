@@ -315,7 +315,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
         }))
       }))
       localStorage.setItem('ai_agent_history', JSON.stringify(sanitized))
-    } catch (_e) { /* storage unavailable */ }
+    } catch { /* storage unavailable */ }
   }, [messages])
 
   const scrollToBottom = () =>

@@ -33,6 +33,9 @@ type TUserPreferencesContext = {
 
   hideRelayExplore: boolean
   updateHideRelayExplore: (value: boolean) => void
+
+  enableAiAgent: boolean
+  updateEnableAiAgent: (value: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -61,6 +64,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [hideBookmarks, setHideBookmarks] = useState(storage.getHideBookmarks())
   const [satsToBitcoins, setSatsToBitcoins] = useState(storage.getSatsToBitcoins())
   const [hideRelayExplore, setHideRelayExplore] = useState(storage.getHideRelayExplore())
+  const [enableAiAgent, setEnableAiAgent] = useState(storage.getEnableAiAgent())
 
   useEffect(() => {
     if (!isSmallScreen && enableSingleColumnLayout) {
@@ -115,6 +119,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setHideRelayExplore(value)
   }
 
+  const updateEnableAiAgent = (value: boolean) => {
+    setEnableAiAgent(value)
+    storage.setEnableAiAgent(value)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -137,7 +146,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         satsToBitcoins,
         updateSatsToBitcoins,
         hideRelayExplore,
-        updateHideRelayExplore
+        updateHideRelayExplore,
+        enableAiAgent,
+        updateEnableAiAgent
       }}
     >
       {children}

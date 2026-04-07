@@ -52,7 +52,9 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     satsToBitcoins,
     updateSatsToBitcoins,
     hideRelayExplore,
-    updateHideRelayExplore
+    updateHideRelayExplore,
+    enableAiAgent,
+    updateEnableAiAgent
   } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
@@ -265,6 +267,19 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="hide-relay-explore"
             checked={hideRelayExplore}
             onCheckedChange={updateHideRelayExplore}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="enable-ai-agent" className="text-base font-normal">
+            <div>{t('AI Agent')}</div>
+            <div className="text-muted-foreground">
+              {t('Enable the AI Agent in the sidebar')}
+            </div>
+          </Label>
+          <Switch
+            id="enable-ai-agent"
+            checked={enableAiAgent}
+            onCheckedChange={updateEnableAiAgent}
           />
         </SettingItem>
         <MutedWords />

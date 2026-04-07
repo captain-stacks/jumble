@@ -77,6 +77,7 @@ class LocalStorageService {
   private hideBookmarks: boolean = false
   private satsToBitcoins: boolean = false
   private hideRelayExplore: boolean = true
+  private enableAiAgent: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -303,6 +304,9 @@ class LocalStorageService {
         // Invalid JSON, use default
       }
     }
+    if (this.minTrustScoreMap['relays-global'] === undefined) {
+      this.minTrustScoreMap['relays-global'] = 100
+    }
 
     const defaultRelayUrlsStr = window.localStorage.getItem(StorageKey.DEFAULT_RELAY_URLS)
     if (defaultRelayUrlsStr) {
@@ -362,6 +366,9 @@ class LocalStorageService {
 
     const storedHideRelayExplore = window.localStorage.getItem(StorageKey.HIDE_RELAY_EXPLORE)
     this.hideRelayExplore = storedHideRelayExplore === null ? true : storedHideRelayExplore === 'true'
+
+    this.enableAiAgent =
+      window.localStorage.getItem(StorageKey.ENABLE_AI_AGENT) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -799,6 +806,15 @@ class LocalStorageService {
   setHideRelayExplore(value: boolean) {
     this.hideRelayExplore = value
     window.localStorage.setItem(StorageKey.HIDE_RELAY_EXPLORE, value.toString())
+  }
+
+  getEnableAiAgent() {
+    return this.enableAiAgent
+  }
+
+  setEnableAiAgent(value: boolean) {
+    this.enableAiAgent = value
+    window.localStorage.setItem(StorageKey.ENABLE_AI_AGENT, value.toString())
   }
 }
 

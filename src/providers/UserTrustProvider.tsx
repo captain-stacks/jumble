@@ -6,6 +6,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { useFollowList } from './FollowListProvider'
 import { useNostr } from './NostrProvider'
 
+const FOLLOW_SOURCE_PUBKEY = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
+
 type TUserTrustContext = {
   minTrustScore: number
   minTrustScoreMap: Record<string, number>
@@ -37,25 +39,30 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
-    if (!currentPubkey) return
-
     const initWoT = async () => {
       wotSet.clear()
-      const followings = Array.from(followingSet)
-      followings.forEach((pubkey) => wotSet.add(pubkey))
 
-      const batchSize = 20
-      for (let i = 0; i < followings.length; i += batchSize) {
-        const batch = followings.slice(i, i + batchSize)
-        await Promise.allSettled(
-          batch.map(async (pubkey) => {
-            const _followings = await client.fetchFollowings(pubkey, false)
-            _followings.forEach((following) => {
-              wotSet.add(following)
+      if (currentPubkey) {
+        const followings = Array.from(followingSet)
+        followings.forEach((pubkey) => wotSet.add(pubkey))
+
+        const batchSize = 20
+        for (let i = 0; i < followings.length; i += batchSize) {
+          const batch = followings.slice(i, i + batchSize)
+          await Promise.allSettled(
+            batch.map(async (pubkey) => {
+              const _followings = await client.fetchFollowings(pubkey, false)
+              _followings.forEach((following) => {
+                wotSet.add(following)
+              })
             })
-          })
-        )
-        await new Promise((resolve) => setTimeout(resolve, 200))
+          )
+          await new Promise((resolve) => setTimeout(resolve, 200))
+        }
+      } else if (FOLLOW_SOURCE_PUBKEY) {
+        wotSet.add(FOLLOW_SOURCE_PUBKEY)
+        const followings = await client.fetchFollowings(FOLLOW_SOURCE_PUBKEY, false)
+        followings.forEach((pubkey) => wotSet.add(pubkey))
       }
     }
     initWoT()
@@ -63,7 +70,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   const isUserTrusted = useCallback(
     (pubkey: string) => {
-      if (!currentPubkey || pubkey === currentPubkey) return true
+      if (pubkey === currentPubkey) return true
+      if (!currentPubkey && !FOLLOW_SOURCE_PUBKEY) return true
       return wotSet.has(pubkey)
     },
     [currentPubkey]

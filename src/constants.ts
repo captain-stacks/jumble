@@ -55,6 +55,7 @@ export const StorageKey = {
   HIDE_BOOKMARKS: 'hideBookmarks',
   SATS_TO_BITCOINS: 'satsToBitcoins',
   HIDE_RELAY_EXPLORE: 'hideRelayExplore',
+  ENABLE_AI_AGENT: 'enableAiAgent',
   ENABLE_LIVE_FEED: 'enableLiveFeed', // deprecated
   HIDE_UNTRUSTED_NOTES: 'hideUntrustedNotes', // deprecated
   HIDE_UNTRUSTED_INTERACTIONS: 'hideUntrustedInteractions', // deprecated

@@ -656,15 +656,21 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         )
       : ''
 
+    const [followListEvent, muteListEvent, relayListEvent] = await Promise.all([
+      signer.signEvent(createFollowListDraftEvent(followListTags)),
+      signer.signEvent(createMuteListDraftEvent([], muteListContent)),
+      signer.signEvent(createRelayListDraftEvent(defaultRelays.map((url) => ({ url, scope: 'both' }))))
+    ])
+
     await Promise.allSettled([
-      client.publishEvent(defaultRelays, await signer.signEvent(createFollowListDraftEvent(followListTags))),
-      client.publishEvent(defaultRelays, await signer.signEvent(createMuteListDraftEvent([], muteListContent))),
-      client.publishEvent(
-        defaultRelays,
-        await signer.signEvent(
-          createRelayListDraftEvent(defaultRelays.map((url) => ({ url, scope: 'both' })))
-        )
-      )
+      client.publishEvent(defaultRelays, followListEvent),
+      client.publishEvent(defaultRelays, muteListEvent),
+      client.publishEvent(defaultRelays, relayListEvent)
+    ])
+
+    await Promise.allSettled([
+      updateFollowListEvent(followListEvent),
+      updateMuteListEvent(muteListEvent, spicyPubkeys.map((pk) => ['p', pk]))
     ])
   }
 

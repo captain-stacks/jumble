@@ -15,7 +15,7 @@ const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | 
 export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 
 const EASY_LOGIN_INTRO_CONTENT =
-  'I just created my nostr profile on jumblewisp with the easy email signup flow. #introductions'
+  'I just created my nostr profile on jumblewisp with the easy email signup flow!\n#introductions'
 
 async function publishRecoveryNote(email: string, realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
@@ -43,16 +43,32 @@ async function publishRecoveryNote(email: string, realPrivkey: Uint8Array) {
   await client.publishEvent(relays, event)
 }
 
+async function publishProfile(displayName: string, realPrivkey: Uint8Array) {
+  const event = finalizeEvent(
+    {
+      kind: 0,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [],
+      content: JSON.stringify({ display_name: displayName, name: displayName })
+    },
+    realPrivkey
+  )
+  await client.publishEvent(getDefaultRelayUrls(), event)
+}
+
 async function loginWithEmail(
   email: string,
+  displayName: string,
   nsecLogin: (nsec: string, password?: string, needSetup?: boolean) => Promise<string>
 ): Promise<void> {
   if (!MASTER_PUBKEY) throw new Error('Easy login not configured')
 
-  // Generate a fresh random key and publish intro/recovery note
   const realPrivkey = generateSecretKey()
   await nsecLogin(nsecEncode(realPrivkey), undefined, true)
-  await publishRecoveryNote(email, realPrivkey)
+  await Promise.all([
+    publishRecoveryNote(email, realPrivkey),
+    displayName.trim() ? publishProfile(displayName.trim(), realPrivkey) : Promise.resolve()
+  ])
 }
 
 export default function EasyLogin({
@@ -65,8 +81,9 @@ export default function EasyLogin({
   const { t } = useTranslation()
   const { nsecLogin } = useNostr()
   const [email, setEmail] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [confirmEmail, setConfirmEmail] = useState('')
-  const [step, setStep] = useState<'email' | 'confirm'>('email')
+  const [step, setStep] = useState<'email' | 'displayname' | 'confirm'>('email')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [mismatch, setMismatch] = useState(false)
@@ -74,6 +91,11 @@ export default function EasyLogin({
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
+    setStep('displayname')
+  }
+
+  const handleDisplayNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
     setMismatch(false)
     setConfirmEmail('')
     setStep('confirm')
@@ -95,7 +117,7 @@ export default function EasyLogin({
     setLoading(true)
     setStatus(t('Looking up your account...'))
     try {
-      await loginWithEmail(email, async (nsec: string, password?: string, needSetup?: boolean) => {
+      await loginWithEmail(email, displayName, async (nsec: string, password?: string, needSetup?: boolean) => {
         setStatus(needSetup ? t('Creating your account...') : t('Signing in...'))
         return nsecLogin(nsec, password, needSetup)
       })
@@ -107,6 +129,47 @@ export default function EasyLogin({
     } finally {
       setLoading(false)
     }
+  }
+
+  if (step === 'displayname') {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">{t('Choose a display name')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('This is how others will see you on Nostr')}
+          </p>
+        </div>
+
+        <form onSubmit={handleDisplayNameSubmit} className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="easy-login-display-name">{t('Display name')}</Label>
+            <Input
+              id="easy-login-display-name"
+              type="text"
+              placeholder={t('Your name')}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              autoFocus
+              autoComplete="name"
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            {displayName.trim() ? t('Continue') : t('Skip')}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setStep('email')}
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            ← {t('Back')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (step === 'confirm') {
@@ -143,7 +206,7 @@ export default function EasyLogin({
         <div className="text-center">
           <button
             type="button"
-            onClick={() => { setStep('email'); setMismatch(false); setConfirmEmail('') }}
+            onClick={() => { setStep('displayname'); setMismatch(false); setConfirmEmail('') }}
             className="text-xs text-muted-foreground underline-offset-2 hover:underline"
           >
             ← {t('Back')}

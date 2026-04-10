@@ -1,3 +1,4 @@
+import ChangeRecoveryEmailPage from '@/pages/secondary/ChangeRecoveryEmailPage'
 import EasyLoginRecoveryPage from '@/pages/secondary/EasyLoginRecoveryPage'
 import AIAgentPage from '@/pages/secondary/AIAgentPage'
 import AppearanceSettingsPage from '@/pages/secondary/AppearanceSettingsPage'
@@ -56,7 +57,8 @@ const SECONDARY_ROUTE_CONFIGS = [
   { path: '/follow-packs/:id', element: <FollowPackPage /> },
   { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
   { path: '/ai-agent', element: <AIAgentPage /> },
-  { path: '/settings/easy-login-recovery', element: <EasyLoginRecoveryPage /> }
+  { path: '/settings/easy-login-recovery', element: <EasyLoginRecoveryPage /> },
+  { path: '/settings/change-recovery-email', element: <ChangeRecoveryEmailPage /> }
 ]
 
 export const SECONDARY_ROUTES = SECONDARY_ROUTE_CONFIGS.map(({ path, element }) => ({

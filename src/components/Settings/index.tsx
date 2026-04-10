@@ -2,6 +2,7 @@ import AboutInfoDialog from '@/components/AboutInfoDialog'
 import Donation from '@/components/Donation'
 import {
   toAppearanceSettings,
+  toChangeRecoveryEmail,
   toEasyLoginRecovery,
   toEmojiPackSettings,
   toGeneralSettings,
@@ -131,6 +132,15 @@ export default function Settings() {
             <div>{t('Copy private key')} (ncryptsec)</div>
           </div>
           {copiedNcryptsec ? <Check /> : <Copy />}
+        </SettingItem>
+      )}
+      {MASTER_PUBKEY && !!nsec && (
+        <SettingItem className="clickable" onClick={() => push(toChangeRecoveryEmail())}>
+          <div className="flex items-center gap-4">
+            <KeyRound />
+            <div>Change recovery email</div>
+          </div>
+          <ChevronRight />
         </SettingItem>
       )}
       {MASTER_PUBKEY && pubkey === MASTER_PUBKEY && (

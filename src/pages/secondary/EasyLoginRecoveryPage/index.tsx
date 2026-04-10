@@ -6,6 +6,7 @@ import { getDefaultRelayUrls } from '@/lib/relay'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
+import { nip19 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { forwardRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
@@ -25,6 +26,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
 ) {
   const { pubkey, nip44Decrypt } = useNostr()
   const [email, setEmail] = useState('')
+  const [npub, setNpub] = useState('')
   const [loading, setLoading] = useState(false)
   const [accounts, setAccounts] = useState<TRecoveredAccount[] | null>(null)
   const [totalNotes, setTotalNotes] = useState<number | null>(null)
@@ -41,20 +43,34 @@ export default forwardRef(function EasyLoginRecoveryPage(
     setTotalNotes(null)
 
     try {
+      let authorPubkey: string | undefined
+      if (npub.trim()) {
+        try {
+          const decoded = nip19.decode(npub.trim())
+          if (decoded.type === 'npub') authorPubkey = decoded.data
+        } catch {
+          setError('Invalid npub')
+          setLoading(false)
+          return
+        }
+      }
+
       const relays = getDefaultRelayUrls()
       const allEvents = await client.fetchEvents(relays, [
-        { kinds: [1], '#t': ['jumblewisp-easy-signup'], limit: 500 }
+        {
+          kinds: [30078],
+          '#m': [MASTER_PUBKEY!],
+          '#d': ['jumblewisp-recovery-key'],
+          ...(authorPubkey ? { authors: [authorPubkey] } : {}),
+          limit: 500
+        }
       ])
       setTotalNotes(allEvents.length)
 
-      const candidates = allEvents.filter((ev) =>
-        ev.tags.some((t) => t[0] === 'encrypted-nostr-key')
-      )
-
       const found: TRecoveredAccount[] = []
 
-      for (const ev of candidates) {
-        const encryptedKey = ev.tags.find((t) => t[0] === 'encrypted-nostr-key')?.[1]
+      for (const ev of allEvents) {
+        const encryptedKey = ev.content
         if (!encryptedKey) continue
         try {
           const { getPublicKey } = await import('nostr-tools')
@@ -117,7 +133,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
     <SecondaryPageLayout ref={ref} index={index} title="Account Recovery">
       <div className="space-y-6 p-4">
         <p className="text-sm text-muted-foreground">
-          Enter the user's email address to recover their private key(s) from their intro note.
+          Enter the user's email address to recover their private key from their recovery event.
         </p>
 
         <form onSubmit={handleRecover} className="space-y-3">
@@ -130,6 +146,16 @@ export default forwardRef(function EasyLoginRecoveryPage(
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="recovery-npub">User's npub <span className="text-muted-foreground">(optional)</span></Label>
+            <Input
+              id="recovery-npub"
+              type="text"
+              placeholder="npub1..."
+              value={npub}
+              onChange={(e) => setNpub(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}

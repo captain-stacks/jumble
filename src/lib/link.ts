@@ -95,3 +95,4 @@ export const toUserAggregationDetail = (feedId: string, pubkey: string) => {
   return `/user-aggregation/${feedId}/${npub}`
 }
 export const toEasyLoginRecovery = () => '/settings/easy-login-recovery'
+export const toChangeRecoveryEmail = () => '/settings/change-recovery-email'

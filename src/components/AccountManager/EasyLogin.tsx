@@ -15,9 +15,22 @@ const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | 
 export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 
 const EASY_LOGIN_INTRO_CONTENT =
-  'I just created my nostr profile on jumblewisp with the easy email signup flow!\n#introductions'
+  'I just created my nostr profile on #jumblewisp with the easy email signup flow!\n\nJumblewisp is a community fork of the Jumble Nostr client: https://jumble.thecaptain.dev\n\n#introductions'
 
-async function publishRecoveryNote(email: string, realPrivkey: Uint8Array) {
+async function publishIntroNote(realPrivkey: Uint8Array) {
+  const event = finalizeEvent(
+    {
+      kind: 1,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['t', 'introductions'], ['t', 'jumblewisp']],
+      content: EASY_LOGIN_INTRO_CONTENT
+    },
+    realPrivkey
+  )
+  await client.publishEvent(getDefaultRelayUrls(), event)
+}
+
+async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
   // Derive ephemeral privkey from email — reproducible, never stored
   const ephemeralPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
@@ -27,20 +40,18 @@ async function publishRecoveryNote(email: string, realPrivkey: Uint8Array) {
 
   const event = finalizeEvent(
     {
-      kind: 1,
+      kind: 30078,
       created_at: Math.floor(Date.now() / 1000),
       tags: [
-        ['t', 'introductions'],
-        ['t', 'jumblewisp-easy-signup'],
-        ['encrypted-nostr-key', encryptedKey]
+        ['d', 'jumblewisp-recovery-key'],
+        ['m', MASTER_PUBKEY]
       ],
-      content: EASY_LOGIN_INTRO_CONTENT
+      content: encryptedKey
     },
     realPrivkey
   )
 
-  const relays = getDefaultRelayUrls()
-  await client.publishEvent(relays, event)
+  await client.publishEvent(getDefaultRelayUrls(), event)
 }
 
 async function publishProfile(displayName: string, realPrivkey: Uint8Array) {
@@ -66,7 +77,8 @@ async function loginWithEmail(
   const realPrivkey = generateSecretKey()
   await nsecLogin(nsecEncode(realPrivkey), undefined, true)
   await Promise.all([
-    publishRecoveryNote(email, realPrivkey),
+    publishIntroNote(realPrivkey),
+    publishRecoveryEvent(email, realPrivkey),
     displayName.trim() ? publishProfile(displayName.trim(), realPrivkey) : Promise.resolve()
   ])
 }

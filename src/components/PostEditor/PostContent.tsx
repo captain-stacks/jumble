@@ -15,7 +15,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import postEditorCache from '@/services/post-editor-cache.service'
 import threadService from '@/services/thread.service'
 import { TPollCreateData } from '@/types'
-import { CircleHelp, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, X } from 'lucide-react'
+import { CircleHelp, Check, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, SpellCheck, X } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -75,6 +75,8 @@ export default function PostContent({
   const [minPow, setMinPow] = useState(0)
   const [translatingReply, setTranslatingReply] = useState(false)
   const [translatedReplyLang, setTranslatedReplyLang] = useState<string | null>(null)
+  const [proofreading, setProofreading] = useState(false)
+  const [proofreadResult, setProofreadResult] = useState<string | null>(null)
 
   const [openaiReady, setOpenaiReady] = useState(() => openaiService.isInitialized())
   useEffect(() => {
@@ -97,6 +99,38 @@ export default function PostContent({
       toast.error('Translation failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setTranslatingReply(false)
+    }
+  }
+
+  const handleProofread = async () => {
+    if (!text.trim() || proofreading) return
+    setProofreading(true)
+    setProofreadResult(null)
+    try {
+      const { fixed } = await openaiService.proofread(text)
+      setProofreadResult(fixed)
+    } catch (err) {
+      toast.error('Proofreading failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setProofreading(false)
+    }
+  }
+
+  const applyProofread = () => {
+    if (!proofreadResult) return
+    textareaRef.current?.replaceText(proofreadResult)
+    setProofreadResult(null)
+    if (pendingPostRef.current) {
+      pendingPostRef.current = false
+      doPost()
+    }
+  }
+
+  const dismissProofread = () => {
+    setProofreadResult(null)
+    if (pendingPostRef.current) {
+      pendingPostRef.current = false
+      doPost()
     }
   }
 
@@ -168,12 +202,39 @@ export default function PostContent({
   }, [defaultContent, parentStuff, isNsfw, isPoll, pollCreateData, addClientTag])
 
   const postingRef = useRef(false)
+  const pendingPostRef = useRef(false)
 
   const post = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
     checkLogin(async () => {
       if (!canPost || !pubkey || postingRef.current) return
 
+      if (openaiReady && text.trim() && !pendingPostRef.current) {
+        pendingPostRef.current = true
+        setProofreading(true)
+        setProofreadResult(null)
+        try {
+          const { fixed } = await openaiService.proofread(text)
+          setProofreadResult(fixed)
+        } catch {
+          // proofreading failed, proceed with post
+          pendingPostRef.current = false
+          doPost()
+        } finally {
+          setProofreading(false)
+        }
+        return
+      }
+
+      pendingPostRef.current = false
+      doPost()
+
+    })
+  }
+
+  const doPost = () => {
+    checkLogin(async () => {
+      if (!canPost || !pubkey || postingRef.current) return
       postingRef.current = true
       setPosting(true)
       try {
@@ -210,7 +271,6 @@ export default function PostContent({
         errors.forEach((err) => {
           toast.error(`${t('Failed to post')}: ${err}`, { duration: 10_000 })
         })
-        return
       } finally {
         setPosting(false)
         postingRef.current = false
@@ -267,6 +327,14 @@ export default function PostContent({
         onUploadEnd={handleUploadEnd}
         placeholder={highlightedText ? t('Write your thoughts about this highlight...') : undefined}
       />
+      {proofreadResult !== null && (
+        <ProofreadPanel
+          original={text}
+          fixed={proofreadResult}
+          onApply={applyProofread}
+          onDismiss={dismissProofread}
+        />
+      )}
       {isPoll && (
         <PollEditor
           pollCreateData={pollCreateData}
@@ -396,6 +464,17 @@ export default function PostContent({
               {translatingReply ? <LoaderCircle className="animate-spin" /> : <Languages className={translatedReplyLang ? 'text-pink-400' : ''} />}
             </Button>
           )}
+          {openaiReady && (
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={proofreading || !text.trim()}
+              onClick={handleProofread}
+              title={t('Proofread')}
+            >
+              {proofreading ? <LoaderCircle className="animate-spin" /> : <SpellCheck className={proofreadResult !== null ? 'text-primary' : ''} />}
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Mentions
@@ -447,6 +526,80 @@ export default function PostContent({
           {parentStuff ? t('Reply') : t('Post')}
         </Button>
       </div>
+    </div>
+  )
+}
+
+type TDiffToken = { text: string; type: 'same' | 'added' | 'removed' }
+
+function wordDiff(original: string, fixed: string): TDiffToken[] {
+  const a = original.split(/(\s+)/)
+  const b = fixed.split(/(\s+)/)
+
+  // LCS table
+  const m = a.length, n = b.length
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1])
+    }
+  }
+
+  const tokens: TDiffToken[] = []
+  let i = 0, j = 0
+  while (i < m || j < n) {
+    if (i < m && j < n && a[i] === b[j]) {
+      tokens.push({ text: a[i], type: 'same' })
+      i++; j++
+    } else if (j < n && (i >= m || dp[i][j + 1] >= dp[i + 1][j])) {
+      tokens.push({ text: b[j], type: 'added' })
+      j++
+    } else {
+      tokens.push({ text: a[i], type: 'removed' })
+      i++
+    }
+  }
+  return tokens
+}
+
+function ProofreadPanel({
+  original,
+  fixed,
+  onApply,
+  onDismiss
+}: {
+  original: string
+  fixed: string
+  onApply: () => void
+  onDismiss: () => void
+}) {
+  const { t } = useTranslation()
+  const tokens = wordDiff(original, fixed)
+  const hasChanges = tokens.some((t) => t.type !== 'same')
+
+  return (
+    <div className="rounded-lg border bg-muted/30 p-3 text-sm space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-muted-foreground">{hasChanges ? t('Suggested corrections') : t('No mistakes found')}</span>
+        <button type="button" onClick={onDismiss} className="text-muted-foreground hover:text-foreground">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {hasChanges && (
+        <>
+          <div className="leading-relaxed whitespace-pre-wrap break-words">
+            {tokens.map((token, i) => {
+              if (token.type === 'same') return <span key={i}>{token.text}</span>
+              if (token.type === 'removed') return <span key={i} className="bg-red-500/20 text-red-600 dark:text-red-400 line-through">{token.text}</span>
+              return <span key={i} className="bg-green-500/20 text-green-700 dark:text-green-400">{token.text}</span>
+            })}
+          </div>
+          <Button size="sm" onClick={onApply} className="gap-1.5">
+            <Check className="h-3.5 w-3.5" />
+            {t('Apply')}
+          </Button>
+        </>
+      )}
     </div>
   )
 }

@@ -25,12 +25,18 @@
     appearance: none;
   }
 
+  button,
+  [role='button'],
+  label {
+    user-select: none;
+  }
+
   body {
     @apply bg-background text-foreground;
     -webkit-overflow-scrolling: touch;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
-    user-select: none;
+    user-select: text;
   }
 
   body,

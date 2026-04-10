@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Send,
   Settings2,
+  Square,
   Trash2,
   X,
   XCircle
@@ -70,6 +71,7 @@ type TMessage = {
   role: 'user' | 'assistant' | 'system'
   content: string
   actions?: TActionResult[]
+  isSynthesis?: boolean
   request?: any
   response?: any
 }
@@ -91,56 +93,116 @@ Query action — fetches Nostr events from relays:
 - limit <= 100; kinds: 0=profile 1=note 3=follows 6=repost 7=reaction 9735=zap
 - relays: optional wss:// URLs; use [] for defaults
 
-Process action — transforms the collected data sequentially (each step receives the previous step's output, or all query results for the first process step):
+Process action — transforms data sequentially (each step receives the previous step's output):
 - "filter": { "field": "content"|"pubkey"|"kind", "contains": "string" } or { "field": "pubkey"|"kind", "equals": value }
 - "sort": { "field": "created_at"|"content", "order": "asc"|"desc" }
 - "deduplicate": { "field": "pubkey"|"id" }
 - "top": { "n": number }
 - "count": { "groupBy": "pubkey"|"kind" }
-- "summarize": {} — AI-generated natural language summary of the data
-- "customScript": { "code": "function(data) { /* your JS code here */ return processedData; }" } — For complex operations, provide a Javascript function that takes an array of events and returns a modified array. The function will be executed in a sandboxed environment. Only use this when the other operations are not sufficient.
+- "summarize": {} — AI-generated natural language summary
+- "customScript": { "code": "(data) => { /* JS arrow fn or function expr */ return processedData }" }
 
-Design the full plan in one response: include queries to gather data and process steps to answer the question.
-If no actions are needed (e.g. a general question), return "actions": [].
+Design the full plan in one response. If no actions needed, return "actions": [].
 Respond ONLY with valid JSON.`
+
+// ── JSON extraction helper ────────────────────────────────────────────────────
+
+function extractJSON(raw: string): string {
+  // Strip markdown code fences: ```json ... ``` or ``` ... ```
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+  if (fenced) return fenced[1].trim()
+  // Find first { ... } block in case of leading/trailing prose
+  const start = raw.indexOf('{')
+  const end = raw.lastIndexOf('}')
+  if (start !== -1 && end !== -1 && end > start) return raw.slice(start, end + 1)
+  return raw.trim()
+}
 
 // ── OpenAI helper ─────────────────────────────────────────────────────────────
 
-async function callOpenAI(apiKey: string, messages: { role: string; content: string }[]) {
+async function callOpenAI(
+  apiKey: string,
+  messages: { role: string; content: string }[],
+  signal?: AbortSignal
+) {
   const body = { model: 'gpt-4o', messages, temperature: 0.2 }
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal
   })
   if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${await res.text()}`)
   const response = await res.json()
   return { request: body, response }
 }
 
-// ── Build conversation history for OpenAI ─────────────────────────────────────
+// ── Relay fetch with timeout ──────────────────────────────────────────────────
 
-function buildHistory(msgs: TMessage[]): { role: string; content: string }[] {
-  return msgs.flatMap((m) => {
+function fetchWithTimeout(relays: string[], filter: Filter, ms = 15_000): Promise<any[]> {
+  return Promise.race([
+    client.fetchEvents(relays, filter),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Relay query timed out after ${ms / 1000}s`)), ms)
+    )
+  ])
+}
+
+// ── Build conversation history ────────────────────────────────────────────────
+
+function buildHistory(
+  msgs: TMessage[],
+  localResults?: Map<number, TActionResult['output']>,
+  msgIndex?: number
+): { role: string; content: string }[] {
+  return msgs.flatMap((m, mi) => {
     if (m.role === 'user') return [{ role: 'user', content: m.content }]
     if (m.role === 'assistant') {
       let text = m.content
       try {
         text = JSON.parse(m.content).message ?? m.content
-      } catch { /* invalid JSON, use raw content */ }
-      if (m.actions?.some((a) => a.status === 'done' || a.status === 'error')) {
-        const summary = m.actions
-          .map((a) => {
+      } catch { /* use raw */ }
+
+      const actions = m.actions ?? []
+      if (actions.length > 0) {
+        const isSynthesisMsg = mi === msgIndex && localResults !== undefined
+        const summary = actions
+          .map((a, ai) => {
             const label = `[${a.action.type}] ${a.action.description}`
-            if (a.status === 'done') {
-              if (typeof a.output === 'string') return `${label}: "${a.output.slice(0, 300)}"`
-              if (Array.isArray(a.output)) return `${label}: ${a.output.length} results`
+            const output = isSynthesisMsg ? localResults!.get(ai) : a.output
+            const status = isSynthesisMsg
+              ? (localResults!.has(ai) ? 'done' : a.status)
+              : a.status
+
+            if (status === 'done' && output !== null) {
+              if (typeof output === 'string') {
+                return `${label}:\n${output.slice(0, 800)}`
+              }
+              if (Array.isArray(output) && output.length > 0) {
+                if ('key' in (output[0] as any)) {
+                  // count output — include full list up to 50
+                  return `${label} (${output.length} groups):\n${JSON.stringify(output.slice(0, 50))}`
+                }
+                if ('id' in (output[0] as any)) {
+                  // events — include meaningful sample
+                  const sample = (output as TNostrEvent[]).slice(0, 20).map((e) => ({
+                    kind: e.kind,
+                    pubkey: e.pubkey.slice(0, 12) + '…',
+                    content: e.content.slice(0, 250),
+                    created_at: new Date(e.created_at * 1000).toISOString()
+                  }))
+                  return `${label} (${output.length} events):\n${JSON.stringify(sample, null, 2)}`
+                }
+              }
+              if (Array.isArray(output) && output.length === 0) {
+                return `${label}: 0 results`
+              }
             }
-            if (a.status === 'error') return `${label}: ERROR — ${a.error}`
-            return `${label}: ${a.status}`
+            if (status === 'error') return `${label}: ERROR — ${(a as any).error ?? 'unknown'}`
+            return `${label}: ${status}`
           })
-          .join('\n')
-        text = `${text}\n\nResults:\n${summary}`
+          .join('\n\n')
+        text = `${text}\n\nAction results:\n${summary}`
       }
       return [{ role: 'assistant', content: text }]
     }
@@ -151,7 +213,8 @@ function buildHistory(msgs: TMessage[]): { role: string; content: string }[] {
 // ── Replaceable event deduplication ──────────────────────────────────────────
 
 function deduplicateReplaceableEvents(events: TNostrEvent[]): TNostrEvent[] {
-  const isReplaceable = (kind: number) => kind === 0 || kind === 3 || (kind >= 10000 && kind < 20000)
+  const isReplaceable = (kind: number) =>
+    kind === 0 || kind === 3 || (kind >= 10000 && kind < 20000)
   const isParamReplaceable = (kind: number) => kind >= 30000 && kind < 40000
 
   const replaceableMap = new Map<string, TNostrEvent>()
@@ -187,38 +250,32 @@ async function runProcessStep(
   const { operation, params } = action
 
   if (operation === 'filter') {
-    return Promise.resolve(
-      events.filter((e) => {
-        const val = (e as any)[params.field] ?? ''
-        if (params.contains !== undefined)
-          return String(val).toLowerCase().includes(String(params.contains).toLowerCase())
-        if (params.equals !== undefined) return val === params.equals
-        return true
-      })
-    )
+    return events.filter((e) => {
+      const val = (e as any)[params.field] ?? ''
+      if (params.contains !== undefined)
+        return String(val).toLowerCase().includes(String(params.contains).toLowerCase())
+      if (params.equals !== undefined) return val === params.equals
+      return true
+    })
   }
   if (operation === 'sort') {
-    return Promise.resolve(
-      [...events].sort((a, b) => {
-        const av = (a as any)[params.field] ?? ''
-        const bv = (b as any)[params.field] ?? ''
-        return params.order === 'asc' ? (av > bv ? 1 : -1) : av < bv ? 1 : -1
-      })
-    )
+    return [...events].sort((a, b) => {
+      const av = (a as any)[params.field] ?? ''
+      const bv = (b as any)[params.field] ?? ''
+      return params.order === 'asc' ? (av > bv ? 1 : -1) : av < bv ? 1 : -1
+    })
   }
   if (operation === 'deduplicate') {
     const seen = new Set()
-    return Promise.resolve(
-      events.filter((e) => {
-        const key = (e as any)[params.field]
-        if (seen.has(key)) return false
-        seen.add(key)
-        return true
-      })
-    )
+    return events.filter((e) => {
+      const key = (e as any)[params.field]
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
   }
   if (operation === 'top') {
-    return Promise.resolve(events.slice(0, params.n ?? 10))
+    return events.slice(0, params.n ?? 10)
   }
   if (operation === 'count') {
     const counts: Record<string, number> = {}
@@ -226,11 +283,9 @@ async function runProcessStep(
       const key = String((e as any)[params.groupBy] ?? 'unknown')
       counts[key] = (counts[key] ?? 0) + 1
     })
-    return Promise.resolve(
-      Object.entries(counts)
-        .map(([key, count]) => ({ key, count }))
-        .sort((a, b) => b.count - a.count)
-    )
+    return Object.entries(counts)
+      .map(([key, count]) => ({ key, count }))
+      .sort((a, b) => b.count - a.count)
   }
   if (operation === 'summarize') {
     const sample = events.slice(0, 50).map((e) => ({
@@ -238,21 +293,20 @@ async function runProcessStep(
       content: e.content.slice(0, 300),
       created_at: new Date(e.created_at * 1000).toISOString()
     }))
-    const result = await callOpenAI(apiKey, [
-      {
-        role: 'system',
-        content:
-          'You are a Nostr data analyst. Provide a concise analytical summary of the events that answers the user question.'
-      },
-      {
-        role: 'user',
-        content: `Question: "${question}"\n\nEvents (${events.length} total, showing up to 50):\n${JSON.stringify(
-          sample,
-          null,
-          2
-        )}\n\nProvide a clear summary answering the question.`
-      }
-    ])
+    const result = await callOpenAI(
+      apiKey,
+      [
+        {
+          role: 'system',
+          content:
+            'You are a Nostr data analyst. Summarize the events concisely to answer the user question.'
+        },
+        {
+          role: 'user',
+          content: `Question: "${question}"\n\nEvents (${events.length} total, sample of up to 50):\n${JSON.stringify(sample, null, 2)}\n\nProvide a clear answer.`
+        }
+      ]
+    )
     return result.response.choices[0].message.content as string
   }
   if (operation === 'customScript') {
@@ -260,25 +314,25 @@ async function runProcessStep(
       const worker = new Worker(new URL('./ai-agent.worker.ts', import.meta.url), {
         type: 'module'
       })
-      worker.onmessage = (e) => {
-        if (e.data.error) {
-          reject(new Error(e.data.error))
-        } else {
-          resolve(e.data.results)
-        }
+      const timer = setTimeout(() => {
         worker.terminate()
+        reject(new Error('customScript worker timed out'))
+      }, 12_000)
+      worker.onmessage = (e) => {
+        clearTimeout(timer)
+        worker.terminate()
+        if (e.data.error) reject(new Error(e.data.error))
+        else resolve(e.data.results)
       }
       worker.onerror = (e) => {
-        reject(new Error(`Worker error: ${e.message}`))
+        clearTimeout(timer)
         worker.terminate()
+        reject(new Error(`Worker error: ${e.message}`))
       }
-      worker.postMessage({
-        code: params.code,
-        data: events
-      })
+      worker.postMessage({ code: params.code, data: events })
     })
   }
-  return Promise.resolve(events)
+  return events
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -295,11 +349,14 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [synthesizing, setSynthesizing] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') ?? '')
   const [showSettings, setShowSettings] = useState(false)
   const [apiKeyDraft, setApiKeyDraft] = useState(apiKey)
   const bottomRef = useRef<HTMLDivElement>(null)
   const messagesRef = useRef(messages)
+  const abortRef = useRef<AbortController | null>(null)
+
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
@@ -327,62 +384,27 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
     setShowSettings(false)
   }
 
-  const sendMessage = async () => {
-    const text = input.trim()
-    if (!text || loading) return
-    if (!apiKey) {
-      setShowSettings(true)
-      return
-    }
-
-    const userMsg: TMessage = { role: 'user', content: text }
-    const history = [...messages, userMsg]
-    setMessages(history)
-    setInput('')
-    setLoading(true)
-    scrollToBottom()
-
-    try {
-      const { request, response } = await callOpenAI(apiKey, [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...buildHistory(history)
-      ])
-      const raw = response.choices[0]?.message?.content ?? ''
-      let parsed: { message: string; actions: TAction[] }
-      try {
-        parsed = JSON.parse(raw)
-      } catch {
-        throw new Error(`Could not parse AI response as JSON:\n${raw}`)
-      }
-      const assistantMsg: TMessage = {
-        role: 'assistant',
-        content: raw,
-        actions: (parsed.actions ?? []).map((a) => ({ action: a, output: null, status: 'pending' })),
-        request,
-        response
-      }
-      setMessages([...history, assistantMsg])
-    } catch (e: any) {
-      setMessages([...history, { role: 'system', content: `Error: ${e.message}` }])
-    } finally {
-      setLoading(false)
-      scrollToBottom()
-    }
+  const stop = () => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    setLoading(false)
+    setSynthesizing(false)
   }
 
-  const executeAction = async (
+  // ── Low-level action executor ────────────────────────────────────────────────
+  // Returns the output, updates UI state. Always receives action and input directly.
+
+  const runAction = async (
     msgIndex: number,
     actionIndex: number,
-    inputOverride?: TNostrEvent[]
+    action: TAction,
+    inputOverride: TNostrEvent[],
+    question: string,
+    signal: AbortSignal
   ): Promise<TActionResult['output']> => {
-    const msg = messagesRef.current[msgIndex]
-    const action = msg.actions![actionIndex].action
-    const question =
-      messagesRef.current
-        .slice(0, msgIndex)
-        .reverse()
-        .find((m) => m.role === 'user')?.content ?? ''
+    if (signal.aborted) throw new Error('Aborted')
 
+    // Mark running
     setMessages((prev) => {
       const next = [...prev]
       const m = { ...next[msgIndex], actions: [...(next[msgIndex].actions ?? [])] }
@@ -395,8 +417,9 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
       let output: TActionResult['output']
 
       if (action.type === 'query') {
+        if (signal.aborted) throw new Error('Aborted')
         const relays = action.relays?.length ? action.relays : getDefaultRelayUrls()
-        const rawEvents = await client.fetchEvents(relays, action.filter)
+        const rawEvents = await fetchWithTimeout(relays, action.filter)
         output = deduplicateReplaceableEvents(
           rawEvents.map((e) => ({
             id: e.id,
@@ -408,35 +431,8 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
           }))
         )
       } else {
-        let inputEvents: TNostrEvent[]
-        if (inputOverride) {
-          inputEvents = inputOverride
-        } else {
-          // Manual single-step run: read from settled state via ref
-          const currentActions = messagesRef.current[msgIndex].actions ?? []
-          inputEvents = []
-          let foundPrev = false
-          for (let i = actionIndex - 1; i >= 0; i--) {
-            const prev = currentActions[i]
-            if (
-              prev.action.type === 'process' &&
-              prev.status === 'done' &&
-              Array.isArray(prev.output) &&
-              prev.output.length > 0 &&
-              'id' in (prev.output[0] as any)
-            ) {
-              inputEvents = prev.output as TNostrEvent[]
-              foundPrev = true
-              break
-            }
-          }
-          if (!foundPrev) {
-            inputEvents = currentActions
-              .filter((a) => a.action.type === 'query' && a.status === 'done' && Array.isArray(a.output))
-              .flatMap((a) => a.output as TNostrEvent[])
-          }
-        }
-        output = await runProcessStep(action, inputEvents, apiKey, question)
+        if (signal.aborted) throw new Error('Aborted')
+        output = await runProcessStep(action, inputOverride, apiKey, question)
       }
 
       setMessages((prev) => {
@@ -449,6 +445,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
       scrollToBottom()
       return output
     } catch (e: any) {
+      if (e.message === 'Aborted' || signal.aborted) throw e
       setMessages((prev) => {
         const next = [...prev]
         const m = { ...next[msgIndex], actions: [...(next[msgIndex].actions ?? [])] }
@@ -461,35 +458,258 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
     }
   }
 
-  const executeAll = async (msgIndex: number) => {
-    const actions = messagesRef.current[msgIndex].actions ?? []
+  // ── Run full plan: queries in parallel, process steps sequentially ────────────
 
-    // Run queries in parallel, collecting outputs directly (don't rely on state updates)
-    const queryOutputs: TNostrEvent[][] = []
+  const runPlan = async (
+    msgIndex: number,
+    actions: TActionResult[],
+    question: string,
+    signal: AbortSignal
+  ): Promise<Map<number, TActionResult['output']>> => {
+    const results = new Map<number, TActionResult['output']>()
+
+    // Queries in parallel
     await Promise.all(
-      actions.map(async (a, i) => {
-        if (a.action.type !== 'query') return
-        if (a.status === 'done' && Array.isArray(a.output)) {
-          queryOutputs.push(a.output as TNostrEvent[])
-          return
-        }
-        if (a.status !== 'pending') return
-        const out = await executeAction(msgIndex, i)
-        if (Array.isArray(out)) queryOutputs.push(out as TNostrEvent[])
+      actions.map(async (ar, i) => {
+        if (ar.action.type !== 'query') return
+        const out = await runAction(msgIndex, i, ar.action, [], question, signal)
+        results.set(i, out)
       })
     )
 
-    // Run process steps sequentially, passing output from one to the next
-    let processInput: TNostrEvent[] = queryOutputs.flat()
+    if (signal.aborted) throw new Error('Aborted')
+
+    // Process steps sequentially, chaining data
+    let processInput: TNostrEvent[] = []
+    for (const [, out] of results) {
+      if (Array.isArray(out) && out.length > 0 && 'id' in (out[0] as any)) {
+        processInput.push(...(out as TNostrEvent[]))
+      }
+    }
+
     for (let i = 0; i < actions.length; i++) {
-      if (actions[i].action.type !== 'process' || actions[i].status !== 'pending') continue
-      const out = await executeAction(msgIndex, i, processInput)
+      if (actions[i].action.type !== 'process') continue
+      if (signal.aborted) throw new Error('Aborted')
+      const out = await runAction(msgIndex, i, actions[i].action, processInput, question, signal)
+      results.set(i, out)
       if (Array.isArray(out) && out.length > 0 && 'id' in (out[0] as any)) {
         processInput = out as TNostrEvent[]
       } else if (Array.isArray(out) && out.length === 0) {
         processInput = []
       }
     }
+
+    return results
+  }
+
+  // ── Synthesis: send results back to AI for final answer ──────────────────────
+
+  const synthesize = async (
+    priorMessages: TMessage[],
+    msgIndex: number,
+    localResults: Map<number, TActionResult['output']>,
+    iteration: number,
+    signal: AbortSignal
+  ) => {
+    if (signal.aborted) return
+
+    setSynthesizing(true)
+    try {
+      const history = buildHistory(priorMessages, localResults, msgIndex)
+      const { request, response } = await callOpenAI(
+        apiKey,
+        [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...history,
+          {
+            role: 'user',
+            content:
+              'Based on the action results above, write a clear answer to the user\'s question in plain conversational text. Do NOT respond with JSON. If the data is insufficient to answer, say so and explain what was found.'
+          }
+        ],
+        signal
+      )
+
+      if (signal.aborted) return
+
+      const raw: string = response.choices[0]?.message?.content ?? ''
+
+      // Check if AI still returned JSON (requesting more actions)
+      let newActions: TAction[] = []
+      try {
+        const parsed = JSON.parse(extractJSON(raw))
+        newActions = parsed?.actions?.filter(Boolean) ?? []
+      } catch { /* plain text — no more actions */ }
+
+      const synthMsg: TMessage = {
+        role: 'assistant',
+        content: newActions.length > 0 ? raw : raw,
+        isSynthesis: newActions.length === 0,
+        actions: newActions.length > 0
+          ? newActions.map((a) => ({ action: a, output: null, status: 'pending' }))
+          : undefined,
+        request,
+        response
+      }
+
+      setMessages((prev) => [...prev, synthMsg])
+      scrollToBottom()
+
+      // Agentic loop: if AI wants more data, execute again (max 3 iterations)
+      if (newActions.length > 0 && iteration < 2 && !signal.aborted) {
+        // Give React a tick to update messagesRef
+        await new Promise((r) => setTimeout(r, 50))
+        const nextMsgIndex = messagesRef.current.length - 1
+        const question =
+          priorMessages
+            .slice()
+            .reverse()
+            .find((m) => m.role === 'user')?.content ?? ''
+        const nextResults = await runPlan(nextMsgIndex, synthMsg.actions!, question, signal)
+        await synthesize(messagesRef.current, nextMsgIndex, nextResults, iteration + 1, signal)
+      }
+    } catch (e: any) {
+      if (!signal.aborted) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'system', content: `Synthesis error: ${e.message}` }
+        ])
+      }
+    } finally {
+      setSynthesizing(false)
+    }
+  }
+
+  // ── Main send ────────────────────────────────────────────────────────────────
+
+  const sendMessage = async () => {
+    const text = input.trim()
+    if (!text || loading || synthesizing) return
+    if (!apiKey) {
+      setShowSettings(true)
+      return
+    }
+
+    const userMsg: TMessage = { role: 'user', content: text }
+    const history = [...messagesRef.current, userMsg]
+    setMessages(history)
+    messagesRef.current = history
+    setInput('')
+    setLoading(true)
+    scrollToBottom()
+
+    const controller = new AbortController()
+    abortRef.current = controller
+    const { signal } = controller
+
+    try {
+      const { request, response } = await callOpenAI(
+        apiKey,
+        [{ role: 'system', content: SYSTEM_PROMPT }, ...buildHistory(history)],
+        signal
+      )
+      if (signal.aborted) return
+
+      const raw: string = response.choices[0]?.message?.content ?? ''
+      let parsed: { message: string; actions: TAction[] }
+      try {
+        parsed = JSON.parse(extractJSON(raw))
+      } catch {
+        throw new Error(`Could not parse AI response as JSON:\n${raw}`)
+      }
+
+      const assistantMsg: TMessage = {
+        role: 'assistant',
+        content: raw,
+        actions: (parsed.actions ?? []).map((a) => ({ action: a, output: null, status: 'pending' })),
+        request,
+        response
+      }
+
+      const withAssistant = [...history, assistantMsg]
+      setMessages(withAssistant)
+      messagesRef.current = withAssistant
+      scrollToBottom()
+
+      const msgIndex = withAssistant.length - 1
+
+      if ((parsed.actions ?? []).length > 0 && !signal.aborted) {
+        const localResults = await runPlan(msgIndex, assistantMsg.actions!, text, signal)
+        if (!signal.aborted) {
+          await synthesize(messagesRef.current, msgIndex, localResults, 0, signal)
+        }
+      }
+    } catch (e: any) {
+      if (!signal.aborted) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'system', content: `Error: ${e.message}` }
+        ])
+      }
+    } finally {
+      setLoading(false)
+      setSynthesizing(false)
+      if (abortRef.current === controller) abortRef.current = null
+      scrollToBottom()
+    }
+  }
+
+  // ── Manual re-run (for already-shown messages) ───────────────────────────────
+
+  const executeAll = async (msgIndex: number) => {
+    const msg = messagesRef.current[msgIndex]
+    const question =
+      messagesRef.current
+        .slice(0, msgIndex)
+        .reverse()
+        .find((m) => m.role === 'user')?.content ?? ''
+
+    const controller = new AbortController()
+    abortRef.current = controller
+    setLoading(true)
+    try {
+      const localResults = await runPlan(msgIndex, msg.actions ?? [], question, controller.signal)
+      if (!controller.signal.aborted) {
+        await synthesize(messagesRef.current, msgIndex, localResults, 0, controller.signal)
+      }
+    } finally {
+      setLoading(false)
+      setSynthesizing(false)
+      if (abortRef.current === controller) abortRef.current = null
+    }
+  }
+
+  const executeAction = async (msgIndex: number, actionIndex: number) => {
+    const msg = messagesRef.current[msgIndex]
+    const ar = msg.actions![actionIndex]
+    const question =
+      messagesRef.current
+        .slice(0, msgIndex)
+        .reverse()
+        .find((m) => m.role === 'user')?.content ?? ''
+
+    // Collect previous step output for process actions
+    let inputEvents: TNostrEvent[] = []
+    if (ar.action.type === 'process') {
+      const prevActions = msg.actions ?? []
+      for (let i = actionIndex - 1; i >= 0; i--) {
+        const prev = prevActions[i]
+        if (prev.status === 'done' && Array.isArray(prev.output) && prev.output.length > 0 && 'id' in (prev.output[0] as any)) {
+          inputEvents = prev.output as TNostrEvent[]
+          break
+        }
+      }
+      if (inputEvents.length === 0) {
+        inputEvents = (msg.actions ?? [])
+          .filter((a) => a.action.type === 'query' && a.status === 'done' && Array.isArray(a.output))
+          .flatMap((a) => a.output as TNostrEvent[])
+      }
+    }
+
+    const controller = new AbortController()
+    abortRef.current = controller
+    await runAction(msgIndex, actionIndex, ar.action, inputEvents, question, controller.signal)
+    if (abortRef.current === controller) abortRef.current = null
   }
 
   const resetActionsFrom = (msgIndex: number, fromIndex: number) => {
@@ -543,6 +763,8 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
       return next
     })
   }
+
+  const isRunning = loading || synthesizing
 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('AI Agent')}>
@@ -611,11 +833,20 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                 </div>
               )}
 
-              {msg.role === 'assistant' && (
+              {msg.role === 'assistant' && msg.isSynthesis && (
+                <div className="flex gap-2">
+                  <Bot className="mt-1 size-4 shrink-0 text-primary" />
+                  <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-muted px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">
+                    {msg.content}
+                  </div>
+                </div>
+              )}
+
+              {msg.role === 'assistant' && !msg.isSynthesis && (
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2">
                     <Bot className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <p className="text-sm">
+                    <p className="text-sm text-muted-foreground">
                       {(() => {
                         try {
                           return JSON.parse(msg.content).message ?? msg.content
@@ -626,42 +857,6 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                     </p>
                   </div>
 
-                  {msg.request && msg.response && (
-                    <div className="flex flex-col gap-2 rounded-xl border bg-muted/20 p-3">
-                      <details>
-                        <summary className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          {t('API Call Details')}
-                        </summary>
-                        <div className="flex flex-col gap-2 pt-2">
-                          <div>
-                            <h4 className="text-sm font-semibold">{t('Request')}</h4>
-                            <pre className="overflow-x-auto rounded-lg bg-background p-2 text-xs">
-                              {(() => {
-                                try {
-                                  return JSON.stringify(msg.request, null, 2)
-                                } catch {
-                                  return 'Error serializing request'
-                                }
-                              })()}
-                            </pre>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold">{t('Response')}</h4>
-                            <pre className="overflow-x-auto rounded-lg bg-background p-2 text-xs">
-                              {(() => {
-                                try {
-                                  return JSON.stringify(msg.response, null, 2)
-                                } catch {
-                                  return 'Error serializing response'
-                                }
-                              })()}
-                            </pre>
-                          </div>
-                        </div>
-                      </details>
-                    </div>
-                  )}
-
                   {msg.actions && msg.actions.length > 0 && (
                     <div className="flex flex-col gap-2 rounded-xl border bg-muted/20 p-3">
                       <div className="flex items-center justify-between">
@@ -669,7 +864,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                           {t('Actions')}
                         </p>
                         <div className="flex items-center gap-1.5">
-                          {msg.actions.some((a) => a.status === 'pending') && (
+                          {msg.actions.some((a) => a.status === 'pending') && !isRunning && (
                             <Button
                               size="sm"
                               className="h-6 gap-1 px-2 text-xs"
@@ -679,7 +874,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                               {t('Run all')}
                             </Button>
                           )}
-                          {msg.actions.some((a) => a.status === 'done' || a.status === 'error') && (
+                          {msg.actions.some((a) => a.status === 'done' || a.status === 'error') && !isRunning && (
                             <button
                               className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                               onClick={() => resetAllActions(msgIdx)}
@@ -699,27 +894,31 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                             stepNumber={aIdx + 1}
                             onExecute={() => executeAction(msgIdx, aIdx)}
                             onUpdate={
-                              ar.status === 'pending'
+                              ar.status === 'pending' && !isRunning
                                 ? (action) => updateAction(msgIdx, aIdx, action)
                                 : undefined
                             }
                             onDelete={
-                              ar.status === 'pending' ? () => deleteAction(msgIdx, aIdx) : undefined
+                              ar.status === 'pending' && !isRunning
+                                ? () => deleteAction(msgIdx, aIdx)
+                                : undefined
                             }
                             onReset={
-                              ar.status === 'done' || ar.status === 'error'
+                              (ar.status === 'done' || ar.status === 'error') && !isRunning
                                 ? () => resetActionsFrom(msgIdx, aIdx)
                                 : undefined
                             }
                           />
                         ))}
-                        <button
-                          className="flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => addAction(msgIdx, (msg.actions?.length ?? 1) - 1)}
-                        >
-                          <Plus className="size-3" />
-                          {t('Add action')}
-                        </button>
+                        {!isRunning && (
+                          <button
+                            className="flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                            onClick={() => addAction(msgIdx, (msg.actions?.length ?? 1) - 1)}
+                          >
+                            <Plus className="size-3" />
+                            {t('Add action')}
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -728,10 +927,17 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
             </div>
           ))}
 
-          {loading && (
+          {loading && !synthesizing && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
               {t('Thinking...')}
+            </div>
+          )}
+
+          {synthesizing && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              {t('Synthesizing results...')}
             </div>
           )}
 
@@ -752,11 +958,17 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
                   sendMessage()
                 }
               }}
-              disabled={loading}
+              disabled={isRunning}
             />
-            <Button size="icon" onClick={sendMessage} disabled={loading || !input.trim()}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            </Button>
+            {isRunning ? (
+              <Button size="icon" variant="outline" onClick={stop} title={t('Stop')}>
+                <Square className="size-4" />
+              </Button>
+            ) : (
+              <Button size="icon" onClick={sendMessage} disabled={!input.trim()}>
+                <Send className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -810,7 +1022,9 @@ function ActionCard({
   const outputIsEvents =
     Array.isArray(result.output) && result.output.length > 0 && 'id' in (result.output[0] as any)
   const outputIsCounts =
-    Array.isArray(result.output) && result.output.length > 0 && 'key' in (result.output[0] as any)
+    Array.isArray(result.output) &&
+    result.output.length > 0 &&
+    'key' in (result.output[0] as any)
   const outputIsText = typeof result.output === 'string'
 
   const startEdit = () => {
@@ -952,7 +1166,9 @@ function ActionCard({
                 {t('Run')}
               </Button>
             )}
-            {result.status === 'running' && <Loader2 className="size-3.5 animate-spin text-primary" />}
+            {result.status === 'running' && (
+              <Loader2 className="size-3.5 animate-spin text-primary" />
+            )}
             {(result.status === 'done' || result.status === 'error') && (
               <>
                 {result.status === 'done' && <CheckCircle2 className="size-3.5 text-green-500" />}
@@ -975,7 +1191,9 @@ function ActionCard({
       {result.status === 'done' && result.output !== null && (
         <div className="border-t px-3 py-2">
           {outputIsText && (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{result.output as string}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+              {result.output as string}
+            </p>
           )}
           {outputIsCounts && (
             <div className="flex flex-col gap-1">
@@ -1005,7 +1223,9 @@ function ActionCard({
                         <span>kind:{evt.kind}</span>
                         <span>{new Date(evt.created_at * 1000).toLocaleString()}</span>
                       </div>
-                      <p className="mt-1 line-clamp-3 break-words">{evt.content || '(no content)'}</p>
+                      <p className="mt-1 line-clamp-3 break-words">
+                        {evt.content || '(no content)'}
+                      </p>
                     </div>
                   ))}
                 </div>

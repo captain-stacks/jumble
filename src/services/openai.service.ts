@@ -264,6 +264,30 @@ class OpenAIService {
     return parsed
   }
 
+  async proofread(text: string): Promise<{ fixed: string }> {
+    if (!this.client) {
+      throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')
+    }
+
+    const response = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a proofreader. Fix spelling, grammar, and punctuation mistakes in the given text. Preserve the author\'s voice, style, tone, and intent — do not rewrite or improve phrasing beyond correcting errors. Do not flag or change the capitalization of the first word of a sentence — that is intentional. Do not add or enforce punctuation at the end of sentences — missing periods or other terminal punctuation is intentional. If the text has no mistakes, return it unchanged. Respond with JSON: {"fixed": "<corrected text>"}'
+        },
+        { role: 'user', content: text }
+      ],
+      response_format: { type: 'json_object' }
+    })
+
+    const raw = response.choices[0].message.content
+    if (!raw) throw new Error('No response from OpenAI')
+    const parsed = JSON.parse(raw)
+    return { fixed: parsed.fixed ?? text }
+  }
+
   async summarizeNote(content: string): Promise<string> {
     if (!this.client) {
       throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')

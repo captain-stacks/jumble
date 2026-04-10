@@ -1,5 +1,5 @@
 import EasyLoginRecoveryPage from '@/pages/secondary/EasyLoginRecoveryPage'
-import NewAIAgentPage from '@/pages/secondary/NewAIAgentPage'
+import AIAgentPage from '@/pages/secondary/AIAgentPage'
 import AppearanceSettingsPage from '@/pages/secondary/AppearanceSettingsPage'
 import BookmarkPage from '@/pages/secondary/BookmarkPage'
 import EmojiPackSettingsPage from '@/pages/secondary/EmojiPackSettingsPage'
@@ -55,7 +55,7 @@ const SECONDARY_ROUTE_CONFIGS = [
   { path: '/bookmarks', element: <BookmarkPage /> },
   { path: '/follow-packs/:id', element: <FollowPackPage /> },
   { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
-  { path: '/ai-agent', element: <NewAIAgentPage /> },
+  { path: '/ai-agent', element: <AIAgentPage /> },
   { path: '/settings/easy-login-recovery', element: <EasyLoginRecoveryPage /> }
 ]
 

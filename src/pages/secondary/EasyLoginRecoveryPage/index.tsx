@@ -57,11 +57,6 @@ export default forwardRef(function EasyLoginRecoveryPage(
 
       const { getPublicKey } = await import('nostr-tools')
       const { hexToBytes } = await import('@noble/hashes/utils')
-      const { sha256 } = await import('@noble/hashes/sha256')
-
-      // Derive emailLookupPubkey from email for relay-side filtering
-      const emailLookupPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
-      const emailLookupPubkey = getPublicKey(emailLookupPrivkey)
 
       const relays = getDefaultRelayUrls()
       const allEvents = await client.fetchEvents(relays, [
@@ -69,7 +64,6 @@ export default forwardRef(function EasyLoginRecoveryPage(
           kinds: [30078],
           '#m': [MASTER_PUBKEY!],
           '#d': ['jumblewisp-recovery-key'],
-          '#p': [emailLookupPubkey],
           ...(authorPubkey ? { authors: [authorPubkey] } : {}),
           limit: 500
         }
@@ -79,12 +73,12 @@ export default forwardRef(function EasyLoginRecoveryPage(
       const found: TRecoveredAccount[] = []
 
       for (const ev of allEvents) {
-        const encryptedKey = ev.content
-        if (!encryptedKey) continue
-        // encryptionPubkey is in the e tag — master decrypts using it
-        const encryptionPubkey = ev.tags.find((t) => t[0] === 'e')?.[1]
+        const encryptionPubkey = ev.tags.find((t) => t[0] === 'encryption-pubkey')?.[1]
         if (!encryptionPubkey) continue
         try {
+          const { encryptedEmail, encryptedKey } = JSON.parse(ev.content)
+          const decryptedEmail = await nip44Decrypt(encryptionPubkey, encryptedEmail)
+          if (decryptedEmail.trim().toLowerCase() !== email.trim().toLowerCase()) continue
           const decrypted = await nip44Decrypt(encryptionPubkey, encryptedKey)
           if (!decrypted || !/^[0-9a-f]{64}$/.test(decrypted)) continue
           const keyBytes = hexToBytes(decrypted)

@@ -673,6 +673,9 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       updateMuteListEvent(muteListEvent, spicyPubkeys.map((pk) => ['p', pk]))
     ])
 
+    // Default new users to global feed
+    storage.setFeedInfo({ feedType: 'global' }, newUserPubkey)
+
     bootstrapCache.clear()
   }
 

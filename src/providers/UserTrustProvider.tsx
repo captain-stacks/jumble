@@ -61,7 +61,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     const initWoT = async () => {
       // Increment version to invalidate any previous bootstrap in-flight operations
       initVersion++
-      const thisVersion = initVersion
 
       // WAIT: Don't run any bootstrap logic until account initialization is complete
       if (!isInitialized) {
@@ -101,8 +100,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           const pool = new SimplePool()
           for (let i = 0; i < directFollows.length; i += BATCH_SIZE) {
             const batch = directFollows.slice(i, i + BATCH_SIZE)
-            const batchNum = Math.floor(i / BATCH_SIZE) + 1
-            const totalBatches = Math.ceil(directFollows.length / BATCH_SIZE)
             const results = await Promise.all(
               batch.map((pubkey) => {
                 const filter = {
@@ -113,22 +110,15 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                 return pool.get(relays, filter)
               })
             )
-            let addedCount = 0
             results.forEach((event) => {
               if (event) {
-                const pubkeys = getPubkeysFromPTags(event.tags)
-                pubkeys.forEach((pubkey) => {
-                  if (!wotSet.has(pubkey)) {
-                    addedCount++
-                  }
-                  wotSet.add(pubkey)
-                })
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => wotSet.add(pubkey))
               }
             })
 
             await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
           }
-        } catch (error) {
+        } catch {
           // Silently handle errors
         }
         
@@ -139,12 +129,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       }
 
       // For non-logged-in users: bootstrap from FOLLOW_SOURCE_PUBKEY
-      // GATE: Never start bootstrap if user is logged in
-      if (currentPubkey) {
-        setIsWotReady(true)
-        return
-      }
-
       if (!FOLLOW_SOURCE_PUBKEY) {
         setIsWotReady(true)
         return
@@ -177,28 +161,14 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         setWotStep(3)
         for (let i = 0; i < followings.length; i += BATCH_SIZE) {
           const batch = followings.slice(i, i + BATCH_SIZE)
-          const batchNum = Math.floor(i / BATCH_SIZE) + 1
-          const totalBatches = Math.ceil(followings.length / BATCH_SIZE)
           const results = await Promise.all(
-            batch.map((pubkey) => {
-              const filter = {
-                authors: [pubkey],
-                kinds: [kinds.Contacts],
-                limit: 1
-              }
-              return pool.get(relays, filter)
-            })
+            batch.map((pubkey) =>
+              pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts], limit: 1 })
+            )
           )
-          let addedCount = 0
           results.forEach((event) => {
             if (event) {
-              const pubkeys = getPubkeysFromPTags(event.tags)
-              pubkeys.forEach((pubkey) => {
-                if (!wotSet.has(pubkey)) {
-                  addedCount++
-                }
-                wotSet.add(pubkey)
-              })
+              getPubkeysFromPTags(event.tags).forEach((pubkey) => wotSet.add(pubkey))
             }
           })
           await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
@@ -207,11 +177,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         // Step 4: Done
         setWotStep(4)
 
-        // Cache WoT for bootstrap - but only if user hasn't logged in (version check)
-        if (currentPubkey) {
-        } else {
-          bootstrapCache.setWoT(Array.from(wotSet))
-        }
+        bootstrapCache.setWoT(Array.from(wotSet))
 
         // Also cache mute list for bootstrap - but only if user hasn't logged in
         if (!currentPubkey) {
@@ -224,7 +190,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
         // Now mark WoT as ready, after cache is populated
         setIsWotReady(true)
-      } catch (error) {
+      } catch {
         // Silently handle errors
         setIsWotReady(true)
       }

@@ -60,7 +60,7 @@ class LocalStorageService {
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
   private sidebarCollapse: boolean = false
   private primaryColor: TPrimaryColor = 'DEFAULT'
-  private enableSingleColumnLayout: boolean = true
+  private enableSingleColumnLayout: boolean = false
   private faviconUrlTemplate: string = DEFAULT_FAVICON_URL_TEMPLATE
   private filterOutOnionRelays: boolean = !isTorBrowser()
   private allowInsecureConnection: boolean = false
@@ -251,7 +251,7 @@ class LocalStorageService {
       (window.localStorage.getItem(StorageKey.PRIMARY_COLOR) as TPrimaryColor) ?? 'DEFAULT'
 
     this.enableSingleColumnLayout =
-      window.localStorage.getItem(StorageKey.ENABLE_SINGLE_COLUMN_LAYOUT) !== 'false'
+      window.localStorage.getItem(StorageKey.ENABLE_SINGLE_COLUMN_LAYOUT) === 'true'
 
     this.faviconUrlTemplate =
       window.localStorage.getItem(StorageKey.FAVICON_URL_TEMPLATE) ?? DEFAULT_FAVICON_URL_TEMPLATE

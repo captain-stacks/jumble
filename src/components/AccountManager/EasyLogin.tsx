@@ -11,7 +11,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
-export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
+const hasOpenAiKey = !!(
+  import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key')
+)
+export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY && hasOpenAiKey
 
 const EASY_LOGIN_INTRO_CONTENT =
   'I just created my nostr profile on #jumblewisp with the easy email signup flow!\n\nJumblewisp is a community fork of the Jumble Nostr client: https://jumble.thecaptain.dev\n\n#introductions'

@@ -17,6 +17,7 @@ type TUserTrustContext = {
   isSpammer: (pubkey: string) => Promise<boolean>
   meetsMinTrustScore: (pubkey: string, minScore: number) => Promise<boolean>
   isWotReady: boolean
+  wotStep: number
 }
 
 const UserTrustContext = createContext<TUserTrustContext | undefined>(undefined)
@@ -39,10 +40,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     storage.getMinTrustScoreMap()
   )
   const [isWotReady, setIsWotReady] = useState(false)
+  const [wotStep, setWotStep] = useState(0)
 
   useEffect(() => {
     const initWoT = async () => {
       setIsWotReady(false)
+      setWotStep(0) // Connecting to relays
       wotSet.clear()
 
       if (currentPubkey) {
@@ -63,9 +66,13 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           await new Promise((resolve) => setTimeout(resolve, 200))
         }
       } else if (FOLLOW_SOURCE_PUBKEY) {
+        setWotStep(1) // Building web of trust
         wotSet.add(FOLLOW_SOURCE_PUBKEY)
+        setWotStep(2) // Fetching follow list
         const followings = await client.fetchFollowings(FOLLOW_SOURCE_PUBKEY, false)
+        setWotStep(3) // Filtering trusted notes
         followings.forEach((pubkey) => wotSet.add(pubkey))
+        setWotStep(4) // Almost there
       }
 
       setIsWotReady(true)
@@ -140,7 +147,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         isUserTrusted,
         isSpammer,
         meetsMinTrustScore,
-        isWotReady
+        isWotReady,
+        wotStep
       }}
     >
       {children}

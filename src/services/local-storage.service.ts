@@ -73,8 +73,8 @@ class LocalStorageService {
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
   private hideIndirectNotifications: boolean = false
-  private disableReactions: boolean = false
-  private hideBookmarks: boolean = false
+  private disableReactions: boolean = true
+  private hideBookmarks: boolean = true
   private satsToBitcoins: boolean = false
   private hideRelayExplore: boolean = true
   private enableAiAgent: boolean = false
@@ -358,10 +358,10 @@ class LocalStorageService {
       window.localStorage.getItem(StorageKey.HIDE_INDIRECT_NOTIFICATIONS) === 'true'
 
     this.disableReactions =
-      window.localStorage.getItem(StorageKey.DISABLE_REACTIONS) === 'true'
+      window.localStorage.getItem(StorageKey.DISABLE_REACTIONS) !== 'false'
 
     this.hideBookmarks =
-      window.localStorage.getItem(StorageKey.HIDE_BOOKMARKS) === 'true'
+      window.localStorage.getItem(StorageKey.HIDE_BOOKMARKS) !== 'false'
 
     this.satsToBitcoins =
       window.localStorage.getItem(StorageKey.SATS_TO_BITCOINS) === 'true'

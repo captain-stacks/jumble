@@ -5,6 +5,8 @@ import { getDefaultRelayUrls } from '@/lib/relay'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
+import { hmac } from '@noble/hashes/hmac'
+import { sha256 } from '@noble/hashes/sha2'
 import { bytesToHex } from '@noble/hashes/utils'
 import { finalizeEvent, generateSecretKey, getPublicKey, nip19, nip44 } from 'nostr-tools'
 import { forwardRef, useEffect, useState } from 'react'
@@ -73,13 +75,14 @@ export default forwardRef(function ChangeRecoveryEmailPage(
       if (decoded.type !== 'nsec') throw new Error('Invalid key')
       const privkey = decoded.data
 
-      // encryptionPrivkey: random throwaway — encrypts both email and nsec, then discarded
-      const encryptionPrivkey = generateSecretKey()
-      const encryptionPubkey = getPublicKey(encryptionPrivkey)
-      const conversationKey = nip44.getConversationKey(encryptionPrivkey, MASTER_PUBKEY)
+      const normalizedEmail = email.trim().toLowerCase()
 
-      const encryptedEmail = nip44.encrypt(email.trim().toLowerCase(), conversationKey)
-      const encryptedKey = nip44.encrypt(bytesToHex(privkey), conversationKey)
+      const ephPrivkey = generateSecretKey()
+      const ephPubkey = getPublicKey(ephPrivkey)
+      const sharedSecret = nip44.getConversationKey(ephPrivkey, MASTER_PUBKEY)
+      const encryptedEmail = nip44.encrypt(normalizedEmail, sharedSecret)
+      const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
+      const encryptedKey = nip44.encrypt(bytesToHex(privkey), emailKey)
 
       const event = finalizeEvent(
         {
@@ -88,7 +91,7 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           tags: [
             ['d', 'jumblewisp-recovery-key'],
             ['m', MASTER_PUBKEY],
-            ['encryption-pubkey', encryptionPubkey],
+            ['ephemeral-pubkey', ephPubkey],
             ['encrypted-email', encryptedEmail]
           ],
           content: encryptedKey

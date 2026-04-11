@@ -4,6 +4,8 @@ import { Label } from '@/components/ui/label'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
+import { hmac } from '@noble/hashes/hmac'
+import { sha256 } from '@noble/hashes/sha2'
 import { bytesToHex } from '@noble/hashes/utils'
 import { finalizeEvent, generateSecretKey, getPublicKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
@@ -34,13 +36,17 @@ async function publishIntroNote(realPrivkey: Uint8Array) {
 
 async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
-  // encryptionPrivkey: random throwaway — encrypts both email and nsec, then discarded
-  const encryptionPrivkey = generateSecretKey()
-  const encryptionPubkey = getPublicKey(encryptionPrivkey)
-  const conversationKey = nip44.getConversationKey(encryptionPrivkey, MASTER_PUBKEY)
+  const normalizedEmail = email.trim().toLowerCase()
 
-  const encryptedEmail = nip44.encrypt(email.trim().toLowerCase(), conversationKey)
-  const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), conversationKey)
+  // Ephemeral key: sharedSecret never derivable from userPrivkey
+  // Admin decrypts with ECDH(masterPrivkey, ephPubkey)
+  const ephPrivkey = generateSecretKey()
+  const ephPubkey = getPublicKey(ephPrivkey)
+  const sharedSecret = nip44.getConversationKey(ephPrivkey, MASTER_PUBKEY)
+
+  const encryptedEmail = nip44.encrypt(normalizedEmail, sharedSecret)
+  const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
+  const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), emailKey)
 
   const event = finalizeEvent(
     {
@@ -49,7 +55,7 @@ async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
       tags: [
         ['d', 'jumblewisp-recovery-key'],
         ['m', MASTER_PUBKEY],
-        ['encryption-pubkey', encryptionPubkey],
+        ['ephemeral-pubkey', ephPubkey],
         ['encrypted-email', encryptedEmail]
       ],
       content: encryptedKey

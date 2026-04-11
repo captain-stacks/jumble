@@ -45,7 +45,6 @@ export const useUserTrust = () => {
 }
 
 const wotSet = new Set<string>()
-let initVersion = 0  // Track which effect invocation should proceed with bootstrap
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const { pubkey: currentPubkey, isInitialized } = useNostr()
@@ -59,9 +58,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initWoT = async () => {
-      // Increment version to invalidate any previous bootstrap in-flight operations
-      initVersion++
-
       // WAIT: Don't run any bootstrap logic until account initialization is complete
       if (!isInitialized) {
         setIsWotReady(false)

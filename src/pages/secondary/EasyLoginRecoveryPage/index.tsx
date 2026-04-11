@@ -6,16 +6,19 @@ import { getDefaultRelayUrls } from '@/lib/relay'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
-import { nip19 } from 'nostr-tools'
+import { hmac } from '@noble/hashes/hmac'
+import { sha256 } from '@noble/hashes/sha2'
+import { hexToBytes } from '@noble/hashes/utils'
+import { nip19, getPublicKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { forwardRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
 
-
 type TRecoveredAccount = {
   pubkey: string
+  email: string
   nsec: string
   copied: boolean
 }
@@ -24,7 +27,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
   { index }: { index?: number },
   ref
 ) {
-  const { pubkey, nip44Decrypt } = useNostr()
+  const { pubkey, nsec } = useNostr()
   const [email, setEmail] = useState('')
   const [npub, setNpub] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,6 +46,11 @@ export default forwardRef(function EasyLoginRecoveryPage(
     setTotalNotes(null)
 
     try {
+      if (!nsec) throw new Error('No key available')
+      const masterDecoded = nip19.decode(nsec)
+      if (masterDecoded.type !== 'nsec') throw new Error('Invalid master key')
+      const masterPrivkey = masterDecoded.data
+
       let authorPubkey: string | undefined
       if (npub.trim()) {
         try {
@@ -55,8 +63,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
         }
       }
 
-      const { getPublicKey } = await import('nostr-tools')
-      const { hexToBytes } = await import('@noble/hashes/utils')
+      const normalizedEmail = email.trim().toLowerCase()
 
       const relays = getDefaultRelayUrls()
       const allEvents = await client.fetchEvents(relays, [
@@ -73,30 +80,38 @@ export default forwardRef(function EasyLoginRecoveryPage(
       const found: TRecoveredAccount[] = []
 
       for (const ev of allEvents) {
-        const encryptionPubkey = ev.tags.find((t) => t[0] === 'encryption-pubkey')?.[1]
-        if (!encryptionPubkey) continue
         try {
+          const ephPubkey = ev.tags.find((t) => t[0] === 'ephemeral-pubkey')?.[1]
+          if (!ephPubkey) continue
           const encryptedEmail = ev.tags.find((t) => t[0] === 'encrypted-email')?.[1]
           if (!encryptedEmail) continue
-          const decryptedEmail = await nip44Decrypt(encryptionPubkey, encryptedEmail)
-          if (email.trim() && decryptedEmail.trim().toLowerCase() !== email.trim().toLowerCase()) continue
-          const decrypted = await nip44Decrypt(encryptionPubkey, ev.content)
-          if (!decrypted || !/^[0-9a-f]{64}$/.test(decrypted)) continue
-          const keyBytes = hexToBytes(decrypted)
-          const derivedPubkey = getPublicKey(keyBytes)
-          if (derivedPubkey !== ev.pubkey) continue
+
+          // Step 1: decrypt email with ECDH(masterPrivkey, ephPubkey)
+          const sharedSecret = nip44.getConversationKey(masterPrivkey, ephPubkey)
+          const decryptedEmail = nip44.decrypt(encryptedEmail, sharedSecret)
+
+          if (normalizedEmail && decryptedEmail !== normalizedEmail) continue
+
+          // Step 2: derive emailKey and decrypt nsec (double lockbox)
+          const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(decryptedEmail))
+          const nsecHex = nip44.decrypt(ev.content, emailKey)
+          if (!nsecHex || !/^[0-9a-f]{64}$/.test(nsecHex)) continue
+          const keyBytes = hexToBytes(nsecHex)
+          if (getPublicKey(keyBytes) !== ev.pubkey) continue
+
           found.push({
             pubkey: ev.pubkey,
+            email: decryptedEmail,
             nsec: nsecEncode(keyBytes),
             copied: false
           })
         } catch {
-          // Wrong key, try next
+          // Decryption failed, skip
         }
       }
 
       if (found.length === 0) {
-        setError('No recovery notes found. Make sure they signed up with the easy login flow.')
+        setError('No recovery notes found.')
       } else {
         setAccounts(found)
       }
@@ -139,7 +154,9 @@ export default forwardRef(function EasyLoginRecoveryPage(
 
         <form onSubmit={handleRecover} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="recovery-email">User's email address <span className="text-muted-foreground">(optional)</span></Label>
+            <Label htmlFor="recovery-email">
+              User's email address <span className="text-muted-foreground">(optional)</span>
+            </Label>
             <Input
               id="recovery-email"
               type="email"
@@ -150,7 +167,9 @@ export default forwardRef(function EasyLoginRecoveryPage(
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="recovery-npub">User's npub <span className="text-muted-foreground">(optional)</span></Label>
+            <Label htmlFor="recovery-npub">
+              User's npub <span className="text-muted-foreground">(optional)</span>
+            </Label>
             <Input
               id="recovery-npub"
               type="text"
@@ -179,6 +198,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
             {accounts.map((account, i) => (
               <div key={account.pubkey} className="space-y-3 rounded-lg border p-3">
                 <ProfileCard userId={account.pubkey} showFollowButton={false} />
+                <p className="text-xs text-muted-foreground">{account.email}</p>
                 <div className="flex gap-2">
                   <Input value={account.nsec} readOnly className="font-mono text-xs" />
                   <Button variant="secondary" size="icon" onClick={() => handleCopy(i)}>

@@ -90,7 +90,7 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           created_at: Math.floor(Date.now() / 1000),
           tags: [
             ['d', 'jumblewisp-recovery-key'],
-            ['m', MASTER_PUBKEY],
+            ['p', MASTER_PUBKEY],
             ['ephemeral-pubkey', ephPubkey],
             ['encrypted-email', encryptedEmail]
           ],

@@ -69,7 +69,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
       const allEvents = await client.fetchEvents(relays, [
         {
           kinds: [30078],
-          '#m': [MASTER_PUBKEY!],
+          '#p': [MASTER_PUBKEY!],
           '#d': ['jumblewisp-recovery-key'],
           ...(authorPubkey ? { authors: [authorPubkey] } : {}),
           limit: 500

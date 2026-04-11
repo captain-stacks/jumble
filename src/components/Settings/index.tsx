@@ -138,7 +138,7 @@ export default function Settings() {
         <SettingItem className="clickable" onClick={() => push(toChangeRecoveryEmail())}>
           <div className="flex items-center gap-4">
             <KeyRound />
-            <div>Change recovery email</div>
+            <div>Recovery email</div>
           </div>
           <ChevronRight />
         </SettingItem>

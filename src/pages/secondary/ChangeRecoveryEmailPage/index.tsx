@@ -7,8 +7,8 @@ import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
-import { finalizeEvent, nip19, nip44 } from 'nostr-tools'
-import { forwardRef, useState } from 'react'
+import { finalizeEvent, generateSecretKey, getPublicKey, nip19, nip44 } from 'nostr-tools'
+import { forwardRef, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
@@ -18,7 +18,8 @@ export default forwardRef(function ChangeRecoveryEmailPage(
   ref
 ) {
   const { t } = useTranslation()
-  const { nsec } = useNostr()
+  const { nsec, pubkey } = useNostr()
+  const [hasExisting, setHasExisting] = useState<boolean | null>(null)
   const [email, setEmail] = useState('')
   const [confirm, setConfirm] = useState('')
   const [step, setStep] = useState<'email' | 'confirm'>('email')
@@ -26,6 +27,22 @@ export default forwardRef(function ChangeRecoveryEmailPage(
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!pubkey || !MASTER_PUBKEY) return
+    client
+      .fetchEvents(getDefaultRelayUrls(), [
+        {
+          kinds: [30078],
+          authors: [pubkey],
+          '#d': ['jumblewisp-recovery-key'],
+          '#m': [MASTER_PUBKEY],
+          limit: 1
+        }
+      ])
+      .then((events) => setHasExisting(events.length > 0))
+      .catch(() => setHasExisting(false))
+  }, [pubkey])
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,9 +70,18 @@ export default forwardRef(function ChangeRecoveryEmailPage(
     setLoading(true)
     setError('')
     try {
-      const { data: privkey } = nip19.decode(nsec) as { data: Uint8Array }
-      const ephemeralPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
-      const conversationKey = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
+      const decoded = nip19.decode(nsec)
+      if (decoded.type !== 'nsec') throw new Error('Invalid key')
+      const privkey = decoded.data
+
+      // emailLookupPrivkey: derived from email — relay-indexed lookup key only
+      const emailLookupPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
+      const emailLookupPubkey = getPublicKey(emailLookupPrivkey)
+
+      // encryptionPrivkey: random throwaway — used for encryption, then discarded
+      const encryptionPrivkey = generateSecretKey()
+      const encryptionPubkey = getPublicKey(encryptionPrivkey)
+      const conversationKey = nip44.getConversationKey(encryptionPrivkey, MASTER_PUBKEY)
       const encryptedKey = nip44.encrypt(bytesToHex(privkey), conversationKey)
 
       const event = finalizeEvent(
@@ -64,7 +90,9 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           created_at: Math.floor(Date.now() / 1000),
           tags: [
             ['d', 'jumblewisp-recovery-key'],
-            ['m', MASTER_PUBKEY]
+            ['m', MASTER_PUBKEY],
+            ['p', emailLookupPubkey],
+            ['e', encryptionPubkey]
           ],
           content: encryptedKey
         },
@@ -80,24 +108,37 @@ export default forwardRef(function ChangeRecoveryEmailPage(
     }
   }
 
+  const isChanging = hasExisting === true
+  const title = isChanging ? t('Change recovery email') : t('Set up recovery email')
+
   return (
-    <SecondaryPageLayout ref={ref} index={index} title={t('Change recovery email')}>
+    <SecondaryPageLayout ref={ref} index={index} title={title}>
       <div className="space-y-6 p-4">
         {success ? (
           <div className="space-y-2">
-            <p className="text-sm font-medium">{t('Recovery email updated')}</p>
+            <p className="text-sm font-medium">
+              {isChanging ? t('Recovery email updated') : t('Recovery email set up')}
+            </p>
             <p className="text-sm text-muted-foreground">
-              {t('Your account can now be recovered using the new email address.')}
+              {t('Your account can now be recovered using this email address.')}
             </p>
           </div>
         ) : step === 'email' ? (
           <>
             <p className="text-sm text-muted-foreground">
-              {t('Enter a new email address to use for account recovery.')}
+              {isChanging
+                ? t(
+                    'Enter a new email address for account recovery. Your current recovery email will no longer work after this change. For privacy reasons, we cannot display what email is currently set.'
+                  )
+                : t(
+                    'Enter an email address to use for account recovery. If you ever lose access, this email will allow the account administrator to recover your private key.'
+                  )}
             </p>
             <form onSubmit={handleEmailSubmit} className="space-y-3">
               <div className="space-y-1">
-                <Label htmlFor="recovery-new-email">{t('New email address')}</Label>
+                <Label htmlFor="recovery-new-email">
+                  {isChanging ? t('New email address') : t('Email address')}
+                </Label>
                 <Input
                   id="recovery-new-email"
                   type="email"
@@ -141,17 +182,17 @@ export default forwardRef(function ChangeRecoveryEmailPage(
                 className="w-full"
                 disabled={loading || (!mismatch && !confirm.trim())}
               >
-                {loading
-                  ? t('Saving...')
-                  : mismatch
-                    ? t('Try again')
-                    : t('Save')}
+                {loading ? t('Saving...') : mismatch ? t('Try again') : t('Save')}
               </Button>
             </form>
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => { setStep('email'); setMismatch(false); setConfirm('') }}
+                onClick={() => {
+                  setStep('email')
+                  setMismatch(false)
+                  setConfirm('')
+                }}
                 className="text-xs text-muted-foreground underline-offset-2 hover:underline"
               >
                 ← {t('Back')}

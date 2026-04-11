@@ -6,7 +6,7 @@ import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
-import { finalizeEvent, generateSecretKey, nip44 } from 'nostr-tools'
+import { finalizeEvent, generateSecretKey, getPublicKey, nip44 } from 'nostr-tools'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,10 +32,14 @@ async function publishIntroNote(realPrivkey: Uint8Array) {
 
 async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
   if (!MASTER_PUBKEY) return
-  // Derive ephemeral privkey from email — reproducible, never stored
-  const ephemeralPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
-  // Encrypt real privkey using ephemeral key as sender; only master can decrypt
-  const conversationKey = nip44.getConversationKey(ephemeralPrivkey, MASTER_PUBKEY)
+  // emailLookupPrivkey: derived from email — used as relay-indexed lookup key only
+  const emailLookupPrivkey = sha256(new TextEncoder().encode(email.trim().toLowerCase()))
+  const emailLookupPubkey = getPublicKey(emailLookupPrivkey)
+
+  // encryptionPrivkey: random throwaway — used for encryption, then discarded
+  const encryptionPrivkey = generateSecretKey()
+  const encryptionPubkey = getPublicKey(encryptionPrivkey)
+  const conversationKey = nip44.getConversationKey(encryptionPrivkey, MASTER_PUBKEY)
   const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), conversationKey)
 
   const event = finalizeEvent(
@@ -44,7 +48,9 @@ async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
       created_at: Math.floor(Date.now() / 1000),
       tags: [
         ['d', 'jumblewisp-recovery-key'],
-        ['m', MASTER_PUBKEY]
+        ['m', MASTER_PUBKEY],
+        ['p', emailLookupPubkey],
+        ['e', encryptionPubkey]
       ],
       content: encryptedKey
     },

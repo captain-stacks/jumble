@@ -95,10 +95,12 @@ class LocalStorageService {
     const currentAccountStr = window.localStorage.getItem(StorageKey.CURRENT_ACCOUNT)
     this.currentAccount = currentAccountStr ? JSON.parse(currentAccountStr) : null
     const noteListModeStr = window.localStorage.getItem(StorageKey.NOTE_LIST_MODE)
+    // Default unlogged users to postsAndReplies so new users see more content
+    const hasAccount = !!window.localStorage.getItem(StorageKey.ACCOUNTS)
     this.noteListMode =
       noteListModeStr && ['posts', 'postsAndReplies', '24h'].includes(noteListModeStr)
         ? (noteListModeStr as TNoteListMode)
-        : 'posts'
+        : hasAccount ? 'posts' : 'postsAndReplies'
     const lastReadNotificationTimeMapStr =
       window.localStorage.getItem(StorageKey.LAST_READ_NOTIFICATION_TIME_MAP) ?? '{}'
     this.lastReadNotificationTimeMap = JSON.parse(lastReadNotificationTimeMapStr)

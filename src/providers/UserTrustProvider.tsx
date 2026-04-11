@@ -16,6 +16,7 @@ type TUserTrustContext = {
   isUserTrusted: (pubkey: string) => boolean
   isSpammer: (pubkey: string) => Promise<boolean>
   meetsMinTrustScore: (pubkey: string, minScore: number) => Promise<boolean>
+  isWotReady: boolean
 }
 
 const UserTrustContext = createContext<TUserTrustContext | undefined>(undefined)
@@ -37,9 +38,11 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
     storage.getMinTrustScoreMap()
   )
+  const [isWotReady, setIsWotReady] = useState(false)
 
   useEffect(() => {
     const initWoT = async () => {
+      setIsWotReady(false)
       wotSet.clear()
 
       if (currentPubkey) {
@@ -64,6 +67,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         const followings = await client.fetchFollowings(FOLLOW_SOURCE_PUBKEY, false)
         followings.forEach((pubkey) => wotSet.add(pubkey))
       }
+
+      setIsWotReady(true)
     }
     initWoT()
   }, [currentPubkey, followingSet])
@@ -134,7 +139,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         updateMinTrustScore,
         isUserTrusted,
         isSpammer,
-        meetsMinTrustScore
+        meetsMinTrustScore,
+        isWotReady
       }}
     >
       {children}

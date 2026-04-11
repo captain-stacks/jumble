@@ -8,6 +8,7 @@ import { toSearch } from '@/lib/link'
 import { useCurrentRelays } from '@/providers/CurrentRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { TPageRef } from '@/types'
 import { Compass, Info, LogIn, PencilLine, Search, Sparkles } from 'lucide-react'
@@ -31,6 +32,7 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
   const layoutRef = useRef<TPageRef>(null)
   const { pubkey } = useNostr()
   const { feedInfo, relayUrls, isReady, switchFeed } = useFeed()
+  const { isWotReady } = useUserTrust()
   const [showRelayDetails, setShowRelayDetails] = useState(false)
 
   useImperativeHandle(ref, () => layoutRef.current as TPageRef)
@@ -51,9 +53,11 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
   }, [relayUrls])
 
   let content: React.ReactNode = null
-  if (!isReady) {
-    content = (
+  if (!isReady || (!pubkey && !isWotReady)) {
+    content = pubkey ? (
       <div className="pt-3 text-center text-sm text-muted-foreground">{t('loading...')}</div>
+    ) : (
+      <GuestLoadingScreen />
     )
   } else if (!feedInfo) {
     content = <WelcomeGuide />
@@ -101,6 +105,83 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
 })
 NoteListPage.displayName = 'NoteListPage'
 export default NoteListPage
+
+const GUEST_LOADING_STEPS = [
+  { icon: '🔌', label: 'Connecting to relays...' },
+  { icon: '🕸️', label: 'Building web of trust...' },
+  { icon: '👥', label: 'Fetching follow list...' },
+  { icon: '🛡️', label: 'Filtering trusted notes...' },
+  { icon: '✨', label: 'Almost there...' }
+]
+
+function GuestLoadingScreen() {
+  const [stepIndex, setStepIndex] = useState(0)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    // Small delay so the screen fades in rather than flashing
+    const t = setTimeout(() => setVisible(true), 50)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, GUEST_LOADING_STEPS.length - 1))
+    }, 1400)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div
+      className={`flex min-h-[60vh] flex-col items-center justify-center gap-8 px-6 transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
+    >
+      <div className="flex flex-col gap-4 w-full max-w-xs">
+        {GUEST_LOADING_STEPS.map(({ icon, label }, i) => {
+          const isDone = i < stepIndex
+          const isActive = i === stepIndex
+          const isFuture = i > stepIndex
+          return (
+            <div
+              key={label}
+              className={`flex items-center gap-4 transition-all duration-500 ${isFuture ? 'opacity-20' : 'opacity-100'}`}
+            >
+              <div
+                className={`flex size-10 flex-shrink-0 items-center justify-center rounded-full text-xl transition-all duration-500 ${
+                  isDone
+                    ? 'bg-primary/20'
+                    : isActive
+                      ? 'bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background'
+                      : 'bg-muted'
+                }`}
+              >
+                <span className={isActive ? 'animate-bounce' : ''}>{icon}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span
+                  className={`font-medium transition-all duration-500 ${
+                    isDone ? 'text-muted-foreground line-through' : isActive ? 'text-foreground' : 'text-muted-foreground'
+                  }`}
+                >
+                  {label}
+                </span>
+                {isActive && (
+                  <div className="flex gap-1">
+                    <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                    <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                    <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+                  </div>
+                )}
+                {isDone && (
+                  <span className="text-xs text-primary">Done</span>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 function NoteListPageTitlebar({
   layoutRef,

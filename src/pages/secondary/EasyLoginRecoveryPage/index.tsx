@@ -166,7 +166,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
 
         {totalNotes !== null && (
           <p className="text-xs text-muted-foreground">
-            {totalNotes} signup note{totalNotes !== 1 ? 's' : ''} in search space
+            {totalNotes} recovery event{totalNotes !== 1 ? 's' : ''} in search space
           </p>
         )}
 

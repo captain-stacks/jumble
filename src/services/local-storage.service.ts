@@ -78,6 +78,7 @@ class LocalStorageService {
   private satsToBitcoins: boolean = false
   private hideRelayExplore: boolean = true
   private enableAiAgent: boolean = false
+  private showMuteDebugModal: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -371,6 +372,9 @@ class LocalStorageService {
 
     this.enableAiAgent =
       window.localStorage.getItem(StorageKey.ENABLE_AI_AGENT) === 'true'
+
+    this.showMuteDebugModal =
+      window.localStorage.getItem(StorageKey.SHOW_MUTE_DEBUG_MODAL) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -817,6 +821,15 @@ class LocalStorageService {
   setEnableAiAgent(value: boolean) {
     this.enableAiAgent = value
     window.localStorage.setItem(StorageKey.ENABLE_AI_AGENT, value.toString())
+  }
+
+  getShowMuteDebugModal() {
+    return this.showMuteDebugModal
+  }
+
+  setShowMuteDebugModal(value: boolean) {
+    this.showMuteDebugModal = value
+    window.localStorage.setItem(StorageKey.SHOW_MUTE_DEBUG_MODAL, value.toString())
   }
 }
 

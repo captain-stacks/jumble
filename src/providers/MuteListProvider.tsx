@@ -3,6 +3,7 @@ import { formatError } from '@/lib/error'
 import { getPubkeysFromPTags } from '@/lib/tag'
 import client from '@/services/client.service'
 import indexedDb from '@/services/indexed-db.service'
+import bootstrapCache from '@/services/bootstrap-cache.service'
 import dayjs from 'dayjs'
 import { Event } from 'nostr-tools'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
@@ -10,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useNostr } from './NostrProvider'
+import { useUserTrustReady } from './UserTrustProvider'
 
 type TMuteListContext = {
   mutePubkeySet: Set<string>
@@ -44,6 +46,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     nip44Decrypt,
     nip44Encrypt
   } = useNostr()
+  const isWotReady = useUserTrustReady()
   const [tags, setTags] = useState<string[][]>([])
   const [privateTags, setPrivateTags] = useState<string[][]>([])
   const publicMutePubkeySet = useMemo(() => new Set(getPubkeysFromPTags(tags)), [tags])
@@ -83,20 +86,38 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const updateMuteTags = async () => {
-      if (!muteListEvent) {
-        setTags([])
-        setPrivateTags([])
+      // Logged-in users should NEVER use bootstrap cache
+      if (accountPubkey) {
+        bootstrapCache.clear()
+        
+        if (muteListEvent) {
+          // Logged-in user: use their mute list event
+          const privateTags = await getPrivateTags(muteListEvent).catch(() => {
+            return []
+          })
+          setPrivateTags(privateTags)
+          setTags(muteListEvent.tags)
+        } else {
+          setTags([])
+          setPrivateTags([])
+        }
         return
       }
 
-      const privateTags = await getPrivateTags(muteListEvent).catch(() => {
-        return []
-      })
-      setPrivateTags(privateTags)
-      setTags(muteListEvent.tags)
+      // Non-logged-in users only: check bootstrap cache
+      const cachedMuteList = bootstrapCache.getMuteList()
+      if (cachedMuteList && cachedMuteList.length > 0) {
+        // Convert cached pubkeys to public mute tags
+        const muteTags = cachedMuteList.map((pk) => ['p', pk])
+        setTags(muteTags)
+        setPrivateTags([])
+      } else {
+        setTags([])
+        setPrivateTags([])
+      }
     }
     updateMuteTags()
-  }, [muteListEvent])
+  }, [muteListEvent, accountPubkey, getPrivateTags, isWotReady])
 
   const getMutePubkeys = () => {
     return Array.from(mutePubkeySet)

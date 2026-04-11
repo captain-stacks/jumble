@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
 import { TPageRef } from '@/types'
+import storage from '@/services/local-storage.service'
 import {
   cloneElement,
   createContext,
@@ -17,6 +18,7 @@ import {
 } from 'react'
 import BackgroundAudio from './components/BackgroundAudio'
 import BottomNavigationBar from './components/BottomNavigationBar'
+import MuteDebugModal from './components/MuteDebugModal'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import { NotificationProvider } from './providers/NotificationProvider'
@@ -77,10 +79,32 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
     }
   ])
   const [secondaryStack, setSecondaryStack] = useState<TStackItem[]>([])
+  const [debugModalEnabled, setDebugModalEnabledState] = useState(() => storage.getShowMuteDebugModal())
+  const [debugModalOpen, setDebugModalOpen] = useState(false)
   const { isSmallScreen } = useScreenSize()
   const { theme } = useTheme()
   const { enableSingleColumnLayout } = useUserPreferences()
   const ignorePopStateRef = useRef(false)
+
+  const toggleDebugModal = () => {
+    const newEnabled = !debugModalEnabled
+    storage.setShowMuteDebugModal(newEnabled)
+    setDebugModalEnabledState(newEnabled)
+    setDebugModalOpen(newEnabled)
+  }
+
+  const closeDebugModal = () => {
+    setDebugModalOpen(false)
+    storage.setShowMuteDebugModal(false)
+    setDebugModalEnabledState(false)
+  }
+
+  // Sync modal visibility with enabled state
+  useEffect(() => {
+    if (debugModalEnabled && !debugModalOpen) {
+      setDebugModalOpen(true)
+    }
+  }, [debugModalEnabled, debugModalOpen])
 
   useEffect(() => {
     if (isSmallScreen) return
@@ -89,6 +113,11 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         navigatePrimaryPage('search')
+      }
+      // Debug modal: Alt+M
+      if (e.altKey && e.key === 'm') {
+        e.preventDefault()
+        toggleDebugModal()
       }
       if (
         e.key === 'Escape' &&
@@ -326,6 +355,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               ))}
               <BottomNavigationBar />
               <TooManyRelaysAlertDialog />
+              {debugModalOpen && <MuteDebugModal onClose={closeDebugModal} />}
             </NotificationProvider>
           </CurrentRelaysProvider>
         </SecondaryPageContext.Provider>
@@ -387,6 +417,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               </div>
               <TooManyRelaysAlertDialog />
               <BackgroundAudio className="fixed bottom-20 right-0 z-50 w-80 overflow-hidden rounded-l-full rounded-r-none border shadow-lg" />
+              {debugModalOpen && <MuteDebugModal onClose={closeDebugModal} />}
             </NotificationProvider>
           </CurrentRelaysProvider>
         </SecondaryPageContext.Provider>
@@ -476,6 +507,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
             </div>
             <TooManyRelaysAlertDialog />
             <BackgroundAudio className="fixed bottom-20 right-0 z-50 w-80 overflow-hidden rounded-l-full rounded-r-none border shadow-lg" />
+            {debugModalOpen && <MuteDebugModal onClose={closeDebugModal} />}
           </NotificationProvider>
         </CurrentRelaysProvider>
       </SecondaryPageContext.Provider>

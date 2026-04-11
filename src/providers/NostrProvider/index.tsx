@@ -22,6 +22,7 @@ import customEmojiService from '@/services/custom-emoji.service'
 import indexedDb from '@/services/indexed-db.service'
 import storage from '@/services/local-storage.service'
 import stuffStatsService from '@/services/stuff-stats.service'
+import bootstrapCache from '@/services/bootstrap-cache.service'
 import {
   ISigner,
   TAccount,
@@ -457,6 +458,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
   }
 
   const login = (signer: ISigner, act: TAccount) => {
+    console.log('[NostrProvider] User login - clearing bootstrap cache', { pubkey: act.pubkey.slice(0, 16) + '...' })
+    bootstrapCache.clear()
     const newAccounts = storage.addAccount(act)
     setAccounts(newAccounts)
     storage.switchAccount(act)
@@ -466,6 +469,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
   }
 
   const removeAccount = (act: TAccountPointer) => {
+    console.log('[NostrProvider] Removing account')
+    bootstrapCache.clear()
     const newAccounts = storage.removeAccount(act)
     setAccounts(newAccounts)
     if (account?.pubkey === act.pubkey) {
@@ -476,6 +481,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
 
   const switchAccount = async (act: TAccountPointer | null) => {
     if (!act) {
+      console.log('[NostrProvider] Logout - clearing bootstrap cache')
+      bootstrapCache.clear()
       storage.switchAccount(null)
       setAccount(null)
       setSigner(null)
@@ -631,47 +638,61 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
 
   const setupNewUser = async (signer: ISigner) => {
     const defaultRelays = getDefaultRelayUrls()
+    // Bootstrap is only for new account creation, NOT for existing users logging in
     const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 
-    const [masterFollowListEvent, spicyListEvent] = followSourcePubkey
-      ? await Promise.all([
-          client.fetchFollowListEvent(followSourcePubkey),
-          client.fetchParameterizedReplaceableEvent(followSourcePubkey, 30001, 'spicy')
-        ])
-      : [null, null]
+    try {
+      console.log('[setupNewUser] Creating new user account', { 
+        hasFollowSourcePubkey: !!followSourcePubkey, 
+        isNewAccount: true 
+      })
 
-    const followListTags = masterFollowListEvent
-      ? masterFollowListEvent.tags.filter(([t]) => t === 'p')
-      : []
+      // Try to use cached follow list first, then fetch fresh
+      // Only fetch from master pubkey if this is a new account bootstrap
+      let followListTags: string[][] = []
+      const masterFollowListEvent = followSourcePubkey
+        ? await client.fetchFollowListEvent(followSourcePubkey)
+        : null
 
-    const spicyPubkeys = spicyListEvent
-      ? spicyListEvent.tags.filter(([t]) => t === 'p').map(([, pubkey]) => pubkey)
-      : []
+      followListTags = masterFollowListEvent
+        ? masterFollowListEvent.tags.filter(([t]) => t === 'p')
+        : []
 
-    const newUserPubkey = await signer.getPublicKey()
-    const muteListContent = spicyPubkeys.length > 0
-      ? await signer.nip44Encrypt(
-          newUserPubkey,
-          JSON.stringify(spicyPubkeys.map((pk) => ['p', pk]))
-        )
-      : ''
+      // Try to use cached mute list from UserTrustProvider bootstrap (only for bootstrapped new accounts)
+      let spicyPubkeys = followSourcePubkey ? (bootstrapCache.getMuteList() || []) : []
+      console.log('[setupNewUser] Bootstrap mute list', { found: spicyPubkeys.length > 0, size: spicyPubkeys.length })
 
-    const [followListEvent, muteListEvent, relayListEvent] = await Promise.all([
-      signer.signEvent(createFollowListDraftEvent(followListTags)),
-      signer.signEvent(createMuteListDraftEvent([], muteListContent)),
-      signer.signEvent(createRelayListDraftEvent(defaultRelays.map((url) => ({ url, scope: 'both' }))))
-    ])
+      const newUserPubkey = await signer.getPublicKey()
+      const muteListContent = spicyPubkeys.length > 0
+        ? await signer.nip44Encrypt(
+            newUserPubkey,
+            JSON.stringify(spicyPubkeys.map((pk) => ['p', pk]))
+          )
+        : ''
 
-    await Promise.allSettled([
-      client.publishEvent(defaultRelays, followListEvent),
-      client.publishEvent(defaultRelays, muteListEvent),
-      client.publishEvent(defaultRelays, relayListEvent)
-    ])
+      const [followListEvent, muteListEvent, relayListEvent] = await Promise.all([
+        signer.signEvent(createFollowListDraftEvent(followListTags)),
+        signer.signEvent(createMuteListDraftEvent([], muteListContent)),
+        signer.signEvent(createRelayListDraftEvent(defaultRelays.map((url) => ({ url, scope: 'both' }))))
+      ])
 
-    await Promise.allSettled([
-      updateFollowListEvent(followListEvent),
-      updateMuteListEvent(muteListEvent, spicyPubkeys.map((pk) => ['p', pk]))
-    ])
+      await Promise.allSettled([
+        client.publishEvent(defaultRelays, followListEvent),
+        client.publishEvent(defaultRelays, muteListEvent),
+        client.publishEvent(defaultRelays, relayListEvent)
+      ])
+
+      await Promise.allSettled([
+        updateFollowListEvent(followListEvent),
+        updateMuteListEvent(muteListEvent, spicyPubkeys.map((pk) => ['p', pk]))
+      ])
+
+      // Clear bootstrap cache after successful account creation
+      bootstrapCache.clear()
+    } catch (error) {
+      // Don't clear cache on error, user might try again
+      throw error
+    }
   }
 
   const signEvent = async (draftEvent: TDraftEvent) => {

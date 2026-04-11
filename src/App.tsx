@@ -35,8 +35,8 @@ export default function App(): JSX.Element {
                   <TranslationServiceProvider>
                     <FavoriteRelaysProvider>
                       <FollowListProvider>
-                        <MuteListProvider>
-                          <UserTrustProvider>
+                        <UserTrustProvider>
+                          <MuteListProvider>
                             <BookmarksProvider>
                               <EmojiPackProvider>
                                 <PinListProvider>
@@ -53,8 +53,8 @@ export default function App(): JSX.Element {
                                 </PinListProvider>
                               </EmojiPackProvider>
                             </BookmarksProvider>
-                          </UserTrustProvider>
-                        </MuteListProvider>
+                          </MuteListProvider>
+                        </UserTrustProvider>
                       </FollowListProvider>
                     </FavoriteRelaysProvider>
                   </TranslationServiceProvider>

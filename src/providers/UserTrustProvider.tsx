@@ -2,11 +2,17 @@ import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import client from '@/services/client.service'
 import fayan from '@/services/fayan.service'
 import storage from '@/services/local-storage.service'
+import bootstrapCache from '@/services/bootstrap-cache.service'
+import { getDefaultRelayUrls } from '@/lib/relay'
+import { getPubkeysFromPTags } from '@/lib/tag'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useFollowList } from './FollowListProvider'
 import { useNostr } from './NostrProvider'
+import { kinds, SimplePool } from 'nostr-tools'
 
 const FOLLOW_SOURCE_PUBKEY = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
+const BATCH_SIZE = 20
+const BATCH_DELAY_MS = 200
 
 type TUserTrustContext = {
   minTrustScore: number
@@ -20,6 +26,14 @@ type TUserTrustContext = {
   wotStep: number
 }
 
+export const useUserTrustReady = () => {
+  const context = useContext(UserTrustContext)
+  if (!context) {
+    throw new Error('useUserTrustReady must be used within UserTrustProvider')
+  }
+  return context.isWotReady
+}
+
 const UserTrustContext = createContext<TUserTrustContext | undefined>(undefined)
 
 export const useUserTrust = () => {
@@ -31,9 +45,10 @@ export const useUserTrust = () => {
 }
 
 const wotSet = new Set<string>()
+let initVersion = 0  // Track which effect invocation should proceed with bootstrap
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
-  const { pubkey: currentPubkey } = useNostr()
+  const { pubkey: currentPubkey, isInitialized } = useNostr()
   const { followingSet } = useFollowList()
   const [minTrustScore, setMinTrustScore] = useState(() => storage.getMinTrustScore())
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
@@ -44,41 +59,178 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initWoT = async () => {
-      setIsWotReady(false)
-      setWotStep(0) // Connecting to relays
-      wotSet.clear()
+      // Increment version to invalidate any previous bootstrap in-flight operations
+      initVersion++
+      const thisVersion = initVersion
 
-      if (currentPubkey) {
-        const followings = Array.from(followingSet)
-        followings.forEach((pubkey) => wotSet.add(pubkey))
-
-        const batchSize = 20
-        for (let i = 0; i < followings.length; i += batchSize) {
-          const batch = followings.slice(i, i + batchSize)
-          await Promise.allSettled(
-            batch.map(async (pubkey) => {
-              const _followings = await client.fetchFollowings(pubkey, false)
-              _followings.forEach((following) => {
-                wotSet.add(following)
-              })
-            })
-          )
-          await new Promise((resolve) => setTimeout(resolve, 200))
-        }
-      } else if (FOLLOW_SOURCE_PUBKEY) {
-        setWotStep(1) // Building web of trust
-        wotSet.add(FOLLOW_SOURCE_PUBKEY)
-        setWotStep(2) // Fetching follow list
-        const followings = await client.fetchFollowings(FOLLOW_SOURCE_PUBKEY, false)
-        setWotStep(3) // Filtering trusted notes
-        followings.forEach((pubkey) => wotSet.add(pubkey))
-        setWotStep(4) // Almost there
+      // WAIT: Don't run any bootstrap logic until account initialization is complete
+      if (!isInitialized) {
+        setIsWotReady(false)
+        return
       }
 
-      setIsWotReady(true)
+      // IMMEDIATE CHECK: If user is logged in, handle it and return - no bootstrap
+      if (currentPubkey) {
+        bootstrapCache.clear()
+        
+        // Ensure WoT doesn't persist state from bootstrap
+        wotSet.clear()
+        
+        // Wait for followingSet to be populated before building WoT
+        if (followingSet.size === 0) {
+          setIsWotReady(false)
+          return
+        }
+        
+        setIsWotReady(false)
+        setWotStep(0)
+        
+        // Step 1: Add current user
+        wotSet.add(currentPubkey)
+        setWotStep(1)
+        
+        // Step 2: Add direct follows (already fetched from their account)
+        setWotStep(2)
+        const directFollows = Array.from(followingSet)
+        directFollows.forEach((pubkey) => wotSet.add(pubkey))
+        
+        // Step 3: Fetch follows of follows in batches from standard relays
+        setWotStep(3)
+        const relays = getDefaultRelayUrls()
+        try {
+          const pool = new SimplePool()
+          for (let i = 0; i < directFollows.length; i += BATCH_SIZE) {
+            const batch = directFollows.slice(i, i + BATCH_SIZE)
+            const batchNum = Math.floor(i / BATCH_SIZE) + 1
+            const totalBatches = Math.ceil(directFollows.length / BATCH_SIZE)
+            const results = await Promise.all(
+              batch.map((pubkey) => {
+                const filter = {
+                  authors: [pubkey],
+                  kinds: [kinds.Contacts],
+                  limit: 1
+                }
+                return pool.get(relays, filter)
+              })
+            )
+            let addedCount = 0
+            results.forEach((event) => {
+              if (event) {
+                const pubkeys = getPubkeysFromPTags(event.tags)
+                pubkeys.forEach((pubkey) => {
+                  if (!wotSet.has(pubkey)) {
+                    addedCount++
+                  }
+                  wotSet.add(pubkey)
+                })
+              }
+            })
+
+            await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
+          }
+        } catch (error) {
+          // Silently handle errors
+        }
+        
+        // Step 4: Done
+        setWotStep(4)
+        setIsWotReady(true)
+        return
+      }
+
+      // For non-logged-in users: bootstrap from FOLLOW_SOURCE_PUBKEY
+      // GATE: Never start bootstrap if user is logged in
+      if (currentPubkey) {
+        setIsWotReady(true)
+        return
+      }
+
+      if (!FOLLOW_SOURCE_PUBKEY) {
+        setIsWotReady(true)
+        return
+      }
+
+      const sourcePubkey = FOLLOW_SOURCE_PUBKEY
+
+      // Build bootstrap WoT using standard relays
+      const relays = getDefaultRelayUrls()
+
+      try {
+        const pool = new SimplePool()
+
+        // Step 1: Add source pubkey
+        wotSet.add(sourcePubkey)
+        setWotStep(1)
+
+        // Step 2: Fetch direct follows
+        setWotStep(2)
+        const followListFilter = {
+          authors: [sourcePubkey],
+          kinds: [kinds.Contacts],
+          limit: 1
+        }
+        const followListEvent = await pool.get(relays, followListFilter)
+        const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
+        followings.forEach((pubkey) => wotSet.add(pubkey))
+
+        // Step 3: Fetch follows of follows in batches
+        setWotStep(3)
+        for (let i = 0; i < followings.length; i += BATCH_SIZE) {
+          const batch = followings.slice(i, i + BATCH_SIZE)
+          const batchNum = Math.floor(i / BATCH_SIZE) + 1
+          const totalBatches = Math.ceil(followings.length / BATCH_SIZE)
+          const results = await Promise.all(
+            batch.map((pubkey) => {
+              const filter = {
+                authors: [pubkey],
+                kinds: [kinds.Contacts],
+                limit: 1
+              }
+              return pool.get(relays, filter)
+            })
+          )
+          let addedCount = 0
+          results.forEach((event) => {
+            if (event) {
+              const pubkeys = getPubkeysFromPTags(event.tags)
+              pubkeys.forEach((pubkey) => {
+                if (!wotSet.has(pubkey)) {
+                  addedCount++
+                }
+                wotSet.add(pubkey)
+              })
+            }
+          })
+          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
+        }
+
+        // Step 4: Done
+        setWotStep(4)
+
+        // Cache WoT for bootstrap - but only if user hasn't logged in (version check)
+        if (currentPubkey) {
+        } else {
+          bootstrapCache.setWoT(Array.from(wotSet))
+        }
+
+        // Also cache mute list for bootstrap - but only if user hasn't logged in
+        if (!currentPubkey) {
+          const spicyListEvent = await client.fetchParameterizedReplaceableEvent(sourcePubkey, 30001, 'spicy')
+          if (spicyListEvent) {
+            const spicyPubkeys = spicyListEvent.tags.filter(([t]) => t === 'p').map(([, pubkey]) => pubkey)
+            bootstrapCache.setMuteList(spicyPubkeys)
+          }
+        }
+
+        // Now mark WoT as ready, after cache is populated
+        setIsWotReady(true)
+      } catch (error) {
+        // Silently handle errors
+        setIsWotReady(true)
+      }
     }
     initWoT()
-  }, [currentPubkey, followingSet])
+  }, [currentPubkey, followingSet, isInitialized])
 
   const isUserTrusted = useCallback(
     (pubkey: string) => {

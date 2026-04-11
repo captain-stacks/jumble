@@ -65,9 +65,9 @@ const clients: Record<string, { name: string; getUrl: (id: string) => string }> 
     name: 'Pareto',
     getUrl: (id: string) => `https://pareto.space/a/${id}`
   },
-  jumblewisp: {
-    name: 'Jumblewisp',
-    getUrl: (id: string) => `https://jumble.thecaptain.dev/notes/${id}`
+  njump: {
+    name: 'Njump',
+    getUrl: (id: string) => `https://njump.me/${id}`
   }
 }
 
@@ -95,26 +95,26 @@ export default function ClientSelect({
         }
       } catch (error) {
         console.error('Failed to decode NIP-19 pointer:', error)
-        return ['jumblewisp']
+        return ['njump']
       }
     }
     if (!kind) {
-      return ['jumblewisp']
+      return ['njump']
     }
 
     switch (kind) {
       case kinds.LongFormArticle:
       case kinds.DraftLong:
-        return ['yakihonne', 'coracle', 'habla', 'lumilumi', 'pareto', 'jumblewisp']
+        return ['yakihonne', 'coracle', 'habla', 'lumilumi', 'pareto', 'njump']
       case kinds.LiveEvent:
-        return ['zapStream', 'nostrudel', 'jumblewisp']
+        return ['zapStream', 'nostrudel', 'njump']
       case kinds.Date:
       case kinds.Time:
-        return ['coracle', 'jumblewisp']
+        return ['coracle', 'njump']
       case kinds.CommunityDefinition:
-        return ['coracle', 'snort', 'jumblewisp']
+        return ['coracle', 'snort', 'njump']
       default:
-        return ['jumblewisp']
+        return ['njump']
     }
   }, [event])
 

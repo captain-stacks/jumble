@@ -13,13 +13,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
-const hasOpenAiKey = !!(
-  import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key')
-)
-export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY && hasOpenAiKey
+export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 
 const EASY_LOGIN_INTRO_CONTENT =
-  'I just created my nostr profile on #jumblewisp with the easy email signup flow!\n\nJumblewisp is a community fork of the Jumble Nostr client: https://jumble.thecaptain.dev\n\n#introductions'
+  'Just shipped serverless email signup on jumblewisp. No database, no OAuth, no "we\'ll never sell your data" privacy policy. Just math.\n\nPowered by NIP-69420: Serverless email key recovery. Yes that\'s the real NIP number. No it hasn\'t been submitted. No I\'m not going to submit it.\n\nIn 100 seconds or less:\n\n• Type your email, get a Nostr keypair. No password needed, because passwords are just forgotten secrets with extra steps.\n• A throwaway keypair does ECDH with the master pubkey. Shared secret derived. Throwaway key discarded immediately, gone like your motivation to read the NIP.\n• Your email is encrypted with that shared secret. No hash stored anywhere. An attacker with the relay data sees ciphertext and questions their career choices.\n• Your nsec is encrypted with a different key: HMAC-SHA256(sharedSecret, email). This is the double lockbox. Admin needs the master privkey to read your email. Then needs your email to decrypt your nsec. Neither alone gets them anywhere.\n• Both land as a kind 30078 on Nostr itself. Because why use S3 when you have relays and trust issues.\n\nIf you lose access, DM me your email. I run the master key. Your nsec comes back. No ticket system. No 3-5 business days, unless I\'m on a mountain meditation retreat, in which case it\'s definitely 3-5 business days.\n\nTry it out: https://jumble.thecaptain.dev\n\n#introductions #jumblewisp #nostr'
 
 async function publishIntroNote(realPrivkey: Uint8Array) {
   const event = finalizeEvent(

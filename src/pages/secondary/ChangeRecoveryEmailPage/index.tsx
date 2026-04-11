@@ -80,7 +80,6 @@ export default forwardRef(function ChangeRecoveryEmailPage(
       const ephPrivkey = generateSecretKey()
       const ephPubkey = getPublicKey(ephPrivkey)
       const sharedSecret = nip44.getConversationKey(ephPrivkey, MASTER_PUBKEY)
-      const encryptedEmail = nip44.encrypt(normalizedEmail, sharedSecret)
       const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
       const encryptedKey = nip44.encrypt(bytesToHex(privkey), emailKey)
 
@@ -91,8 +90,7 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           tags: [
             ['d', 'jumblewisp-recovery-key'],
             ['p', MASTER_PUBKEY],
-            ['ephemeral-pubkey', ephPubkey],
-            ['encrypted-email', encryptedEmail]
+            ['ephemeral-pubkey', ephPubkey]
           ],
           content: encryptedKey
         },

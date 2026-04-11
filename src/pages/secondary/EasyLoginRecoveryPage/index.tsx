@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import ProfileCard from '@/components/ProfileCard'
+import UserAvatar from '@/components/UserAvatar'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import client from '@/services/client.service'
@@ -10,16 +10,17 @@ import { hmac } from '@noble/hashes/hmac'
 import { sha256 } from '@noble/hashes/sha2'
 import { hexToBytes } from '@noble/hashes/utils'
 import { nip19, getPublicKey, nip44 } from 'nostr-tools'
+import { decrypt as decryptNcryptsec } from 'nostr-tools/nip49'
 import { nsecEncode } from 'nostr-tools/nip19'
 import { forwardRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
 const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | undefined
+const NCRYPTSEC_STORAGE_KEY = 'jumblewisp_master_ncryptsec'
 
 type TRecoveredAccount = {
   pubkey: string
-  email: string
-  nsec: string
+  nsec: string | null
   copied: boolean
 }
 
@@ -28,6 +29,8 @@ export default forwardRef(function EasyLoginRecoveryPage(
   ref
 ) {
   const { pubkey, nsec } = useNostr()
+  const [ncryptsec, setNcryptsec] = useState(() => localStorage.getItem(NCRYPTSEC_STORAGE_KEY) ?? '')
+  const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
   const [npub, setNpub] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,6 +39,15 @@ export default forwardRef(function EasyLoginRecoveryPage(
   const [error, setError] = useState('')
 
   const isMaster = pubkey === MASTER_PUBKEY
+
+  const handleNcryptsecChange = (value: string) => {
+    setNcryptsec(value)
+    if (value.trim()) {
+      localStorage.setItem(NCRYPTSEC_STORAGE_KEY, value.trim())
+    } else {
+      localStorage.removeItem(NCRYPTSEC_STORAGE_KEY)
+    }
+  }
 
   const handleRecover = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,10 +58,16 @@ export default forwardRef(function EasyLoginRecoveryPage(
     setTotalNotes(null)
 
     try {
-      if (!nsec) throw new Error('No key available')
-      const masterDecoded = nip19.decode(nsec)
-      if (masterDecoded.type !== 'nsec') throw new Error('Invalid master key')
-      const masterPrivkey = masterDecoded.data
+      let masterPrivkey: Uint8Array
+      if (nsec) {
+        const decoded = nip19.decode(nsec)
+        if (decoded.type !== 'nsec') throw new Error('Invalid master key')
+        masterPrivkey = decoded.data
+      } else {
+        if (!ncryptsec.trim()) throw new Error('Enter your master ncryptsec')
+        if (!password) throw new Error('Enter your password')
+        masterPrivkey = decryptNcryptsec(ncryptsec.trim(), password)
+      }
 
       let authorPubkey: string | undefined
       if (npub.trim()) {
@@ -83,30 +101,26 @@ export default forwardRef(function EasyLoginRecoveryPage(
         try {
           const ephPubkey = ev.tags.find((t) => t[0] === 'ephemeral-pubkey')?.[1]
           if (!ephPubkey) continue
-          const encryptedEmail = ev.tags.find((t) => t[0] === 'encrypted-email')?.[1]
-          if (!encryptedEmail) continue
 
-          // Step 1: decrypt email with ECDH(masterPrivkey, ephPubkey)
-          const sharedSecret = nip44.getConversationKey(masterPrivkey, ephPubkey)
-          const decryptedEmail = nip44.decrypt(encryptedEmail, sharedSecret)
-
-          if (normalizedEmail && decryptedEmail !== normalizedEmail) continue
-
-          // Step 2: derive emailKey and decrypt nsec (double lockbox)
-          const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(decryptedEmail))
-          const nsecHex = nip44.decrypt(ev.content, emailKey)
-          if (!nsecHex || !/^[0-9a-f]{64}$/.test(nsecHex)) continue
-          const keyBytes = hexToBytes(nsecHex)
-          if (getPublicKey(keyBytes) !== ev.pubkey) continue
-
-          found.push({
-            pubkey: ev.pubkey,
-            email: decryptedEmail,
-            nsec: nsecEncode(keyBytes),
-            copied: false
-          })
+          if (normalizedEmail) {
+            // Email provided: derive emailKey and attempt full decryption
+            const sharedSecret = nip44.getConversationKey(masterPrivkey, ephPubkey)
+            const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
+            try {
+              const nsecHex = nip44.decrypt(ev.content, emailKey)
+              if (!nsecHex || !/^[0-9a-f]{64}$/.test(nsecHex)) continue
+              const keyBytes = hexToBytes(nsecHex)
+              if (getPublicKey(keyBytes) !== ev.pubkey) continue
+              found.push({ pubkey: ev.pubkey, nsec: nsecEncode(keyBytes), copied: false })
+            } catch {
+              // Wrong email for this event, skip
+            }
+          } else {
+            // No email: show profile only, nsec locked
+            found.push({ pubkey: ev.pubkey, nsec: null, copied: false })
+          }
         } catch {
-          // Decryption failed, skip
+          // Skip malformed events
         }
       }
 
@@ -123,8 +137,8 @@ export default forwardRef(function EasyLoginRecoveryPage(
   }
 
   const handleCopy = (i: number) => {
-    if (!accounts) return
-    navigator.clipboard.writeText(accounts[i].nsec)
+    if (!accounts || !accounts[i].nsec) return
+    navigator.clipboard.writeText(accounts[i].nsec!)
     setAccounts((prev) =>
       prev ? prev.map((a, idx) => (idx === i ? { ...a, copied: true } : a)) : prev
     )
@@ -153,6 +167,31 @@ export default forwardRef(function EasyLoginRecoveryPage(
         </p>
 
         <form onSubmit={handleRecover} className="space-y-3">
+          {!nsec && (
+            <>
+              <div className="space-y-1">
+                <Label htmlFor="recovery-ncryptsec">Master ncryptsec</Label>
+                <Input
+                  id="recovery-ncryptsec"
+                  type="password"
+                  placeholder="ncryptsec1..."
+                  value={ncryptsec}
+                  onChange={(e) => handleNcryptsecChange(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="recovery-password">Password</Label>
+                <Input
+                  id="recovery-password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </>
+          )}
           <div className="space-y-1">
             <Label htmlFor="recovery-email">
               User's email address <span className="text-muted-foreground">(optional)</span>
@@ -163,7 +202,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
               placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoFocus
+              autoFocus={!!nsec}
             />
           </div>
           <div className="space-y-1">
@@ -197,14 +236,15 @@ export default forwardRef(function EasyLoginRecoveryPage(
             </p>
             {accounts.map((account, i) => (
               <div key={account.pubkey} className="space-y-3 rounded-lg border p-3">
-                <ProfileCard userId={account.pubkey} showFollowButton={false} />
-                <p className="text-xs text-muted-foreground">{account.email}</p>
-                <div className="flex gap-2">
-                  <Input value={account.nsec} readOnly className="font-mono text-xs" />
-                  <Button variant="secondary" size="icon" onClick={() => handleCopy(i)}>
-                    {account.copied ? <Check /> : <Copy />}
-                  </Button>
-                </div>
+                <UserAvatar userId={account.pubkey} size="normal" />
+                {account.nsec && (
+                  <div className="flex gap-2">
+                    <Input value={account.nsec} readOnly className="font-mono text-xs" />
+                    <Button variant="secondary" size="icon" onClick={() => handleCopy(i)}>
+                      {account.copied ? <Check /> : <Copy />}
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
             <p className="text-xs text-muted-foreground">

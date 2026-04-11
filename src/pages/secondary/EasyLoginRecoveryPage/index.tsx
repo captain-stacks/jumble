@@ -36,7 +36,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
 
   const handleRecover = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !MASTER_PUBKEY) return
+    if (!MASTER_PUBKEY) return
     setLoading(true)
     setError('')
     setAccounts(null)
@@ -76,10 +76,11 @@ export default forwardRef(function EasyLoginRecoveryPage(
         const encryptionPubkey = ev.tags.find((t) => t[0] === 'encryption-pubkey')?.[1]
         if (!encryptionPubkey) continue
         try {
-          const { encryptedEmail, encryptedKey } = JSON.parse(ev.content)
+          const encryptedEmail = ev.tags.find((t) => t[0] === 'encrypted-email')?.[1]
+          if (!encryptedEmail) continue
           const decryptedEmail = await nip44Decrypt(encryptionPubkey, encryptedEmail)
-          if (decryptedEmail.trim().toLowerCase() !== email.trim().toLowerCase()) continue
-          const decrypted = await nip44Decrypt(encryptionPubkey, encryptedKey)
+          if (email.trim() && decryptedEmail.trim().toLowerCase() !== email.trim().toLowerCase()) continue
+          const decrypted = await nip44Decrypt(encryptionPubkey, ev.content)
           if (!decrypted || !/^[0-9a-f]{64}$/.test(decrypted)) continue
           const keyBytes = hexToBytes(decrypted)
           const derivedPubkey = getPublicKey(keyBytes)
@@ -133,12 +134,12 @@ export default forwardRef(function EasyLoginRecoveryPage(
     <SecondaryPageLayout ref={ref} index={index} title="Account Recovery">
       <div className="space-y-6 p-4">
         <p className="text-sm text-muted-foreground">
-          Enter the user's email address to recover their private key from their recovery event.
+          Enter an email address to find a specific user, or leave blank to retrieve all recovery events.
         </p>
 
         <form onSubmit={handleRecover} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="recovery-email">User's email address</Label>
+            <Label htmlFor="recovery-email">User's email address <span className="text-muted-foreground">(optional)</span></Label>
             <Input
               id="recovery-email"
               type="email"
@@ -159,7 +160,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading || !email.trim()}>
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Searching...' : 'Recover Key'}
           </Button>
         </form>

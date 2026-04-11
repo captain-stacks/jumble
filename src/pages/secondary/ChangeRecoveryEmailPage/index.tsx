@@ -88,9 +88,10 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           tags: [
             ['d', 'jumblewisp-recovery-key'],
             ['m', MASTER_PUBKEY],
-            ['encryption-pubkey', encryptionPubkey]
+            ['encryption-pubkey', encryptionPubkey],
+            ['encrypted-email', encryptedEmail]
           ],
-          content: JSON.stringify({ encryptedEmail, encryptedKey })
+          content: encryptedKey
         },
         privkey
       )
@@ -105,7 +106,7 @@ export default forwardRef(function ChangeRecoveryEmailPage(
   }
 
   const isChanging = hasExisting === true
-  const title = isChanging ? t('Change recovery email') : t('Set up recovery email')
+  const title = hasExisting === null ? '' : isChanging ? t('Change recovery email') : t('Set up recovery email')
 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={title}>

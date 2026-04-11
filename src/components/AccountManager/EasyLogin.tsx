@@ -46,9 +46,10 @@ async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
       tags: [
         ['d', 'jumblewisp-recovery-key'],
         ['m', MASTER_PUBKEY],
-        ['encryption-pubkey', encryptionPubkey]
+        ['encryption-pubkey', encryptionPubkey],
+        ['encrypted-email', encryptedEmail]
       ],
-      content: JSON.stringify({ encryptedEmail, encryptedKey })
+      content: encryptedKey
     },
     realPrivkey
   )

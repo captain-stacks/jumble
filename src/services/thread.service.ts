@@ -17,7 +17,7 @@ import { Filter, kinds, NostrEvent } from 'nostr-tools'
 
 type TRootInfo =
   | { type: 'E'; id: string; pubkey: string }
-  | { type: 'A'; id: string; pubkey: string; relay?: string }
+  | { type: 'A'; id: string; pubkey: string; relay?: string; eventId?: string }
   | { type: 'I'; id: string }
 
 class ThreadService {
@@ -107,6 +107,21 @@ class ThreadService {
             limit
           }
         )
+        // Also fetch legacy replies that reference the event ID directly
+        if (rootInfo.eventId) {
+          filters.push(
+            {
+              '#e': [rootInfo.eventId],
+              kinds: [kinds.ShortTextNote],
+              limit
+            },
+            {
+              '#E': [rootInfo.eventId],
+              kinds: [ExtendedKind.COMMENT, ExtendedKind.VOICE_COMMENT],
+              limit
+            }
+          )
+        }
         if (rootInfo.relay) {
           relayUrls.push(rootInfo.relay)
         }
@@ -333,7 +348,8 @@ class ThreadService {
               type: 'A',
               id: getReplaceableCoordinateFromEvent(event),
               pubkey: event.pubkey,
-              relay: client.getEventHint(event.id)
+              relay: client.getEventHint(event.id),
+              eventId: event.id
             }
           : { type: 'E', id: event.id, pubkey: event.pubkey }
         : { type: 'I', id: externalContent! }
@@ -355,7 +371,8 @@ class ThreadService {
       } else if (rootTag?.type === 'a') {
         const [, coordinate, relay] = rootTag.tag
         const [, pubkey] = coordinate.split(':')
-        root = { type: 'A', id: coordinate, pubkey, relay }
+        const cachedEvent = client.getReplaeableEventFromCache(coordinate)
+        root = { type: 'A', id: coordinate, pubkey, relay, eventId: cachedEvent?.id }
       } else if (rootTag?.type === 'i') {
         root = { type: 'I', id: rootTag.tag[1] }
       }

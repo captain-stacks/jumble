@@ -36,6 +36,9 @@ type TUserPreferencesContext = {
 
   enableAiAgent: boolean
   updateEnableAiAgent: (value: boolean) => void
+
+  disableSpecialFollowFeatures: boolean
+  updateDisableSpecialFollowFeatures: (value: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -65,6 +68,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [satsToBitcoins, setSatsToBitcoins] = useState(storage.getSatsToBitcoins())
   const [hideRelayExplore, setHideRelayExplore] = useState(storage.getHideRelayExplore())
   const [enableAiAgent, setEnableAiAgent] = useState(storage.getEnableAiAgent())
+  const [disableSpecialFollowFeatures, setDisableSpecialFollowFeatures] = useState(
+    storage.getDisableSpecialFollowFeatures()
+  )
 
   useEffect(() => {
     if (!isSmallScreen && enableSingleColumnLayout) {
@@ -124,6 +130,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setEnableAiAgent(value)
   }
 
+  const updateDisableSpecialFollowFeatures = (value: boolean) => {
+    setDisableSpecialFollowFeatures(value)
+    storage.setDisableSpecialFollowFeatures(value)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -148,7 +159,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         hideRelayExplore,
         updateHideRelayExplore,
         enableAiAgent,
-        updateEnableAiAgent
+        updateEnableAiAgent,
+        disableSpecialFollowFeatures,
+        updateDisableSpecialFollowFeatures
       }}
     >
       {children}

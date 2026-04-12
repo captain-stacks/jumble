@@ -14,6 +14,7 @@ import { toMuteList, toProfileEditor } from '@/lib/link'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
 import { Link, Zap, Bitcoin, Check, Copy } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -37,6 +38,7 @@ export default function Profile({ id }: { id?: string }) {
   const { profile, isFetching } = useFetchProfile(id)
   const { pubkey: accountPubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
+  const { disableSpecialFollowFeatures } = useUserPreferences()
   const [searchInput, setSearchInput] = useState('')
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
   const { followings } = useFetchFollowings(profile?.pubkey)
@@ -137,7 +139,7 @@ export default function Profile({ id }: { id?: string }) {
               <>
                 {!!lightningAddress && <ProfileZapButton pubkey={pubkey} />}
                 <MuteButton pubkey={pubkey} />
-                <SpecialFollowButton pubkey={pubkey} />
+                {!disableSpecialFollowFeatures && <SpecialFollowButton pubkey={pubkey} />}
                 <FollowButton pubkey={pubkey} />
               </>
             )}

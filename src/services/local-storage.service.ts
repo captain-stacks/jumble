@@ -78,6 +78,7 @@ class LocalStorageService {
   private satsToBitcoins: boolean = false
   private hideRelayExplore: boolean = true
   private enableAiAgent: boolean = false
+  private disableSpecialFollowFeatures: boolean = true
   private showMuteDebugModal: boolean = false
 
   constructor() {
@@ -372,6 +373,9 @@ class LocalStorageService {
 
     this.enableAiAgent =
       window.localStorage.getItem(StorageKey.ENABLE_AI_AGENT) === 'true'
+
+    const storedDisableSpecialFollowFeatures = window.localStorage.getItem(StorageKey.DISABLE_SPECIAL_FOLLOW_FEATURES)
+    this.disableSpecialFollowFeatures = storedDisableSpecialFollowFeatures === null ? true : storedDisableSpecialFollowFeatures === 'true'
 
     this.showMuteDebugModal =
       window.localStorage.getItem(StorageKey.SHOW_MUTE_DEBUG_MODAL) === 'true'
@@ -821,6 +825,15 @@ class LocalStorageService {
   setEnableAiAgent(value: boolean) {
     this.enableAiAgent = value
     window.localStorage.setItem(StorageKey.ENABLE_AI_AGENT, value.toString())
+  }
+
+  getDisableSpecialFollowFeatures() {
+    return this.disableSpecialFollowFeatures
+  }
+
+  setDisableSpecialFollowFeatures(value: boolean) {
+    this.disableSpecialFollowFeatures = value
+    window.localStorage.setItem(StorageKey.DISABLE_SPECIAL_FOLLOW_FEATURES, value.toString())
   }
 
   getShowMuteDebugModal() {

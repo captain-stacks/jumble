@@ -54,7 +54,9 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     hideRelayExplore,
     updateHideRelayExplore,
     enableAiAgent,
-    updateEnableAiAgent
+    updateEnableAiAgent,
+    disableSpecialFollowFeatures,
+    updateDisableSpecialFollowFeatures
   } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
@@ -280,6 +282,19 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="enable-ai-agent"
             checked={enableAiAgent}
             onCheckedChange={updateEnableAiAgent}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="disable-special-follow-features" className="text-base font-normal">
+            <div>{t('Special Follow Features')}</div>
+            <div className="text-muted-foreground">
+              {t('Enable starring/pinning users as special follows')}
+            </div>
+          </Label>
+          <Switch
+            id="disable-special-follow-features"
+            checked={!disableSpecialFollowFeatures}
+            onCheckedChange={(checked) => updateDisableSpecialFollowFeatures(!checked)}
           />
         </SettingItem>
         <MutedWords />

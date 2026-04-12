@@ -81,8 +81,7 @@ export const ApplicationDataKey = {
 export const BIG_RELAY_URLS = [
   'wss://relay.damus.io/',
   'wss://nos.lol/',
-  'wss://relay.primal.net/',
-  'wss://offchain.pub/'
+  'wss://relay.primal.net/'
 ]
 
 export const SEARCHABLE_RELAY_URLS = ['wss://search.nos.today/', 'wss://relay.nostr.band/']

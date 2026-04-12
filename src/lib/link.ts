@@ -94,5 +94,8 @@ export const toUserAggregationDetail = (feedId: string, pubkey: string) => {
   const npub = nip19.npubEncode(pubkey)
   return `/user-aggregation/${feedId}/${npub}`
 }
+export const toArticle = (domain: string, dtag: string) =>
+  `/${encodeURIComponent(domain)}/${encodeURIComponent(dtag)}`
+
 export const toEasyLoginRecovery = () => '/settings/easy-login-recovery'
 export const toChangeRecoveryEmail = () => '/settings/change-recovery-email'

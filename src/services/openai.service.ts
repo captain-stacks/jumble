@@ -323,12 +323,11 @@ class OpenAIService {
         {
           role: 'system',
           content:
-            'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 3 relevant Bible verses from the NIV translation. Keep each verse text concise (one sentence max). Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
+            'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 8 relevant Bible verses from the NIV translation. Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
         },
         { role: 'user', content: query }
       ],
       response_format: { type: 'json_object' },
-      max_tokens: 1500
     })
 
     const raw = response.choices[0].message.content

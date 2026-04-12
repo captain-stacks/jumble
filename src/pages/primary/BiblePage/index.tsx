@@ -44,6 +44,7 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
   const [postOpen, setPostOpen] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [pendingUpload, setPendingUpload] = useState<Promise<string> | undefined>(undefined)
+  const [hints, setHints] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<{ reference: string; text: string }[]>([])
@@ -116,7 +117,8 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
     setLoading(true)
     setError(null)
     try {
-      const prompt = `A beautiful, reverent, painterly illustration inspired by the Bible verse: "${verse.text}". Epic, cinematic lighting, oil painting style, spiritual and uplifting atmosphere. No text, no words, no letters, no writing of any kind in the image.`
+      const hint = hints.trim() ? ` ${hints.trim()}.` : ''
+      const prompt = `A beautiful, reverent, painterly illustration inspired by the Bible verse: "${verse.text}".${hint} Epic, cinematic lighting, oil painting style, spiritual and uplifting atmosphere. No text, no words, no letters, no writing of any kind in the image.`
       const { url, blob } = await openaiService.generateImage(prompt)
       setImageUrl(url)
       setImageBlob(blob)
@@ -181,6 +183,13 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
           <p className="text-base leading-relaxed text-foreground italic mb-3">{verse.text}</p>
           <p className="text-sm font-semibold text-muted-foreground">– {verse.reference}</p>
         </div>
+
+        <input
+          value={hints}
+          onChange={(e) => setHints(e.target.value)}
+          placeholder="Image hints (e.g. sunset, ancient Jerusalem, watercolor)"
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
 
         <div className="flex flex-wrap gap-3">
           <button

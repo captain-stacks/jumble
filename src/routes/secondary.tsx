@@ -1,3 +1,4 @@
+import ArticlePage from '@/pages/secondary/ArticlePage'
 import ChangeRecoveryEmailPage from '@/pages/secondary/ChangeRecoveryEmailPage'
 import EasyLoginRecoveryPage from '@/pages/secondary/EasyLoginRecoveryPage'
 import AIAgentPage from '@/pages/secondary/AIAgentPage'
@@ -58,7 +59,9 @@ const SECONDARY_ROUTE_CONFIGS = [
   { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
   { path: '/ai-agent', element: <AIAgentPage /> },
   { path: '/settings/easy-login-recovery', element: <EasyLoginRecoveryPage /> },
-  { path: '/settings/change-recovery-email', element: <ChangeRecoveryEmailPage /> }
+  { path: '/settings/change-recovery-email', element: <ChangeRecoveryEmailPage /> },
+  // Catch-all: domain/:dtag — must be last to avoid shadowing other routes
+  { path: '/:domain/:dtag', element: <ArticlePage /> }
 ]
 
 export const SECONDARY_ROUTES = SECONDARY_ROUTE_CONFIGS.map(({ path, element }) => ({

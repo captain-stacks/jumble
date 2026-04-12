@@ -29,7 +29,7 @@ export default function AccountManager({ close }: { close?: () => void }) {
       ) : page === 'advanced' || !EASY_LOGIN_ENABLED ? (
         <AccountManagerNav setPage={setPage} close={close} />
       ) : (
-        <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} />
+        <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} onNsec={() => setPage('nsec')} />
       )}
     </>
   )

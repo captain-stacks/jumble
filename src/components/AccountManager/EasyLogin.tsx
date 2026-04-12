@@ -92,10 +92,12 @@ async function loginWithEmail(
 
 export default function EasyLogin({
   onLoginSuccess,
-  onAdvanced
+  onAdvanced,
+  onNsec
 }: {
   onLoginSuccess: () => void
   onAdvanced: () => void
+  onNsec: () => void
 }) {
   const { t } = useTranslation()
   const { nsecLogin } = useNostr()
@@ -259,6 +261,17 @@ export default function EasyLogin({
           {t('Continue')}
         </Button>
       </form>
+
+      <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-400">
+        {t('Already have a profile? This form creates a new one.')}{' '}
+        <button
+          type="button"
+          onClick={onNsec}
+          className="font-semibold underline underline-offset-2"
+        >
+          {t('Log in with your private key instead.')}
+        </button>
+      </div>
 
       <div className="text-center">
         <button

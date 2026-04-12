@@ -51,7 +51,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
           feedInfo = storedFeedInfo
         } else {
           if (!IS_COMMUNITY_MODE) {
-            feedInfo = { feedType: 'following' }
+            feedInfo = { feedType: 'global' }
           }
         }
       } else if (!IS_COMMUNITY_MODE) {

@@ -7,6 +7,7 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinnedUsers } from '@/providers/PinnedUsersProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { Globe, Settings2, Star, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -19,6 +20,7 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
   const { relaySets, favoriteRelays } = useFavoriteRelays()
   const { feedInfo, switchFeed } = useFeed()
   const { pinnedPubkeySet } = usePinnedUsers()
+  const { disableSpecialFollowFeatures } = useUserPreferences()
   const filteredRelaySets = useMemo(() => {
     return relaySets.filter((set) => set.relayUrls.length > 0)
   }, [relaySets])
@@ -81,22 +83,24 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             </div>
           </FeedSwitcherItem>
 
-          <FeedSwitcherItem
-            isActive={feedInfo?.feedType === 'pinned'}
-            disabled={!pubkey || pinnedPubkeySet.size === 0}
-            onClick={() => {
-              if (!pubkey) return
-              switchFeed('pinned', { pubkey })
-              close?.()
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex size-6 shrink-0 items-center justify-center">
-                <Star className="size-5" />
+          {!disableSpecialFollowFeatures && (
+            <FeedSwitcherItem
+              isActive={feedInfo?.feedType === 'pinned'}
+              disabled={!pubkey || pinnedPubkeySet.size === 0}
+              onClick={() => {
+                if (!pubkey) return
+                switchFeed('pinned', { pubkey })
+                close?.()
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <Star className="size-5" />
+                </div>
+                <div className="flex-1">{t('Special Follow')}</div>
               </div>
-              <div className="flex-1">{t('Special Follow')}</div>
-            </div>
-          </FeedSwitcherItem>
+            </FeedSwitcherItem>
+          )}
         </div>
       </div>
 

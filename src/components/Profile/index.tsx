@@ -40,8 +40,6 @@ export default function Profile({ id }: { id?: string }) {
   const { disableSpecialFollowFeatures } = useUserPreferences()
   const [searchInput, setSearchInput] = useState('')
   const [unMutingState, setUnMutingState] = useState(false)
-  const pubkey = profile?.pubkey
-  const isMuted = pubkey ? mutePubkeySet.has(pubkey) : false
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
   const { followings } = useFetchFollowings(profile?.pubkey)
   const isFollowingYou = useMemo(() => {
@@ -119,6 +117,7 @@ export default function Profile({ id }: { id?: string }) {
   if (!profile) return <NotFound />
 
   const { banner, username, about, pubkey, website, lightningAddress, sp, emojis } = profile
+  const isMuted = useMemo(() => mutePubkeySet.has(pubkey), [pubkey, mutePubkeySet])
   return (
     <>
       <div ref={topContainerRef}>

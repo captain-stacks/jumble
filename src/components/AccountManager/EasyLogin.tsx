@@ -102,7 +102,7 @@ export default function EasyLogin({
   const [email, setEmail] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [confirmEmail, setConfirmEmail] = useState('')
-  const [step, setStep] = useState<'email' | 'displayname' | 'confirm'>('email')
+  const [step, setStep] = useState<'email' | 'confirm' | 'displayname'>('email')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [mismatch, setMismatch] = useState(false)
@@ -110,17 +110,12 @@ export default function EasyLogin({
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
-    setStep('displayname')
-  }
-
-  const handleDisplayNameSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
     setMismatch(false)
     setConfirmEmail('')
     setStep('confirm')
   }
 
-  const handleConfirmSubmit = async (e: React.FormEvent) => {
+  const handleConfirmSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (mismatch) {
       setMismatch(false)
@@ -133,6 +128,11 @@ export default function EasyLogin({
       setMismatch(true)
       return
     }
+    setStep('displayname')
+  }
+
+  const handleDisplayNameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
     setStatus(t('Looking up your account...'))
     try {
@@ -142,12 +142,53 @@ export default function EasyLogin({
       })
       onLoginSuccess()
     } catch (err) {
-      setMismatch(false)
-      setConfirmEmail('')
       setStatus(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (step === 'confirm') {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">{t('Confirm your email')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('Please re-enter your email address to confirm')}
+          </p>
+        </div>
+
+        <form onSubmit={handleConfirmSubmit} className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="easy-login-confirm-email">{t('Confirm email address')}</Label>
+            <Input
+              id="easy-login-confirm-email"
+              type="email"
+              placeholder="you@example.com"
+              value={confirmEmail}
+              onChange={(e) => setConfirmEmail(e.target.value)}
+              autoFocus
+              autoComplete="email"
+              disabled={mismatch}
+            />
+          </div>
+          {mismatch && <p className="text-sm text-red-500">{t('Email addresses do not match')}</p>}
+          <Button type="submit" className="w-full" disabled={!mismatch && !confirmEmail.trim()}>
+            {mismatch ? t('Try again') : t('Continue')}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => { setStep('email'); setMismatch(false); setConfirmEmail('') }}
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            ← {t('Back')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (step === 'displayname') {
@@ -173,59 +214,16 @@ export default function EasyLogin({
               autoComplete="name"
             />
           </div>
-          <Button type="submit" className="w-full">
-            {displayName.trim() ? t('Continue') : t('Skip')}
-          </Button>
-        </form>
-
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setStep('email')}
-            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-          >
-            ← {t('Back')}
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (step === 'confirm') {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold">{t('Confirm your email')}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t('Please re-enter your email address to confirm')}
-          </p>
-        </div>
-
-        <form onSubmit={handleConfirmSubmit} className="space-y-3">
-          <div className="space-y-1">
-            <Label htmlFor="easy-login-confirm-email">{t('Confirm email address')}</Label>
-            <Input
-              id="easy-login-confirm-email"
-              type="email"
-              placeholder="you@example.com"
-              value={confirmEmail}
-              onChange={(e) => setConfirmEmail(e.target.value)}
-              autoFocus
-              autoComplete="email"
-              disabled={mismatch || loading}
-            />
-          </div>
-          {mismatch && <p className="text-sm text-red-500">{t('Email addresses do not match')}</p>}
           {status && <p className="text-sm text-muted-foreground">{status}</p>}
-          <Button type="submit" className="w-full" disabled={loading || (!mismatch && !confirmEmail.trim())}>
-            {loading ? status || t('Signing in...') : mismatch ? t('Try again') : t('Continue')}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? status || t('Creating your account...') : displayName.trim() ? t('Continue') : t('Skip')}
           </Button>
         </form>
 
         <div className="text-center">
           <button
             type="button"
-            onClick={() => { setStep('displayname'); setMismatch(false); setConfirmEmail('') }}
+            onClick={() => setStep('confirm')}
             className="text-xs text-muted-foreground underline-offset-2 hover:underline"
           >
             ← {t('Back')}

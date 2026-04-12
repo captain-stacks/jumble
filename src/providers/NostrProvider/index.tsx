@@ -503,6 +503,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       throw new Error('invalid nsec or hex')
     }
     const pubkey = nsecSigner.login(privkey)
+    const cachedMutePubkeys = needSetup ? (bootstrapCache.getMuteList() || []) : []
     if (password) {
       const ncryptsec = nip49.encrypt(privkey, password)
       login(nsecSigner, { pubkey, signerType: 'ncryptsec', ncryptsec })
@@ -510,7 +511,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       login(nsecSigner, { pubkey, signerType: 'nsec', nsec: nip19.nsecEncode(privkey) })
     }
     if (needSetup) {
-      setupNewUser(nsecSigner)
+      setupNewUser(nsecSigner, cachedMutePubkeys)
     }
     return pubkey
   }
@@ -633,7 +634,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  const setupNewUser = async (signer: ISigner) => {
+  const setupNewUser = async (signer: ISigner, cachedMutePubkeys: string[] = []) => {
     const defaultRelays = getDefaultRelayUrls()
     const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 
@@ -645,7 +646,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       ? masterFollowListEvent.tags.filter(([t]) => t === 'p')
       : []
 
-    const spicyPubkeys = followSourcePubkey ? (bootstrapCache.getMuteList() || []) : []
+    const spicyPubkeys = cachedMutePubkeys.length > 0 ? cachedMutePubkeys : (followSourcePubkey ? (bootstrapCache.getMuteList() || []) : [])
 
     const newUserPubkey = await signer.getPublicKey()
     const muteListContent =

@@ -138,10 +138,7 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
     if (!proofreadResult) return
     textareaRef.current?.replaceText(proofreadResult)
     setProofreadResult(null)
-    if (pendingPostRef.current) {
-      pendingPostRef.current = false
-      doPost()
-    }
+    pendingPostRef.current = false
   }
 
   const dismissProofread = () => {

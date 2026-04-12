@@ -60,7 +60,7 @@ export default function PostContent({
     [parentStuff]
   )
   const [showMoreOptions, setShowMoreOptions] = useState(false)
-  const [addClientTag, setAddClientTag] = useState(false)
+  const [addClientTag, setAddClientTag] = useState(true)
   const [mentions, setMentions] = useState<string[]>([])
   const [isNsfw, setIsNsfw] = useState(false)
   const [isPoll, setIsPoll] = useState(false)

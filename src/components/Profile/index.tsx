@@ -1,5 +1,6 @@
 import Collapsible from '@/components/Collapsible'
 import FollowButton from '@/components/FollowButton'
+import MuteButton from '@/components/MuteButton'
 import Nip05 from '@/components/Nip05'
 import NpubQrCode from '@/components/NpubQrCode'
 import ProfileAbout from '@/components/ProfileAbout'
@@ -135,6 +136,7 @@ export default function Profile({ id }: { id?: string }) {
             ) : (
               <>
                 {!!lightningAddress && <ProfileZapButton pubkey={pubkey} />}
+                <MuteButton pubkey={pubkey} />
                 <SpecialFollowButton pubkey={pubkey} />
                 <FollowButton pubkey={pubkey} />
               </>

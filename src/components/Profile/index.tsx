@@ -169,7 +169,7 @@ export default function Profile({ id }: { id?: string }) {
                 {!disableSpecialFollowFeatures && <SpecialFollowButton pubkey={pubkey} />}
                 <FollowButton pubkey={pubkey} />
               </>
-            )}}
+            )}
           </div>
           <div className="pt-2">
             <div className="flex items-center gap-2">

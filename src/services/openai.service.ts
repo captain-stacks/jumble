@@ -328,12 +328,17 @@ class OpenAIService {
         { role: 'user', content: query }
       ],
       response_format: { type: 'json_object' },
-      max_tokens: 600
+      max_tokens: 1500
     })
 
     const raw = response.choices[0].message.content
     if (!raw) throw new Error('No response from OpenAI')
-    const parsed = JSON.parse(raw)
+    let parsed: { verses?: { reference: string; text: string }[] }
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      throw new Error('Could not parse search results — please try again')
+    }
     return parsed.verses ?? []
   }
 

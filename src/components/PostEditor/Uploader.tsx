@@ -1,25 +1,35 @@
 import mediaUpload, { UPLOAD_ABORTED_ERROR_MSG } from '@/services/media-upload.service'
-import { useRef } from 'react'
+import { forwardRef, useImperativeHandle, useRef } from 'react'
 import { toast } from 'sonner'
 
-export default function Uploader({
-  children,
-  onUploadSuccess,
-  onUploadStart,
-  onUploadEnd,
-  onProgress,
-  className,
-  accept = 'image/*'
-}: {
-  children: React.ReactNode
-  onUploadSuccess: ({ url, tags }: { url: string; tags: string[][] }) => void
-  onUploadStart?: (file: File, cancel: () => void) => void
-  onUploadEnd?: (file: File) => void
-  onProgress?: (file: File, progress: number) => void
-  className?: string
-  accept?: string
-}) {
+export type TUploaderHandle = { trigger: () => void }
+
+const Uploader = forwardRef<
+  TUploaderHandle,
+  {
+    children: React.ReactNode
+    onUploadSuccess: ({ url, tags }: { url: string; tags: string[][] }) => void
+    onUploadStart?: (file: File, cancel: () => void) => void
+    onUploadEnd?: (file: File) => void
+    onProgress?: (file: File, progress: number) => void
+    className?: string
+    accept?: string
+  }
+>(function Uploader(
+  {
+    children,
+    onUploadSuccess,
+    onUploadStart,
+    onUploadEnd,
+    onProgress,
+    className,
+    accept = 'image/*'
+  },
+  ref
+) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(ref, () => ({ trigger: handleUploadClick }))
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return
@@ -75,4 +85,6 @@ export default function Uploader({
       />
     </div>
   )
-}
+})
+
+export default Uploader

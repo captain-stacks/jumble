@@ -16,7 +16,7 @@ const MASTER_PUBKEY = import.meta.env.VITE_EASY_LOGIN_MASTER_PUBKEY as string | 
 export const EASY_LOGIN_ENABLED = !!MASTER_PUBKEY
 
 const EASY_LOGIN_INTRO_CONTENT =
-  'I just created my nostr profile on #jumblewisp with the easy email signup flow!\n\nJumblewisp is a community fork of the Jumble Nostr client: https://jumble.thecaptain.dev\n\n#introductions'
+  'I just created my nostr profile on jumblewisp with the easy email signup flow!\n\nJumblewisp is a community fork of the Jumble nostr client: https://jumble.thecaptain.dev\n\n#introductions'
 
 async function publishIntroNote(realPrivkey: Uint8Array) {
   const event = finalizeEvent(

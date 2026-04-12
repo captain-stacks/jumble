@@ -312,6 +312,60 @@ class OpenAIService {
     return summary
   }
 
+  async searchBibleVerses(query: string): Promise<{ reference: string; text: string }[]> {
+    if (!this.client) {
+      throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')
+    }
+
+    const response = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 3 relevant Bible verses from the NIV translation. Keep each verse text concise (one sentence max). Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
+        },
+        { role: 'user', content: query }
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 600
+    })
+
+    const raw = response.choices[0].message.content
+    if (!raw) throw new Error('No response from OpenAI')
+    const parsed = JSON.parse(raw)
+    return parsed.verses ?? []
+  }
+
+  async generateImage(prompt: string): Promise<{ url: string; blob: Blob }> {
+    if (!this.client) {
+      throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')
+    }
+
+    const response = await this.client.images.generate({
+      model: 'dall-e-3',
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+      response_format: 'b64_json'
+    })
+
+    const b64 = response.data?.[0]?.b64_json
+    if (!b64) {
+      throw new Error('No image data returned from OpenAI')
+    }
+
+    const binary = atob(b64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+    const blob = new Blob([bytes], { type: 'image/png' })
+    const url = URL.createObjectURL(blob)
+    return { url, blob }
+  }
+
   clearHistory() {
     this.conversationHistory = []
   }

@@ -17,7 +17,6 @@ import {
   Plus,
   RotateCcw,
   Send,
-  Settings2,
   Square,
   Trash2,
   X,
@@ -351,8 +350,6 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [loading, setLoading] = useState(false)
   const [synthesizing, setSynthesizing] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') ?? '')
-  const [showSettings, setShowSettings] = useState(false)
-  const [apiKeyDraft, setApiKeyDraft] = useState(apiKey)
   const bottomRef = useRef<HTMLDivElement>(null)
   const messagesRef = useRef(messages)
   const abortRef = useRef<AbortController | null>(null)
@@ -360,6 +357,12 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  useEffect(() => {
+    return openaiService.subscribe(() => {
+      setApiKey(localStorage.getItem('openai_api_key') ?? '')
+    })
+  }, [])
 
   useEffect(() => {
     try {
@@ -378,13 +381,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   const scrollToBottom = () =>
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
 
-  const saveApiKey = () => {
-    openaiService.setApiKey(apiKeyDraft)
-    setApiKey(apiKeyDraft)
-    setShowSettings(false)
-  }
-
-  const stop = () => {
+const stop = () => {
     abortRef.current?.abort()
     abortRef.current = null
     setLoading(false)
@@ -585,10 +582,7 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   const sendMessage = async () => {
     const text = input.trim()
     if (!text || loading || synthesizing) return
-    if (!apiKey) {
-      setShowSettings(true)
-      return
-    }
+    if (!apiKey) return
 
     const userMsg: TMessage = { role: 'user', content: text }
     const history = [...messagesRef.current, userMsg]
@@ -769,41 +763,15 @@ const AIAgentPage = forwardRef(({ index }: { index?: number }, ref) => {
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('AI Agent')}>
       <div className="flex flex-col gap-0">
-        {/* Settings */}
-        <div className="border-b px-4 py-2">
+        {/* Toolbar */}
+        <div className="flex items-center justify-end border-b px-4 py-2">
           <button
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setShowSettings((v) => !v)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+            onClick={() => setMessages([])}
           >
-            <Settings2 className="size-3.5" />
-            {t('OpenAI settings')}
+            <Trash2 className="size-3.5" />
+            {t('Clear history')}
           </button>
-          {showSettings && (
-            <div className="mt-2 flex flex-col gap-2">
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="sk-..."
-                  value={apiKeyDraft}
-                  onChange={(e) => setApiKeyDraft(e.target.value)}
-                />
-                <Button size="sm" onClick={saveApiKey}>
-                  {t('Save')}
-                </Button>
-              </div>
-              <button
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive"
-                onClick={() => {
-                  setMessages([])
-                  setShowSettings(false)
-                }}
-              >
-                <Trash2 className="size-3.5" />
-                {t('Clear history')}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Messages */}

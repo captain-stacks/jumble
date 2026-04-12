@@ -27,7 +27,8 @@ export default function PostEditor({
   open,
   setOpen,
   openFrom,
-  highlightedText
+  highlightedText,
+  pendingUpload
 }: {
   defaultContent?: string
   parentStuff?: Event | string
@@ -35,6 +36,7 @@ export default function PostEditor({
   setOpen: Dispatch<boolean>
   openFrom?: string[]
   highlightedText?: string
+  pendingUpload?: Promise<string>
 }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
@@ -47,9 +49,10 @@ export default function PostEditor({
         close={() => setOpen(false)}
         openFrom={openFrom}
         highlightedText={highlightedText}
+        pendingUpload={pendingUpload}
       />
     )
-  }, [highlightedText])
+  }, [highlightedText, pendingUpload])
 
   if (isSmallScreen) {
     return (

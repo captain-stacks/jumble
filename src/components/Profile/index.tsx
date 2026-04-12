@@ -36,7 +36,7 @@ export default function Profile({ id }: { id?: string }) {
   const { push } = useSecondaryPage()
   const { profile, isFetching } = useFetchProfile(id)
   const { pubkey: accountPubkey } = useNostr()
-  const { mutePubkeySet, mutePubkeyPrivately, mutePubkeyPublicly, unmutePubkey } = useMuteList()
+  const { mutePubkeySet, mutePubkeyPrivately, unmutePubkey } = useMuteList()
   const { disableSpecialFollowFeatures } = useUserPreferences()
   const [searchInput, setSearchInput] = useState('')
   const [unMutingState, setUnMutingState] = useState(false)

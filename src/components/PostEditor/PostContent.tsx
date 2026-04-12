@@ -38,13 +38,15 @@ export default function PostContent({
   parentStuff,
   close,
   openFrom,
-  highlightedText
+  highlightedText,
+  pendingUpload
 }: {
   defaultContent?: string
   parentStuff?: Event | string
   close: () => void
   openFrom?: string[]
   highlightedText?: string
+  pendingUpload?: Promise<string>
 }) {
   const { t } = useTranslation()
   const { pubkey, publish, checkLogin } = useNostr()
@@ -83,7 +85,23 @@ export default function PostContent({
     return openaiService.subscribe(() => setOpenaiReady(openaiService.isInitialized()))
   }, [])
 
-  const showTranslateReplyButton = !!parentEvent && openaiReady
+  const [pendingUploading, setPendingUploading] = useState(false)
+  useEffect(() => {
+    if (!pendingUpload) return
+    let cancelled = false
+    setPendingUploading(true)
+    pendingUpload.then((url) => {
+      if (!cancelled) {
+        textareaRef.current?.appendText(url, true)
+        setPendingUploading(false)
+      }
+    }).catch(() => {
+      if (!cancelled) setPendingUploading(false)
+    })
+    return () => { cancelled = true }
+  }, [pendingUpload])
+
+const showTranslateReplyButton = !!parentEvent && openaiReady
 
   const handleTranslateReply = async () => {
     if (!parentEvent || !text.trim() || translatingReply) return
@@ -415,8 +433,8 @@ export default function PostContent({
             onProgress={handleUploadProgress}
             accept="image/*,video/*,audio/*"
           >
-            <Button variant="ghost" size="icon">
-              <ImageUp />
+            <Button variant="ghost" size="icon" disabled={pendingUploading}>
+              {pendingUploading ? <LoaderCircle className="animate-spin" /> : <ImageUp />}
             </Button>
           </Uploader>
           {/* I'm not sure why, but after triggering the virtual keyboard,

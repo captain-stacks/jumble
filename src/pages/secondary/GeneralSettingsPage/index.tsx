@@ -16,6 +16,7 @@ import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { TMediaAutoLoadPolicy, TNsfwDisplayPolicy, TProfilePictureAutoLoadPolicy } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
+import openaiService from '@/services/openai.service'
 import { RotateCcw } from 'lucide-react'
 import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +27,14 @@ import SettingItem from './SettingItem'
 const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t, i18n } = useTranslation()
   const [language, setLanguage] = useState<TLanguage>(i18n.language as TLanguage)
+  const [apiKeyDraft, setApiKeyDraft] = useState(() => localStorage.getItem('openai_api_key') ?? '')
+  const [apiKeySaved, setApiKeySaved] = useState(false)
+
+  const saveApiKey = () => {
+    openaiService.setApiKey(apiKeyDraft)
+    setApiKeySaved(true)
+    setTimeout(() => setApiKeySaved(false), 2000)
+  }
   const {
     autoplay,
     setAutoplay,
@@ -283,6 +292,24 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             checked={enableAiAgent}
             onCheckedChange={updateEnableAiAgent}
           />
+        </SettingItem>
+        <SettingItem className="flex-col !h-auto items-start gap-2 py-3">
+          <Label htmlFor="openai-api-key" className="text-base font-normal">
+            OpenAI API Key
+          </Label>
+          <div className="flex w-full gap-2">
+            <input
+              id="openai-api-key"
+              type="password"
+              className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-primary"
+              placeholder="sk-..."
+              value={apiKeyDraft}
+              onChange={(e) => setApiKeyDraft(e.target.value)}
+            />
+            <Button size="sm" onClick={saveApiKey}>
+              {apiKeySaved ? t('Saved') : t('Save')}
+            </Button>
+          </div>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="disable-special-follow-features" className="text-base font-normal">

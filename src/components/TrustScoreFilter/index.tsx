@@ -13,7 +13,7 @@ const TRUST_LEVELS = [
   { value: 0, label: 'trust-filter.off' },
   { value: 60, label: 'trust-filter.low' },
   { value: 80, label: 'trust-filter.medium' },
-  { value: 90, label: 'trust-filter.high' },
+  { value: 99, label: 'trust-filter.high' },
   { value: 100, label: 'trust-filter.wot' }
 ]
 

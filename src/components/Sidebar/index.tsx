@@ -10,6 +10,7 @@ import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import AccountButton from './AccountButton'
 import AIAgentButton from './AIAgentButton'
+import BibleButton from './BibleButton'
 import BookmarkButton from './BookmarkButton'
 import RelaysButton from './ExploreButton'
 import FollowingButton from './FollowingButton'
@@ -62,6 +63,7 @@ export default function PrimaryPageSidebar() {
         <SearchButton collapse={sidebarCollapse} />
         <ProfileButton collapse={sidebarCollapse} />
         {pubkey && <BookmarkButton collapse={sidebarCollapse} />}
+        <BibleButton collapse={sidebarCollapse} />
         {enableAiAgent && <AIAgentButton collapse={sidebarCollapse} />}
         <SettingsButton collapse={sidebarCollapse} />
         <PostButton collapse={sidebarCollapse} />

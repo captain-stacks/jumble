@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import UserAvatar from '@/components/UserAvatar'
+import UserItem from '@/components/UserItem'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import client from '@/services/client.service'
@@ -58,15 +58,20 @@ export default forwardRef(function EasyLoginRecoveryPage(
     setTotalNotes(null)
 
     try {
-      let masterPrivkey: Uint8Array
-      if (nsec) {
-        const decoded = nip19.decode(nsec)
-        if (decoded.type !== 'nsec') throw new Error('Invalid master key')
-        masterPrivkey = decoded.data
-      } else {
-        if (!ncryptsec.trim()) throw new Error('Enter your master ncryptsec')
-        if (!password) throw new Error('Enter your password')
-        masterPrivkey = decryptNcryptsec(ncryptsec.trim(), password)
+      const normalizedEmail = email.trim().toLowerCase()
+
+      // Only resolve masterPrivkey when email is provided (needed for decryption)
+      let masterPrivkey: Uint8Array | null = null
+      if (normalizedEmail) {
+        if (nsec) {
+          const decoded = nip19.decode(nsec)
+          if (decoded.type !== 'nsec') throw new Error('Invalid master key')
+          masterPrivkey = decoded.data
+        } else {
+          if (!ncryptsec.trim()) throw new Error('Enter your master ncryptsec to decrypt')
+          if (!password) throw new Error('Enter your password to decrypt')
+          masterPrivkey = decryptNcryptsec(ncryptsec.trim(), password)
+        }
       }
 
       let authorPubkey: string | undefined
@@ -80,8 +85,6 @@ export default forwardRef(function EasyLoginRecoveryPage(
           return
         }
       }
-
-      const normalizedEmail = email.trim().toLowerCase()
 
       const relays = getDefaultRelayUrls()
       const allEvents = await client.fetchEvents(relays, [
@@ -102,8 +105,8 @@ export default forwardRef(function EasyLoginRecoveryPage(
           const ephPubkey = ev.tags.find((t) => t[0] === 'ephemeral-pubkey')?.[1]
           if (!ephPubkey) continue
 
-          if (normalizedEmail) {
-            // Email provided: derive emailKey and attempt full decryption
+          if (masterPrivkey && normalizedEmail) {
+            // Email + key provided: derive emailKey and attempt full decryption
             const sharedSecret = nip44.getConversationKey(masterPrivkey, ephPubkey)
             const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
             try {
@@ -236,7 +239,7 @@ export default forwardRef(function EasyLoginRecoveryPage(
             </p>
             {accounts.map((account, i) => (
               <div key={account.pubkey} className="space-y-3 rounded-lg border p-3">
-                <UserAvatar userId={account.pubkey} size="normal" />
+                <UserItem userId={account.pubkey} hideFollowButton />
                 {account.nsec && (
                   <div className="flex gap-2">
                     <Input value={account.nsec} readOnly className="font-mono text-xs" />

@@ -20,6 +20,7 @@ export default forwardRef(function ChangeRecoveryEmailPage(
 ) {
   const { t } = useTranslation()
   const { nsec, pubkey } = useNostr()
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
   const [hasExisting, setHasExisting] = useState<boolean | null>(null)
   const [email, setEmail] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -30,20 +31,38 @@ export default forwardRef(function ChangeRecoveryEmailPage(
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!pubkey || !MASTER_PUBKEY) return
+    if (!pubkey || !MASTER_PUBKEY || !nsec) return
     client
       .fetchEvents(getDefaultRelayUrls(), [
         {
           kinds: [30078],
           authors: [pubkey],
           '#d': ['jumblewisp-recovery-key'],
-          '#m': [MASTER_PUBKEY],
+          '#p': [MASTER_PUBKEY],
           limit: 1
         }
       ])
-      .then((events) => setHasExisting(events.length > 0))
+      .then((events) => {
+        if (events.length === 0) {
+          setHasExisting(false)
+          return
+        }
+        setHasExisting(true)
+        const ev = events[0]
+        const encryptedEmail = ev.tags.find((t) => t[0] === 'encrypted-email')?.[1]
+        if (!encryptedEmail) return
+        try {
+          const decoded = nip19.decode(nsec)
+          if (decoded.type !== 'nsec') return
+          const privkey = decoded.data
+          const selfKey = nip44.getConversationKey(privkey, getPublicKey(privkey))
+          setCurrentEmail(nip44.decrypt(encryptedEmail, selfKey))
+        } catch {
+          // Can't decrypt, leave currentEmail null
+        }
+      })
       .catch(() => setHasExisting(false))
-  }, [pubkey])
+  }, [pubkey, nsec])
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +102,9 @@ export default forwardRef(function ChangeRecoveryEmailPage(
       const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
       const encryptedKey = nip44.encrypt(bytesToHex(privkey), emailKey)
 
+      const selfKey = nip44.getConversationKey(privkey, getPublicKey(privkey))
+      const encryptedEmailSelf = nip44.encrypt(normalizedEmail, selfKey)
+
       const event = finalizeEvent(
         {
           kind: 30078,
@@ -90,7 +112,8 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           tags: [
             ['d', 'jumblewisp-recovery-key'],
             ['p', MASTER_PUBKEY],
-            ['ephemeral-pubkey', ephPubkey]
+            ['ephemeral-pubkey', ephPubkey],
+            ['encrypted-email', encryptedEmailSelf]
           ],
           content: encryptedKey
         },
@@ -123,15 +146,18 @@ export default forwardRef(function ChangeRecoveryEmailPage(
           </div>
         ) : step === 'email' ? (
           <>
-            <p className="text-sm text-muted-foreground">
-              {isChanging
-                ? t(
-                    'Enter a new email address for account recovery. Your current recovery email will no longer work after this change. For privacy reasons, we cannot display what email is currently set.'
-                  )
-                : t(
-                    'Enter an email address to use for account recovery. If you ever lose access, this email will allow the account administrator to recover your private key.'
-                  )}
-            </p>
+            {currentEmail ? (
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">{t('Current recovery email')}</p>
+                <p className="text-sm font-medium">{currentEmail}</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {isChanging
+                  ? t('Enter a new email address for account recovery.')
+                  : t('Enter an email address to use for account recovery. If you ever lose access, this email will allow the account administrator to recover your private key.')}
+              </p>
+            )}
             <form onSubmit={handleEmailSubmit} className="space-y-3">
               <div className="space-y-1">
                 <Label htmlFor="recovery-new-email">

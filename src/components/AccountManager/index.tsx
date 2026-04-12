@@ -15,11 +15,12 @@ type TAccountManagerPage = 'easy' | 'advanced' | 'nsec' | 'bunker' | 'npub' | 's
 
 export default function AccountManager({ close }: { close?: () => void }) {
   const [page, setPage] = useState<TAccountManagerPage>(null)
+  const [nsecBack, setNsecBack] = useState<TAccountManagerPage>('advanced')
 
   return (
     <>
       {page === 'nsec' ? (
-        <PrivateKeyLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
+        <PrivateKeyLogin back={() => setPage(nsecBack)} onLoginSuccess={() => close?.()} />
       ) : page === 'bunker' ? (
         <NostrConnectLogin back={() => setPage('advanced')} onLoginSuccess={() => close?.()} />
       ) : page === 'npub' ? (
@@ -29,7 +30,7 @@ export default function AccountManager({ close }: { close?: () => void }) {
       ) : page === 'advanced' || !EASY_LOGIN_ENABLED ? (
         <AccountManagerNav setPage={setPage} close={close} />
       ) : (
-        <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} onNsec={() => setPage('nsec')} />
+        <EasyLogin onLoginSuccess={() => close?.()} onAdvanced={() => setPage('advanced')} onNsec={() => { setNsecBack(null); setPage('nsec') }} />
       )}
     </>
   )

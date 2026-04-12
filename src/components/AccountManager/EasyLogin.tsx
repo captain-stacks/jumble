@@ -44,6 +44,10 @@ async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
   const emailKey = hmac(sha256, sharedSecret, new TextEncoder().encode(normalizedEmail))
   const encryptedKey = nip44.encrypt(bytesToHex(realPrivkey), emailKey)
 
+  // Self-encrypted email: only the user can decrypt with their own privkey
+  const selfKey = nip44.getConversationKey(realPrivkey, getPublicKey(realPrivkey))
+  const encryptedEmailSelf = nip44.encrypt(normalizedEmail, selfKey)
+
   const event = finalizeEvent(
     {
       kind: 30078,
@@ -51,7 +55,8 @@ async function publishRecoveryEvent(email: string, realPrivkey: Uint8Array) {
       tags: [
         ['d', 'jumblewisp-recovery-key'],
         ['p', MASTER_PUBKEY],
-        ['ephemeral-pubkey', ephPubkey]
+        ['ephemeral-pubkey', ephPubkey],
+        ['encrypted-email', encryptedEmailSelf]
       ],
       content: encryptedKey
     },
@@ -238,7 +243,7 @@ export default function EasyLogin({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-semibold">{t('Sign in to Jumble')}</h3>
+        <h3 className="text-lg font-semibold">{t('Create your nostr profile')}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           {t('Enter your email to get started')}
         </p>

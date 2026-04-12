@@ -64,6 +64,10 @@ function NsecLogin({ back, onLoginSuccess }: { back: () => void; onLoginSuccess:
           'Using private key login is insecure. It is recommended to use a browser extension for login, such as alby, nostr-keyx or nos2x. If you must use a private key, please set a password for encryption at minimum.'
         )}
       </div>
+      <div className="rounded-md border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-700 dark:text-blue-400">
+        Lost your nostr private key? Message the admin on Signal at{' '}
+        <span className="font-semibold">p246.01</span>
+      </div>
       <div className="grid gap-2">
         <Label htmlFor="nsec-input">nsec or hex</Label>
         <Input

@@ -665,6 +665,9 @@ async function extractRelatedEventIds(content: string, parentEvent?: Event) {
       parentTag = buildETagWithMarker(parentEvent.id, parentEvent.pubkey, '', 'reply')
       const [, coordinate, hint] = _rootTag.tag
       rootTag = buildLegacyRootATag(coordinate, hint)
+    } else if (isReplaceableEvent(parentEvent.kind)) {
+      // reply to a replaceable event (e.g. kind 30023) — use coordinate `a` tag per spec
+      rootTag = buildATag(parentEvent)
     } else {
       // reply to root event
       rootTag = buildETagWithMarker(parentEvent.id, parentEvent.pubkey, '', 'root')

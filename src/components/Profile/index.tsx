@@ -1,6 +1,5 @@
 import Collapsible from '@/components/Collapsible'
 import FollowButton from '@/components/FollowButton'
-import MuteButton from '@/components/MuteButton'
 import Nip05 from '@/components/Nip05'
 import NpubQrCode from '@/components/NpubQrCode'
 import ProfileAbout from '@/components/ProfileAbout'
@@ -16,7 +15,7 @@ import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
-import { Link, Zap, Bitcoin, Check, Copy } from 'lucide-react'
+import { Link, Zap, Bitcoin, Check, Copy, Bell, BellOff, Loader } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFound from '../NotFound'
@@ -37,9 +36,12 @@ export default function Profile({ id }: { id?: string }) {
   const { push } = useSecondaryPage()
   const { profile, isFetching } = useFetchProfile(id)
   const { pubkey: accountPubkey } = useNostr()
-  const { mutePubkeySet } = useMuteList()
+  const { mutePubkeySet, mutePubkeyPrivately, mutePubkeyPublicly, unmutePubkey } = useMuteList()
   const { disableSpecialFollowFeatures } = useUserPreferences()
   const [searchInput, setSearchInput] = useState('')
+  const [unMutingState, setUnMutingState] = useState(false)
+  const pubkey = profile?.pubkey
+  const isMuted = pubkey ? mutePubkeySet.has(pubkey) : false
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
   const { followings } = useFetchFollowings(profile?.pubkey)
   const isFollowingYou = useMemo(() => {
@@ -138,11 +140,37 @@ export default function Profile({ id }: { id?: string }) {
             ) : (
               <>
                 {!!lightningAddress && <ProfileZapButton pubkey={pubkey} />}
-                <MuteButton pubkey={pubkey} />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    setUnMutingState(true)
+                    try {
+                      if (isMuted) {
+                        await unmutePubkey(pubkey)
+                      } else {
+                        await mutePubkeyPrivately(pubkey)
+                      }
+                    } finally {
+                      setUnMutingState(false)
+                    }
+                  }}
+                  disabled={unMutingState}
+                >
+                  {unMutingState ? (
+                    <Loader className="animate-spin" />
+                  ) : isMuted ? (
+                    <Bell className="text-muted-foreground" />
+                  ) : (
+                    <BellOff className="text-muted-foreground" />
+                  )}
+                </Button>
                 {!disableSpecialFollowFeatures && <SpecialFollowButton pubkey={pubkey} />}
                 <FollowButton pubkey={pubkey} />
               </>
-            )}
+            )}}
           </div>
           <div className="pt-2">
             <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 export default function Logo({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 220 68"
+      viewBox="0 0 300 68"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
@@ -61,10 +61,10 @@ export default function Logo({ className }: { className?: string }) {
       </defs>
 
       {/* ── Canvas ── */}
-      <rect width="220" height="68" rx="14" fill="url(#lg-bg)"/>
+      <rect width="300" height="68" rx="14" fill="url(#lg-bg)"/>
 
       {/* Atmospheric pool linking flame → letters */}
-      <ellipse cx="110" cy="34" rx="115" ry="32" fill="url(#lg-atm)" filter="url(#lg-haze)"/>
+      <ellipse cx="150" cy="34" rx="155" ry="32" fill="url(#lg-atm)" filter="url(#lg-haze)"/>
 
       {/* ─────────── Flame (left, free-floating) ─────────── */}
       <g transform="translate(8, 2)">
@@ -91,45 +91,46 @@ export default function Logo({ className }: { className?: string }) {
         <circle  cx="30"   cy="8.2"  r="1"   fill="#bae6fd" opacity="0.95" filter="url(#lg-glow)"/>
       </g>
 
-      {/* ─────────── "wisp" — ethereal gradient letters ─────────── */}
+      {/* ─────────── "jumblewisp" — ethereal gradient letters ─────────── */}
       {/*
-        fontSize=47, baseline y=52, letterSpacing=-1
-        Approximate glyph geometry (Space Grotesk 700):
-          w : x≈62–100   3 peaks at x≈68, 81, 94   top y≈19
-          i : x≈100–111  dot center ≈ (105, 12)
-          s : x≈111–136
-          p : x≈136–164
+        fontSize=38, baseline y=52, letterSpacing=-1
+        Approximate glyph geometry (Space Grotesk 700) at size 38:
+          j u m b l e : x≈62–192   (~21px avg per char)
+          w : x≈192–224   3 peaks at x≈198, 208, 218   top y≈19
+          i : x≈224–235   dot center ≈ (229, 12)
+          s : x≈235–255
+          p : x≈255–276
       */}
       <text
         x="62"
         y="52"
-        fontSize="47"
+        fontSize="38"
         fontWeight="700"
         fontFamily="'Space Grotesk', system-ui, sans-serif"
         letterSpacing="-1"
         fill="url(#lg-letters)"
         filter="url(#lg-bloom)"
       >
-        wisp
+        jumblewisp
       </text>
 
       {/* Wisps off the three "w" peaks */}
       <path
-        d="M68 19 C67 15 65.5 11 67.5 7.5 C67.8 11 68.2 14 69 18 C67.5 13.5 67 10 68.5 7 C69 11 69 16 68 19Z"
+        d="M198 19 C197 15 195.5 11 197.5 7.5 C197.8 11 198.2 14 199 18 C197.5 13.5 197 10 198.5 7 C199 11 199 16 198 19Z"
         fill="#7dd3fc" opacity="0.65" filter="url(#lg-glow)"
       />
       <path
-        d="M81 17 C80 12.5 78 8 80.5 4 C80.8 8.5 81.5 12 82.5 16 C80.5 11 79.5 7 81.5 3.5 C82.5 8 82.5 13.5 81 17Z"
+        d="M209 17 C208 12.5 206 8 208.5 4 C208.8 8.5 209.5 12 210.5 16 C208.5 11 207.5 7 209.5 3.5 C210.5 8 210.5 13.5 209 17Z"
         fill="#bae6fd" opacity="0.75" filter="url(#lg-bloom)"
       />
       <path
-        d="M94 19 C93 15 91.5 11 93.5 7.5 C93.8 11 94.2 14 95 18 C93.5 13.5 93 10 94.5 7 C95 11 95 16 94 19Z"
+        d="M220 19 C219 15 217.5 11 219.5 7.5 C219.8 11 220.2 14 221 18 C219.5 13.5 219 10 220.5 7 C221 11 221 16 220 19Z"
         fill="#7dd3fc" opacity="0.65" filter="url(#lg-glow)"
       />
 
       {/* Sparkle dot on the "i" (replaces typographic dot) */}
-      <circle cx="105" cy="12" r="2.6" fill="white" opacity="0.9" filter="url(#lg-bloom)"/>
-      <circle cx="105" cy="12" r="1.3" fill="white"/>
+      <circle cx="229" cy="12" r="2.6" fill="white" opacity="0.9" filter="url(#lg-bloom)"/>
+      <circle cx="229" cy="12" r="1.3" fill="white"/>
     </svg>
   )
 }

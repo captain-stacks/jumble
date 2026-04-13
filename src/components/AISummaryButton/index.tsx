@@ -2,7 +2,7 @@ import openaiService from '@/services/openai.service'
 import { cn } from '@/lib/utils'
 import { Loader, Sparkles, X } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ExtendedKind } from '@/constants'
 
 const SUMMARIZABLE_KINDS = [
@@ -20,13 +20,15 @@ export function useAISummary(event: Event) {
   const [summary, setSummary] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [visible, setVisible] = useState(false)
+  const [apiKeyReady, setApiKeyReady] = useState(() => openaiService.isInitialized())
+  useEffect(() => openaiService.subscribe(() => setApiKeyReady(openaiService.isInitialized())), [])
 
   const supported = useMemo(
     () =>
       SUMMARIZABLE_KINDS.includes(event.kind) &&
       event.content.trim().length > 0 &&
-      openaiService.isInitialized(),
-    [event]
+      apiKeyReady,
+    [event, apiKeyReady]
   )
 
   const toggle = async (e: React.MouseEvent) => {

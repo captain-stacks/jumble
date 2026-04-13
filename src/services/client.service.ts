@@ -940,7 +940,13 @@ class ClientService extends EventTarget {
 
     if (!event && author) {
       const relayList = await this.fetchRelayList(author)
-      event = await this.fetchEventFromRelays(relayList.write.slice(0, 5), filter)
+      // Always include default (big) relays and any naddr/nevent relay hints so
+      // non-authenticated users can still find events on public relays even when
+      // the author's primary relay requires auth.
+      const urlsToTry = Array.from(
+        new Set([...relayList.write.slice(0, 5), ...relays.slice(0, 3), ...getDefaultRelayUrls()])
+      )
+      event = await this.fetchEventFromRelays(urlsToTry, filter)
     }
 
     if (event && event.id !== id) {

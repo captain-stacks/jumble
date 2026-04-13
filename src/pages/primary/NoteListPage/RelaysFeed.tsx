@@ -21,7 +21,7 @@ export default function RelaysFeed() {
   const [areAlgoRelays, setAreAlgoRelays] = useState(false)
 
   const mostrFilterFn = useCallback(
-    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy'),
+    (event: Event) => !event.tags.some((tag) => tag[0] === 'proxy' && tag[1]?.startsWith('at://')),
     []
   )
 

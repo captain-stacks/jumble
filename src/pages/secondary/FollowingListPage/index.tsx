@@ -20,7 +20,7 @@ const FollowingListPage = forwardRef(({ id, index }: { id?: string; index?: numb
       }
       displayScrollToTopButton
     >
-      <ProfileList pubkeys={followings} />
+      <ProfileList pubkeys={followings} showBulkActions />
     </SecondaryPageLayout>
   )
 })

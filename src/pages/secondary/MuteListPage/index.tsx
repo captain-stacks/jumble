@@ -5,22 +5,29 @@ import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
 import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
+import { useFollowList } from '@/providers/FollowListProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
-import { Loader, Lock, LockKeyhole, Unlock } from 'lucide-react'
+import { Loader, Lock, LockKeyhole, Unlock, UserCheck } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFoundPage from '../NotFoundPage'
 
 const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
-  const { profile, pubkey } = useNostr()
+  const { profile, pubkey: accountPubkey } = useNostr()
+  const { followAll, followingSet } = useFollowList()
   const { getMutePubkeys, makeAllPrivate, changing, getMuteType } = useMuteList()
-  const mutePubkeys = useMemo(() => getMutePubkeys(), [pubkey])
+  const mutePubkeys = useMemo(() => getMutePubkeys(), [accountPubkey])
   const hasPublicMutes = useMemo(
     () => mutePubkeys.some((pk) => getMuteType(pk) === 'public'),
     [mutePubkeys, getMuteType]
   )
+  const unfollowedMutePubkeys = useMemo(
+    () => mutePubkeys.filter((pk) => pk !== accountPubkey && !followingSet.has(pk)),
+    [mutePubkeys, followingSet, accountPubkey]
+  )
+  const [followingAll, setFollowingAll] = useState(false)
   const [visibleMutePubkeys, setVisibleMutePubkeys] = useState<string[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -67,8 +74,23 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
       title={t("username's muted", { username: profile.username })}
       displayScrollToTopButton
     >
-      {hasPublicMutes && (
-        <div className="px-4 pt-2">
+      <div className="flex flex-wrap gap-2 px-4 pt-2">
+        {unfollowedMutePubkeys.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={followingAll}
+            onClick={async () => {
+              setFollowingAll(true)
+              try { await followAll(unfollowedMutePubkeys) } finally { setFollowingAll(false) }
+            }}
+          >
+            {followingAll ? <Loader className="animate-spin" /> : <UserCheck />}
+            {t('Follow all')} ({unfollowedMutePubkeys.length})
+          </Button>
+        )}
+        {hasPublicMutes && (
           <Button
             variant="outline"
             size="sm"
@@ -79,8 +101,8 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
             {changing ? <Loader className="animate-spin" /> : <LockKeyhole />}
             {t('Make all private')}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
       <div className="space-y-2 px-4 pt-2">
         {visibleMutePubkeys.map((pubkey, index) => (
           <UserItem key={`${index}-${pubkey}`} pubkey={pubkey} />

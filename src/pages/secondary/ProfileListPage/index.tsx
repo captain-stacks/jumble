@@ -63,5 +63,5 @@ function ProfileListByDomain({ domain }: { domain: string }) {
     init()
   }, [domain])
 
-  return <ProfileList pubkeys={pubkeys} />
+  return <ProfileList pubkeys={pubkeys} showBulkActions />
 }

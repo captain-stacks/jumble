@@ -26,7 +26,7 @@ export default function Relay({ url, className }: { url?: string; className?: st
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
 
   const mostrFilterFn = useCallback(
-    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy'),
+    (event: Event) => !event.tags.some((tag) => tag[0] === 'proxy' && tag[1]?.startsWith('at://')),
     []
   )
 

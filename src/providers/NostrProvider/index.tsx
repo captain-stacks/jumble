@@ -690,7 +690,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
 
   const publish = async (
     draftEvent: TDraftEvent,
-    { minPow = 0, ...options }: TPublishOptions = {}
+    { minPow = 0, onSigned, ...options }: TPublishOptions = {}
   ) => {
     if (!account || !signer || account.signerType === 'npub') {
       throw new Error('You need to login first')
@@ -717,6 +717,8 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         throw new Error(t('Cancelled'))
       }
     }
+
+    onSigned?.(event)
 
     const relays = await client.determineTargetRelays(event, options)
 

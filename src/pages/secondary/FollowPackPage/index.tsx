@@ -96,7 +96,7 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
         </div>
 
         {/* Content */}
-        {tab === 'users' && <ProfileList pubkeys={pubkeys} />}
+        {tab === 'users' && <ProfileList pubkeys={pubkeys} showBulkActions />}
         {tab === 'feed' && pubkeys.length > 0 && (
           <Feed trustScoreFilterId={`follow-pack-${getEventKey(event)}`} pubkeys={pubkeys} />
         )}

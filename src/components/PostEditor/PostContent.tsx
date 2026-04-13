@@ -271,16 +271,20 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
           _additionalRelayUrls.push(...getDefaultRelayUrls())
         }
 
-        const newEvent = await publish(draftEvent, {
+        await publish(draftEvent, {
           specifiedRelayUrls: isProtectedEvent ? additionalRelayUrls : undefined,
           additionalRelayUrls: isPoll ? pollCreateData.relays : _additionalRelayUrls,
-          minPow
+          minPow,
+          onSigned: (signedEvent) => {
+            postEditorCache.clearPostCache({ defaultContent, parentStuff })
+            deleteDraftEventCache(draftEvent)
+            if (parentStuff) {
+              threadService.addRepliesToThread([signedEvent])
+            }
+            toast.success(t('Post successful'), { duration: 2000 })
+            close()
+          }
         })
-        postEditorCache.clearPostCache({ defaultContent, parentStuff })
-        deleteDraftEventCache(draftEvent)
-        threadService.addRepliesToThread([newEvent])
-        toast.success(t('Post successful'), { duration: 2000 })
-        close()
       } catch (error) {
         const errors = formatError(error)
         errors.forEach((err) => {

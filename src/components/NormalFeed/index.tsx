@@ -8,6 +8,7 @@ import { useUserTrust } from '@/providers/UserTrustProvider'
 import storage from '@/services/local-storage.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
 import { useMemo, useRef, useState } from 'react'
+import { Event } from 'nostr-tools'
 import KindFilter from '../KindFilter'
 import { RefreshButton } from '../RefreshButton'
 
@@ -21,7 +22,8 @@ export default function NormalFeed({
   onRefresh,
   isPubkeyFeed = false,
   filterMutedNotes = true,
-  showMutedContent = false
+  showMutedContent = false,
+  filterFn
 }: {
   trustScoreFilterId?: string
   subRequests: TFeedSubRequest[]
@@ -33,6 +35,7 @@ export default function NormalFeed({
   isPubkeyFeed?: boolean
   filterMutedNotes?: boolean
   showMutedContent?: boolean
+  filterFn?: (event: Event) => boolean
 }) {
   const { showKinds } = useKindFilter()
   const { getMinTrustScore } = useUserTrust()
@@ -135,6 +138,7 @@ export default function NormalFeed({
           trustScoreThreshold={trustScoreThreshold}
           filterMutedNotes={filterMutedNotes}
           showMutedContent={showMutedContent}
+          filterFn={filterFn}
         />
       )}
     </>

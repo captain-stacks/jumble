@@ -2,12 +2,35 @@ import NormalFeed from '@/components/NormalFeed'
 import { checkAlgoRelay } from '@/lib/relay'
 import { useFeed } from '@/providers/FeedProvider'
 import relayInfoService from '@/services/relay-info.service'
-import { useEffect, useMemo, useState } from 'react'
+import { Event } from 'nostr-tools'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
+const MOSTR_RELAY_HOSTNAME = 'relay.mostr.pub'
+
+function isMostrRelay(url: string) {
+  try {
+    return new URL(url).hostname === MOSTR_RELAY_HOSTNAME
+  } catch {
+    return false
+  }
+}
 
 export default function RelaysFeed() {
   const { relayUrls, feedInfo } = useFeed()
   const [isReady, setIsReady] = useState(false)
   const [areAlgoRelays, setAreAlgoRelays] = useState(false)
+
+  const mostrFilterFn = useCallback(
+    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy'),
+    []
+  )
+
+  const filterFn = useMemo(() => {
+    if (relayUrls.length === 1 && isMostrRelay(relayUrls[0])) {
+      return mostrFilterFn
+    }
+    return undefined
+  }, [relayUrls, mostrFilterFn])
   const trustScoreFilterId = useMemo(() => {
     if (feedInfo?.feedType === 'relay' && feedInfo.id) {
       return `relay-${feedInfo.id}`
@@ -39,6 +62,7 @@ export default function RelaysFeed() {
       areAlgoRelays={areAlgoRelays}
       isMainFeed
       showRelayCloseReason
+      filterFn={filterFn}
     />
   )
 }

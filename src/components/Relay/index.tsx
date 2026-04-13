@@ -4,9 +4,18 @@ import SearchInput from '@/components/SearchInput'
 import { useFetchRelayInfo } from '@/hooks'
 import { normalizeUrl } from '@/lib/url'
 import { useCurrentRelays } from '@/providers/CurrentRelaysProvider'
-import { useEffect, useMemo, useState } from 'react'
+import { Event } from 'nostr-tools'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFound from '../NotFound'
+
+function isMostrRelay(url: string) {
+  try {
+    return new URL(url).hostname === 'relay.mostr.pub'
+  } catch {
+    return false
+  }
+}
 
 export default function Relay({ url, className }: { url?: string; className?: string }) {
   const { t } = useTranslation()
@@ -15,6 +24,11 @@ export default function Relay({ url, className }: { url?: string; className?: st
   const { relayInfo } = useFetchRelayInfo(normalizedUrl)
   const [searchInput, setSearchInput] = useState('')
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
+
+  const mostrFilterFn = useCallback(
+    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy'),
+    []
+  )
 
   useEffect(() => {
     if (normalizedUrl) {
@@ -57,6 +71,7 @@ export default function Relay({ url, className }: { url?: string; className?: st
           { urls: [normalizedUrl], filter: debouncedInput ? { search: debouncedInput } : {} }
         ]}
         showRelayCloseReason
+        filterFn={normalizedUrl && isMostrRelay(normalizedUrl) ? mostrFilterFn : undefined}
       />
     </div>
   )

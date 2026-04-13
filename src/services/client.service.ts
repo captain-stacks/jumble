@@ -515,6 +515,14 @@ class ClientService extends EventTarget {
                 startLogin()
                 return
               }
+
+              // No way to auth — treat as exhausted so the query can still complete
+              if (!eosed) {
+                eosedCount++
+                eosed = eosedCount >= startedCount
+                oneose?.(eosed)
+              }
+              return
             }
 
             // close the subscription

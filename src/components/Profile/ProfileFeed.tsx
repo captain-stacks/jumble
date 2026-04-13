@@ -45,7 +45,8 @@ export default function ProfileFeed({
       { value: 'posts', label: 'Notes' },
       { value: 'postsAndReplies', label: 'Replies' },
       { value: 'images', label: 'Images' },
-      { value: 'gallery', label: 'Gallery' }
+      { value: 'gallery', label: 'Gallery' },
+      { value: 'lists', label: 'Lists' }
     ]
 
     if (myPubkey && myPubkey !== pubkey) {
@@ -133,6 +134,16 @@ export default function ProfileFeed({
         return
       }
 
+      if (listMode === 'lists') {
+        setSubRequests([
+          {
+            urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
+            filter: { authors: [pubkey], kinds: [ExtendedKind.FOLLOW_SET] }
+          }
+        ])
+        return
+      }
+
       if (search) {
         const writeRelays = relayList.write.slice(0, 8)
         const relayInfos = await relayInfoService.getRelayInfos(writeRelays)
@@ -179,7 +190,7 @@ export default function ProfileFeed({
         }}
         threshold={Math.max(800, topSpace)}
         options={
-          listMode !== 'gallery' ? (
+          listMode !== 'gallery' && listMode !== 'lists' ? (
             <>
               {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
               <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
@@ -190,11 +201,17 @@ export default function ProfileFeed({
       <NoteList
         ref={noteListRef}
         subRequests={subRequests}
-        showKinds={listMode === 'gallery' ? [ExtendedKind.PICTURE] : temporaryShowKinds}
+        showKinds={
+          listMode === 'gallery'
+            ? [ExtendedKind.PICTURE]
+            : listMode === 'lists'
+              ? [ExtendedKind.FOLLOW_SET]
+              : temporaryShowKinds
+        }
         hideReplies={listMode === 'posts' || listMode === 'images'}
         filterMutedNotes={false}
         showMutedContent={isMuted}
-        pinnedEventIds={listMode === 'you' || !!search ? [] : pinnedEventIds}
+        pinnedEventIds={listMode === 'you' || listMode === 'lists' || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
         filterFn={listMode === 'images' ? (e) => e.content.split(/\s+/).some((word) => isImage(word)) : undefined}
         fetchLimit={listMode === 'images' ? 1000 : undefined}

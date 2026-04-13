@@ -115,5 +115,5 @@ function Feed({ trustScoreFilterId, pubkeys }: { trustScoreFilterId: string; pub
     client.generateSubRequestsForPubkeys(pubkeys, myPubkey).then(setSubRequests)
   }, [pubkeys, myPubkey])
 
-  return <NormalFeed trustScoreFilterId={trustScoreFilterId} subRequests={subRequests} />
+  return <NormalFeed trustScoreFilterId={trustScoreFilterId} subRequests={subRequests} filterMutedNotes={false} showMutedContent={true} />
 }

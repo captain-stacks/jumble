@@ -19,7 +19,9 @@ export default function NormalFeed({
   showRelayCloseReason = false,
   disable24hMode = false,
   onRefresh,
-  isPubkeyFeed = false
+  isPubkeyFeed = false,
+  filterMutedNotes = true,
+  showMutedContent = false
 }: {
   trustScoreFilterId?: string
   subRequests: TFeedSubRequest[]
@@ -29,6 +31,8 @@ export default function NormalFeed({
   disable24hMode?: boolean
   onRefresh?: () => void
   isPubkeyFeed?: boolean
+  filterMutedNotes?: boolean
+  showMutedContent?: boolean
 }) {
   const { showKinds } = useKindFilter()
   const { getMinTrustScore } = useUserTrust()
@@ -129,6 +133,8 @@ export default function NormalFeed({
           showRelayCloseReason={showRelayCloseReason}
           isPubkeyFeed={isPubkeyFeed}
           trustScoreThreshold={trustScoreThreshold}
+          filterMutedNotes={filterMutedNotes}
+          showMutedContent={showMutedContent}
         />
       )}
     </>

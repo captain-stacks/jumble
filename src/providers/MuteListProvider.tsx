@@ -6,7 +6,7 @@ import indexedDb from '@/services/indexed-db.service'
 import bootstrapCache from '@/services/bootstrap-cache.service'
 import dayjs from 'dayjs'
 import { Event } from 'nostr-tools'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -58,6 +58,21 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     return new Set([...Array.from(privateMutePubkeySet), ...Array.from(publicMutePubkeySet)])
   }, [publicMutePubkeySet, privateMutePubkeySet])
   const [changing, setChanging] = useState(false)
+  // Refs hold the latest pending state so concurrent mute calls immediately see each other's changes
+  const pendingTagsRef = useRef<string[][]>([])
+  const pendingPrivateTagsRef = useRef<string[][]>([])
+  const lastPublishedAtRef = useRef<number>(0)
+  const inflightRef = useRef<number>(0)
+
+  const incrementChanging = useCallback(() => {
+    inflightRef.current++
+    setChanging(true)
+  }, [])
+
+  const decrementChanging = useCallback(() => {
+    inflightRef.current = Math.max(0, inflightRef.current - 1)
+    if (inflightRef.current === 0) setChanging(false)
+  }, [])
 
   const getPrivateTags = useCallback(
     async (muteListEvent: Event) => {
@@ -89,17 +104,22 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
       // Logged-in users should NEVER use bootstrap cache
       if (accountPubkey) {
         bootstrapCache.clear()
-        
+
         if (muteListEvent) {
           // Logged-in user: use their mute list event
-          const privateTags = await getPrivateTags(muteListEvent).catch(() => {
+          const resolvedPrivateTags = await getPrivateTags(muteListEvent).catch(() => {
             return []
           })
-          setPrivateTags(privateTags)
+          setPrivateTags(resolvedPrivateTags)
           setTags(muteListEvent.tags)
+          // Sync refs with ground truth from relay (overwrites any pending state)
+          pendingTagsRef.current = muteListEvent.tags
+          pendingPrivateTagsRef.current = resolvedPrivateTags
         } else {
           setTags([])
           setPrivateTags([])
+          pendingTagsRef.current = []
+          pendingPrivateTagsRef.current = []
         }
         return
       }
@@ -110,10 +130,14 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         // Convert cached pubkeys to public mute tags
         const muteTags = cachedMuteList.map((pk) => ['p', pk])
         setTags(muteTags)
+        pendingTagsRef.current = muteTags
         setPrivateTags([])
+        pendingPrivateTagsRef.current = []
       } else {
         setTags([])
         setPrivateTags([])
+        pendingTagsRef.current = []
+        pendingPrivateTagsRef.current = []
       }
     }
     updateMuteTags()
@@ -133,10 +157,10 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
   )
 
   const publishNewMuteListEvent = async (tags: string[][], content?: string) => {
-    if (dayjs().unix() === muteListEvent?.created_at) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    }
-    const newMuteListDraftEvent = createMuteListDraftEvent(tags, content)
+    const now = dayjs().unix()
+    const createdAt = Math.max(now, lastPublishedAtRef.current + 1)
+    lastPublishedAtRef.current = createdAt
+    const newMuteListDraftEvent = { ...createMuteListDraftEvent(tags, content), created_at: createdAt }
     const event = await publish(newMuteListDraftEvent)
     return event
   }
@@ -152,80 +176,88 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
   }
 
   const mutePubkeyPublicly = async (pubkey: string) => {
-    if (!accountPubkey || changing) return
+    if (!accountPubkey) return
 
-    setChanging(true)
-    try {
-      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
-      checkMuteListEvent(muteListEvent)
-      if (
-        muteListEvent &&
-        muteListEvent.tags.some(([tagName, tagValue]) => tagName === 'p' && tagValue === pubkey)
-      ) {
-        return
-      }
-      const newTags = (muteListEvent?.tags ?? []).concat([['p', pubkey]])
-      // Update local state immediately
-      setTags(newTags)
-      setChanging(false)
-      // Publish in background
-      publishNewMuteListEvent(newTags, muteListEvent?.content).then(async (newMuteListEvent) => {
-        const privateTags = await getPrivateTags(newMuteListEvent)
-        await updateMuteListEvent(newMuteListEvent, privateTags)
-      }).catch((error) => {
+    // Check pending state (not relay state) to avoid double-mute
+    const currentTags = pendingTagsRef.current
+    const currentPrivateTags = pendingPrivateTagsRef.current
+    if (
+      currentTags.some(([n, v]) => n === 'p' && v === pubkey) ||
+      currentPrivateTags.some(([n, v]) => n === 'p' && v === pubkey)
+    ) {
+      return
+    }
+
+    // Update pending refs and local state synchronously so concurrent calls see this immediately
+    const newTags = currentTags.concat([['p', pubkey]])
+    pendingTagsRef.current = newTags
+    setTags(newTags)
+
+    incrementChanging()
+    // Re-encrypt private tags in every publish to ensure private content is never clobbered
+    // by a higher-timestamped public-mute event that carries stale (or empty) encrypted content.
+    ;(async () => {
+      try {
+        const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+        checkMuteListEvent(muteListEvent)
+        let cipherText = muteListEvent?.content
+        if (currentPrivateTags.length > 0) {
+          cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(currentPrivateTags))
+        }
+        const newMuteListEvent = await publishNewMuteListEvent(newTags, cipherText)
+        await updateMuteListEvent(newMuteListEvent, currentPrivateTags)
+      } catch (error) {
         const errors = formatError(error)
         errors.forEach((err) => {
           toast.error(t('Failed to mute user publicly') + ': ' + err, { duration: 10_000 })
         })
-      })
-    } catch (error) {
-      const errors = formatError(error)
-      errors.forEach((err) => {
-        toast.error(t('Failed to mute user publicly') + ': ' + err, { duration: 10_000 })
-      })
-      setChanging(false)
-    }
+      } finally {
+        decrementChanging()
+      }
+    })()
   }
 
   const mutePubkeyPrivately = async (pubkey: string) => {
-    if (!accountPubkey || changing) return
+    if (!accountPubkey) return
 
-    setChanging(true)
-    try {
-      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
-      checkMuteListEvent(muteListEvent)
-      const existingPrivateTags = muteListEvent ? await getPrivateTags(muteListEvent) : []
-      if (existingPrivateTags.some(([tagName, tagValue]) => tagName === 'p' && tagValue === pubkey)) {
-        return
-      }
+    // Check pending state to avoid double-mute
+    const currentTags = pendingTagsRef.current
+    const currentPrivateTags = pendingPrivateTagsRef.current
+    if (
+      currentPrivateTags.some(([n, v]) => n === 'p' && v === pubkey) ||
+      currentTags.some(([n, v]) => n === 'p' && v === pubkey)
+    ) {
+      return
+    }
 
-      const newPrivateTags = existingPrivateTags.concat([['p', pubkey]])
-      // Update local state immediately
-      setPrivateTags(newPrivateTags)
-      setChanging(false)
-      // Publish in background
-      nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags)).then(async (cipherText) => {
-        const newMuteListEvent = await publishNewMuteListEvent(muteListEvent?.tags ?? [], cipherText)
+    // Update pending refs and local state synchronously
+    const newPrivateTags = currentPrivateTags.concat([['p', pubkey]])
+    pendingPrivateTagsRef.current = newPrivateTags
+    setPrivateTags(newPrivateTags)
+
+    incrementChanging()
+    ;(async () => {
+      try {
+        const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+        checkMuteListEvent(muteListEvent)
+        const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+        const newMuteListEvent = await publishNewMuteListEvent(currentTags, cipherText)
         await updateMuteListEvent(newMuteListEvent, newPrivateTags)
-      }).catch((error) => {
+      } catch (error) {
         const errors = formatError(error)
         errors.forEach((err) => {
           toast.error(t('Failed to mute user privately') + ': ' + err, { duration: 10_000 })
         })
-      })
-    } catch (error) {
-      const errors = formatError(error)
-      errors.forEach((err) => {
-        toast.error(t('Failed to mute user privately') + ': ' + err, { duration: 10_000 })
-      })
-      setChanging(false)
-    }
+      } finally {
+        decrementChanging()
+      }
+    })()
   }
 
   const unmutePubkey = async (pubkey: string) => {
     if (!accountPubkey || changing) return
 
-    setChanging(true)
+    incrementChanging()
     try {
       const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
       if (!muteListEvent) return
@@ -248,14 +280,14 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         toast.error(t('Failed to unmute user') + ': ' + err, { duration: 10_000 })
       })
     } finally {
-      setChanging(false)
+      decrementChanging()
     }
   }
 
   const switchToPublicMute = async (pubkey: string) => {
     if (!accountPubkey || changing) return
 
-    setChanging(true)
+    incrementChanging()
     try {
       const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
       if (!muteListEvent) return
@@ -280,14 +312,14 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         toast.error(t('Failed to switch to public mute') + ': ' + err, { duration: 10_000 })
       })
     } finally {
-      setChanging(false)
+      decrementChanging()
     }
   }
 
   const switchToPrivateMute = async (pubkey: string) => {
     if (!accountPubkey || changing) return
 
-    setChanging(true)
+    incrementChanging()
     try {
       const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
       if (!muteListEvent) return
@@ -310,14 +342,14 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         toast.error(t('Failed to switch to private mute') + ': ' + err, { duration: 10_000 })
       })
     } finally {
-      setChanging(false)
+      decrementChanging()
     }
   }
 
   const makeAllPrivate = async () => {
     if (!accountPubkey || changing) return
 
-    setChanging(true)
+    incrementChanging()
     try {
       const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
       if (!muteListEvent) return
@@ -344,7 +376,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         toast.error(t('Failed to make all mutes private') + ': ' + err, { duration: 10_000 })
       })
     } finally {
-      setChanging(false)
+      decrementChanging()
     }
   }
 

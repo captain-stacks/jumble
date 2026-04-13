@@ -1,15 +1,16 @@
 import NormalFeed from '@/components/NormalFeed'
 import { checkAlgoRelay } from '@/lib/relay'
 import { useFeed } from '@/providers/FeedProvider'
+import { useNostr } from '@/providers/NostrProvider'
 import relayInfoService from '@/services/relay-info.service'
 import { Event } from 'nostr-tools'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-const MOSTR_RELAY_HOSTNAME = 'relay.mostr.pub'
+const MOSTR_RELAY_HOSTNAMES = new Set(['relay.mostr.pub', 'relay.momostr.pink'])
 
 function isMostrRelay(url: string) {
   try {
-    return new URL(url).hostname === MOSTR_RELAY_HOSTNAME
+    return MOSTR_RELAY_HOSTNAMES.has(new URL(url).hostname)
   } catch {
     return false
   }
@@ -17,20 +18,23 @@ function isMostrRelay(url: string) {
 
 export default function RelaysFeed() {
   const { relayUrls, feedInfo } = useFeed()
+  const { pubkey } = useNostr()
   const [isReady, setIsReady] = useState(false)
   const [areAlgoRelays, setAreAlgoRelays] = useState(false)
 
   const mostrFilterFn = useCallback(
-    (event: Event) => !event.tags.some((tag) => tag[0] === 'proxy' && tag[1]?.startsWith('at://')),
+    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy' && !tag[1]?.startsWith('at://')),
     []
   )
 
   const filterFn = useMemo(() => {
-    if (relayUrls.length === 1 && isMostrRelay(relayUrls[0])) {
-      return mostrFilterFn
+    const isMostr = relayUrls.length === 1 && isMostrRelay(relayUrls[0])
+    return (event: Event) => {
+      if (pubkey && event.pubkey === pubkey) return false
+      if (isMostr) return mostrFilterFn(event)
+      return true
     }
-    return undefined
-  }, [relayUrls, mostrFilterFn])
+  }, [relayUrls, pubkey, mostrFilterFn])
   const trustScoreFilterId = useMemo(() => {
     if (feedInfo?.feedType === 'relay' && feedInfo.id) {
       return `relay-${feedInfo.id}`

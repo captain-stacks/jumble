@@ -9,9 +9,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFound from '../NotFound'
 
+const MOSTR_RELAY_HOSTNAMES = new Set(['relay.mostr.pub', 'relay.momostr.pink'])
+
 function isMostrRelay(url: string) {
   try {
-    return new URL(url).hostname === 'relay.mostr.pub'
+    return MOSTR_RELAY_HOSTNAMES.has(new URL(url).hostname)
   } catch {
     return false
   }
@@ -26,7 +28,7 @@ export default function Relay({ url, className }: { url?: string; className?: st
   const [debouncedInput, setDebouncedInput] = useState(searchInput)
 
   const mostrFilterFn = useCallback(
-    (event: Event) => !event.tags.some((tag) => tag[0] === 'proxy' && tag[1]?.startsWith('at://')),
+    (event: Event) => event.tags.some((tag) => tag[0] === 'proxy' && !tag[1]?.startsWith('at://')),
     []
   )
 

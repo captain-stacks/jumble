@@ -2,6 +2,7 @@ import { useSecondaryPage } from '@/PageManager'
 import Note from '@/components/Note'
 import NoteCard, { NoteCardLoadingSkeleton } from '@/components/NoteCard'
 import NoteInteractions from '@/components/NoteInteractions'
+import PostEditor from '@/components/PostEditor'
 import StuffStats from '@/components/StuffStats'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -18,6 +19,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
+import openaiService from '@/services/openai.service'
 import { Send } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
@@ -86,6 +88,8 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
   const { enableSingleColumnLayout } = useUserPreferences()
   const [replyInput, setReplyInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [postEditorOpen, setPostEditorOpen] = useState(false)
+  const [postEditorDefault, setPostEditorDefault] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -98,6 +102,19 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
     await checkLogin(async () => {
       setSending(true)
       try {
+        if (openaiService.isInitialized()) {
+          try {
+            const { fixed } = await openaiService.proofread(text)
+            if (fixed !== text) {
+              setPostEditorDefault(fixed)
+              setPostEditorOpen(true)
+              setReplyInput('')
+              return
+            }
+          } catch {
+            // proofread failed, proceed with posting as-is
+          }
+        }
         const addClientTag = window.localStorage.getItem(StorageKey.ADD_CLIENT_TAG) === 'true'
         const draft = await createShortTextNoteDraftEvent(text, [], { parentEvent: event, addClientTag })
         await publish(draft)
@@ -173,6 +190,14 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('Note')} displayScrollToTopButton footer={replyBar}>
+      {event && (
+        <PostEditor
+          parentStuff={event}
+          defaultContent={postEditorDefault}
+          open={postEditorOpen}
+          setOpen={setPostEditorOpen}
+        />
+      )}
       {rootITag && (
         <div className="px-4 pt-3">
           <ExternalRoot value={rootITag[1]} />

@@ -95,7 +95,7 @@ export default {
     'Add an Account': 'เพิ่มบัญชี',
     'More options': 'ตัวเลือกเพิ่มเติม',
     'Add client tag': 'เพิ่มแท็กไคลเอนต์',
-    'Show others this was sent via Jumble': 'แสดงให้ผู้อื่นเห็นว่าส่งผ่าน Jumble',
+    'Show others this was sent via jumblewisp': 'แสดงให้ผู้อื่นเห็นว่าส่งผ่าน jumblewisp',
     'Are you sure you want to logout?': 'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?',
     'relay sets': 'ชุดรีเลย์',
     edit: 'แก้ไข',
@@ -196,9 +196,9 @@ export default {
     All: 'ทั้งหมด',
     Reactions: 'ปฏิกิริยา',
     Zaps: 'ซาตส์',
-    'Enjoying Jumble?': 'ชอบ Jumble ไหม?',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'การบริจาคของคุณช่วยให้ฉันดูแลและพัฒนา Jumble ให้ดีขึ้น! 😊',
+    'Enjoying jumblewisp?': 'ชอบ jumblewisp ไหม?',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'การบริจาคของคุณช่วยให้ฉันดูแลและพัฒนา jumblewisp ให้ดีขึ้น! 😊',
     'Earlier notifications': 'การแจ้งเตือนก่อนหน้า',
     'Temporarily display this note': 'แสดงโน้ตนี้ชั่วคราว',
     buttonFollowing: 'กำลังติดตาม',
@@ -488,14 +488,14 @@ export default {
     Remote: 'ระยะไกล',
     'Encrypted Key': 'คีย์ที่เข้ารหัส',
     'Private Key': 'คีย์ส่วนตัว',
-    'Welcome to Jumble': 'ยินดีต้อนรับสู่ Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble เป็นไคลเอนต์ที่เน้นการเรียกดูรีเลย์ เริ่มต้นด้วยการสำรวจรีเลย์ที่น่าสนใจ หรือเข้าสู่ระบบเพื่อดูฟีดที่คุณติดตาม',
+    'Welcome to jumblewisp': 'ยินดีต้อนรับสู่ jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp เป็นไคลเอนต์ที่เน้นการเรียกดูรีเลย์ เริ่มต้นด้วยการสำรวจรีเลย์ที่น่าสนใจ หรือเข้าสู่ระบบเพื่อดูฟีดที่คุณติดตาม',
     'Explore Relays': 'สำรวจรีเลย์',
     'Choose a feed': 'เลือกฟีด',
     'and {{x}} others': 'และอื่น ๆ {{x}} รายการ',
     selfZapWarning:
-      'Jumble ไม่รับผิดชอบต่อสิ่งที่เกิดขึ้นหากคุณ zap ตัวเอง ดำเนินการด้วยความเสี่ยงของคุณเอง 😉⚡',
+      'jumblewisp ไม่รับผิดชอบต่อสิ่งที่เกิดขึ้นหากคุณ zap ตัวเอง ดำเนินการด้วยความเสี่ยงของคุณเอง 😉⚡',
     'Emoji Pack': 'แพ็คอีโมจิ',
     'Emoji pack added': 'เพิ่มแพ็คอีโมจิแล้ว',
     'Add emoji pack failed': 'การเพิ่มแพ็คอีโมจิล้มเหลว',
@@ -589,7 +589,7 @@ export default {
     'Publish Highlight': 'เผยแพร่ไฮไลท์',
     'Show replies': 'แสดงการตอบกลับ',
     'Hide replies': 'ซ่อนการตอบกลับ',
-    'Welcome to Jumble!': 'ยินดีต้อนรับสู่ Jumble!',
+    'Welcome to jumblewisp!': 'ยินดีต้อนรับสู่ jumblewisp!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'ฟีดของคุณว่างเปล่าเพราะคุณยังไม่ได้ติดตามใครเลย เริ่มต้นด้วยการสำรวจเนื้อหาที่น่าสนใจและติดตามผู้ใช้ที่คุณชอบ!',
     'Search Users': 'ค้นหาผู้ใช้',

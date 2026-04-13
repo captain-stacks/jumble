@@ -95,7 +95,7 @@ export default {
     'Add an Account': 'افزودن حساب',
     'More options': 'گزینه‌های بیشتر',
     'Add client tag': 'افزودن برچسب کلاینت',
-    'Show others this was sent via Jumble': 'به دیگران نشان دهید که از طریق Jumble ارسال شده',
+    'Show others this was sent via jumblewisp': 'به دیگران نشان دهید که از طریق jumblewisp ارسال شده',
     'Are you sure you want to logout?': 'آیا مطمئن هستید که می‌خواهید خارج شوید؟',
     'relay sets': 'مجموعه‌های رله',
     edit: 'ویرایش',
@@ -198,9 +198,9 @@ export default {
     All: 'همه',
     Reactions: 'واکنش‌ها',
     Zaps: 'زپ‌ها',
-    'Enjoying Jumble?': 'از Jumble لذت می‌برید؟',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'کمک مالی شما به من در نگهداری Jumble و بهتر کردن آن کمک می‌کند! 😊',
+    'Enjoying jumblewisp?': 'از jumblewisp لذت می‌برید؟',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'کمک مالی شما به من در نگهداری jumblewisp و بهتر کردن آن کمک می‌کند! 😊',
     'Earlier notifications': 'اعلان‌های قبلی',
     'Temporarily display this note': 'نمایش موقت این یادداشت',
     buttonFollowing: 'دنبال می‌کنم',
@@ -493,14 +493,14 @@ export default {
     Remote: 'از راه دور',
     'Encrypted Key': 'رمزگذاری شده کلید',
     'Private Key': 'کلید خصوصی',
-    'Welcome to Jumble': 'به Jumble خوش آمدید',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble یک کلاینت متمرکز بر مرور رله‌هاست. با کاوش در رله‌های جالب شروع کنید یا وارد شوید تا فید دنبال‌کننده‌های خود را مشاهده کنید.',
+    'Welcome to jumblewisp': 'به jumblewisp خوش آمدید',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp یک کلاینت متمرکز بر مرور رله‌هاست. با کاوش در رله‌های جالب شروع کنید یا وارد شوید تا فید دنبال‌کننده‌های خود را مشاهده کنید.',
     'Explore Relays': 'کاوش در رله‌ها',
     'Choose a feed': 'یک فید انتخاب کنید',
     'and {{x}} others': 'و {{x}} دیگر',
     selfZapWarning:
-      'Jumble مسئولیتی در قبال اتفاقاتی که در صورت ارسال zap به خودتان می‌افتد ندارد. با مسئولیت خود ادامه دهید. 😉⚡',
+      'jumblewisp مسئولیتی در قبال اتفاقاتی که در صورت ارسال zap به خودتان می‌افتد ندارد. با مسئولیت خود ادامه دهید. 😉⚡',
     'Emoji Pack': 'بسته ایموجی',
     'Emoji pack added': 'بسته ایموجی اضافه شد',
     'Add emoji pack failed': 'افزودن بسته ایموجی ناموفق بود',
@@ -596,7 +596,7 @@ export default {
     'Publish Highlight': 'انتشار برجسته‌سازی',
     'Show replies': 'نمایش پاسخ‌ها',
     'Hide replies': 'پنهان کردن پاسخ‌ها',
-    'Welcome to Jumble!': 'به Jumble خوش آمدید!',
+    'Welcome to jumblewisp!': 'به jumblewisp خوش آمدید!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'فید شما خالی است زیرا هنوز کسی را دنبال نمی‌کنید. با کاوش محتوای جالب و دنبال کردن کاربرانی که دوست دارید شروع کنید!',
     'Search Users': 'جستجوی کاربران',

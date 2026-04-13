@@ -27,7 +27,7 @@ class TranslationService {
       auth = await client.signHttpAuth(
         new URL(path, JUMBLE_API_BASE_URL).toString(),
         method,
-        'Auth to get Jumble translation service account'
+        'Auth to get jumblewisp translation service account'
       )
     }
     const act = await this._fetch<TTranslationAccount>({

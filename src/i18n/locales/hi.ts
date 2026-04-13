@@ -95,8 +95,8 @@ export default {
     'Add an Account': 'अकाउंट जोड़ें',
     'More options': 'अधिक विकल्प',
     'Add client tag': 'क्लाइंट टैग जोड़ें',
-    'Show others this was sent via Jumble':
-      'दूसरों को दिखाएं कि यह Jumble के माध्यम से भेजा गया था',
+    'Show others this was sent via jumblewisp':
+      'दूसरों को दिखाएं कि यह jumblewisp के माध्यम से भेजा गया था',
     'Are you sure you want to logout?': 'क्या आप वाकई लॉगआउट करना चाहते हैं?',
     'relay sets': 'रिले सेट',
     edit: 'संपादित करें',
@@ -199,9 +199,9 @@ export default {
     All: 'सभी',
     Reactions: 'प्रतिक्रियाएं',
     Zaps: 'जैप्स',
-    'Enjoying Jumble?': 'Jumble का आनंद ले रहे हैं?',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'आपका दान मुझे Jumble को बनाए रखने और इसे बेहतर बनाने में मदद करता है! 😊',
+    'Enjoying jumblewisp?': 'jumblewisp का आनंद ले रहे हैं?',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'आपका दान मुझे jumblewisp को बनाए रखने और इसे बेहतर बनाने में मदद करता है! 😊',
     'Earlier notifications': 'पुरानी सूचनाएं',
     'Temporarily display this note': 'इस नोट को अस्थायी रूप से प्रदर्शित करें',
     buttonFollowing: 'फॉलो कर रहे हैं',
@@ -495,14 +495,14 @@ export default {
     Remote: 'रिमोट',
     'Encrypted Key': 'एन्क्रिप्टेड की',
     'Private Key': 'प्राइवेट की',
-    'Welcome to Jumble': 'Jumble में आपका स्वागत है',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble एक क्लाइंट है जो रिले ब्राउज़ करने पर केंद्रित है। रोचक रिले की खोज करके शुरू करें या अपनी फ़ॉलोइंग फ़ीड देखने के लिए लॉगिन करें।',
+    'Welcome to jumblewisp': 'jumblewisp में आपका स्वागत है',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp एक क्लाइंट है जो रिले ब्राउज़ करने पर केंद्रित है। रोचक रिले की खोज करके शुरू करें या अपनी फ़ॉलोइंग फ़ीड देखने के लिए लॉगिन करें।',
     'Explore Relays': 'रिले एक्सप्लोर करें',
     'Choose a feed': 'एक फीड चुनें',
     'and {{x}} others': 'और {{x}} अन्य',
     selfZapWarning:
-      'Jumble आपके द्वारा स्वयं को zap करने पर क्या होता है, इसके लिए जिम्मेदार नहीं है। अपनी जोखिम पर आगे बढ़ें। 😉⚡',
+      'jumblewisp आपके द्वारा स्वयं को zap करने पर क्या होता है, इसके लिए जिम्मेदार नहीं है। अपनी जोखिम पर आगे बढ़ें। 😉⚡',
     'Emoji Pack': 'इमोजी पैक',
     'Emoji pack added': 'इमोजी पैक जोड़ा गया',
     'Add emoji pack failed': 'इमोजी पैक जोड़ना विफल रहा',
@@ -597,7 +597,7 @@ export default {
     'Publish Highlight': 'हाइलाइट प्रकाशित करें',
     'Show replies': 'जवाब दिखाएं',
     'Hide replies': 'जवाब छुपाएं',
-    'Welcome to Jumble!': 'Jumble में आपका स्वागत है!',
+    'Welcome to jumblewisp!': 'jumblewisp में आपका स्वागत है!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'आपका फ़ीड खाली है क्योंकि आप अभी तक किसी को फ़ॉलो नहीं कर रहे हैं। दिलचस्प सामग्री का अन्वेषण करके और अपनी पसंद के उपयोगकर्ताओं को फ़ॉलो करके शुरू करें!',
     'Search Users': 'उपयोगकर्ता खोजें',

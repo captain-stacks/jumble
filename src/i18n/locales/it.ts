@@ -95,8 +95,8 @@ export default {
     'Add an Account': 'Aggiungi un Account',
     'More options': 'Più opzioni',
     'Add client tag': 'Aggiungi etichetta del client',
-    'Show others this was sent via Jumble':
-      'Mostra agli altri che questo è stato inviato tramite Jumble',
+    'Show others this was sent via jumblewisp':
+      'Mostra agli altri che questo è stato inviato tramite jumblewisp',
     'Are you sure you want to logout?': 'Sei sicuro di volerti scollegare?',
     'relay sets': 'set di relay',
     edit: 'modifica',
@@ -199,9 +199,9 @@ export default {
     All: 'Tutto',
     Reactions: 'Reazioni',
     Zaps: 'Zaps',
-    'Enjoying Jumble?': 'Ti sta piacendo Jumble?',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'La tua donazione mi aiuta a mantenere Jumble e a migliorarlo! 😊',
+    'Enjoying jumblewisp?': 'Ti sta piacendo jumblewisp?',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'La tua donazione mi aiuta a mantenere jumblewisp e a migliorarlo! 😊',
     'Earlier notifications': 'Notifiche precedenti',
     'Temporarily display this note': 'Visualizza temporaneamente questa nota',
     buttonFollowing: 'Seguendo',
@@ -498,14 +498,14 @@ export default {
     Remote: 'Remoto',
     'Encrypted Key': 'Chiave Crittografata',
     'Private Key': 'Chiave Privata',
-    'Welcome to Jumble': 'Benvenuto su Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble è un client focalizzato sulla navigazione dei relay. Inizia esplorando relay interessanti o effettua il login per visualizzare il tuo feed di following.',
+    'Welcome to jumblewisp': 'Benvenuto su jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp è un client focalizzato sulla navigazione dei relay. Inizia esplorando relay interessanti o effettua il login per visualizzare il tuo feed di following.',
     'Explore Relays': 'Esplora Relay',
     'Choose a feed': 'Scegli un feed',
     'and {{x}} others': 'e altri {{x}}',
     selfZapWarning:
-      'Jumble non è responsabile di ciò che accade se zappi te stesso. Procedi a tuo rischio e pericolo. 😉⚡',
+      'jumblewisp non è responsabile di ciò che accade se zappi te stesso. Procedi a tuo rischio e pericolo. 😉⚡',
     'Emoji Pack': 'Pacchetto Emoji',
     'Emoji pack added': 'Pacchetto emoji aggiunto',
     'Add emoji pack failed': 'Aggiunta del pacchetto emoji non riuscita',
@@ -602,7 +602,7 @@ export default {
     'Publish Highlight': 'Pubblica Evidenziazione',
     'Show replies': 'Mostra risposte',
     'Hide replies': 'Nascondi risposte',
-    'Welcome to Jumble!': 'Benvenuto su Jumble!',
+    'Welcome to jumblewisp!': 'Benvenuto su jumblewisp!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'Il tuo feed è vuoto perché non stai ancora seguendo nessuno. Inizia esplorando contenuti interessanti e seguendo gli utenti che ti piacciono!',
     'Search Users': 'Cerca Utenti',

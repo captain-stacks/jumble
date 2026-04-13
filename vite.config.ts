@@ -59,8 +59,8 @@ export default defineConfig(({ mode }) => {
           enabled: true
         },
         manifest: {
-          name: 'Wisp',
-          short_name: 'Wisp',
+          name: 'jumblewisp',
+          short_name: 'jumblewisp',
           icons: [
             {
               src: '/pwa-512x512.png',

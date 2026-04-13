@@ -95,7 +95,7 @@ export default {
     'Add an Account': 'إضافة حساب',
     'More options': 'المزيد من الخيارات',
     'Add client tag': 'إضافة وسم العميل',
-    'Show others this was sent via Jumble': 'عرض أن هذه الرسالة أُرسلت عبر Jumble',
+    'Show others this was sent via jumblewisp': 'عرض أن هذه الرسالة أُرسلت عبر jumblewisp',
     'Are you sure you want to logout?': 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
     'relay sets': 'مجموعات الريلاي',
     edit: 'تعديل',
@@ -196,9 +196,9 @@ export default {
     All: 'الكل',
     Reactions: 'التفاعلات',
     Zaps: 'Zaps',
-    'Enjoying Jumble?': 'هل تستمتع بـ Jumble؟',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'تبرعك يساعد في صيانة Jumble وتحسينه! 😊',
+    'Enjoying jumblewisp?': 'هل تستمتع بـ jumblewisp؟',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'تبرعك يساعد في صيانة jumblewisp وتحسينه! 😊',
     'Earlier notifications': 'الإشعارات السابقة',
     'Temporarily display this note': 'عرض هذه الملاحظة مؤقتاً',
     buttonFollowing: 'جارٍ المتابعة',
@@ -490,14 +490,14 @@ export default {
     Remote: 'عن بُعد',
     'Encrypted Key': 'مفتاح مشفر',
     'Private Key': 'مفتاح خاص',
-    'Welcome to Jumble': 'مرحبًا بك في Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble هو عميل يركز على تصفح المرحلات. ابدأ باستكشاف المرحلات المثيرة للاهتمام أو قم بتسجيل الدخول لعرض خلاصتك.',
+    'Welcome to jumblewisp': 'مرحبًا بك في jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp هو عميل يركز على تصفح المرحلات. ابدأ باستكشاف المرحلات المثيرة للاهتمام أو قم بتسجيل الدخول لعرض خلاصتك.',
     'Explore Relays': 'استكشف المرحلات',
     'Choose a feed': 'اختر خلاصة',
     'and {{x}} others': 'و {{x}} آخرون',
     selfZapWarning:
-      'Jumble غير مسؤولة عما يحدث إذا أرسلت zap لنفسك. تابع على مسؤوليتك الخاصة. 😉⚡',
+      'jumblewisp غير مسؤولة عما يحدث إذا أرسلت zap لنفسك. تابع على مسؤوليتك الخاصة. 😉⚡',
     'Emoji Pack': 'حزمة الرموز التعبيرية',
     'Emoji pack added': 'تمت إضافة حزمة الرموز التعبيرية',
     'Add emoji pack failed': 'فشل إضافة حزمة الرموز التعبيرية',
@@ -590,7 +590,7 @@ export default {
     'Publish Highlight': 'نشر التمييز',
     'Show replies': 'إظهار الردود',
     'Hide replies': 'إخفاء الردود',
-    'Welcome to Jumble!': 'مرحبًا بك في Jumble!',
+    'Welcome to jumblewisp!': 'مرحبًا بك في jumblewisp!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'خلاصتك فارغة لأنك لا تتابع أي شخص بعد. ابدأ باستكشاف محتوى مثير للاهتمام ومتابعة المستخدمين الذين تحبهم!',
     'Search Users': 'البحث عن المستخدمين',

@@ -1,4 +1,4 @@
-import { CODY_PUBKEY, JUMBLE_PUBKEY } from '@/constants'
+import { CAPTAIN_PUBKEY } from '@/constants'
 import { getZapInfoFromEvent } from '@/lib/event-metadata'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { TProfile } from '@/types'
@@ -15,8 +15,6 @@ import client from './client.service'
 
 export type TRecentSupporter = { pubkey: string; amount: number; comment?: string }
 
-const OFFICIAL_PUBKEYS = [JUMBLE_PUBKEY, CODY_PUBKEY]
-
 class LightningService {
   static instance: LightningService
   provider: WebLNProvider | null = null
@@ -26,7 +24,7 @@ class LightningService {
     if (!LightningService.instance) {
       LightningService.instance = this
       init({
-        appName: 'Jumble',
+        appName: 'jumblewisp',
         showBalance: false
       })
     }
@@ -180,18 +178,18 @@ class LightningService {
     if (this.recentSupportersCache) {
       return this.recentSupportersCache
     }
-    const relayList = await client.fetchRelayList(CODY_PUBKEY)
+    const relayList = await client.fetchRelayList(CAPTAIN_PUBKEY)
     const events = await client.fetchEvents(relayList.read.slice(0, 4), {
-      authors: ['79f00d3f5a19ec806189fcab03c1be4ff81d18ee4f653c88fac41fe03570f432'], // alby
       kinds: [kinds.Zap],
-      '#p': OFFICIAL_PUBKEYS,
+      '#p': [CAPTAIN_PUBKEY],
       since: dayjs().subtract(1, 'month').unix()
     })
     events.sort((a, b) => b.created_at - a.created_at)
     const map = new Map<string, { pubkey: string; amount: number; comment?: string }>()
     events.forEach((event) => {
+      if (event.tags.some((tag) => tag[0] === 'e')) return // zap to a note, not a profile
       const info = getZapInfoFromEvent(event)
-      if (!info || !info.senderPubkey || OFFICIAL_PUBKEYS.includes(info.senderPubkey)) return
+      if (!info || !info.senderPubkey || info.senderPubkey === CAPTAIN_PUBKEY) return
 
       const { amount, comment, senderPubkey } = info
       const item = map.get(senderPubkey)
@@ -203,7 +201,6 @@ class LightningService {
       }
     })
     this.recentSupportersCache = Array.from(map.values())
-      .filter((item) => item.amount >= 1000)
       .sort((a, b) => b.amount - a.amount)
     return this.recentSupportersCache
   }

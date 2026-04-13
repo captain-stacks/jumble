@@ -96,7 +96,7 @@ export default {
     'Add an Account': 'Konto hinzufügen',
     'More options': 'Mehr Optionen',
     'Add client tag': 'Client-Tag hinzufügen',
-    'Show others this was sent via Jumble': 'Anderen zeigen, dass dies über Jumble gesendet wurde',
+    'Show others this was sent via jumblewisp': 'Anderen zeigen, dass dies über jumblewisp gesendet wurde',
     'Are you sure you want to logout?': 'Bist du sicher, dass du dich abmelden möchtest?',
     'relay sets': 'Relay-Sets',
     edit: 'bearbeiten',
@@ -200,9 +200,9 @@ export default {
     All: 'Alle',
     Reactions: 'Reaktionen',
     Zaps: 'Zaps',
-    'Enjoying Jumble?': 'Gefällt dir Jumble?',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      'Deine Spende hilft mir, Jumble zu pflegen und zu verbessern! 😊',
+    'Enjoying jumblewisp?': 'Gefällt dir jumblewisp?',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      'Deine Spende hilft mir, jumblewisp zu pflegen und zu verbessern! 😊',
     'Earlier notifications': 'Frühere Benachrichtigungen',
     'Temporarily display this note': 'Notiz vorübergehend anzeigen',
     buttonFollowing: 'Folge',
@@ -504,14 +504,14 @@ export default {
     Remote: 'Remote',
     'Encrypted Key': 'Verschlüsselter Schlüssel',
     'Private Key': 'Privater Schlüssel',
-    'Welcome to Jumble': 'Willkommen bei Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble ist ein Client, der sich auf das Durchsuchen von Relays konzentriert. Beginnen Sie mit der Erkundung interessanter Relays oder melden Sie sich an, um Ihren Following-Feed anzuzeigen.',
+    'Welcome to jumblewisp': 'Willkommen bei jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp ist ein Client, der sich auf das Durchsuchen von Relays konzentriert. Beginnen Sie mit der Erkundung interessanter Relays oder melden Sie sich an, um Ihren Following-Feed anzuzeigen.',
     'Explore Relays': 'Relays erkunden',
     'Choose a feed': 'Wähle einen Feed',
     'and {{x}} others': 'und {{x}} andere',
     selfZapWarning:
-      'Jumble ist nicht verantwortlich für das, was passiert, wenn Sie sich selbst zappen. Fahren Sie auf eigene Gefahr fort. 😉⚡',
+      'jumblewisp ist nicht verantwortlich für das, was passiert, wenn Sie sich selbst zappen. Fahren Sie auf eigene Gefahr fort. 😉⚡',
     'Emoji Pack': 'Emoji-Paket',
     'Emoji pack added': 'Emoji-Paket hinzugefügt',
     'Add emoji pack failed': 'Hinzufügen des Emoji-Pakets fehlgeschlagen',
@@ -607,7 +607,7 @@ export default {
     'Publish Highlight': 'Markierung Veröffentlichen',
     'Show replies': 'Antworten anzeigen',
     'Hide replies': 'Antworten ausblenden',
-    'Welcome to Jumble!': 'Willkommen bei Jumble!',
+    'Welcome to jumblewisp!': 'Willkommen bei jumblewisp!',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       'Ihr Feed ist leer, weil Sie noch niemandem folgen. Beginnen Sie damit, interessante Inhalte zu erkunden und Benutzern zu folgen, die Ihnen gefallen!',
     'Search Users': 'Benutzer suchen',

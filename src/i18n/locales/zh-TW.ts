@@ -94,7 +94,7 @@ export default {
     'Add an Account': '新增帳戶',
     'More options': '更多選項',
     'Add client tag': '新增客戶端標籤',
-    'Show others this was sent via Jumble': '告訴別人這是透過 Jumble 發送的',
+    'Show others this was sent via jumblewisp': '告訴別人這是透過 jumblewisp 發送的',
     'Are you sure you want to logout?': '確定要登出嗎？',
     'relay sets': '伺服器組',
     edit: '編輯',
@@ -198,9 +198,9 @@ export default {
     All: '全部',
     Reactions: '互動',
     Zaps: '打閃',
-    'Enjoying Jumble?': '喜歡 Jumble 嗎？',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      '您的捐贈幫助我維護 Jumble 並使其更好！😊',
+    'Enjoying jumblewisp?': '喜歡 jumblewisp 嗎？',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      '您的捐贈幫助我維護 jumblewisp 並使其更好！😊',
     'Earlier notifications': '更早的通知',
     'Temporarily display this note': '臨時顯示此筆記',
     buttonFollowing: '已關注',
@@ -486,13 +486,13 @@ export default {
     Remote: '遠端',
     'Encrypted Key': '加密私鑰',
     'Private Key': '私鑰',
-    'Welcome to Jumble': '歡迎來到 Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble 是一個專注於瀏覽伺服器的客戶端。從探索有趣的伺服器開始，或者登入檢視你的關注動態。',
+    'Welcome to jumblewisp': '歡迎來到 jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp 是一個專注於瀏覽伺服器的客戶端。從探索有趣的伺服器開始，或者登入檢視你的關注動態。',
     'Explore Relays': '探索伺服器',
     'Choose a feed': '選擇一個動態',
     'and {{x}} others': '和其他 {{x}} 人',
-    selfZapWarning: 'Jumble 對您給自己打賞所發生的事情概不負責。風險自負。😉⚡',
+    selfZapWarning: 'jumblewisp 對您給自己打賞所發生的事情概不負責。風險自負。😉⚡',
     'Emoji Pack': '表情包',
     'Emoji pack added': '表情包已新增',
     'Add emoji pack failed': '新增表情包失敗',
@@ -577,7 +577,7 @@ export default {
     'Unfollow Special': '取消特別關注',
     'Personal Feeds': '個人訂閱',
     'Relay Feeds': '中繼訂閱',
-    'Welcome to Jumble!': '歡迎來到 Jumble！',
+    'Welcome to jumblewisp!': '歡迎來到 jumblewisp！',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       '你的動態是空的，因為你還沒有關注任何人。開始探索有趣的內容並關注你喜歡的用戶吧！',
     'Search Users': '搜尋用戶',

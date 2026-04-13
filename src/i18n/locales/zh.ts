@@ -94,7 +94,7 @@ export default {
     'Add an Account': '添加账户',
     'More options': '更多选项',
     'Add client tag': '添加客户端标签',
-    'Show others this was sent via Jumble': '告诉别人这是通过 Jumble 发送的',
+    'Show others this was sent via jumblewisp': '告诉别人这是通过 jumblewisp 发送的',
     'Are you sure you want to logout?': '确定要退出登录吗？',
     'relay sets': '服务器组',
     edit: '编辑',
@@ -198,9 +198,9 @@ export default {
     All: '全部',
     Reactions: '互动',
     Zaps: '打闪',
-    'Enjoying Jumble?': '喜欢 Jumble 吗？',
-    'Your donation helps me maintain Jumble and make it better! 😊':
-      '您的捐赠帮助我维护 Jumble 并使其更好！😊',
+    'Enjoying jumblewisp?': '喜欢 jumblewisp 吗？',
+    'Your donation helps me maintain jumblewisp and make it better! 😊':
+      '您的捐赠帮助我维护 jumblewisp 并使其更好！😊',
     'Earlier notifications': '更早的通知',
     'Temporarily display this note': '临时显示此笔记',
     buttonFollowing: '已关注',
@@ -486,13 +486,13 @@ export default {
     Remote: '远程',
     'Encrypted Key': '加密私钥',
     'Private Key': '私钥',
-    'Welcome to Jumble': '欢迎来到 Jumble',
-    'Jumble is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
-      'Jumble 是一个专注于浏览服务器的客户端。从探索有趣的服务器开始，或者登录查看你的关注动态。',
+    'Welcome to jumblewisp': '欢迎来到 jumblewisp',
+    'jumblewisp is a client focused on browsing relays. Get started by exploring interesting relays or login to view your following feed.':
+      'jumblewisp 是一个专注于浏览服务器的客户端。从探索有趣的服务器开始，或者登录查看你的关注动态。',
     'Explore Relays': '探索服务器',
     'Choose a feed': '选择一个动态',
     'and {{x}} others': '和其他 {{x}} 人',
-    selfZapWarning: 'Jumble 对您给自己打赏所发生的事情概不负责。风险自负。😉⚡',
+    selfZapWarning: 'jumblewisp 对您给自己打赏所发生的事情概不负责。风险自负。😉⚡',
     'Emoji Pack': '表情包',
     'Emoji pack added': '表情包已添加',
     'Add emoji pack failed': '添加表情包失败',
@@ -582,7 +582,7 @@ export default {
     'Publish Highlight': '发布高亮',
     'Show replies': '显示回复',
     'Hide replies': '隐藏回复',
-    'Welcome to Jumble!': '欢迎来到 Jumble！',
+    'Welcome to jumblewisp!': '欢迎来到 jumblewisp！',
     'Your feed is empty because you are not following anyone yet. Start by exploring interesting content and following users you like!':
       '你的动态是空的，因为你还没有关注任何人。开始探索有趣的内容并关注你喜欢的用户吧！',
     'Search Users': '搜索用户',

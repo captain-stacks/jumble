@@ -64,6 +64,10 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     updateHideRelayExplore,
     enableAiAgent,
     updateEnableAiAgent,
+    enableBiblePage,
+    updateEnableBiblePage,
+    enableQuranPage,
+    updateEnableQuranPage,
     disableSpecialFollowFeatures,
     updateDisableSpecialFollowFeatures
   } = useUserPreferences()
@@ -291,6 +295,28 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="enable-ai-agent"
             checked={enableAiAgent}
             onCheckedChange={updateEnableAiAgent}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="enable-bible-page" className="text-base font-normal">
+            <div>Bible</div>
+            <div className="text-muted-foreground">Show Bible page in the sidebar</div>
+          </Label>
+          <Switch
+            id="enable-bible-page"
+            checked={enableBiblePage}
+            onCheckedChange={updateEnableBiblePage}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="enable-quran-page" className="text-base font-normal">
+            <div>Quran</div>
+            <div className="text-muted-foreground">Show Quran page in the sidebar</div>
+          </Label>
+          <Switch
+            id="enable-quran-page"
+            checked={enableQuranPage}
+            onCheckedChange={updateEnableQuranPage}
           />
         </SettingItem>
         <SettingItem className="flex-col !h-auto items-start gap-2 py-3">

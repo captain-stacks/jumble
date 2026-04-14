@@ -26,7 +26,7 @@ import SettingsButton from './SettingsButton'
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
   const { theme } = useTheme()
-  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout, hideRelayExplore, enableAiAgent } = useUserPreferences()
+  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout, hideRelayExplore, enableAiAgent, enableBiblePage, enableQuranPage } = useUserPreferences()
   const { pubkey } = useNostr()
   const { navigate } = usePrimaryPage()
 
@@ -64,8 +64,8 @@ export default function PrimaryPageSidebar() {
         <SearchButton collapse={sidebarCollapse} />
         <ProfileButton collapse={sidebarCollapse} />
         {pubkey && <BookmarkButton collapse={sidebarCollapse} />}
-        <BibleButton collapse={sidebarCollapse} />
-        <QuranButton collapse={sidebarCollapse} />
+        {enableBiblePage && <BibleButton collapse={sidebarCollapse} />}
+        {enableQuranPage && <QuranButton collapse={sidebarCollapse} />}
         {enableAiAgent && <AIAgentButton collapse={sidebarCollapse} />}
         <SettingsButton collapse={sidebarCollapse} />
         <PostButton collapse={sidebarCollapse} />

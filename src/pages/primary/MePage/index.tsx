@@ -8,14 +8,17 @@ import { Separator } from '@/components/ui/separator'
 import { SimpleUserAvatar } from '@/components/UserAvatar'
 import { SimpleUsername } from '@/components/Username'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
-import { toBookmarks, toProfile, toRelaySettings, toSettings, toWallet } from '@/lib/link'
+import { toAIAgent, toBookmarks, toProfile, toRelaySettings, toSettings, toWallet } from '@/lib/link'
 import { cn } from '@/lib/utils'
-import { useSecondaryPage } from '@/PageManager'
+import { usePrimaryPage, useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { TPageRef } from '@/types'
 import {
   ArrowDownUp,
+  BookOpen,
   Bookmark,
+  BotMessageSquare,
   ChevronRight,
   LogOut,
   Server,
@@ -29,7 +32,9 @@ import { useTranslation } from 'react-i18next'
 const MePage = forwardRef<TPageRef>((_, ref) => {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
+  const { navigate } = usePrimaryPage()
   const { pubkey } = useNostr()
+  const { enableBiblePage, enableQuranPage, enableAiAgent } = useUserPreferences()
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
 
@@ -80,6 +85,21 @@ const MePage = forwardRef<TPageRef>((_, ref) => {
         <Item onClick={() => push(toBookmarks())}>
           <Bookmark /> {t('Bookmarks')}
         </Item>
+        {enableAiAgent && (
+          <Item onClick={() => push(toAIAgent())}>
+            <BotMessageSquare /> AI Agent
+          </Item>
+        )}
+        {enableBiblePage && (
+          <Item onClick={() => navigate('bible')}>
+            <BookOpen /> Bible
+          </Item>
+        )}
+        {enableQuranPage && (
+          <Item onClick={() => navigate('quran')}>
+            <BookOpen /> Quran
+          </Item>
+        )}
         <Item onClick={() => push(toWallet())}>
           <Wallet />
           {t('Wallet')}

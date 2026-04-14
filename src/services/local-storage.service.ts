@@ -78,6 +78,8 @@ class LocalStorageService {
   private satsToBitcoins: boolean = false
   private hideRelayExplore: boolean = true
   private enableAiAgent: boolean = false
+  private enableBiblePage: boolean = true
+  private enableQuranPage: boolean = true
   private disableSpecialFollowFeatures: boolean = true
   private showMuteDebugModal: boolean = false
 
@@ -373,6 +375,12 @@ class LocalStorageService {
 
     this.enableAiAgent =
       window.localStorage.getItem(StorageKey.ENABLE_AI_AGENT) === 'true'
+
+    const storedEnableBiblePage = window.localStorage.getItem(StorageKey.ENABLE_BIBLE_PAGE)
+    this.enableBiblePage = storedEnableBiblePage === null ? true : storedEnableBiblePage === 'true'
+
+    const storedEnableQuranPage = window.localStorage.getItem(StorageKey.ENABLE_QURAN_PAGE)
+    this.enableQuranPage = storedEnableQuranPage === null ? true : storedEnableQuranPage === 'true'
 
     const storedDisableSpecialFollowFeatures = window.localStorage.getItem(StorageKey.DISABLE_SPECIAL_FOLLOW_FEATURES)
     this.disableSpecialFollowFeatures = storedDisableSpecialFollowFeatures === null ? true : storedDisableSpecialFollowFeatures === 'true'
@@ -825,6 +833,24 @@ class LocalStorageService {
   setEnableAiAgent(value: boolean) {
     this.enableAiAgent = value
     window.localStorage.setItem(StorageKey.ENABLE_AI_AGENT, value.toString())
+  }
+
+  getEnableBiblePage() {
+    return this.enableBiblePage
+  }
+
+  setEnableBiblePage(value: boolean) {
+    this.enableBiblePage = value
+    window.localStorage.setItem(StorageKey.ENABLE_BIBLE_PAGE, value.toString())
+  }
+
+  getEnableQuranPage() {
+    return this.enableQuranPage
+  }
+
+  setEnableQuranPage(value: boolean) {
+    this.enableQuranPage = value
+    window.localStorage.setItem(StorageKey.ENABLE_QURAN_PAGE, value.toString())
   }
 
   getDisableSpecialFollowFeatures() {

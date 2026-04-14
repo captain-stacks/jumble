@@ -37,6 +37,12 @@ type TUserPreferencesContext = {
   enableAiAgent: boolean
   updateEnableAiAgent: (value: boolean) => void
 
+  enableBiblePage: boolean
+  updateEnableBiblePage: (value: boolean) => void
+
+  enableQuranPage: boolean
+  updateEnableQuranPage: (value: boolean) => void
+
   disableSpecialFollowFeatures: boolean
   updateDisableSpecialFollowFeatures: (value: boolean) => void
 }
@@ -68,6 +74,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [satsToBitcoins, setSatsToBitcoins] = useState(storage.getSatsToBitcoins())
   const [hideRelayExplore, setHideRelayExplore] = useState(storage.getHideRelayExplore())
   const [enableAiAgent, setEnableAiAgent] = useState(storage.getEnableAiAgent())
+  const [enableBiblePage, setEnableBiblePage] = useState(() => storage.getEnableBiblePage())
+  const [enableQuranPage, setEnableQuranPage] = useState(() => storage.getEnableQuranPage())
   const [disableSpecialFollowFeatures, setDisableSpecialFollowFeatures] = useState(
     storage.getDisableSpecialFollowFeatures()
   )
@@ -130,6 +138,16 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setEnableAiAgent(value)
   }
 
+  const updateEnableBiblePage = (value: boolean) => {
+    setEnableBiblePage(value)
+    storage.setEnableBiblePage(value)
+  }
+
+  const updateEnableQuranPage = (value: boolean) => {
+    setEnableQuranPage(value)
+    storage.setEnableQuranPage(value)
+  }
+
   const updateDisableSpecialFollowFeatures = (value: boolean) => {
     setDisableSpecialFollowFeatures(value)
     storage.setDisableSpecialFollowFeatures(value)
@@ -160,6 +178,10 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         updateHideRelayExplore,
         enableAiAgent,
         updateEnableAiAgent,
+        enableBiblePage,
+        updateEnableBiblePage,
+        enableQuranPage,
+        updateEnableQuranPage,
         disableSpecialFollowFeatures,
         updateDisableSpecialFollowFeatures
       }}

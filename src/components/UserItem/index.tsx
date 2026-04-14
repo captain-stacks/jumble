@@ -3,9 +3,11 @@ import MuteButton from '@/components/MuteButton'
 import Nip05 from '@/components/Nip05'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { userIdToPubkey } from '@/lib/pubkey'
 import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 import { useMemo } from 'react'
 import FollowingBadge from '../FollowingBadge'
 import TrustScoreBadge from '../TrustScoreBadge'
@@ -15,12 +17,14 @@ export default function UserItem({
   hideFollowButton,
   showMuteButton = false,
   showFollowingBadge = false,
+  onRemove,
   className
 }: {
   userId: string
   hideFollowButton?: boolean
   showMuteButton?: boolean
   showFollowingBadge?: boolean
+  onRemove?: (pubkey: string) => void
   className?: string
 }) {
   const pubkey = useMemo(() => userIdToPubkey(userId), [userId])
@@ -42,6 +46,11 @@ export default function UserItem({
       </div>
       {showMuteButton && <MuteButton pubkey={pubkey} className={!hideFollowButton ? 'min-w-0 px-3' : undefined} />}
       {!hideFollowButton && <FollowButton pubkey={userId} className={showMuteButton ? 'min-w-0 px-3' : undefined} />}
+      {onRemove && (
+        <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={() => onRemove(pubkey)}>
+          <X size={16} />
+        </Button>
+      )}
     </div>
   )
 }

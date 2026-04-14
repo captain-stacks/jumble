@@ -11,12 +11,14 @@ export default function ProfileList({
   pubkeys,
   showBulkActions = false,
   showMuteButton = false,
-  hideFollowButton = false
+  hideFollowButton = false,
+  onRemove
 }: {
   pubkeys: string[]
   showBulkActions?: boolean
   showMuteButton?: boolean
   hideFollowButton?: boolean
+  onRemove?: (pubkey: string) => void
 }) {
   const { t } = useTranslation()
   const { pubkey: accountPubkey } = useNostr()
@@ -108,7 +110,7 @@ export default function ProfileList({
         </div>
       )}
       {visiblePubkeys.map((pubkey, index) => (
-        <UserItem key={`${index}-${pubkey}`} userId={pubkey} showMuteButton={showMuteButton} hideFollowButton={hideFollowButton} />
+        <UserItem key={`${index}-${pubkey}`} userId={pubkey} showMuteButton={showMuteButton} hideFollowButton={hideFollowButton} onRemove={onRemove} />
       ))}
       {pubkeys.length > visiblePubkeys.length && <div ref={bottomRef} />}
     </div>

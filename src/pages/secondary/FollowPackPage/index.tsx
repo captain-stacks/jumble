@@ -30,7 +30,7 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
   const [mutePackDialogOpen, setMutePackDialogOpen] = useState(false)
 
   const { event, isFetching } = useFetchEvent(id)
-  const { pubkey: accountPubkey } = useNostr()
+  const { pubkey: accountPubkey, publish, checkLogin } = useNostr()
   const { getMutePubkeys } = useMuteList()
 
   const { title, description, image, pubkeys: eventPubkeys } = useMemo(() => {
@@ -39,10 +39,28 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
   }, [event])
 
   const isOwnMuteList = event?.kind === 10000 && event?.pubkey === accountPubkey
+  const isOwnPack = event?.pubkey === accountPubkey && !isOwnMuteList
   const pubkeys = useMemo(
     () => (isOwnMuteList ? getMutePubkeys() : eventPubkeys),
     [isOwnMuteList, getMutePubkeys, eventPubkeys]
   )
+
+  const handleRemovePubkey = (pubkey: string) => {
+    if (!event) return
+    checkLogin(async () => {
+      try {
+        await publish({
+          kind: event.kind,
+          content: event.content,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: event.tags.filter((tag) => !(tag[0] === 'p' && tag[1] === pubkey))
+        })
+        toast.success('Removed')
+      } catch (err) {
+        toast.error(`Failed to remove: ${(err as Error).message}`)
+      }
+    })
+  }
 
   if (isFetching) {
     return (
@@ -128,7 +146,7 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
         </div>
 
         {/* Content */}
-        {tab === 'users' && <ProfileList pubkeys={pubkeys} showBulkActions showMuteButton />}
+        {tab === 'users' && <ProfileList pubkeys={pubkeys} showBulkActions showMuteButton onRemove={isOwnPack ? handleRemovePubkey : undefined} />}
         {tab === 'feed' && pubkeys.length > 0 && (
           <Feed trustScoreFilterId={`follow-pack-${getEventKey(event)}`} pubkeys={pubkeys} />
         )}

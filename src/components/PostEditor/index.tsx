@@ -52,7 +52,7 @@ export default function PostEditor({
         pendingUpload={pendingUpload}
       />
     )
-  }, [highlightedText, pendingUpload])
+  }, [defaultContent, highlightedText, pendingUpload])
 
   if (isSmallScreen) {
     return (

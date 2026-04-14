@@ -318,12 +318,41 @@ class OpenAIService {
     }
 
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',
           content:
             'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 8 relevant Bible verses from the NIV translation. Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
+        },
+        { role: 'user', content: query }
+      ],
+      response_format: { type: 'json_object' },
+    })
+
+    const raw = response.choices[0].message.content
+    if (!raw) throw new Error('No response from OpenAI')
+    let parsed: { verses?: { reference: string; text: string }[] }
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      throw new Error('Could not parse search results — please try again')
+    }
+    return parsed.verses ?? []
+  }
+
+  async searchQuranVerses(query: string): Promise<{ reference: string; text: string }[]> {
+    if (!this.client) {
+      throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')
+    }
+
+    const response = await this.client.chat.completions.create({
+      model: 'gpt-5',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a Quran reference assistant. Given a search query — either a topic/keyword or a surah/ayah reference — return up to 8 relevant Quran verses. Respond with JSON: {"verses": [{"reference": "<Surah Name Chapter:Verse>", "text": "<verse text in English>"}]}'
         },
         { role: 'user', content: query }
       ],

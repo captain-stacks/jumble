@@ -1,4 +1,5 @@
 import BiblePage from '@/pages/primary/BiblePage'
+import QuranPage from '@/pages/primary/QuranPage'
 import BookmarkPage from '@/pages/primary/BookmarkPage'
 import ExplorePage from '@/pages/primary/ExplorePage'
 import FollowingPage from '@/pages/primary/FollowingPage'
@@ -23,7 +24,8 @@ const PRIMARY_ROUTE_CONFIGS = [
   { key: 'search', component: SearchPage },
   { key: 'bookmark', component: BookmarkPage },
   { key: 'settings', component: SettingsPage },
-  { key: 'bible', component: BiblePage }
+  { key: 'bible', component: BiblePage },
+  { key: 'quran', component: QuranPage }
 ] as const
 
 export const PRIMARY_PAGE_REF_MAP = PRIMARY_ROUTE_CONFIGS.reduce(

@@ -333,6 +333,7 @@ class OpenAIService {
         { role: 'user', content: query }
       ],
       response_format: { type: 'json_object' },
+      max_tokens: 2000,
     })
 
     const raw = response.choices[0].message.content
@@ -363,6 +364,7 @@ class OpenAIService {
         { role: 'user', content: query }
       ],
       response_format: { type: 'json_object' },
+      max_tokens: 2000,
     })
 
     const raw = response.choices[0].message.content

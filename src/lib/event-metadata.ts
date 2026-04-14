@@ -427,7 +427,9 @@ export function getFollowPackInfoFromEvent(event: Event) {
   })
 
   if (!title) {
-    title = event.tags.find(tagNameEquals('d'))?.[1] ?? 'Untitled Follow Pack'
+    const dTag = event.tags.find(tagNameEquals('d'))?.[1]
+    const fallback = event.kind === 10000 ? 'Mute List' : 'Untitled Follow Pack'
+    title = dTag ?? fallback
   }
 
   return { title, description, image, pubkeys }

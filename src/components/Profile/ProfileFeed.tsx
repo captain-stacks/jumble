@@ -1,7 +1,7 @@
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import Tabs from '@/components/Tabs'
-import { ExtendedKind, MAX_PINNED_NOTES } from '@/constants'
+import { ExtendedKind, MAX_PINNED_NOTES, YOUTUBE_URL_REGEX } from '@/constants'
 import { getDefaultRelayUrls, getSearchRelayUrls } from '@/lib/relay'
 import { isImage } from '@/lib/url'
 import { generateBech32IdFromETag } from '@/lib/tag'
@@ -46,7 +46,9 @@ export default function ProfileFeed({
       { value: 'postsAndReplies', label: 'Replies' },
       { value: 'images', label: 'Images' },
       { value: 'gallery', label: 'Gallery' },
-      { value: 'lists', label: 'Lists' }
+      { value: 'lists', label: 'Lists' },
+      { value: 'inLists', label: "In lists" },
+      { value: 'youtube', label: 'YouTube' }
     ]
 
     if (myPubkey && myPubkey !== pubkey) {
@@ -144,6 +146,16 @@ export default function ProfileFeed({
         return
       }
 
+      if (listMode === 'inLists') {
+        setSubRequests([
+          {
+            urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
+            filter: { kinds: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000], '#p': [pubkey] }
+          }
+        ])
+        return
+      }
+
       if (search) {
         const writeRelays = relayList.write.slice(0, 8)
         const relayInfos = await relayInfoService.getRelayInfos(writeRelays)
@@ -190,7 +202,7 @@ export default function ProfileFeed({
         }}
         threshold={Math.max(800, topSpace)}
         options={
-          listMode !== 'gallery' && listMode !== 'lists' ? (
+          listMode !== 'gallery' && listMode !== 'lists' && listMode !== 'inLists' && listMode !== 'youtube' ? (
             <>
               {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
               <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
@@ -206,15 +218,23 @@ export default function ProfileFeed({
             ? [ExtendedKind.PICTURE]
             : listMode === 'lists'
               ? [ExtendedKind.FOLLOW_SET]
-              : temporaryShowKinds
+              : listMode === 'inLists'
+                ? [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000]
+                : temporaryShowKinds
         }
         hideReplies={listMode === 'posts' || listMode === 'images'}
         filterMutedNotes={false}
         showMutedContent={isMuted}
-        pinnedEventIds={listMode === 'you' || listMode === 'lists' || !!search ? [] : pinnedEventIds}
+        pinnedEventIds={listMode === 'you' || listMode === 'lists' || listMode === 'inLists' || listMode === 'youtube' || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
-        filterFn={listMode === 'images' ? (e) => e.content.split(/\s+/).some((word) => isImage(word)) : undefined}
-        fetchLimit={listMode === 'images' ? 1000 : undefined}
+        filterFn={
+          listMode === 'images'
+            ? (e) => e.content.split(/\s+/).some((word) => isImage(word))
+            : listMode === 'youtube'
+              ? (e) => YOUTUBE_URL_REGEX.test(e.content)
+              : undefined
+        }
+        fetchLimit={listMode === 'images' || listMode === 'youtube' ? 1000 : undefined}
       />
     </>
   )

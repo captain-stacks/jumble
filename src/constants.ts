@@ -128,16 +128,18 @@ export const ALLOWED_FILTER_KINDS = [
   kinds.Highlights,
   kinds.LongFormArticle,
   ExtendedKind.ADDRESSABLE_NORMAL_VIDEO,
-  ExtendedKind.ADDRESSABLE_SHORT_VIDEO
-]
-
-export const SUPPORTED_KINDS = [
-  ...ALLOWED_FILTER_KINDS,
+  ExtendedKind.ADDRESSABLE_SHORT_VIDEO,
   ExtendedKind.RELAY_REVIEW,
   kinds.Emojisets,
+  ExtendedKind.FOLLOW_SET,
   ExtendedKind.FOLLOW_PACK,
-  ExtendedKind.FOLLOW_SET
+  kinds.Mutelist,
+  kinds.LiveEvent,
+  kinds.CommunityDefinition,
+  ExtendedKind.GROUP_METADATA
 ]
+
+export const SUPPORTED_KINDS = [...ALLOWED_FILTER_KINDS]
 
 export const URL_REGEX =
   /https?:\/\/[\w\p{L}\p{N}\p{M}&.\-/?=#@%+_:!~*()]+[^\s.,;:'"(\]}!?，。；："'！？】）]/giu

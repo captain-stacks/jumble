@@ -207,10 +207,22 @@ class LocalStorageService {
       if (showKindsVersion < 4 && showKindSet.has(kinds.Repost)) {
         showKindSet.add(kinds.GenericRepost)
       }
+      if (showKindsVersion < 5) {
+        showKindSet.add(ExtendedKind.RELAY_REVIEW)
+        showKindSet.add(kinds.Emojisets)
+        showKindSet.add(ExtendedKind.FOLLOW_SET)
+        showKindSet.add(ExtendedKind.FOLLOW_PACK)
+        showKindSet.add(kinds.LiveEvent)
+        showKindSet.add(kinds.CommunityDefinition)
+        showKindSet.add(ExtendedKind.GROUP_METADATA)
+      }
+      if (showKindsVersion < 6 && showKindSet.has(ExtendedKind.FOLLOW_SET)) {
+        showKindSet.add(kinds.Mutelist)
+      }
       this.showKinds = Array.from(showKindSet)
     }
     window.localStorage.setItem(StorageKey.SHOW_KINDS, JSON.stringify(this.showKinds))
-    window.localStorage.setItem(StorageKey.SHOW_KINDS_VERSION, '4')
+    window.localStorage.setItem(StorageKey.SHOW_KINDS_VERSION, '6')
 
     this.hideContentMentioningMutedUsers =
       window.localStorage.getItem(StorageKey.HIDE_CONTENT_MENTIONING_MUTED_USERS) === 'true'

@@ -1,7 +1,9 @@
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import Tabs from '@/components/Tabs'
 import TrustScoreFilter from '@/components/TrustScoreFilter'
+import { Button } from '@/components/ui/button'
 import UserAggregationList, { TUserAggregationListRef } from '@/components/UserAggregationList'
+import { ExtendedKind } from '@/constants'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
@@ -9,6 +11,7 @@ import storage from '@/services/local-storage.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
 import { useMemo, useRef, useState } from 'react'
 import { Event } from 'nostr-tools'
+import { VolumeX } from 'lucide-react'
 import KindFilter from '../KindFilter'
 import { RefreshButton } from '../RefreshButton'
 
@@ -49,6 +52,7 @@ export default function NormalFeed({
     return subRequests.every((req) => !req.filter.kinds?.length)
   }, [subRequests])
   const [trustFilterOpen, setTrustFilterOpen] = useState(false)
+  const [showMuted, setShowMuted] = useState(false)
   const trustScoreThreshold = useMemo(() => {
     return trustScoreFilterId ? getMinTrustScore(trustScoreFilterId) : undefined
   }, [trustScoreFilterId, getMinTrustScore])
@@ -70,6 +74,29 @@ export default function NormalFeed({
     setTrustFilterOpen(open)
   }
 
+  const combinedFilterFn = useMemo(() => {
+    return (event: Event) => {
+      if (
+        event.kind === ExtendedKind.FOLLOW_SET &&
+        event.tags.some(
+          (tag) =>
+            (tag[0] === 'd' || tag[0] === 'title') && tag[1]?.toLowerCase() === 'bookmark'
+        )
+      ) {
+        return false
+      }
+      if (
+        (event.kind === ExtendedKind.FOLLOW_SET ||
+          event.kind === ExtendedKind.FOLLOW_PACK ||
+          event.kind === 10000) &&
+        !event.tags.some((tag) => tag[0] === 'p')
+      ) {
+        return false
+      }
+      return filterFn ? filterFn(event) : true
+    }
+  }, [filterFn])
+
   return (
     <>
       <Tabs
@@ -84,6 +111,15 @@ export default function NormalFeed({
         }}
         options={
           <>
+            <Button
+              variant="ghost"
+              size="titlebar-icon"
+              className={showMuted ? 'text-foreground' : 'text-muted-foreground'}
+              onClick={() => setShowMuted((v) => !v)}
+              title={showMuted ? 'Hide muted users' : 'Show muted users'}
+            >
+              <VolumeX size={16} />
+            </Button>
             {!supportTouch && (
               <RefreshButton
                 onClick={() => {
@@ -136,11 +172,12 @@ export default function NormalFeed({
           showRelayCloseReason={showRelayCloseReason}
           isPubkeyFeed={isPubkeyFeed}
           trustScoreThreshold={trustScoreThreshold}
-          filterMutedNotes={filterMutedNotes}
-          showMutedContent={showMutedContent}
-          filterFn={filterFn}
+          filterMutedNotes={showMuted ? false : filterMutedNotes}
+          showMutedContent={showMuted ? true : showMutedContent}
+          filterFn={combinedFilterFn}
         />
       )}
     </>
   )
 }
+

@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useFollowList } from '@/providers/FollowListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { Loader } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-export default function FollowButton({ pubkey }: { pubkey: string }) {
+export default function FollowButton({ pubkey, className }: { pubkey: string; className?: string }) {
   const { t } = useTranslation()
   const { pubkey: accountPubkey, checkLogin } = useNostr()
   const { followingSet, follow, unfollow } = useFollowList()
@@ -30,7 +31,7 @@ export default function FollowButton({ pubkey }: { pubkey: string }) {
 
   return (
     <Button
-      className="min-w-28 rounded-full"
+      className={cn('min-w-28 rounded-full', className)}
       variant={isFollowing ? (hover ? 'destructive' : 'secondary') : 'default'}
       disabled={updating}
       onClick={handleClick}

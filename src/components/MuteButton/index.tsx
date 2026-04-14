@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import {
   DropdownMenu,
@@ -14,7 +15,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-export default function MuteButton({ pubkey }: { pubkey: string }) {
+export default function MuteButton({ pubkey, className }: { pubkey: string; className?: string }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const { pubkey: accountPubkey, checkLogin } = useNostr()
@@ -64,7 +65,7 @@ export default function MuteButton({ pubkey }: { pubkey: string }) {
   if (isMuted) {
     return (
       <Button
-        className="w-20 min-w-20 rounded-full"
+        className={cn('w-20 min-w-20 rounded-full', className)}
         variant="secondary"
         onClick={handleUnmute}
         disabled={updating || changing}

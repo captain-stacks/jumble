@@ -151,7 +151,7 @@ const NoteList = forwardRef<
 
         return false
       },
-      [mutePubkeySet, isEventDeleted, filterFn, mutedWords, pinnedEventHexIdSet]
+      [mutePubkeySet, isEventDeleted, filterFn, mutedWords, pinnedEventHexIdSet, filterMutedNotes, hideContentMentioningMutedUsers]
     )
 
     useEffect(() => {

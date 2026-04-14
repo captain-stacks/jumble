@@ -1,4 +1,5 @@
 import FollowButton from '@/components/FollowButton'
+import MuteButton from '@/components/MuteButton'
 import Nip05 from '@/components/Nip05'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -12,11 +13,13 @@ import TrustScoreBadge from '../TrustScoreBadge'
 export default function UserItem({
   userId,
   hideFollowButton,
+  showMuteButton = false,
   showFollowingBadge = false,
   className
 }: {
   userId: string
   hideFollowButton?: boolean
+  showMuteButton?: boolean
   showFollowingBadge?: boolean
   className?: string
 }) {
@@ -37,7 +40,8 @@ export default function UserItem({
         </div>
         <Nip05 pubkey={userId} />
       </div>
-      {!hideFollowButton && <FollowButton pubkey={userId} />}
+      {showMuteButton && <MuteButton pubkey={pubkey} className={!hideFollowButton ? 'min-w-0 px-3' : undefined} />}
+      {!hideFollowButton && <FollowButton pubkey={userId} className={showMuteButton ? 'min-w-0 px-3' : undefined} />}
     </div>
   )
 }

@@ -9,10 +9,14 @@ import UserItem from '../UserItem'
 
 export default function ProfileList({
   pubkeys,
-  showBulkActions = false
+  showBulkActions = false,
+  showMuteButton = false,
+  hideFollowButton = false
 }: {
   pubkeys: string[]
   showBulkActions?: boolean
+  showMuteButton?: boolean
+  hideFollowButton?: boolean
 }) {
   const { t } = useTranslation()
   const { pubkey: accountPubkey } = useNostr()
@@ -104,7 +108,7 @@ export default function ProfileList({
         </div>
       )}
       {visiblePubkeys.map((pubkey, index) => (
-        <UserItem key={`${index}-${pubkey}`} userId={pubkey} />
+        <UserItem key={`${index}-${pubkey}`} userId={pubkey} showMuteButton={showMuteButton} hideFollowButton={hideFollowButton} />
       ))}
       {pubkeys.length > visiblePubkeys.length && <div ref={bottomRef} />}
     </div>

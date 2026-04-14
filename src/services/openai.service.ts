@@ -159,11 +159,7 @@ class OpenAIService {
         messages,
       }
 
-      console.log('OpenAI Request:', JSON.stringify(requestPayload, null, 2))
-
       const response = await this.client.chat.completions.create(requestPayload)
-
-      console.log('OpenAI Response:', JSON.stringify(response, null, 2))
 
       const assistantMessage = response.choices[0].message.content
 
@@ -334,7 +330,6 @@ class OpenAIService {
       ],
     })
 
-    console.log('searchBibleVerses response:', JSON.stringify(response))
     const raw = response.choices[0].message.content
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }
@@ -364,7 +359,6 @@ class OpenAIService {
       ],
     })
 
-    console.log('searchQuranVerses response:', JSON.stringify(response))
     const raw = response.choices[0].message.content
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }

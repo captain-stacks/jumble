@@ -122,7 +122,11 @@ export default function Note({
     content = <RelayReview className="mt-2" event={event} />
   } else if (event.kind === kinds.Emojisets) {
     content = <EmojiPack className="mt-2" event={event} />
-  } else if (event.kind === ExtendedKind.FOLLOW_PACK || event.kind === ExtendedKind.FOLLOW_SET) {
+  } else if (
+    event.kind === ExtendedKind.FOLLOW_PACK ||
+    event.kind === ExtendedKind.FOLLOW_SET ||
+    event.kind === kinds.Mutelist
+  ) {
     content = <FollowPack className="mt-2" event={event} />
   } else {
     content = <Content className="mt-2" event={event} enableHighlight />

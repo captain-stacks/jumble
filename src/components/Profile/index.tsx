@@ -9,7 +9,7 @@ import PubkeyCopy from '@/components/PubkeyCopy'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchFollowings, useFetchProfile } from '@/hooks'
-import { toMuteList, toProfileEditor } from '@/lib/link'
+import { toFollowPack, toProfileEditor } from '@/lib/link'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -35,7 +35,7 @@ export default function Profile({ id }: { id?: string }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
   const { profile, isFetching } = useFetchProfile(id)
-  const { pubkey: accountPubkey } = useNostr()
+  const { pubkey: accountPubkey, muteListEvent } = useNostr()
   const { mutePubkeySet, mutePubkeyPrivately, unmutePubkey } = useMuteList()
   const { disableSpecialFollowFeatures } = useUserPreferences()
   const [searchInput, setSearchInput] = useState('')
@@ -234,8 +234,8 @@ export default function Profile({ id }: { id?: string }) {
               <div className="flex items-center gap-4">
                 <Followings pubkey={pubkey} />
                 <Relays pubkey={pubkey} />
-                {isSelf && (
-                  <SecondaryPageLink to={toMuteList()} className="flex w-fit gap-1 hover:underline">
+                {isSelf && muteListEvent && (
+                  <SecondaryPageLink to={toFollowPack(muteListEvent)} className="flex w-fit gap-1 hover:underline">
                     {mutePubkeySet.size}
                     <div className="text-muted-foreground">{t('Muted')}</div>
                   </SecondaryPageLink>

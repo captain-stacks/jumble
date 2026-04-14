@@ -28,7 +28,12 @@ const KIND_FILTER_OPTIONS = [
       ExtendedKind.ADDRESSABLE_SHORT_VIDEO
     ],
     label: 'Video Posts'
-  }
+  },
+  { kindGroup: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, kinds.Mutelist], label: 'Follow Lists' },
+  { kindGroup: [kinds.Emojisets], label: 'Emoji Packs' },
+  { kindGroup: [ExtendedKind.RELAY_REVIEW], label: 'Relay Reviews' },
+  { kindGroup: [kinds.LiveEvent], label: 'Live Events' },
+  { kindGroup: [kinds.CommunityDefinition, ExtendedKind.GROUP_METADATA], label: 'Communities' }
 ]
 const ALL_KINDS = KIND_FILTER_OPTIONS.flatMap(({ kindGroup }) => kindGroup)
 
@@ -102,7 +107,7 @@ export default function KindFilter({
 
   const content = (
     <div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {KIND_FILTER_OPTIONS.map(({ kindGroup, label }) => {
           const checked = kindGroup.every((k) => temporaryShowKinds.includes(k))
           return (
@@ -192,7 +197,7 @@ export default function KindFilter({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-96" collisionPadding={16} sideOffset={0}>
+      <PopoverContent className="w-[520px]" collisionPadding={16} sideOffset={0}>
         {content}
       </PopoverContent>
     </Popover>

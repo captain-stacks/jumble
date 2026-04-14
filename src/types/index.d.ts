@@ -138,7 +138,7 @@ export type TPublishOptions = {
   onSigned?: (event: import('nostr-tools').VerifiedEvent) => void
 }
 
-export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you' | '24h' | 'gallery' | 'images' | 'lists'
+export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you' | '24h' | 'gallery' | 'images' | 'lists' | 'inLists' | 'youtube'
 
 export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps' | 'muted'
 

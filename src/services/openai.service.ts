@@ -35,6 +35,11 @@ export default result;
 
 Always remember: The code runs in a sandboxed browser environment with NO module support.`
 
+function parseJson(raw: string): unknown {
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+  return JSON.parse(fenced ? fenced[1].trim() : raw)
+}
+
 class OpenAIService {
   static instance: OpenAIService
 
@@ -334,8 +339,9 @@ class OpenAIService {
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }
     try {
-      parsed = JSON.parse(raw)
-    } catch {
+      parsed = parseJson(raw) as typeof parsed
+    } catch (e) {
+      console.error('searchBibleVerses parse error, raw:', raw, e)
       throw new Error('Could not parse search results — please try again')
     }
     return parsed.verses ?? []
@@ -363,8 +369,9 @@ class OpenAIService {
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }
     try {
-      parsed = JSON.parse(raw)
-    } catch {
+      parsed = parseJson(raw) as typeof parsed
+    } catch (e) {
+      console.error('searchQuranVerses parse error, raw:', raw, e)
       throw new Error('Could not parse search results — please try again')
     }
     return parsed.verses ?? []

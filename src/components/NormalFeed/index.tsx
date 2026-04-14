@@ -3,7 +3,7 @@ import Tabs from '@/components/Tabs'
 import TrustScoreFilter from '@/components/TrustScoreFilter'
 import { Button } from '@/components/ui/button'
 import UserAggregationList, { TUserAggregationListRef } from '@/components/UserAggregationList'
-import { ExtendedKind } from '@/constants'
+import { ExtendedKind, YOUTUBE_URL_REGEX } from '@/constants'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
@@ -93,9 +93,12 @@ export default function NormalFeed({
       ) {
         return false
       }
+      if (listMode === 'youtube' && !YOUTUBE_URL_REGEX.test(event.content)) {
+        return false
+      }
       return filterFn ? filterFn(event) : true
     }
-  }, [filterFn])
+  }, [filterFn, listMode])
 
   return (
     <>
@@ -104,7 +107,8 @@ export default function NormalFeed({
         tabs={[
           { value: 'posts', label: 'Notes' },
           { value: 'postsAndReplies', label: 'Replies' },
-          ...(!disable24hMode ? [{ value: '24h', label: '24h Pulse' }] : [])
+          ...(!disable24hMode ? [{ value: '24h', label: '24h Pulse' }] : []),
+          { value: 'youtube', label: 'YouTube' }
         ]}
         onTabChange={(listMode) => {
           handleListModeChange(listMode as TNoteListMode)
@@ -175,6 +179,7 @@ export default function NormalFeed({
           filterMutedNotes={showMuted ? false : filterMutedNotes}
           showMutedContent={showMuted ? true : showMutedContent}
           filterFn={combinedFilterFn}
+          fetchLimit={listMode === 'youtube' ? 1000 : undefined}
         />
       )}
     </>

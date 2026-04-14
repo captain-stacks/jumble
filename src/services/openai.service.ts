@@ -332,10 +332,9 @@ class OpenAIService {
         },
         { role: 'user', content: query }
       ],
-      response_format: { type: 'json_object' },
-      max_tokens: 2000,
     })
 
+    console.log('searchBibleVerses response:', JSON.stringify(response))
     const raw = response.choices[0].message.content
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }
@@ -359,14 +358,13 @@ class OpenAIService {
         {
           role: 'system',
           content:
-            'You are a Quran reference assistant. Given a search query — either a topic/keyword or a surah/ayah reference — return up to 8 relevant Quran verses. Respond with JSON: {"verses": [{"reference": "<Surah Name Chapter:Verse>", "text": "<verse text in English>"}]}'
+            'You are a Quran reference assistant. Given a search query — either a topic/keyword or a surah/ayah reference — return up to 8 relevant Quran verses in English. Use "God" instead of "Allah" in all translations. Format references as "<Surah Name> <Verse>" (e.g. "Al-Baqarah 286") — surah name only, no chapter number. Respond with JSON: {"verses": [{"reference": "<Surah Name>:<Verse>", "text": "<verse text in English>"}]}'
         },
         { role: 'user', content: query }
       ],
-      response_format: { type: 'json_object' },
-      max_tokens: 2000,
     })
 
+    console.log('searchQuranVerses response:', JSON.stringify(response))
     const raw = response.choices[0].message.content
     if (!raw) throw new Error('No response from OpenAI')
     let parsed: { verses?: { reference: string; text: string }[] }

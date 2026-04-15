@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { parseEmojiPickerUnified } from '@/lib/utils'
 import { TEmoji } from '@/types'
 import { getSuggested } from 'emoji-picker-react/src/dataUtils/suggested'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Pencil } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Emoji from '../Emoji'
 
@@ -10,10 +10,12 @@ const DEFAULT_SUGGESTED_EMOJIS = ['👍', '❤️', '😂', '🥲', '👀', '�
 
 export default function SuggestedEmojis({
   onEmojiClick,
-  onMoreButtonClick
+  onMoreButtonClick,
+  onTextReactionClick
 }: {
   onEmojiClick: (emoji: string | TEmoji) => void
   onMoreButtonClick: () => void
+  onTextReactionClick?: () => void
 }) {
   const [suggestedEmojis, setSuggestedEmojis] =
     useState<(string | TEmoji)[]>(DEFAULT_SUGGESTED_EMOJIS)
@@ -67,6 +69,16 @@ export default function SuggestedEmojis({
             <Emoji emoji={emoji} classNames={{ img: 'size-6 rounded-md' }} />
           </div>
         )
+      )}
+      {onTextReactionClick && (
+        <Button
+          variant="ghost"
+          className="h-8 w-8 text-muted-foreground"
+          onClick={onTextReactionClick}
+          title="Text reaction"
+        >
+          <Pencil size={16} />
+        </Button>
       )}
       <Button variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={onMoreButtonClick}>
         <MoreHorizontal size={24} />

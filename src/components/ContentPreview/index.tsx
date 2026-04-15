@@ -63,6 +63,7 @@ export default function ContentPreview({
   if (
     [
       kinds.ShortTextNote,
+      kinds.Reaction,
       ExtendedKind.COMMENT,
       ExtendedKind.VOICE,
       ExtendedKind.VOICE_COMMENT,

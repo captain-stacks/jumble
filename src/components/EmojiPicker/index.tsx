@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { parseEmojiPickerUnified } from '@/lib/utils'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useTheme } from '@/providers/ThemeProvider'
@@ -9,40 +10,58 @@ import EmojiPickerReact, {
   SuggestionMode,
   Theme
 } from 'emoji-picker-react'
+import { Pencil } from 'lucide-react'
 
 export default function EmojiPicker({
-  onEmojiClick
+  onEmojiClick,
+  onTextReactionClick
 }: {
   onEmojiClick: (emoji: string | TEmoji | undefined, event: MouseEvent) => void
+  onTextReactionClick?: () => void
 }) {
   const { themeSetting } = useTheme()
   const { isSmallScreen } = useScreenSize()
 
   return (
-    <EmojiPickerReact
-      theme={
-        themeSetting === 'system' ? Theme.AUTO : themeSetting === 'dark' ? Theme.DARK : Theme.LIGHT
-      }
-      width={isSmallScreen ? '100%' : 350}
-      autoFocusSearch={false}
-      emojiStyle={EmojiStyle.NATIVE}
-      skinTonePickerLocation={SkinTonePickerLocation.PREVIEW}
-      style={
-        {
-          '--epr-bg-color': 'hsl(var(--background))',
-          '--epr-category-label-bg-color': 'hsl(var(--background))',
-          '--epr-text-color': 'hsl(var(--foreground))',
-          '--epr-hover-bg-color': 'hsl(var(--muted) / 0.5)',
-          '--epr-picker-border-color': 'transparent',
-          '--epr-search-input-bg-color': 'hsl(var(--muted) / 0.5)'
-        } as React.CSSProperties
-      }
-      suggestedEmojisMode={SuggestionMode.FREQUENT}
-      onEmojiClick={(data, e) => {
-        const emoji = parseEmojiPickerUnified(data.unified)
-        onEmojiClick(emoji, e)
-      }}
-      customEmojis={customEmojiService.getAllCustomEmojisForPicker()}
-    />
+    <div>
+      {onTextReactionClick && (
+        <div className="flex justify-end px-2 pt-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 text-xs text-muted-foreground"
+            onClick={onTextReactionClick}
+          >
+            <Pencil size={12} />
+            Text reaction
+          </Button>
+        </div>
+      )}
+      <EmojiPickerReact
+        theme={
+          themeSetting === 'system' ? Theme.AUTO : themeSetting === 'dark' ? Theme.DARK : Theme.LIGHT
+        }
+        width={isSmallScreen ? '100%' : 350}
+        autoFocusSearch={false}
+        emojiStyle={EmojiStyle.NATIVE}
+        skinTonePickerLocation={SkinTonePickerLocation.PREVIEW}
+        style={
+          {
+            '--epr-bg-color': 'hsl(var(--background))',
+            '--epr-category-label-bg-color': 'hsl(var(--background))',
+            '--epr-text-color': 'hsl(var(--foreground))',
+            '--epr-hover-bg-color': 'hsl(var(--muted) / 0.5)',
+            '--epr-picker-border-color': 'transparent',
+            '--epr-search-input-bg-color': 'hsl(var(--muted) / 0.5)'
+          } as React.CSSProperties
+        }
+        suggestedEmojisMode={SuggestionMode.FREQUENT}
+        onEmojiClick={(data, e) => {
+          const emoji = parseEmojiPickerUnified(data.unified)
+          onEmojiClick(emoji, e)
+        }}
+        customEmojis={customEmojiService.getAllCustomEmojisForPicker()}
+      />
+    </div>
   )
 }

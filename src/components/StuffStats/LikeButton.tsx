@@ -1,4 +1,6 @@
+import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerOverlay } from '@/components/ui/drawer'
+import { Input } from '@/components/ui/input'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { LONG_PRESS_THRESHOLD, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { useStuff } from '@/hooks/useStuff'
@@ -15,7 +17,7 @@ import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import stuffStatsService from '@/services/stuff-stats.service'
 import { TEmoji } from '@/types'
-import { Loader, SmilePlus } from 'lucide-react'
+import { ArrowLeft, Loader, SendHorizonal, SmilePlus } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,6 +38,8 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
   const [liking, setLiking] = useState(false)
   const [isEmojiReactionsOpen, setIsEmojiReactionsOpen] = useState(false)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [isTextInputMode, setIsTextInputMode] = useState(false)
+  const [textReaction, setTextReaction] = useState('')
   const [likeCount, setLikeCount] = useState(0)
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isLongPressRef = useRef(false)
@@ -70,7 +74,11 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
   }, [noteStats, meetsMinTrustScore, getMinTrustScore])
 
   useEffect(() => {
-    setTimeout(() => setIsPickerOpen(false), 100)
+    setTimeout(() => {
+      setIsPickerOpen(false)
+      setIsTextInputMode(false)
+      setTextReaction('')
+    }, 100)
   }, [isEmojiReactionsOpen])
 
   const like = async (emoji: string | TEmoji) => {
@@ -178,6 +186,45 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
     </button>
   )
 
+  const textReactionInput = (
+    <div className="flex items-center gap-1 p-2" onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 shrink-0 text-muted-foreground"
+        onClick={() => setIsTextInputMode(false)}
+      >
+        <ArrowLeft size={16} />
+      </Button>
+      <Input
+        autoFocus
+        className="h-8"
+        placeholder={t('React with text...')}
+        value={textReaction}
+        onChange={(e) => setTextReaction(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && textReaction.trim()) {
+            setIsEmojiReactionsOpen(false)
+            like(textReaction.trim())
+          }
+        }}
+      />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 shrink-0 text-muted-foreground enabled:hover:text-primary"
+        disabled={!textReaction.trim()}
+        onClick={() => {
+          if (!textReaction.trim()) return
+          setIsEmojiReactionsOpen(false)
+          like(textReaction.trim())
+        }}
+      >
+        <SendHorizonal size={16} />
+      </Button>
+    </div>
+  )
+
   if (isSmallScreen) {
     return (
       <>
@@ -185,14 +232,19 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
         <Drawer open={isEmojiReactionsOpen} onOpenChange={setIsEmojiReactionsOpen}>
           <DrawerOverlay onClick={() => setIsEmojiReactionsOpen(false)} />
           <DrawerContent hideOverlay>
-            <EmojiPicker
-              onEmojiClick={(emoji) => {
-                setIsEmojiReactionsOpen(false)
-                if (!emoji) return
+            {isTextInputMode ? (
+              textReactionInput
+            ) : (
+              <EmojiPicker
+                onEmojiClick={(emoji) => {
+                  setIsEmojiReactionsOpen(false)
+                  if (!emoji) return
 
-                like(emoji)
-              }}
-            />
+                  like(emoji)
+                }}
+                onTextReactionClick={() => setIsTextInputMode(true)}
+              />
+            )}
           </DrawerContent>
         </Drawer>
       </>
@@ -203,7 +255,9 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
     <Popover open={isEmojiReactionsOpen} onOpenChange={(open) => setIsEmojiReactionsOpen(open)}>
       <PopoverAnchor asChild>{trigger}</PopoverAnchor>
       <PopoverContent side="top" className="w-fit border-0 p-0 shadow-lg">
-        {isPickerOpen ? (
+        {isTextInputMode ? (
+          textReactionInput
+        ) : isPickerOpen ? (
           <EmojiPicker
             onEmojiClick={(emoji, e) => {
               e.stopPropagation()
@@ -212,6 +266,7 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
 
               like(emoji)
             }}
+            onTextReactionClick={() => setIsTextInputMode(true)}
           />
         ) : (
           <SuggestedEmojis
@@ -222,6 +277,7 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
             onMoreButtonClick={() => {
               setIsPickerOpen(true)
             }}
+            onTextReactionClick={() => setIsTextInputMode(true)}
           />
         )}
       </PopoverContent>

@@ -2,11 +2,11 @@ import { useSecondaryPage } from '@/PageManager'
 import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { useStuff } from '@/hooks/useStuff'
 import { useStuffStatsById } from '@/hooks/useStuffStatsById'
-import { toProfile } from '@/lib/link'
+import { toNote } from '@/lib/link'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { TEmoji } from '@/types'
-import { Event } from 'nostr-tools'
+import { Event, nip19 } from 'nostr-tools'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Emoji from '../Emoji'
@@ -81,7 +81,7 @@ export default function ReactionList({ stuff }: { stuff: Event | string }) {
         <div
           key={like.id}
           className="clickable flex items-center gap-3 border-b px-4 py-3 transition-colors"
-          onClick={() => push(toProfile(like.pubkey))}
+          onClick={() => push(toNote(nip19.neventEncode({ id: like.id })))}
         >
           <div className="flex w-6 flex-col items-center">
             <Emoji

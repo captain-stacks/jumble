@@ -4,6 +4,7 @@ import Nip05 from '@/components/Nip05'
 import NpubQrCode from '@/components/NpubQrCode'
 import ProfileAbout from '@/components/ProfileAbout'
 import ProfileOptions from '@/components/ProfileOptions'
+import ProfileReactButton from '@/components/ProfileReactButton'
 import ProfileZapButton from '@/components/ProfileZapButton'
 import PubkeyCopy from '@/components/PubkeyCopy'
 import { Button } from '@/components/ui/button'
@@ -141,6 +142,7 @@ export default function Profile({ id }: { id?: string }) {
               </Button>
             ) : (
               <>
+                <ProfileReactButton pubkey={pubkey} />
                 {!!lightningAddress && <ProfileZapButton pubkey={pubkey} />}
                 <Button
                   variant="secondary"

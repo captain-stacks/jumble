@@ -73,9 +73,11 @@ export function createReactionDraftEvent(event: Event, emoji: TEmoji | string = 
   let content: string
   if (typeof emoji === 'string') {
     content = emoji
+    tags.push(buildTTag(emoji))
   } else {
     content = `:${emoji.shortcode}:`
     tags.push(buildEmojiTag(emoji))
+    tags.push(buildTTag(emoji.shortcode))
   }
 
   return {
@@ -100,9 +102,11 @@ export function createExternalContentReactionDraftEvent(
   let content: string
   if (typeof emoji === 'string') {
     content = emoji
+    tags.push(buildTTag(emoji))
   } else {
     content = `:${emoji.shortcode}:`
     tags.push(buildEmojiTag(emoji))
+    tags.push(buildTTag(emoji.shortcode))
   }
 
   return {

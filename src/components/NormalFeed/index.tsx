@@ -10,7 +10,7 @@ import { useUserTrust } from '@/providers/UserTrustProvider'
 import storage from '@/services/local-storage.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
 import { useMemo, useRef, useState } from 'react'
-import { Event } from 'nostr-tools'
+import { Event, kinds } from 'nostr-tools'
 import { VolumeX } from 'lucide-react'
 import KindFilter from '../KindFilter'
 import { RefreshButton } from '../RefreshButton'
@@ -91,6 +91,9 @@ export default function NormalFeed({
           event.kind === 10000) &&
         !event.tags.some((tag) => tag[0] === 'p')
       ) {
+        return false
+      }
+      if (event.kind === kinds.Emojisets && !event.tags.some((tag) => tag[0] === 'emoji')) {
         return false
       }
       if (listMode === 'youtube' && !YOUTUBE_URL_REGEX.test(event.content)) {

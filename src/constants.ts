@@ -116,6 +116,7 @@ export const ExtendedKind = {
 
 export const ALLOWED_FILTER_KINDS = [
   kinds.ShortTextNote,
+  kinds.Reaction,
   kinds.Repost,
   kinds.GenericRepost,
   ExtendedKind.PICTURE,

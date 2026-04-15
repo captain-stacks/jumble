@@ -25,6 +25,7 @@ import UserAvatar from '../UserAvatar'
 import Username from '../Username'
 import CommunityDefinition from './CommunityDefinition'
 import EmojiPack from './EmojiPack'
+import ReactionNote from './ReactionNote'
 import FollowPack from './FollowPack'
 import GroupMetadata from './GroupMetadata'
 import Highlight from './Highlight'
@@ -86,6 +87,8 @@ export default function Note({
     content = <MutedNote show={() => setShowMuted(true)} />
   } else if (isNsfw && !showNsfw) {
     content = <NsfwNote show={() => setShowNsfw(true)} />
+  } else if (event.kind === kinds.Reaction) {
+    content = <ReactionNote className="mt-2" event={event} />
   } else if (event.kind === kinds.Highlights) {
     content = <Highlight className="mt-2" event={event} />
   } else if (event.kind === kinds.LongFormArticle) {

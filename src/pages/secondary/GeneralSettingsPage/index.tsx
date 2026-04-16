@@ -2,6 +2,7 @@ import Emoji from '@/components/Emoji'
 import EmojiPickerDialog from '@/components/EmojiPickerDialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -29,11 +30,24 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [language, setLanguage] = useState<TLanguage>(i18n.language as TLanguage)
   const [apiKeyDraft, setApiKeyDraft] = useState(() => localStorage.getItem('openai_api_key') ?? '')
   const [apiKeySaved, setApiKeySaved] = useState(false)
+  const [systemPromptDraft, setSystemPromptDraft] = useState(() => openaiService.getSystemPrompt())
+  const [systemPromptSaved, setSystemPromptSaved] = useState(false)
 
   const saveApiKey = () => {
     openaiService.setApiKey(apiKeyDraft)
     setApiKeySaved(true)
     setTimeout(() => setApiKeySaved(false), 2000)
+  }
+
+  const saveSystemPrompt = () => {
+    openaiService.setSystemPrompt(systemPromptDraft)
+    setSystemPromptSaved(true)
+    setTimeout(() => setSystemPromptSaved(false), 2000)
+  }
+
+  const resetSystemPrompt = () => {
+    openaiService.resetSystemPrompt()
+    setSystemPromptDraft(openaiService.getSystemPrompt())
   }
   const {
     autoplay,
@@ -336,6 +350,25 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
               {apiKeySaved ? t('Saved') : t('Save')}
             </Button>
           </div>
+        </SettingItem>
+        <SettingItem className="flex-col !h-auto items-start gap-2 py-3">
+          <div className="flex w-full items-center justify-between">
+            <Label htmlFor="ai-reply-system-prompt" className="text-base font-normal">
+              AI Reply System Prompt
+            </Label>
+            <Button variant="ghost" size="icon" onClick={resetSystemPrompt} title="Reset to default">
+              <RotateCcw className="size-4" />
+            </Button>
+          </div>
+          <Textarea
+            id="ai-reply-system-prompt"
+            className="min-h-[120px] text-sm font-mono"
+            value={systemPromptDraft}
+            onChange={(e) => setSystemPromptDraft(e.target.value)}
+          />
+          <Button size="sm" onClick={saveSystemPrompt}>
+            {systemPromptSaved ? t('Saved') : t('Save')}
+          </Button>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="disable-special-follow-features" className="text-base font-normal">

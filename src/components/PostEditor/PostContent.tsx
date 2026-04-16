@@ -15,7 +15,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import postEditorCache from '@/services/post-editor-cache.service'
 import threadService from '@/services/thread.service'
 import { TPollCreateData } from '@/types'
-import { CircleHelp, Check, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, SpellCheck, Wand2, X } from 'lucide-react'
+import { CircleHelp, Check, ChevronDown, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, SpellCheck, Wand2, X } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { getParentBech32Id } from '@/lib/event'
 import client from '@/services/client.service'
@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
 import EmojiPickerDialog from '../EmojiPickerDialog'
@@ -33,7 +34,7 @@ import PostRelaySelector from './PostRelaySelector'
 import PostTextarea, { TPostTextareaHandle } from './PostTextarea'
 import Uploader from './Uploader'
 import { formatError } from '@/lib/error'
-import openaiService from '@/services/openai.service'
+import openaiService, { DEFAULT_REPLY_SYSTEM_PROMPT } from '@/services/openai.service'
 
 export default function PostContent({
   defaultContent = '',
@@ -83,6 +84,8 @@ export default function PostContent({
   const [proofreadResult, setProofreadResult] = useState<string | null>(null)
 
   const [generatingReply, setGeneratingReply] = useState(false)
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false)
+  const [replySystemPrompt, setReplySystemPrompt] = useState(DEFAULT_REPLY_SYSTEM_PROMPT)
   const [openaiReady, setOpenaiReady] = useState(() => openaiService.isInitialized())
   useEffect(() => {
     return openaiService.subscribe(() => setOpenaiReady(openaiService.isInitialized()))
@@ -152,7 +155,7 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
         currentId = getParentBech32Id(parent)
       }
       const threadChain = chain.map((e) => ({ pubkey: e.pubkey, content: e.content }))
-      const reply = await openaiService.generateReply(threadChain, pubkey)
+      const reply = await openaiService.generateReply(threadChain, pubkey, replySystemPrompt)
       textareaRef.current?.replaceText(reply + '\n#ai-generated')
     } catch (err) {
       toast.error('Generate failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
@@ -521,6 +524,17 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
               {generatingReply ? <LoaderCircle className="animate-spin" /> : <Wand2 />}
             </Button>
           )}
+          {!!parentEvent && openaiReady && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className={showSystemPrompt ? 'bg-accent' : ''}
+              onClick={() => setShowSystemPrompt((v) => !v)}
+              title="Edit AI system prompt"
+            >
+              <ChevronDown className={`size-4 transition-transform ${showSystemPrompt ? 'rotate-180' : ''}`} />
+            </Button>
+          )}
           {openaiReady && (
             <Button
               variant="ghost"
@@ -557,6 +571,16 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
           </div>
         </div>
       </div>
+      {showSystemPrompt && !!parentEvent && openaiReady && (
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">AI reply system prompt (not saved)</Label>
+          <Textarea
+            className="min-h-[80px] text-xs font-mono"
+            value={replySystemPrompt}
+            onChange={(e) => setReplySystemPrompt(e.target.value)}
+          />
+        </div>
+      )}
       <PostOptions
         posting={posting}
         show={showMoreOptions}

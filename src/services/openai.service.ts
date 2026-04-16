@@ -265,6 +265,40 @@ class OpenAIService {
     return parsed
   }
 
+  async generateReply(threadChain: { pubkey: string; content: string }[], userPubkey: string): Promise<string> {
+    if (!this.client) {
+      throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')
+    }
+
+    // Build a readable conversation from oldest to newest
+    const conversation = threadChain
+      .map((msg) => {
+        const label = msg.pubkey === userPubkey ? 'You' : `User ${msg.pubkey.slice(0, 8)}`
+        return `${label}: ${msg.content}`
+      })
+      .join('\n\n')
+
+    const response = await this.client.chat.completions.create({
+      model: 'gpt-5',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are helping a user draft a reply in a Nostr social network conversation. ' +
+            'Given the message thread below (oldest first), write a thoughtful, substantive reply to the last message. ' +
+            'Engage meaningfully with the ideas — add your own perspective, expand on points, ask follow-up questions, or respectfully push back where appropriate. ' +
+            'Aim for at least 2-3 sentences. Match the tone and language of the conversation. ' +
+            'Reply with only the reply text — no labels, no quotes, no preamble.'
+        },
+        { role: 'user', content: conversation }
+      ]
+    })
+
+    const reply = response.choices[0].message.content
+    if (!reply) throw new Error('No reply generated')
+    return reply.trim()
+  }
+
   async proofread(text: string): Promise<{ fixed: string }> {
     if (!this.client) {
       throw new Error('OpenAI client not initialized. Please set your OpenAI API key.')

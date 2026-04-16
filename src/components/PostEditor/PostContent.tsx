@@ -15,8 +15,10 @@ import { useNostr } from '@/providers/NostrProvider'
 import postEditorCache from '@/services/post-editor-cache.service'
 import threadService from '@/services/thread.service'
 import { TPollCreateData } from '@/types'
-import { CircleHelp, Check, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, SpellCheck, X } from 'lucide-react'
+import { CircleHelp, Check, ImageUp, Languages, ListTodo, LoaderCircle, Settings, Smile, SpellCheck, Wand2, X } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
+import { getParentBech32Id } from '@/lib/event'
+import client from '@/services/client.service'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -80,6 +82,7 @@ export default function PostContent({
   const [proofreading, setProofreading] = useState(false)
   const [proofreadResult, setProofreadResult] = useState<string | null>(null)
 
+  const [generatingReply, setGeneratingReply] = useState(false)
   const [openaiReady, setOpenaiReady] = useState(() => openaiService.isInitialized())
   useEffect(() => {
     return openaiService.subscribe(() => setOpenaiReady(openaiService.isInitialized()))
@@ -110,7 +113,7 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
       const result = await openaiService.translateReply(text, parentEvent.content)
       // Only replace if target language isn't English
       if (result.targetLanguage.toLowerCase() !== 'english') {
-        textareaRef.current?.replaceText(result.translated)
+        textareaRef.current?.replaceText(result.translated + '\n#ai-generated')
         setTranslatedReplyLang(result.targetLanguage)
       }
     } catch (err) {
@@ -131,6 +134,30 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
       toast.error('Proofreading failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setProofreading(false)
+    }
+  }
+
+  const handleGenerateReply = async () => {
+    if (!parentEvent || !pubkey || generatingReply) return
+    setGeneratingReply(true)
+    try {
+      // Walk the parent chain from the current event up to the root
+      const chain: Event[] = [parentEvent]
+      let currentId: string | undefined = getParentBech32Id(parentEvent)
+      for (let i = 0; i < 20; i++) {
+        if (!currentId) break
+        const parent = await client.fetchEvent(currentId)
+        if (!parent) break
+        chain.unshift(parent)
+        currentId = getParentBech32Id(parent)
+      }
+      const threadChain = chain.map((e) => ({ pubkey: e.pubkey, content: e.content }))
+      const reply = await openaiService.generateReply(threadChain, pubkey)
+      textareaRef.current?.replaceText(reply + '\n#ai-generated')
+    } catch (err) {
+      toast.error('Generate failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setGeneratingReply(false)
     }
   }
 
@@ -481,6 +508,17 @@ const showTranslateReplyButton = !!parentEvent && openaiReady
               title={translatedReplyLang ? `Translated to ${translatedReplyLang}` : 'Translate reply to match original language'}
             >
               {translatingReply ? <LoaderCircle className="animate-spin" /> : <Languages className={translatedReplyLang ? 'text-pink-400' : ''} />}
+            </Button>
+          )}
+          {!!parentEvent && openaiReady && (
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={generatingReply}
+              onClick={handleGenerateReply}
+              title="Generate reply with AI"
+            >
+              {generatingReply ? <LoaderCircle className="animate-spin" /> : <Wand2 />}
             </Button>
           )}
           {openaiReady && (

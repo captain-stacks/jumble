@@ -764,7 +764,7 @@ function extractQuoteTags(content: string) {
 
 function extractHashtags(content: string) {
   const hashtags: string[] = []
-  const matches = content.match(/#[\p{L}\p{N}\p{M}]+/gu)
+  const matches = content.match(/#[\p{L}\p{N}\p{M}-]+/gu)
   matches?.forEach((m) => {
     const hashtag = m.slice(1).toLowerCase()
     if (hashtag) {

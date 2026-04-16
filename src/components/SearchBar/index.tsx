@@ -154,7 +154,7 @@ const SearchBar = forwardRef<
       // ignore
     }
 
-    const hashtag = search.match(/[\p{L}\p{N}\p{M}]+/u)?.[0].toLowerCase() ?? ''
+    const hashtag = search.match(/[\p{L}\p{N}\p{M}_-]+/u)?.[0].toLowerCase() ?? ''
 
     setSelectableOptions([
       { type: 'notes', search },

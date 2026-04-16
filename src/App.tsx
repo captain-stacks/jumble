@@ -21,6 +21,7 @@ import { TranslationServiceProvider } from '@/providers/TranslationServiceProvid
 import { UserPreferencesProvider } from '@/providers/UserPreferencesProvider'
 import { UserTrustProvider } from '@/providers/UserTrustProvider'
 import { ZapProvider } from '@/providers/ZapProvider'
+import { MarmotProvider } from '@/providers/MarmotProvider'
 import { PageManager } from './PageManager'
 
 export default function App(): JSX.Element {
@@ -31,6 +32,7 @@ export default function App(): JSX.Element {
           <ContentPolicyProvider>
             <DeletedEventProvider>
               <NostrProvider>
+                <MarmotProvider>
                 <ZapProvider>
                   <TranslationServiceProvider>
                     <FavoriteRelaysProvider>
@@ -59,6 +61,7 @@ export default function App(): JSX.Element {
                     </FavoriteRelaysProvider>
                   </TranslationServiceProvider>
                 </ZapProvider>
+                </MarmotProvider>
               </NostrProvider>
             </DeletedEventProvider>
           </ContentPolicyProvider>

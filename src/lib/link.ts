@@ -99,3 +99,4 @@ export const toArticle = (domain: string, dtag: string) =>
 
 export const toEasyLoginRecovery = () => '/settings/easy-login-recovery'
 export const toChangeRecoveryEmail = () => '/settings/change-recovery-email'
+export const toMessageThread = (groupId: string) => `/messages/${groupId}`

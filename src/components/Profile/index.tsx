@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchFollowings, useFetchProfile } from '@/hooks'
 import { toFollowPack, toProfileEditor } from '@/lib/link'
+import ProfileMessageButton from './ProfileMessageButton'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -142,6 +143,7 @@ export default function Profile({ id }: { id?: string }) {
               </Button>
             ) : (
               <>
+                <ProfileMessageButton pubkey={pubkey} />
                 <ProfileReactButton pubkey={pubkey} />
                 {!!lightningAddress && <ProfileZapButton pubkey={pubkey} />}
                 <Button

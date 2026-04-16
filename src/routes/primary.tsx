@@ -1,3 +1,4 @@
+import MessagesPage from '@/pages/primary/MessagesPage'
 import BiblePage from '@/pages/primary/BiblePage'
 import QuranPage from '@/pages/primary/QuranPage'
 import BookmarkPage from '@/pages/primary/BookmarkPage'
@@ -24,6 +25,7 @@ const PRIMARY_ROUTE_CONFIGS = [
   { key: 'search', component: SearchPage },
   { key: 'bookmark', component: BookmarkPage },
   { key: 'settings', component: SettingsPage },
+  { key: 'messages', component: MessagesPage },
   { key: 'bible', component: BiblePage },
   { key: 'quran', component: QuranPage }
 ] as const

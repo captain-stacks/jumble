@@ -27,6 +27,7 @@ import SystemSettingsPage from '@/pages/secondary/SystemSettingsPage'
 import TranslationPage from '@/pages/secondary/TranslationPage'
 import UserAggregationDetailPage from '@/pages/secondary/UserAggregationDetailPage'
 import WalletPage from '@/pages/secondary/WalletPage'
+import MessageThreadPage from '@/pages/secondary/MessageThreadPage'
 import { match } from 'path-to-regexp'
 import { isValidElement } from 'react'
 
@@ -58,6 +59,7 @@ const SECONDARY_ROUTE_CONFIGS = [
   { path: '/follow-packs/:id', element: <FollowPackPage /> },
   { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
   { path: '/ai-agent', element: <AIAgentPage /> },
+  { path: '/messages/:groupId', element: <MessageThreadPage /> },
   { path: '/settings/easy-login-recovery', element: <EasyLoginRecoveryPage /> },
   { path: '/settings/change-recovery-email', element: <ChangeRecoveryEmailPage /> },
   // Catch-all: domain/:dtag — must be last to avoid shadowing other routes

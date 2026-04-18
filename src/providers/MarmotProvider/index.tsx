@@ -1,4 +1,4 @@
-import { MarmotClient, KeyValueGroupStateBackend, KeyPackageStore } from '@internet-privacy/marmot-ts'
+import { MarmotClient, KeyValueGroupStateBackend, KeyPackageStore, createKeyPackageRelayListEvent } from '@internet-privacy/marmot-ts'
 import type { NostrNetworkInterface } from '@internet-privacy/marmot-ts'
 import { getKeyPackageRelayList } from '@internet-privacy/marmot-ts'
 import { GroupHistoryRegistry } from '@/services/marmot-history.service'
@@ -75,6 +75,48 @@ function buildNetworkInterface(pool: RelayPool): NostrNetworkInterface {
   }
 }
 
+async function ensureMarmotRegistration(
+  pubkey: string,
+  mc: MarmotClient<GroupHistory>,
+  network: NostrNetworkInterface,
+  signEvent: (draft: { kind: number; tags: string[][]; content: string; created_at: number }) => Promise<NostrEvent>
+): Promise<void> {
+  try {
+    const defaultRelays = getDefaultRelayUrls()
+    let writeRelays: string[] = defaultRelays.slice(0, 2)
+    try {
+      const relayList = await client.fetchRelayList(pubkey)
+      if (relayList.write.length > 0) {
+        writeRelays = relayList.write.slice(0, 4)
+      }
+    } catch {
+      // use defaults
+    }
+
+    // Ensure kind 10051 (key package relay list) exists
+    const existing10051 = await client.fetchEvents(writeRelays.concat(defaultRelays), {
+      kinds: [10051],
+      authors: [pubkey],
+      limit: 1,
+    })
+    if (existing10051.length === 0) {
+      const unsigned = createKeyPackageRelayListEvent({ pubkey, relays: writeRelays })
+      const signed = await signEvent(unsigned)
+      await network.publish(writeRelays, signed)
+      console.log('[Marmot] Published kind 10051 relay list')
+    }
+
+    // Ensure at least one kind 443 (key package) is published
+    const localCount = await mc.keyPackages.count()
+    if (localCount === 0) {
+      await mc.keyPackages.create({ relays: writeRelays })
+      console.log('[Marmot] Published kind 443 key package')
+    }
+  } catch (err) {
+    console.error('[Marmot] Auto-registration failed:', err)
+  }
+}
+
 export function MarmotProvider({ children }: { children: React.ReactNode }) {
   const { pubkey, signEvent, nip44Encrypt, nip44Decrypt } = useNostr()
   const [marmotClient, setMarmotClient] = useState<MarmotClient<GroupHistory> | null>(null)
@@ -130,6 +172,7 @@ export function MarmotProvider({ children }: { children: React.ReactNode }) {
     })
 
     mc.loadAllGroups()
+      .then(() => ensureMarmotRegistration(pubkey, mc, network, signEvent))
       .then(() => {
         setIsReady(true)
       })

@@ -12,6 +12,8 @@ import {
 import type { MarmotGroup, MediaAttachment } from '@internet-privacy/marmot-ts'
 import type { GroupHistory } from '@/services/marmot-history.service'
 import client from '@/services/client.service'
+import { toMessageThread } from '@/lib/link'
+import { useSecondaryPage } from '@/PageManager'
 import { BlossomClient } from 'blossom-client-sdk'
 import { ImagePlus, Send } from 'lucide-react'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
@@ -72,6 +74,7 @@ const MessageThreadPage = forwardRef(({ groupId, index }: { groupId?: string; in
   const { t } = useTranslation()
   const { pubkey, signEvent } = useNostr()
   const { marmotClient, getHistory } = useMarmot()
+  const { push } = useSecondaryPage()
   const [group, setGroup] = useState<MarmotGroup<GroupHistory> | null>(null)
   const [messages, setMessages] = useState<TMessage[]>([])
   const [input, setInput] = useState('')
@@ -81,6 +84,7 @@ const MessageThreadPage = forwardRef(({ groupId, index }: { groupId?: string; in
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const groupRef = useRef<MarmotGroup<GroupHistory> | null>(null)
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null)
+  const kpSubscriptionRef = useRef<{ unsubscribe: () => void } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = useCallback(() => {
@@ -178,6 +182,73 @@ const MessageThreadPage = forwardRef(({ groupId, index }: { groupId?: string; in
       groupRef.current = null
     }
   }, [groupId, marmotClient])
+
+  // Watch partner's kind 443 events. A new key package means they've reset their
+  // MLS state and can no longer decrypt the current group. Auto-recreate and reinvite.
+  useEffect(() => {
+    if (!group || !marmotClient || !pubkey) return
+
+    const members = getGroupMembers(group.state)
+    const partnerPubkey = members.find((m) => m !== pubkey)
+    if (!partnerPubkey) return // multi-party group — skip for now
+
+    let cancelled = false
+    let reinviting = false
+    const watchStart = Math.floor(Date.now() / 1000)
+
+    const watch = async () => {
+      try {
+        const kpRelays = await marmotClient.network.getUserInboxRelays(partnerPubkey)
+        if (cancelled) return
+
+        const sub = marmotClient.network.subscription(kpRelays, {
+          kinds: [443],
+          authors: [partnerPubkey],
+          since: watchStart
+        })
+
+        kpSubscriptionRef.current = sub.subscribe({
+          next: async (newKpEvent) => {
+            if (cancelled || reinviting) return
+            reinviting = true
+
+            const currentGroup = groupRef.current
+            if (!currentGroup) { reinviting = false; return }
+
+            try {
+              const groupData = extractMarmotGroupData(currentGroup.state)
+              const relays = currentGroup.relays?.length ? currentGroup.relays : undefined
+
+              const newGroup = await marmotClient.createGroup(groupData?.name ?? 'DM', {
+                description: groupData?.description,
+                relays
+              })
+
+              await newGroup.inviteByKeyPackageEvent(newKpEvent)
+              await marmotClient.destroyGroup(currentGroup.id)
+
+              if (!cancelled) {
+                push(toMessageThread(newGroup.idStr))
+              }
+            } catch (err) {
+              console.error('[Marmot] key package rotation reinvite failed:', err)
+              reinviting = false
+            }
+          }
+        })
+      } catch (err) {
+        console.warn('[Marmot] could not watch partner key packages:', err)
+      }
+    }
+
+    watch()
+
+    return () => {
+      cancelled = true
+      kpSubscriptionRef.current?.unsubscribe()
+      kpSubscriptionRef.current = null
+    }
+  }, [group, marmotClient, pubkey])
 
   useEffect(() => {
     scrollToBottom()

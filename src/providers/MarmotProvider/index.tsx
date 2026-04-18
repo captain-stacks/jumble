@@ -93,25 +93,42 @@ async function ensureMarmotRegistration(
       // use defaults
     }
 
-    // Ensure kind 10051 (key package relay list) exists
-    const existing10051 = await client.fetchEvents(writeRelays.concat(defaultRelays), {
+    const checkRelays = Array.from(new Set([...writeRelays, ...defaultRelays]))
+
+    // Check for existing kind 10051 (key package relay list)
+    const existing10051 = await client.fetchEvents(checkRelays, {
       kinds: [10051],
       authors: [pubkey],
       limit: 1,
     })
+
+    // Determine which relays to check for kind 443
+    let kpRelays: string[] = writeRelays
+    if (existing10051.length > 0) {
+      const fromEvent = getKeyPackageRelayList(existing10051[0] as NostrEvent)
+      if (fromEvent.length > 0) kpRelays = fromEvent
+    }
+
+    // Check for existing kind 443 (key package) — local first, then relays
+    const localCount = await mc.keyPackages.count()
+    if (localCount > 0) return
+
+    const existingKP = await client.fetchEvents(kpRelays, {
+      kinds: [443],
+      authors: [pubkey],
+      limit: 1,
+    })
+    if (existingKP.length > 0) return
+
+    // No key packages found anywhere — publish kind 10051 + kind 443
     if (existing10051.length === 0) {
       const unsigned = createKeyPackageRelayListEvent({ pubkey, relays: writeRelays })
       const signed = await signEvent(unsigned)
       await network.publish(writeRelays, signed)
       console.log('[Marmot] Published kind 10051 relay list')
     }
-
-    // Ensure at least one kind 443 (key package) is published
-    const localCount = await mc.keyPackages.count()
-    if (localCount === 0) {
-      await mc.keyPackages.create({ relays: writeRelays })
-      console.log('[Marmot] Published kind 443 key package')
-    }
+    await mc.keyPackages.create({ relays: writeRelays })
+    console.log('[Marmot] Published kind 443 key package')
   } catch (err) {
     console.error('[Marmot] Auto-registration failed:', err)
   }

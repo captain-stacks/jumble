@@ -86,7 +86,7 @@ function computeTrustScore(pubkey: string): number {
   const priorRate = 1 / TRUST_PRIOR_SCALE
   const smoothedRatio =
     (muteRate + priorRate * TRUST_PRIOR_MUTE_RATE) / (followRate + priorRate)
-  return Math.max(1, Math.round(100 * Math.exp(-TRUST_DECAY * smoothedRatio)))
+  return Math.max(0, Math.round(100 * Math.exp(-TRUST_DECAY * smoothedRatio)))
 }
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {

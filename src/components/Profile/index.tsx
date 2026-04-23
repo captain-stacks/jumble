@@ -245,7 +245,7 @@ export default function Profile({ id }: { id?: string }) {
                   </SecondaryPageLink>
                 )}
               </div>
-              {!isSelf && <FollowedBy pubkey={pubkey} />}
+              <FollowedBy pubkey={pubkey} />
             </div>
           </div>
         </div>

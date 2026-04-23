@@ -70,7 +70,7 @@ class LocalStorageService {
   private defaultRelayUrls: string[] = BIG_RELAY_URLS
   private searchRelayUrls: string[] = SEARCHABLE_RELAY_URLS
   private mutedWords: string[] = []
-  private minTrustScore: number = 0
+  private minTrustScore: number = 90
   private minTrustScoreMap: Record<string, number> = {}
   private muteWeight: number = 5
   private hideIndirectNotifications: boolean = false

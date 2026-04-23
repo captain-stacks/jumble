@@ -14,39 +14,79 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
   const { followingSet } = useFollowList()
 
   useEffect(() => {
-    if (!pubkey || !accountPubkey) return
+    if (!pubkey || !accountPubkey) {
+      setFollowedBy([])
+      return
+    }
+
+    let cancelled = false
+
+    const getFollowedByFromLists = (
+      followings: string[],
+      followingsOfFollowings: Array<string[] | null>
+    ) => {
+      const result: string[] = []
+      const limit = isSmallScreen ? 3 : 20
+      for (const [index, following] of followings.entries()) {
+        if (following === pubkey) continue
+        const list = followingsOfFollowings[index]
+        if (list && list.includes(pubkey)) {
+          result.push(following)
+        }
+        if (result.length >= limit) break
+      }
+      return result
+    }
 
     const init = async () => {
       const followings = Array.from(followingSet).reverse()
-      const followingsOfFollowings = await Promise.all(
-        followings.map(async (following) => {
-          return client.fetchFollowings(following, false)
-        })
+
+      // Stage 1: render quickly from local cache only.
+      const cachedSettled = await Promise.allSettled(
+        followings.map(async (following) => client.getCachedFollowings(following, true))
       )
-      const _followedBy: string[] = []
-      const limit = isSmallScreen ? 3 : 5
-      for (const [index, following] of followings.entries()) {
-        if (following === pubkey) continue
-        if (followingsOfFollowings[index].includes(pubkey)) {
-          _followedBy.push(following)
-        }
-        if (_followedBy.length >= limit) {
-          break
-        }
+      const cachedFollowedBy = getFollowedByFromLists(
+        followings,
+        cachedSettled.map((entry) => (entry.status === 'fulfilled' ? entry.value : null))
+      )
+      if (!cancelled) {
+        setFollowedBy(cachedFollowedBy)
       }
-      setFollowedBy(_followedBy)
+
+      // Stage 2: refresh from network/cache query and update only if result changes.
+      const freshSettled = await Promise.allSettled(
+        followings.map(async (following) => client.fetchFollowings(following, true, true))
+      )
+      const freshFollowedBy = getFollowedByFromLists(
+        followings,
+        freshSettled.map((entry) => (entry.status === 'fulfilled' ? entry.value : null))
+      )
+      if (!cancelled) {
+        setFollowedBy((prev) => {
+          if (prev.length === freshFollowedBy.length && prev.every((value, i) => value === freshFollowedBy[i])) {
+            return prev
+          }
+          return freshFollowedBy
+        })
+      }
     }
     init()
-  }, [pubkey, accountPubkey, followingSet])
+
+    return () => {
+      cancelled = true
+    }
+  }, [pubkey, accountPubkey, followingSet, isSmallScreen])
 
   if (followedBy.length === 0) return null
 
   return (
-    <div className="flex items-center gap-1">
-      <div className="text-muted-foreground">{t('Followed by')}</div>
-      {followedBy.map((p) => (
-        <UserAvatar userId={p} key={p} size="xSmall" />
-      ))}
+    <div className="flex items-start gap-1">
+      <div className="pt-0.5 text-muted-foreground">{t('Followed by')}</div>
+      <div className="grid grid-cols-5 gap-1">
+        {followedBy.map((p) => (
+          <UserAvatar userId={p} key={p} size="xSmall" />
+        ))}
+      </div>
     </div>
   )
 }

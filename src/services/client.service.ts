@@ -1430,9 +1430,47 @@ class ClientService extends EventTarget {
     return await this.fetchReplaceableEvent(pubkey, kinds.Contacts, undefined, updateCache)
   }
 
-  async fetchFollowings(pubkey: string, updateCache = true) {
+  async fetchFollowings(pubkey: string, updateCache = true, includeFollowPacks = false) {
     const followListEvent = await this.fetchFollowListEvent(pubkey, updateCache)
-    return followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
+    const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
+
+    if (!includeFollowPacks) {
+      return followings
+    }
+
+    const relayList = await this.fetchRelayList(pubkey)
+    const relays = relayList.write.concat(getDefaultRelayUrls()).slice(0, 8)
+    const followPackEvents = await this.fetchEvents(relays, {
+      authors: [pubkey],
+      kinds: [ExtendedKind.FOLLOW_PACK],
+      limit: 100
+    })
+
+    return Array.from(
+      new Set([...followings, ...followPackEvents.flatMap((event) => getPubkeysFromPTags(event.tags))])
+    )
+  }
+
+  async getCachedFollowings(pubkey: string, includeFollowPacks = false) {
+    const followListEvent = await indexedDb.getReplaceableEvent(pubkey, kinds.Contacts)
+    const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
+
+    if (!includeFollowPacks) {
+      return followings
+    }
+
+    const followPackEvents = await indexedDb.getEvents({
+      authors: [pubkey],
+      kinds: [ExtendedKind.FOLLOW_PACK],
+      limit: 100
+    })
+
+    return Array.from(
+      new Set([
+        ...followings,
+        ...followPackEvents.flatMap(({ event }) => getPubkeysFromPTags(event.tags))
+      ])
+    )
   }
 
   async updateFollowListCache(evt: NEvent) {

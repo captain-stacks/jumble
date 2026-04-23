@@ -124,7 +124,7 @@ async function callOpenAI(
   messages: { role: string; content: string }[],
   signal?: AbortSignal
 ) {
-  const body = { model: 'gpt-5', messages, temperature: 0.2 }
+  const body = { model: 'gpt-5', messages }
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },

@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { ShieldAlert } from 'lucide-react'
 import { useEffect } from 'react'
@@ -18,13 +17,11 @@ export default function TrustScoreBadge({
   numeric?: boolean
 }) {
   const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey } = useUserTrust()
-  const { pubkey: currentPubkey } = useNostr()
 
   useEffect(() => {
     fetchScoreForPubkey(pubkey)
   }, [pubkey, fetchScoreForPubkey])
 
-  const isSelf = currentPubkey === pubkey
   const inWoT = isUserTrusted(pubkey)
 
   if (!numeric && inWoT) return null

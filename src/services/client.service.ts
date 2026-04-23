@@ -814,6 +814,15 @@ class ClientService extends EventTarget {
     })
   }
 
+  async fetchInListsEvents(pubkey: string) {
+    const relayList = await this.fetchRelayList(pubkey)
+    const relays = relayList.write.concat(getDefaultRelayUrls()).slice(0, 8)
+    return this.fetchEvents(relays, {
+      kinds: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000],
+      '#p': [pubkey]
+    })
+  }
+
   async fetchEvents(
     urls: string[],
     filter: Filter | Filter[],

@@ -185,7 +185,7 @@ export default function Profile({ id }: { id?: string }) {
                 emojis={emojis}
                 className="select-text truncate text-xl font-semibold"
               />
-              <TrustScoreBadge pubkey={pubkey} />
+              <TrustScoreBadge pubkey={pubkey} numeric />
               {mutePubkeySet.has(pubkey) && (
                 <div className="h-fit shrink-0 rounded-full bg-muted px-2 text-xs text-muted-foreground">
                   {t('Muted')}

@@ -1,6 +1,5 @@
-import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
+import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import client from '@/services/client.service'
-import fayan from '@/services/fayan.service'
 import storage from '@/services/local-storage.service'
 import bootstrapCache from '@/services/bootstrap-cache.service'
 import { getDefaultRelayUrls } from '@/lib/relay'
@@ -14,6 +13,12 @@ const FOLLOW_SOURCE_PUBKEY = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKE
 const BATCH_SIZE = 20
 const BATCH_DELAY_MS = 200
 
+type TMuteRatio = {
+  follows: number
+  mutes: number
+  ratio: number
+}
+
 type TUserTrustContext = {
   minTrustScore: number
   minTrustScoreMap: Record<string, number>
@@ -22,8 +27,15 @@ type TUserTrustContext = {
   isUserTrusted: (pubkey: string) => boolean
   isSpammer: (pubkey: string) => Promise<boolean>
   meetsMinTrustScore: (pubkey: string, minScore: number) => Promise<boolean>
+  getMuteRatio: (pubkey: string) => TMuteRatio
+  getTrustScore: (pubkey: string) => number
   isWotReady: boolean
   wotStep: number
+  muteVersion: number
+  demandFetchCount: number
+  fetchScoreForPubkey: (pubkey: string) => void
+  inspectedPubkey: string | null
+  setInspectedPubkey: (pubkey: string | null) => void
 }
 
 export const useUserTrustReady = () => {
@@ -45,6 +57,37 @@ export const useUserTrust = () => {
 }
 
 const wotSet = new Set<string>()
+const followCountMap = new Map<string, number>()
+const muteCountMap = new Map<string, number>()
+const countedMuteSet = new Set<string>()
+const scoreFetchedSet = new Set<string>()
+let myFollowSetSize = 0
+
+// Bayesian-smoothed exponential decay operating in rate space:
+//   followRate = follows / myFollowSetSize    (fraction of my follow set who follow this person)
+//   muteRate   = mutes / wotSize              (fraction of full WoT who mute this person)
+//   priorRate  = 1 / PRIOR_SCALE              (fixed prior, pool-size-independent)
+//   smoothedRatio = (muteRate + priorRate * PRIOR_MUTE_RATE) / (followRate + priorRate)
+//   score = round(100 * exp(-DECAY * smoothedRatio))
+// Examples (myFollowSetSize=200, wotSize=2000):
+//   unknown (0/0) → ~61;  10 follows, 0 mutes → ~87;  0 follows, 10 mutes → ~17
+const TRUST_PRIOR_MUTE_RATE = 0.1
+const TRUST_PRIOR_SCALE = 50   // priorRate = 1/50 = 2%
+const TRUST_DECAY = 5
+
+function computeTrustScore(pubkey: string): number {
+  const follows = followCountMap.get(pubkey) ?? 0
+  const mutes = muteCountMap.get(pubkey) ?? 0
+  if (follows === 0 && mutes === 0) return 1
+  const wotSize = wotSet.size
+  if (wotSize === 0 || myFollowSetSize === 0) return 1
+  const followRate = follows / myFollowSetSize
+  const muteRate = mutes / wotSize
+  const priorRate = 1 / TRUST_PRIOR_SCALE
+  const smoothedRatio =
+    (muteRate + priorRate * TRUST_PRIOR_MUTE_RATE) / (followRate + priorRate)
+  return Math.max(1, Math.round(100 * Math.exp(-TRUST_DECAY * smoothedRatio)))
+}
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const { pubkey: currentPubkey, isInitialized } = useNostr()
@@ -55,8 +98,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   )
   const [isWotReady, setIsWotReady] = useState(false)
   const [wotStep, setWotStep] = useState(0)
+  const [muteVersion, setMuteVersion] = useState(0)
+  const [demandFetchCount, setDemandFetchCount] = useState(0)
+  const [inspectedPubkey, setInspectedPubkey] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     const initWoT = async () => {
       // WAIT: Don't run any bootstrap logic until account initialization is complete
       if (!isInitialized) {
@@ -70,6 +117,11 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         
         // Ensure WoT doesn't persist state from bootstrap
         wotSet.clear()
+        followCountMap.clear()
+        muteCountMap.clear()
+        countedMuteSet.clear()
+        scoreFetchedSet.clear()
+        myFollowSetSize = 0
         
         // Wait for followingSet to be populated before building WoT
         if (followingSet.size === 0) {
@@ -88,43 +140,42 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         setWotStep(2)
         const directFollows = Array.from(followingSet)
         directFollows.forEach((pubkey) => wotSet.add(pubkey))
+        myFollowSetSize = followingSet.size
         
-        // Step 3: Fetch follows of follows in batches from standard relays
+        // Step 3: Fetch follows-of-follows in batches to build followCountMap
         setWotStep(3)
         const relays = getDefaultRelayUrls()
+        const pool = new SimplePool()
         try {
-          const pool = new SimplePool()
           for (let i = 0; i < directFollows.length; i += BATCH_SIZE) {
+            if (cancelled) return
             const batch = directFollows.slice(i, i + BATCH_SIZE)
-            const results = await Promise.all(
-              batch.map((pubkey) => {
-                const filter = {
-                  authors: [pubkey],
-                  kinds: [kinds.Contacts],
-                  limit: 1
-                }
-                return pool.get(relays, filter)
-              })
+            const followResults = await Promise.all(
+              batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts], limit: 1 }))
             )
-            results.forEach((event) => {
+            if (cancelled) return
+            followResults.forEach((event) => {
               if (event) {
-                getPubkeysFromPTags(event.tags).forEach((pubkey) => wotSet.add(pubkey))
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                  wotSet.add(pubkey)
+                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                })
               }
             })
-
+            setMuteVersion((v) => v + 1)
             await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
           }
         } catch {
           // Silently handle errors
         }
-        
-        // Step 4: Done
+
         setWotStep(4)
         setIsWotReady(true)
         return
       }
 
       // For non-logged-in users: bootstrap from FOLLOW_SOURCE_PUBKEY
+      myFollowSetSize = 0
       if (!FOLLOW_SOURCE_PUBKEY) {
         setIsWotReady(true)
         return
@@ -192,6 +243,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       }
     }
     initWoT()
+    return () => { cancelled = true }
   }, [currentPubkey, followingSet, isInitialized])
 
   const isUserTrusted = useCallback(
@@ -205,12 +257,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   const isSpammer = useCallback(
     async (pubkey: string) => {
-      if (isUserTrusted(pubkey)) return false
-      const percentile = await fayan.fetchUserPercentile(pubkey)
-      if (percentile === null) return false
-      return percentile < 60
+      if (pubkey === currentPubkey) return false
+      return computeTrustScore(pubkey) < 60
     },
-    [isUserTrusted]
+    [currentPubkey]
   )
 
   const getMinTrustScore = useCallback(
@@ -235,18 +285,53 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const getMuteRatio = useCallback((pubkey: string): TMuteRatio => {
+    const follows = followCountMap.get(pubkey) ?? 0
+    const mutes = muteCountMap.get(pubkey) ?? 0
+    return { follows, mutes, ratio: follows > 0 ? mutes / follows : 0 }
+  }, [])
+
+  const getTrustScore = useCallback((pubkey: string): number => {
+    return computeTrustScore(pubkey)
+  }, [])
+
+  const fetchScoreForPubkey = useCallback((pubkey: string) => {
+    if (!currentPubkey) return
+    if (!isWotReady) return
+    if (scoreFetchedSet.has(pubkey)) return
+    scoreFetchedSet.add(pubkey)
+
+    ;(async () => {
+      try {
+        let added = 0
+        const events = await client.fetchInListsEvents(pubkey)
+        for (const event of events) {
+          const isMute = event.kind === kinds.Mutelist ||
+            (event.kind === ExtendedKind.FOLLOW_SET && event.tags.some(([t, v]) => t === 'l' && v === 'community-pack'))
+          if (!isMute) continue
+          if (!wotSet.has(event.pubkey)) continue
+          const key = `${event.pubkey}:${pubkey}`
+          if (!countedMuteSet.has(key)) {
+            countedMuteSet.add(key)
+            muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+            added++
+          }
+        }
+        if (added > 0) setMuteVersion((v) => v + 1)
+      } catch {
+        // Silently handle errors
+      } finally {
+        setDemandFetchCount((v) => v + 1)
+      }
+    })()
+  }, [currentPubkey, followingSet, isWotReady])
+
   const meetsMinTrustScore = useCallback(
     async (pubkey: string, minScore: number) => {
       if (minScore === 0) return true
       if (pubkey === currentPubkey) return true
 
-      // WoT users always have 100% trust score
-      if (wotSet.has(pubkey)) return true
-
-      // Get percentile from reputation system
-      const percentile = await fayan.fetchUserPercentile(pubkey)
-      if (percentile === null) return false
-      return percentile >= minScore
+      return computeTrustScore(pubkey) >= minScore
     },
     [currentPubkey]
   )
@@ -261,8 +346,15 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         isUserTrusted,
         isSpammer,
         meetsMinTrustScore,
+        getMuteRatio,
+        getTrustScore,
         isWotReady,
-        wotStep
+        wotStep,
+        muteVersion,
+        demandFetchCount,
+        fetchScoreForPubkey,
+        inspectedPubkey,
+        setInspectedPubkey
       }}
     >
       {children}

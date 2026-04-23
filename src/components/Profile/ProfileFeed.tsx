@@ -150,7 +150,10 @@ export default function ProfileFeed({
         setSubRequests([
           {
             urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
-            filter: { kinds: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000], '#p': [pubkey] }
+            filter: {
+              kinds: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000],
+              '#p': [pubkey]
+            }
           }
         ])
         return

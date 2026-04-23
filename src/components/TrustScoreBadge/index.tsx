@@ -1,10 +1,8 @@
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
-import fayan from '@/services/fayan.service'
 import { ShieldAlert } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 
 export default function TrustScoreBadge({
   pubkey,
@@ -19,72 +17,41 @@ export default function TrustScoreBadge({
   }
   numeric?: boolean
 }) {
-  const { t } = useTranslation()
-  const { isUserTrusted } = useUserTrust()
+  const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey } = useUserTrust()
   const { pubkey: currentPubkey } = useNostr()
-  const [percentile, setPercentile] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const isSelf = currentPubkey === pubkey
-  const inWoT = !isSelf && isUserTrusted(pubkey)
 
   useEffect(() => {
-    if (isSelf) {
-      setLoading(false)
-      setPercentile(null)
-      return
-    }
-    // Non-numeric badge skips WoT users (they're trusted, no need for a warning icon).
-    // Numeric badge always fetches so it can show the actual score.
-    if (!numeric && inWoT) {
-      setLoading(false)
-      setPercentile(null)
-      return
-    }
+    fetchScoreForPubkey(pubkey)
+  }, [pubkey, fetchScoreForPubkey])
 
-    const fetchScore = async () => {
-      try {
-        const percentile = await fayan.fetchUserPercentile(pubkey)
-        if (percentile !== null) {
-          setPercentile(percentile)
-        }
-      } catch (error) {
-        console.error('Failed to fetch trust score:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const isSelf = currentPubkey === pubkey
+  const inWoT = isUserTrusted(pubkey)
 
-    fetchScore()
-  }, [pubkey, isSelf, inWoT, numeric])
+  if (!numeric && inWoT) return null
+
+  const score = getTrustScore(pubkey)
+  const { follows, mutes } = getMuteRatio(pubkey)
+  const tooltip = follows > 0
+    ? `Trust score: ${score} (${mutes} mutes / ${follows} follows)`
+    : `Trust score: ${score} (not seen by your follows)`
 
   if (numeric) {
-    if (isSelf || loading || percentile === null) return null
-
     const color = inWoT ? 'text-green-500' : 'text-red-500'
     return (
       <span
-        title={t('Trust score: {{percentile}}%', { percentile })}
+        title={tooltip}
         className={cn('text-xs font-medium tabular-nums', color, className)}
       >
-        {percentile}%
+        {score}
       </span>
     )
   }
 
-  if (loading || percentile === null) return null
+  if (score >= 40) return null
 
-  // percentile < 40: low trust ranking (red alert)
-  if (percentile < 40) {
-    return (
-      <div
-        title={t('Low trust ranking ({{percentile}}%)', { percentile })}
-        className={classNames?.container}
-      >
-        <ShieldAlert className={cn('!size-4 text-red-500', className)} />
-      </div>
-    )
-  }
-
-  return null
+  return (
+    <div title={tooltip} className={classNames?.container}>
+      <ShieldAlert className={cn('!size-4 text-red-500', className)} />
+    </div>
+  )
 }

@@ -84,7 +84,7 @@ export default function Note({
   ) {
     content = <UnknownNote className="mt-2" event={event} />
   } else if (mutePubkeySet.has(event.pubkey) && !showMuted && !showMutedContent) {
-    content = <MutedNote show={() => setShowMuted(true)} />
+    content = <MutedNote pubkey={event.pubkey} show={() => setShowMuted(true)} />
   } else if (isNsfw && !showNsfw) {
     content = <NsfwNote show={() => setShowNsfw(true)} />
   } else if (event.kind === kinds.Reaction) {

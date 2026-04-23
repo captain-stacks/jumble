@@ -142,7 +142,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         directFollows.forEach((pubkey) => wotSet.add(pubkey))
         myFollowSetSize = followingSet.size
         
-        // Step 3: Fetch follows-of-follows in batches to build followCountMap
+        // Step 3: Fetch follows-of-follows and mute lists in batches
         setWotStep(3)
         const relays = getDefaultRelayUrls()
         const pool = new SimplePool()
@@ -150,17 +150,29 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           for (let i = 0; i < directFollows.length; i += BATCH_SIZE) {
             if (cancelled) return
             const batch = directFollows.slice(i, i + BATCH_SIZE)
-            const followResults = await Promise.all(
-              batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts], limit: 1 }))
+            const results = await Promise.all(
+              batch.map((pubkey) =>
+                pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist], limit: 2 })
+              )
             )
             if (cancelled) return
-            followResults.forEach((event) => {
-              if (event) {
-                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                  wotSet.add(pubkey)
-                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                })
-              }
+            results.forEach((events) => {
+              events.forEach((event) => {
+                if (event.kind === kinds.Contacts) {
+                  getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                    wotSet.add(pubkey)
+                    followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                  })
+                } else if (event.kind === kinds.Mutelist) {
+                  getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                    const key = `${event.pubkey}:${pubkey}`
+                    if (!countedMuteSet.has(key)) {
+                      countedMuteSet.add(key)
+                      muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                    }
+                  })
+                }
+              })
             })
             setMuteVersion((v) => v + 1)
             await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))

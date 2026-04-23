@@ -30,10 +30,10 @@ export default function TrustScoreBadge({
   const { follows, mutes } = getMuteRatio(pubkey)
   const tooltip = follows > 0
     ? `Trust score: ${score} (${mutes} mutes / ${follows} follows)`
-    : `Trust score: ${score} (not seen by your follows)`
+    : `Trust score: ${score} (${mutes} mutes, not seen by your follows)`
 
   if (numeric) {
-    const color = inWoT ? 'text-green-500' : 'text-red-500'
+    const color = follows > 0 ? 'text-green-500' : 'text-red-500'
     return (
       <span
         title={tooltip}

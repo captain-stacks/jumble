@@ -2,6 +2,7 @@ import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { isMentioningMutedUsers } from '@/lib/event'
 import { tagNameEquals } from '@/lib/tag'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
+import { useFollowList } from '@/providers/FollowListProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useNotificationUserPreference } from '@/providers/NotificationUserPreferenceProvider'
@@ -24,6 +25,7 @@ export function NotificationItem({
 }) {
   const { pubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
+  const { followingSet } = useFollowList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { showMuted } = useNotificationUserPreference()
@@ -51,8 +53,8 @@ export function NotificationItem({
         return
       }
 
-      // Check trust score
-      if (notification.kind !== kinds.Zap) {
+      // Check trust score (followed users bypass)
+      if (notification.kind !== kinds.Zap && !followingSet.has(notification.pubkey)) {
         const threshold = getMinTrustScore(SPECIAL_TRUST_SCORE_FILTER_ID.NOTIFICATIONS)
         if (!(await meetsMinTrustScore(notification.pubkey, threshold))) {
           setCanShow(false)
@@ -77,6 +79,7 @@ export function NotificationItem({
     notification,
     pubkey,
     mutePubkeySet,
+    followingSet,
     hideContentMentioningMutedUsers,
     showMuted,
     getMinTrustScore,

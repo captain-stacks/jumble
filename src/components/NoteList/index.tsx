@@ -8,6 +8,7 @@ import { mergeTimelines } from '@/lib/timeline'
 import { isTouchDevice } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useDeletedEvent } from '@/providers/DeletedEventProvider'
+import { useFollowList } from '@/providers/FollowListProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePageActive } from '@/providers/PageActiveProvider'
@@ -86,6 +87,7 @@ const NoteList = forwardRef<
     const { startLogin } = useNostr()
     const { isSpammer, meetsMinTrustScore } = useUserTrust()
     const { mutePubkeySet } = useMuteList()
+    const { followingSet } = useFollowList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
     const { isEventDeleted } = useDeletedEvent()
     const [storedEvents, setStoredEvents] = useState<Event[]>([])
@@ -245,8 +247,8 @@ const NoteList = forwardRef<
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt, i) => {
-              // Check trust score filter
-              if (!(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
+              // Followed users bypass trust score filter
+              if (!followingSet.has(evt.pubkey) && !(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
                 return null
               }
               const key = keys[i]
@@ -271,7 +273,8 @@ const NoteList = forwardRef<
       hideReplies,
       hideSpam,
       meetsMinTrustScore,
-      trustScoreThreshold
+      trustScoreThreshold,
+      followingSet
     ])
 
     useEffect(() => {
@@ -305,8 +308,8 @@ const NoteList = forwardRef<
               if (hideSpam && (await isSpammer(evt.pubkey))) {
                 return null
               }
-              // Check trust score filter
-              if (!(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
+              // Followed users bypass trust score filter
+              if (!followingSet.has(evt.pubkey) && !(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
                 return null
               }
               return evt
@@ -316,7 +319,7 @@ const NoteList = forwardRef<
         setFilteredNewEvents(_filteredNotes)
       }
       processNewEvents()
-    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold])
+    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold, followingSet])
 
     const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
       setTimeout(() => {

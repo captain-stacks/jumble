@@ -8,6 +8,7 @@ import storage from '@/services/local-storage.service'
 import { kinds, NostrEvent } from 'nostr-tools'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useContentPolicy } from './ContentPolicyProvider'
+import { useFollowList } from './FollowListProvider'
 import { useMuteList } from './MuteListProvider'
 import { useNostr } from './NostrProvider'
 import { useUserPreferences } from './UserPreferencesProvider'
@@ -35,6 +36,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const active = useMemo(() => current === 'notifications', [current])
   const { pubkey, notificationsSeenAt, updateNotificationsSeenAt } = useNostr()
   const { mutePubkeySet } = useMuteList()
+  const { followingSet } = useFollowList()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const { disableReactions } = useUserPreferences()
@@ -65,6 +67,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               hideContentMentioningMutedUsers,
               meetsMinTrustScore: async (pubkey: string) => {
                 if (trustScoreThreshold === 0) return true
+                if (followingSet.has(pubkey)) return true
                 return meetsMinTrustScore(pubkey, trustScoreThreshold)
               }
             }))
@@ -81,6 +84,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     newNotifications,
     notificationsSeenAt,
     mutePubkeySet,
+    followingSet,
     hideContentMentioningMutedUsers,
     meetsMinTrustScore,
     disableReactions

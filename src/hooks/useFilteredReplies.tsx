@@ -1,5 +1,6 @@
 import { getEventKey, isMentioningMutedUsers } from '@/lib/event'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
+import { useFollowList } from '@/providers/FollowListProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
@@ -12,6 +13,7 @@ export function useFilteredReplies(stuffKey: string, showMutedContent = false) {
   const { pubkey } = useNostr()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { mutePubkeySet } = useMuteList()
+  const { followingSet } = useFollowList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const allThreads = useAllDescendantThreads(stuffKey)
   const [replies, setReplies] = useState<NostrEvent[]>([])
@@ -30,10 +32,13 @@ export function useFilteredReplies(stuffKey: string, showMutedContent = false) {
           if (replyKeySet.has(key)) return
           replyKeySet.add(key)
 
-          if (!showMutedContent && mutePubkeySet.has(evt.pubkey)) return
+          const isFollowed = followingSet.has(evt.pubkey)
+          // Followed users always appear in replies even if muted; mute only blocks feeds
+          if (!showMutedContent && !isFollowed && mutePubkeySet.has(evt.pubkey)) return
           if (!showMutedContent && hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet)) return
 
-          const meetsTrust = await meetsMinTrustScore(evt.pubkey, trustScoreThreshold)
+          // Followed users bypass trust score filter
+          const meetsTrust = isFollowed || (await meetsMinTrustScore(evt.pubkey, trustScoreThreshold))
           if (!meetsTrust) {
             const replyKey = getEventKey(evt)
             const repliesForThisReply = allThreads.get(replyKey)
@@ -41,7 +46,7 @@ export function useFilteredReplies(stuffKey: string, showMutedContent = false) {
             if (repliesForThisReply && repliesForThisReply.length > 0) {
               let hasTrustedReply = false
               for (const reply of repliesForThisReply) {
-                if (await meetsMinTrustScore(reply.pubkey, trustScoreThreshold)) {
+                if (followingSet.has(reply.pubkey) || await meetsMinTrustScore(reply.pubkey, trustScoreThreshold)) {
                   hasTrustedReply = true
                   break
                 }
@@ -64,6 +69,7 @@ export function useFilteredReplies(stuffKey: string, showMutedContent = false) {
     stuffKey,
     allThreads,
     mutePubkeySet,
+    followingSet,
     hideContentMentioningMutedUsers,
     getMinTrustScore,
     meetsMinTrustScore,
@@ -89,6 +95,7 @@ export function useFilteredAllReplies(stuffKey: string) {
   const allThreads = useAllDescendantThreads(stuffKey)
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { mutePubkeySet } = useMuteList()
+  const { followingSet } = useFollowList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
   const [replies, setReplies] = useState<NostrEvent[]>([])
   const [hasReplied, setHasReplied] = useState(false)
@@ -108,11 +115,14 @@ export function useFilteredAllReplies(stuffKey: string) {
             if (replyKeySet.has(key)) return
             replyKeySet.add(key)
 
-            if (mutePubkeySet.has(evt.pubkey)) return
+            const isFollowed = followingSet.has(evt.pubkey)
+            // Followed users always appear in replies even if muted; mute only blocks feeds
+            if (!isFollowed && mutePubkeySet.has(evt.pubkey)) return
             if (hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet))
               return
 
-            const meetsTrust = await meetsMinTrustScore(evt.pubkey, trustScoreThreshold)
+            // Followed users bypass trust score filter
+            const meetsTrust = isFollowed || (await meetsMinTrustScore(evt.pubkey, trustScoreThreshold))
             if (!meetsTrust) {
               const replyKey = getEventKey(evt)
               const repliesForThisReply = allThreads.get(replyKey)
@@ -120,7 +130,7 @@ export function useFilteredAllReplies(stuffKey: string) {
               if (repliesForThisReply && repliesForThisReply.length > 0) {
                 let hasTrustedReply = false
                 for (const reply of repliesForThisReply) {
-                  if (await meetsMinTrustScore(reply.pubkey, trustScoreThreshold)) {
+                  if (followingSet.has(reply.pubkey) || await meetsMinTrustScore(reply.pubkey, trustScoreThreshold)) {
                     hasTrustedReply = true
                     break
                   }
@@ -144,6 +154,7 @@ export function useFilteredAllReplies(stuffKey: string) {
     stuffKey,
     allThreads,
     mutePubkeySet,
+    followingSet,
     hideContentMentioningMutedUsers,
     getMinTrustScore,
     meetsMinTrustScore

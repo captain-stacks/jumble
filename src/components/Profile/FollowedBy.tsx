@@ -21,6 +21,12 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
 
     let cancelled = false
 
+    const areArraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((value, i) => value === b[i])
+
+    const mergeSourceFollowings = (extraFollowings: string[]) =>
+      Array.from(new Set([...Array.from(followingSet), ...extraFollowings])).reverse()
+
     const getFollowedByFromLists = (
       followings: string[],
       followingsOfFollowings: Array<string[] | null>
@@ -38,37 +44,45 @@ export default function FollowedBy({ pubkey }: { pubkey: string }) {
       return result
     }
 
-    const init = async () => {
-      const followings = Array.from(followingSet).reverse()
-
-      // Stage 1: render quickly from local cache only.
-      const cachedSettled = await Promise.allSettled(
-        followings.map(async (following) => client.getCachedFollowings(following, true))
+    const resolveFollowedBy = async (followings: string[], useCacheOnly: boolean) => {
+      const settled = await Promise.allSettled(
+        followings.map(async (following) =>
+          useCacheOnly
+            ? client.getCachedFollowings(following, true)
+            : client.fetchFollowings(following, true, true)
+        )
       )
-      const cachedFollowedBy = getFollowedByFromLists(
+      return getFollowedByFromLists(
         followings,
-        cachedSettled.map((entry) => (entry.status === 'fulfilled' ? entry.value : null))
+        settled.map((entry) => (entry.status === 'fulfilled' ? entry.value : null))
       )
-      if (!cancelled) {
-        setFollowedBy(cachedFollowedBy)
-      }
+    }
+
+    const applyFollowedBy = (nextFollowedBy: string[]) => {
+      if (cancelled) return
+      setFollowedBy((prev) => (areArraysEqual(prev, nextFollowedBy) ? prev : nextFollowedBy))
+    }
+
+    const init = async () => {
+      // Stage 1: render quickly from local cache only.
+      const cachedSourceFollowings = mergeSourceFollowings(
+        await client.getCachedFollowings(accountPubkey, true)
+      )
+      applyFollowedBy(await resolveFollowedBy(cachedSourceFollowings, true))
 
       // Stage 2: refresh from network/cache query and update only if result changes.
-      const freshSettled = await Promise.allSettled(
-        followings.map(async (following) => client.fetchFollowings(following, true, true))
+      const freshSourceFollowings = mergeSourceFollowings(
+        await client.fetchFollowings(accountPubkey, true, true)
       )
-      const freshFollowedBy = getFollowedByFromLists(
-        followings,
-        freshSettled.map((entry) => (entry.status === 'fulfilled' ? entry.value : null))
+      applyFollowedBy(await resolveFollowedBy(freshSourceFollowings, false))
+
+      // Stage 3: follow packs may arrive slightly later; run one delayed refresh pass.
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      if (cancelled) return
+      const delayedSourceFollowings = mergeSourceFollowings(
+        await client.fetchFollowings(accountPubkey, true, true)
       )
-      if (!cancelled) {
-        setFollowedBy((prev) => {
-          if (prev.length === freshFollowedBy.length && prev.every((value, i) => value === freshFollowedBy[i])) {
-            return prev
-          }
-          return freshFollowedBy
-        })
-      }
+      applyFollowedBy(await resolveFollowedBy(delayedSourceFollowings, false))
     }
     init()
 

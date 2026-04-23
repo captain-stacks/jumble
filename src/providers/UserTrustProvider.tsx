@@ -1,4 +1,4 @@
-import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
+import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
 import bootstrapCache from '@/services/bootstrap-cache.service'
@@ -344,9 +344,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         let added = 0
         const events = await client.fetchInListsEvents(pubkey)
         for (const event of events) {
-          const isMute = event.kind === kinds.Mutelist ||
-            (event.kind === ExtendedKind.FOLLOW_SET && event.tags.some(([t, v]) => t === 'l' && v === 'community-pack'))
-          if (!isMute) continue
           if (!wotSet.has(event.pubkey)) continue
           const key = `${event.pubkey}:${pubkey}`
           if (!countedMuteSet.has(key)) {

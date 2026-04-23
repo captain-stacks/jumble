@@ -22,8 +22,30 @@ import { RotateCcw } from 'lucide-react'
 import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DefaultTrustScoreFilter from './DefaultTrustScoreFilter'
+import { Slider } from '@/components/ui/slider'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 import MutedWords from './MutedWords'
 import SettingItem from './SettingItem'
+
+function MuteWeightSlider() {
+  const { t } = useTranslation()
+  const { muteWeight, updateMuteWeight } = useUserTrust()
+  return (
+    <SettingItem className="flex-col items-start gap-2">
+      <Label className="text-base font-normal">
+        {t('Mute weight ({{n}})', { n: muteWeight })}
+      </Label>
+      <Slider
+        value={[muteWeight]}
+        onValueChange={([value]) => updateMuteWeight(value)}
+        min={1}
+        max={10}
+        step={1}
+        className="w-full"
+      />
+    </SettingItem>
+  )
+}
 
 const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t, i18n } = useTranslation()
@@ -206,6 +228,7 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
           </Select>
         </SettingItem>
         <DefaultTrustScoreFilter />
+        <MuteWeightSlider />
         <SettingItem>
           <Label htmlFor="quick-reaction" className="text-base font-normal">
             <div>{t('Quick reaction')}</div>

@@ -72,6 +72,7 @@ class LocalStorageService {
   private mutedWords: string[] = []
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
+  private muteWeight: number = 5
   private hideIndirectNotifications: boolean = false
   private disableReactions: boolean = true
   private hideBookmarks: boolean = true
@@ -327,6 +328,14 @@ class LocalStorageService {
     }
     if (this.minTrustScoreMap['relays-global'] === undefined) {
       this.minTrustScoreMap['relays-global'] = 100
+    }
+
+    const muteWeightStr = window.localStorage.getItem(StorageKey.MUTE_WEIGHT)
+    if (muteWeightStr) {
+      const w = parseFloat(muteWeightStr)
+      if (!isNaN(w) && w >= 1 && w <= 10) {
+        this.muteWeight = w
+      }
     }
 
     const defaultRelayUrlsStr = window.localStorage.getItem(StorageKey.DEFAULT_RELAY_URLS)
@@ -767,6 +776,17 @@ class LocalStorageService {
   setMinTrustScoreMap(map: Record<string, number>) {
     this.minTrustScoreMap = map
     window.localStorage.setItem(StorageKey.MIN_TRUST_SCORE_MAP, JSON.stringify(map))
+  }
+
+  getMuteWeight() {
+    return this.muteWeight
+  }
+
+  setMuteWeight(weight: number) {
+    if (weight >= 1 && weight <= 10) {
+      this.muteWeight = weight
+      window.localStorage.setItem(StorageKey.MUTE_WEIGHT, weight.toString())
+    }
   }
 
   getDefaultRelayUrls() {

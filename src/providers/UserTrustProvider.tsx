@@ -24,6 +24,8 @@ type TUserTrustContext = {
   minTrustScoreMap: Record<string, number>
   getMinTrustScore: (id: string) => number
   updateMinTrustScore: (id: string, score: number) => void
+  muteWeight: number
+  updateMuteWeight: (weight: number) => void
   isUserTrusted: (pubkey: string) => boolean
   isSpammer: (pubkey: string) => Promise<boolean>
   meetsMinTrustScore: (pubkey: string, minScore: number) => Promise<boolean>
@@ -73,7 +75,7 @@ let myFollowSetSize = 0
 //   unknown (0/0) → ~61;  10 follows, 0 mutes → ~87;  0 follows, 10 mutes → ~17
 const TRUST_PRIOR_MUTE_RATE = 0.1
 const TRUST_PRIOR_SCALE = 50   // priorRate = 1/50 = 2%
-const TRUST_DECAY = 5
+let trustDecay = storage.getMuteWeight()
 
 function computeTrustScore(pubkey: string): number {
   const follows = followCountMap.get(pubkey) ?? 0
@@ -86,7 +88,7 @@ function computeTrustScore(pubkey: string): number {
   const priorRate = 1 / TRUST_PRIOR_SCALE
   const smoothedRatio =
     (muteRate + priorRate * TRUST_PRIOR_MUTE_RATE) / (followRate + priorRate)
-  return Math.max(0, Math.round(100 * Math.exp(-TRUST_DECAY * smoothedRatio)))
+  return Math.max(0, Math.round(100 * Math.exp(-trustDecay * smoothedRatio)))
 }
 
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
@@ -96,11 +98,20 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
     storage.getMinTrustScoreMap()
   )
+  const [muteWeight, setMuteWeight] = useState(() => storage.getMuteWeight())
   const [isWotReady, setIsWotReady] = useState(false)
   const [wotStep, setWotStep] = useState(0)
   const [muteVersion, setMuteVersion] = useState(0)
   const [demandFetchCount, setDemandFetchCount] = useState(0)
   const [inspectedPubkey, setInspectedPubkey] = useState<string | null>(null)
+
+  const updateMuteWeight = (weight: number) => {
+    if (weight < 1 || weight > 10) return
+    trustDecay = weight
+    setMuteWeight(weight)
+    storage.setMuteWeight(weight)
+    setMuteVersion((v) => v + 1)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -216,20 +227,35 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
         followings.forEach((pubkey) => wotSet.add(pubkey))
 
-        // Step 3: Fetch follows of follows in batches
+        // Step 3: Fetch follows-of-follows and mute lists in batches to build score maps
         setWotStep(3)
+        myFollowSetSize = followings.length
         for (let i = 0; i < followings.length; i += BATCH_SIZE) {
           const batch = followings.slice(i, i + BATCH_SIZE)
           const results = await Promise.all(
             batch.map((pubkey) =>
-              pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts], limit: 1 })
+              pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist], limit: 2 })
             )
           )
-          results.forEach((event) => {
-            if (event) {
-              getPubkeysFromPTags(event.tags).forEach((pubkey) => wotSet.add(pubkey))
-            }
+          results.forEach((events) => {
+            events.forEach((event) => {
+              if (event.kind === kinds.Contacts) {
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                  wotSet.add(pubkey)
+                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                })
+              } else if (event.kind === kinds.Mutelist) {
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                  const key = `${event.pubkey}:${pubkey}`
+                  if (!countedMuteSet.has(key)) {
+                    countedMuteSet.add(key)
+                    muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                  }
+                })
+              }
+            })
           })
+          setMuteVersion((v) => v + 1)
           await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
         }
 
@@ -355,6 +381,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         minTrustScoreMap,
         getMinTrustScore,
         updateMinTrustScore,
+        muteWeight,
+        updateMuteWeight,
         isUserTrusted,
         isSpammer,
         meetsMinTrustScore,

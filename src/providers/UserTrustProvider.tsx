@@ -36,6 +36,7 @@ type TUserTrustContext = {
   muteVersion: number
   demandFetchCount: number
   fetchScoreForPubkey: (pubkey: string) => void
+  getWotFollowers: (pubkey: string) => string[]
   inspectedPubkey: string | null
   setInspectedPubkey: (pubkey: string | null) => void
 }
@@ -60,6 +61,7 @@ export const useUserTrust = () => {
 
 const wotSet = new Set<string>()
 const followCountMap = new Map<string, number>()
+const followersMap = new Map<string, Set<string>>()
 const muteCountMap = new Map<string, number>()
 const countedMuteSet = new Set<string>()
 const scoreFetchedSet = new Set<string>()
@@ -129,6 +131,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         // Ensure WoT doesn't persist state from bootstrap
         wotSet.clear()
         followCountMap.clear()
+        followersMap.clear()
         muteCountMap.clear()
         countedMuteSet.clear()
         scoreFetchedSet.clear()
@@ -173,6 +176,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                   getPubkeysFromPTags(event.tags).forEach((pubkey) => {
                     wotSet.add(pubkey)
                     followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                    const followers = followersMap.get(pubkey)
+                    if (followers) {
+                      followers.add(event.pubkey)
+                    } else {
+                      followersMap.set(pubkey, new Set([event.pubkey]))
+                    }
                   })
                 } else if (event.kind === kinds.Mutelist) {
                   getPubkeysFromPTags(event.tags).forEach((pubkey) => {
@@ -243,6 +252,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                 getPubkeysFromPTags(event.tags).forEach((pubkey) => {
                   wotSet.add(pubkey)
                   followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                  const followers = followersMap.get(pubkey)
+                  if (followers) {
+                    followers.add(event.pubkey)
+                  } else {
+                    followersMap.set(pubkey, new Set([event.pubkey]))
+                  }
                 })
               } else if (event.kind === kinds.Mutelist) {
                 getPubkeysFromPTags(event.tags).forEach((pubkey) => {
@@ -333,6 +348,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return computeTrustScore(pubkey)
   }, [])
 
+  const getWotFollowers = useCallback((pubkey: string): string[] => {
+    return Array.from(followersMap.get(pubkey) ?? [])
+  }, [])
+
   const fetchScoreForPubkey = useCallback((pubkey: string) => {
     if (!currentPubkey) return
     if (!isWotReady) return
@@ -390,6 +409,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         muteVersion,
         demandFetchCount,
         fetchScoreForPubkey,
+        getWotFollowers,
         inspectedPubkey,
         setInspectedPubkey
       }}

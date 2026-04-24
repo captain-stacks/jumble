@@ -5,7 +5,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import bootstrapCache from '@/services/bootstrap-cache.service'
 import { X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
   const { mutePubkeySet } = useMuteList()
@@ -16,6 +16,14 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
   const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 
   const [tab, setTab] = useState<'debug' | 'progress'>('progress')
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">

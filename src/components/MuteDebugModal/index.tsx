@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
   const { mutePubkeySet } = useMuteList()
   const { pubkey: currentPubkey } = useNostr()
-  const { demandFetchCount, isWotReady, wotStep, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers } = useUserTrust()
+  const { demandFetchCount, isWotReady, wotStep, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers, getWotMuters } = useUserTrust()
   const cachedMuteList = bootstrapCache.getMuteList()
   const cachedWoT = bootstrapCache.getWoT()
   const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
@@ -64,6 +64,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
               const { follows, mutes } = getMuteRatio(inspectedPubkey)
               const inWot = isUserTrusted(inspectedPubkey)
               const wotFollowers = getWotFollowers(inspectedPubkey)
+              const wotMuters = getWotMuters(inspectedPubkey)
               return (
                 <div className="space-y-3">
                   <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs space-y-2">
@@ -87,6 +88,18 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
                       </div>
                       <div className="max-h-64 overflow-y-auto space-y-1">
                         {wotFollowers.map((pk) => (
+                          <UserItem key={pk} userId={pk} hideFollowButton />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {wotMuters.length > 0 && (
+                    <div>
+                      <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Muted by ({wotMuters.length})
+                      </div>
+                      <div className="max-h-64 overflow-y-auto space-y-1">
+                        {wotMuters.map((pk) => (
                           <UserItem key={pk} userId={pk} hideFollowButton />
                         ))}
                       </div>

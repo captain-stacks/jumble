@@ -37,6 +37,7 @@ type TUserTrustContext = {
   demandFetchCount: number
   fetchScoreForPubkey: (pubkey: string) => void
   getWotFollowers: (pubkey: string) => string[]
+  getWotMuters: (pubkey: string) => string[]
   inspectedPubkey: string | null
   setInspectedPubkey: (pubkey: string | null) => void
 }
@@ -63,6 +64,7 @@ const wotSet = new Set<string>()
 const followCountMap = new Map<string, number>()
 const followersMap = new Map<string, Set<string>>()
 const muteCountMap = new Map<string, number>()
+const mutersMap = new Map<string, Set<string>>()
 const countedFollowSet = new Set<string>()
 const countedMuteSet = new Set<string>()
 const scoreFetchedSet = new Set<string>()
@@ -134,6 +136,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         followCountMap.clear()
         followersMap.clear()
         muteCountMap.clear()
+        mutersMap.clear()
         countedFollowSet.clear()
         countedMuteSet.clear()
         scoreFetchedSet.clear()
@@ -195,6 +198,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                     if (!countedMuteSet.has(key)) {
                       countedMuteSet.add(key)
                       muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                      const muters = mutersMap.get(pubkey)
+                      if (muters) {
+                        muters.add(event.pubkey)
+                      } else {
+                        mutersMap.set(pubkey, new Set([event.pubkey]))
+                      }
                     }
                   })
                 }
@@ -362,6 +371,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return Array.from(followersMap.get(pubkey) ?? [])
   }, [])
 
+  const getWotMuters = useCallback((pubkey: string): string[] => {
+    return Array.from(mutersMap.get(pubkey) ?? [])
+  }, [])
+
   const fetchScoreForPubkey = useCallback((pubkey: string) => {
     if (!currentPubkey) return
     if (!isWotReady) return
@@ -420,6 +433,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         demandFetchCount,
         fetchScoreForPubkey,
         getWotFollowers,
+        getWotMuters,
         inspectedPubkey,
         setInspectedPubkey
       }}

@@ -818,8 +818,15 @@ class ClientService extends EventTarget {
     const relayList = await this.fetchRelayList(pubkey)
     const relays = relayList.write.concat(getDefaultRelayUrls()).slice(0, 8)
     return this.fetchEvents(relays, [
-      { kinds: [10000], '#p': [pubkey] },
-      { kinds: [ExtendedKind.FOLLOW_SET], '#p': [pubkey], '#L': ['mutable'] }
+      { kinds: [kinds.Mutelist], '#p': [pubkey] },
+      {
+        kinds: [
+          kinds.Followsets,
+          kinds.Genericlists,
+          ExtendedKind.FOLLOW_PACK
+        ],
+        '#p': [pubkey]
+      }
     ])
   }
 

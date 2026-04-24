@@ -30,6 +30,7 @@ import BannerWithLightbox from './BannerWithLightbox'
 import FollowedBy from './FollowedBy'
 import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
+import ProfileWotInfo from './ProfileWotInfo'
 import Relays from './Relays'
 import SpecialFollowButton from './SpecialFollowButton'
 
@@ -247,6 +248,7 @@ export default function Profile({ id }: { id?: string }) {
               </div>
               <FollowedBy pubkey={pubkey} />
             </div>
+            <ProfileWotInfo pubkey={pubkey} />
           </div>
         </div>
         <div className="px-4 pb-0.5 pt-3.5">

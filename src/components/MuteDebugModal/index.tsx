@@ -10,12 +10,14 @@ import { useEffect, useState } from 'react'
 export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
   const { mutePubkeySet } = useMuteList()
   const { pubkey: currentPubkey } = useNostr()
-  const { demandFetchCount, isWotReady, wotStep, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers, getWotMuters } = useUserTrust()
+  const { demandFetchCount, muteVersion, isWotReady, wotStep, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers, getWotMuters, getWotInLists, fetchScoreForPubkey, downvotedFollowPacks } = useUserTrust()
   const cachedMuteList = bootstrapCache.getMuteList()
   const cachedWoT = bootstrapCache.getWoT()
   const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 
-  const [tab, setTab] = useState<'debug' | 'progress'>('progress')
+  const [tab, setTab] = useState<'debug' | 'progress' | 'packs'>('progress')
+  const [expandedPack, setExpandedPack] = useState<string | null>(null)
+  const [listTab, setListTab] = useState<'followers' | 'muters' | 'inlists'>('followers')
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,6 +26,10 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  useEffect(() => {
+    if (inspectedPubkey) fetchScoreForPubkey(inspectedPubkey)
+  }, [inspectedPubkey, fetchScoreForPubkey])
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -37,7 +43,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
 
         {/* Tab bar */}
         <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
-          {(['progress', 'debug'] as const).map((t) => (
+          {(['progress', 'packs', 'debug'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -47,7 +53,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
                   : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              {t === 'progress' ? 'WoT Progress' : 'Debug Info'}
+              {t === 'progress' ? 'WoT Progress' : t === 'packs' ? `👎 Packs (${downvotedFollowPacks.length})` : 'Debug Info'}
             </button>
           ))}
         </div>
@@ -56,7 +62,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>WoT ready: {isWotReady ? '✅' : `⏳ step ${wotStep}`}</span>
-              <span>On-demand queries: {demandFetchCount}</span>
+              <span>On-demand queries: {demandFetchCount} · mute v{muteVersion}</span>
             </div>
 
             {inspectedPubkey ? (() => {
@@ -65,6 +71,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
               const inWot = isUserTrusted(inspectedPubkey)
               const wotFollowers = getWotFollowers(inspectedPubkey)
               const wotMuters = getWotMuters(inspectedPubkey)
+              const wotInLists = getWotInLists(inspectedPubkey)
               return (
                 <div className="space-y-3">
                   <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs space-y-2">
@@ -81,25 +88,30 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
                       <span className="font-mono">{mutes}</span>
                     </div>
                   </div>
-                  {wotFollowers.length > 0 && (
+                  {(wotFollowers.length > 0 || wotMuters.length > 0 || wotInLists.length > 0) && (
                     <div>
-                      <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Followed by ({wotFollowers.length})
+                      <div className="flex gap-1 mb-2 border-b border-gray-200 dark:border-gray-700">
+                        <button
+                          onClick={() => setListTab('followers')}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-t transition-colors ${listTab === 'followers' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                        >
+                          Followed by ({wotFollowers.length})
+                        </button>
+                        <button
+                          onClick={() => setListTab('muters')}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-t transition-colors ${listTab === 'muters' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                        >
+                          Muted by ({wotMuters.length})
+                        </button>
+                        <button
+                          onClick={() => setListTab('inlists')}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-t transition-colors ${listTab === 'inlists' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                        >
+                          In Lists ({wotInLists.length})
+                        </button>
                       </div>
                       <div className="max-h-64 overflow-y-auto space-y-1">
-                        {wotFollowers.map((pk) => (
-                          <UserItem key={pk} userId={pk} hideFollowButton />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {wotMuters.length > 0 && (
-                    <div>
-                      <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Muted by ({wotMuters.length})
-                      </div>
-                      <div className="max-h-64 overflow-y-auto space-y-1">
-                        {wotMuters.map((pk) => (
+                        {(listTab === 'followers' ? wotFollowers : listTab === 'muters' ? wotMuters : wotInLists).map((pk) => (
                           <UserItem key={pk} userId={pk} hideFollowButton />
                         ))}
                       </div>
@@ -111,6 +123,35 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
               <div className="text-xs text-gray-400 dark:text-gray-500 italic">
                 Open a profile to see its mute query info here.
               </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'packs' && (
+          <div className="space-y-2 text-sm">
+            {downvotedFollowPacks.length === 0 ? (
+              <div className="text-xs text-gray-400 dark:text-gray-500 italic">
+                No 👎'd follow packs found.
+              </div>
+            ) : (
+              downvotedFollowPacks.map((pack) => (
+                <div key={pack.addr} className="border border-gray-200 dark:border-gray-700 rounded">
+                  <button
+                    className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => setExpandedPack(expandedPack === pack.addr ? null : pack.addr)}
+                  >
+                    <span className="font-medium text-sm">{pack.title}</span>
+                    <span className="text-xs text-gray-500">{pack.pubkeys.length} members {expandedPack === pack.addr ? '▲' : '▼'}</span>
+                  </button>
+                  {expandedPack === pack.addr && (
+                    <div className="max-h-48 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
+                      {pack.pubkeys.map((pk) => (
+                        <UserItem key={pk} userId={pk} hideFollowButton />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
             )}
           </div>
         )}

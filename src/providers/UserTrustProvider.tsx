@@ -1,4 +1,4 @@
-import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
+import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
 import bootstrapCache from '@/services/bootstrap-cache.service'
@@ -63,6 +63,7 @@ const wotSet = new Set<string>()
 const followCountMap = new Map<string, number>()
 const followersMap = new Map<string, Set<string>>()
 const muteCountMap = new Map<string, number>()
+const countedFollowSet = new Set<string>()
 const countedMuteSet = new Set<string>()
 const scoreFetchedSet = new Set<string>()
 let myFollowSetSize = 0
@@ -133,6 +134,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         followCountMap.clear()
         followersMap.clear()
         muteCountMap.clear()
+        countedFollowSet.clear()
         countedMuteSet.clear()
         scoreFetchedSet.clear()
         myFollowSetSize = 0
@@ -166,21 +168,25 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
             const batch = directFollows.slice(i, i + BATCH_SIZE)
             const results = await Promise.all(
               batch.map((pubkey) =>
-                pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist], limit: 2 })
+                pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist, ExtendedKind.FOLLOW_PACK], limit: 100 })
               )
             )
             if (cancelled) return
             results.forEach((events) => {
               events.forEach((event) => {
-                if (event.kind === kinds.Contacts) {
+                if (event.kind === kinds.Contacts || event.kind === ExtendedKind.FOLLOW_PACK) {
                   getPubkeysFromPTags(event.tags).forEach((pubkey) => {
                     wotSet.add(pubkey)
-                    followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                    const followers = followersMap.get(pubkey)
-                    if (followers) {
-                      followers.add(event.pubkey)
-                    } else {
-                      followersMap.set(pubkey, new Set([event.pubkey]))
+                    const followKey = `${event.pubkey}:${pubkey}`
+                    if (!countedFollowSet.has(followKey)) {
+                      countedFollowSet.add(followKey)
+                      followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                      const followers = followersMap.get(pubkey)
+                      if (followers) {
+                        followers.add(event.pubkey)
+                      } else {
+                        followersMap.set(pubkey, new Set([event.pubkey]))
+                      }
                     }
                   })
                 } else if (event.kind === kinds.Mutelist) {
@@ -243,20 +249,24 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           const batch = followings.slice(i, i + BATCH_SIZE)
           const results = await Promise.all(
             batch.map((pubkey) =>
-              pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist], limit: 2 })
+              pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist, ExtendedKind.FOLLOW_PACK], limit: 100 })
             )
           )
           results.forEach((events) => {
             events.forEach((event) => {
-              if (event.kind === kinds.Contacts) {
+              if (event.kind === kinds.Contacts || event.kind === ExtendedKind.FOLLOW_PACK) {
                 getPubkeysFromPTags(event.tags).forEach((pubkey) => {
                   wotSet.add(pubkey)
-                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                  const followers = followersMap.get(pubkey)
-                  if (followers) {
-                    followers.add(event.pubkey)
-                  } else {
-                    followersMap.set(pubkey, new Set([event.pubkey]))
+                  const followKey = `${event.pubkey}:${pubkey}`
+                  if (!countedFollowSet.has(followKey)) {
+                    countedFollowSet.add(followKey)
+                    followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                    const followers = followersMap.get(pubkey)
+                    if (followers) {
+                      followers.add(event.pubkey)
+                    } else {
+                      followersMap.set(pubkey, new Set([event.pubkey]))
+                    }
                   }
                 })
               } else if (event.kind === kinds.Mutelist) {

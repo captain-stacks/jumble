@@ -41,7 +41,8 @@ type TUserTrustContext = {
   wotStep: number
   muteVersion: number
   demandFetchCount: number
-  fetchScoreForPubkey: (pubkey: string) => void
+  fetchScoreForPubkey: (pubkey: string) => Promise<void>
+  isScoreFetched: (pubkey: string) => boolean
   getWotFollowers: (pubkey: string) => string[]
   getWotMuters: (pubkey: string) => string[]
   getWotInLists: (pubkey: string) => string[]
@@ -78,7 +79,8 @@ const inListsMap = new Map<string, Set<string>>()
 const inListsEventsMap = new Map<string, Map<string, Event>>()
 const countedFollowSet = new Set<string>()
 const countedMuteSet = new Set<string>()
-const scoreFetchedSet = new Set<string>()
+const scorePromiseMap = new Map<string, Promise<void>>()
+const scoreDoneSet = new Set<string>()
 let myFollowSetSize = 0
 
 // Bayesian-smoothed exponential decay operating in rate space:
@@ -94,11 +96,11 @@ const TRUST_PRIOR_SCALE = 50   // priorRate = 1/50 = 2%
 let trustDecay = storage.getMuteWeight()
 
 function computeTrustScore(pubkey: string): number {
+  const wotSize = wotSet.size
+  if (wotSize === 0 || myFollowSetSize === 0) return 0
   const follows = followCountMap.get(pubkey) ?? 0
   const mutes = muteCountMap.get(pubkey) ?? 0
   if (follows === 0 && mutes === 0) return 1
-  const wotSize = wotSet.size
-  if (wotSize === 0 || myFollowSetSize === 0) return 1
   const followRate = follows / myFollowSetSize
   const muteRate = mutes / wotSize
   const priorRate = 1 / TRUST_PRIOR_SCALE
@@ -153,7 +155,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         inListsEventsMap.clear()
         countedFollowSet.clear()
         countedMuteSet.clear()
-        scoreFetchedSet.clear()
+        scorePromiseMap.clear()
+        scoreDoneSet.clear()
         myFollowSetSize = 0
         
         // Wait for followingSet to be populated before building WoT
@@ -495,13 +498,14 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return Array.from(inListsEventsMap.get(pubkey)?.values() ?? [])
   }, [])
 
-  const fetchScoreForPubkey = useCallback((pubkey: string) => {
-    if (!currentPubkey) return
-    if (!isWotReady) return
-    if (scoreFetchedSet.has(pubkey)) return
-    scoreFetchedSet.add(pubkey)
+  const fetchScoreForPubkey = useCallback((pubkey: string): Promise<void> => {
+    if (!currentPubkey || !isWotReady) return Promise.resolve()
 
-    ;(async () => {
+    const cached = scorePromiseMap.get(pubkey)
+    if (cached) return cached
+
+    const promise = (async () => {
+      let succeeded = false
       try {
         let added = 0
         const events = await client.fetchInListsEvents(pubkey)
@@ -530,13 +534,19 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           }
         }
         if (added > 0) setMuteVersion((v) => v + 1)
+        succeeded = true
       } catch {
-        // Silently handle errors
+        // Allow retry by removing from promise map
+        scorePromiseMap.delete(pubkey)
       } finally {
+        if (succeeded) scoreDoneSet.add(pubkey)
         setDemandFetchCount((v) => v + 1)
       }
     })()
-  }, [currentPubkey, followingSet, isWotReady])
+
+    scorePromiseMap.set(pubkey, promise)
+    return promise
+  }, [currentPubkey, isWotReady])
 
   const meetsMinTrustScore = useCallback(
     async (pubkey: string, minScore: number) => {
@@ -547,6 +557,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     },
     [currentPubkey]
   )
+
+  const isScoreFetched = useCallback((pubkey: string) => scoreDoneSet.has(pubkey), [])
 
   return (
     <UserTrustContext.Provider
@@ -567,6 +579,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         muteVersion,
         demandFetchCount,
         fetchScoreForPubkey,
+        isScoreFetched,
         getWotFollowers,
         getWotMuters,
         getWotInLists,

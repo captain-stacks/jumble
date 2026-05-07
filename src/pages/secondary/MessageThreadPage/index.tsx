@@ -107,7 +107,8 @@ const MessageThreadPage = forwardRef(({ groupId, index }: { groupId?: string; in
     }
 
     const runIngest = async (g: MarmotGroup<GroupHistory>, events: Parameters<MarmotGroup<GroupHistory>['ingest']>[0]) => {
-      for await (const _result of g.ingest(events)) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _ of g.ingest(events)) {
         // applicationMessage events fire as a side-effect
       }
     }

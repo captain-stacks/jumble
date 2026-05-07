@@ -85,7 +85,7 @@ const NoteList = forwardRef<
     const { t } = useTranslation()
     const active = usePageActive()
     const { startLogin } = useNostr()
-    const { isSpammer, meetsMinTrustScore } = useUserTrust()
+    const { isWotReady, fetchScoreForPubkey, isScoreFetched, getTrustScore } = useUserTrust()
     const { mutePubkeySet } = useMuteList()
     const { followingSet } = useFollowList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
@@ -244,11 +244,19 @@ const NoteList = forwardRef<
           return
         }
 
+        if (!isWotReady) return
+
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt, i) => {
-              // Followed users bypass trust score filter
-              if (!followingSet.has(evt.pubkey) && !(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
+              if (followingSet.has(evt.pubkey)) {
+                const key = keys[i]
+                return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
+              }
+              if (!isScoreFetched(evt.pubkey)) {
+                await fetchScoreForPubkey(evt.pubkey)
+              }
+              if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
                 return null
               }
               const key = keys[i]
@@ -272,9 +280,12 @@ const NoteList = forwardRef<
       shouldHideEvent,
       hideReplies,
       hideSpam,
-      meetsMinTrustScore,
+      isScoreFetched,
+      fetchScoreForPubkey,
+      getTrustScore,
       trustScoreThreshold,
-      followingSet
+      followingSet,
+      isWotReady
     ])
 
     useEffect(() => {
@@ -302,15 +313,18 @@ const NoteList = forwardRef<
           return
         }
 
+        if (!isWotReady) return
+
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt) => {
-              if (hideSpam && (await isSpammer(evt.pubkey))) {
-                return null
-              }
-              // Followed users bypass trust score filter
-              if (!followingSet.has(evt.pubkey) && !(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
-                return null
+              if (!followingSet.has(evt.pubkey)) {
+                if (!isScoreFetched(evt.pubkey)) {
+                  await fetchScoreForPubkey(evt.pubkey)
+                }
+                if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
+                  return null
+                }
               }
               return evt
             })
@@ -319,7 +333,7 @@ const NoteList = forwardRef<
         setFilteredNewEvents(_filteredNotes)
       }
       processNewEvents()
-    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold, followingSet])
+    }, [newEvents, shouldHideEvent, isScoreFetched, hideSpam, fetchScoreForPubkey, getTrustScore, trustScoreThreshold, followingSet, isWotReady])
 
     const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
       setTimeout(() => {
@@ -497,7 +511,7 @@ const NoteList = forwardRef<
           />
         ))}
         <div ref={bottomRef} />
-        {shouldShowLoadingIndicator || filtering || initialLoading ? (
+        {shouldShowLoadingIndicator || filtering || initialLoading || (!isWotReady && (hideSpam || (trustScoreThreshold ?? 0) > 0)) ? (
           <NoteCardLoadingSkeleton />
         ) : events.length ? (
           <div className="mt-2 text-center text-sm text-muted-foreground">{t('no more notes')}</div>

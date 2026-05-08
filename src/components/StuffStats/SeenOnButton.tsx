@@ -37,7 +37,7 @@ export default function SeenOnButton({ stuff }: { stuff: Event | string }) {
 
   const trigger = (
     <button
-      className="flex h-full items-center gap-1 ps-3 text-muted-foreground enabled:hover:text-primary disabled:text-muted-foreground/40"
+      className="text-muted-foreground disabled:text-muted-foreground/40 flex h-full cursor-pointer items-center gap-1 ps-3 enabled:hover:text-violet-400"
       title={t('Seen on')}
       disabled={relays.length === 0}
       onClick={() => {

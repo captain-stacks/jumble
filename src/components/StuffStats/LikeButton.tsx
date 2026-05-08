@@ -114,7 +114,7 @@ export default function LikeButton({ stuff }: { stuff: Event | string }) {
 
   const trigger = (
     <button
-      className="text-muted-foreground enabled:hover:text-primary flex h-full cursor-pointer items-center gap-1 px-3"
+      className="text-muted-foreground enabled:hover:text-red-400 flex h-full cursor-pointer items-center gap-1 px-3"
       title={t('Like')}
       disabled={liking}
       onClick={handleClick}

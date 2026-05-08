@@ -74,7 +74,7 @@ export default function TranslateButton({
   return (
     <button
       className={cn(
-        'text-muted-foreground disabled:text-muted-foreground flex h-full items-center px-2 py-1 transition-colors hover:text-pink-400 [&_svg]:size-4 [&_svg]:shrink-0',
+        'text-muted-foreground disabled:text-muted-foreground flex h-full cursor-pointer items-center px-2 py-1 transition-colors hover:text-pink-400 [&_svg]:size-4 [&_svg]:shrink-0',
         className
       )}
       disabled={translating}

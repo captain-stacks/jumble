@@ -965,8 +965,11 @@ class ClientService extends EventTarget {
     }
 
     if (!event && author) {
-      const relayList = await this.fetchRelayList(author)
-      event = await this.fetchEventFromRelays(relayList.write.slice(0, 5), filter)
+      if (!relays.length) {
+        const relayList = await this.fetchRelayList(author)
+        relays = relayList.write.slice(0, 5)
+      }
+      event = await this.fetchEventFromRelays(relays, filter)
     }
 
     if (event && event.id !== id) {

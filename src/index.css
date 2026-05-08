@@ -109,6 +109,11 @@
     overscroll-behavior-y: none;
   }
 
+  button:not([disabled]),
+  [role='button']:not([disabled]) {
+    cursor: pointer;
+  }
+
   :root {
     --surface-background: 0 0% 98%;
     --background: 0 0% 100%;

@@ -57,11 +57,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (active) {
+      if (wasActiveRef.current) return
       wasActiveRef.current = true
+      // Update the global seen-at on entry so closing the tab while still
+      // on this page doesn't lose the read state. The page snapshots its
+      // own lastReadTime before this fires, so the in-view bold styling is
+      // unaffected.
+      updateNotificationsSeenAt()
       return
     }
     if (wasActiveRef.current) {
       wasActiveRef.current = false
+      // Re-update on leave so notifications that arrived during the visit
+      // aren't shown as "new" again on the next visit.
       updateNotificationsSeenAt()
       setReadNotificationIdSet(new Set())
     }

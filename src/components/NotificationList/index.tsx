@@ -59,9 +59,18 @@ export default function NotificationList() {
     }
   }, [notificationType])
 
-  // Reset last-read marker whenever this page becomes current.
+  // Snapshot the page-level last-read marker only when this page becomes
+  // current. We deliberately don't react to subsequent changes of
+  // `notificationsSeenAt` (e.g. the global update fired on entering this
+  // page) — otherwise items would flip from unread to read mid-view.
+  const wasActiveRef = useRef(false)
   useEffect(() => {
-    if (current !== 'notifications' || !pubkey) return
+    if (current !== 'notifications' || !pubkey) {
+      wasActiveRef.current = false
+      return
+    }
+    if (wasActiveRef.current) return
+    wasActiveRef.current = true
     setLastReadTime(getNotificationsSeenAt())
   }, [current, pubkey, getNotificationsSeenAt])
 

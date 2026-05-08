@@ -161,6 +161,15 @@ export type TEmoji = {
   url: string
 }
 
+export type TEmojiPack = {
+  id: string
+  title?: string
+  author: string
+  emojis: TEmoji[]
+}
+
+export type TSkinTone = 0 | 1 | 2 | 3 | 4 | 5
+
 export type TTranslationAccount = {
   pubkey: string
   api_key: string

@@ -12,6 +12,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
 import cryptoFileService from '@/services/crypto-file.service'
 import customEmojiService from '@/services/custom-emoji.service'
+import recentEmojiService from '@/services/recent-emoji.service'
 import dmService from '@/services/dm.service'
 import mediaUpload, { UPLOAD_ABORTED_ERROR_MSG } from '@/services/media-upload.service'
 import { TEmoji, TProfile } from '@/types'
@@ -350,11 +351,8 @@ export default function DmInput({
       return
     }
     let cancelled = false
-    customEmojiService.searchEmojis(emojiQuery).then((ids) => {
+    customEmojiService.searchEmojis(emojiQuery).then((emojis) => {
       if (!cancelled) {
-        const emojis = ids
-          .map((id) => customEmojiService.getEmojiById(id))
-          .filter(Boolean) as TEmoji[]
         setEmojiResults(emojis)
         setEmojiIndex(0)
       }
@@ -399,7 +397,7 @@ export default function DmInput({
       sel.addRange(range)
 
       emojisRef.current.set(emoji.shortcode, emoji.url)
-      customEmojiService.updateSuggested(customEmojiService.getEmojiId(emoji))
+      recentEmojiService.add(emoji)
       setEmojiQuery(null)
       setEmojiResults([])
       triggerRef.current = null

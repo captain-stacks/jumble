@@ -7,9 +7,7 @@ import {
   URL_REGEX,
   WS_URL_REGEX
 } from '@/constants'
-import { TEmoji } from '@/types'
 import { clsx, type ClassValue } from 'clsx'
-import { parseNativeEmoji } from 'emoji-picker-react/src/dataUtils/parseNativeEmoji'
 import { franc } from 'franc-min'
 import { twMerge } from 'tailwind-merge'
 
@@ -186,15 +184,3 @@ export function getClientDescription(): string {
   return details ? `Jumble (${details})` : 'Jumble'
 }
 
-export function parseEmojiPickerUnified(unified: string): string | TEmoji | undefined {
-  if (unified.startsWith(':')) {
-    const secondColonIndex = unified.indexOf(':', 1)
-    if (secondColonIndex < 0) return undefined
-
-    const shortcode = unified.slice(1, secondColonIndex)
-    const url = unified.slice(secondColonIndex + 1)
-    return { shortcode, url }
-  } else {
-    return parseNativeEmoji(unified)
-  }
-}

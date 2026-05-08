@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { parseEmojiPickerUnified } from '@/lib/utils'
+import recentEmojiService from '@/services/recent-emoji.service'
 import { TEmoji } from '@/types'
-import { getSuggested } from 'emoji-picker-react/src/dataUtils/suggested'
 import { MoreHorizontal } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Emoji from '../Emoji'
@@ -19,27 +18,21 @@ export default function SuggestedEmojis({
     useState<(string | TEmoji)[]>(DEFAULT_SUGGESTED_EMOJIS)
 
   useEffect(() => {
-    try {
-      const suggested = getSuggested()
-      const emojiSet = new Set<string>()
-      const suggestEmojis = (
-        suggested
-          .sort((a, b) => b.count - a.count)
-          .map((item) => parseEmojiPickerUnified(item.unified))
-          .filter(Boolean) as (string | TEmoji)[]
-      )
-        .concat(DEFAULT_SUGGESTED_EMOJIS)
-        .filter((emoji) => {
-          if (typeof emoji !== 'string') return true
-          if (emojiSet.has(emoji)) return false
-          emojiSet.add(emoji)
-          return true
-        })
-      setSuggestedEmojis(suggestEmojis.slice(0, 9))
-    } catch {
-      // ignore
-    }
+    const recent = recentEmojiService.getRecent()
+    const seen = new Set<string>()
+    const merged = [...recent, ...DEFAULT_SUGGESTED_EMOJIS].filter((emoji) => {
+      const key = typeof emoji === 'string' ? `n:${emoji}` : `c:${emoji.shortcode}|${emoji.url}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    setSuggestedEmojis(merged.slice(0, 9))
   }, [])
+
+  const handlePick = (emoji: string | TEmoji) => {
+    recentEmojiService.add(emoji)
+    onEmojiClick(emoji)
+  }
 
   return (
     <div className="flex gap-1 p-1" onClick={(e) => e.stopPropagation()}>
@@ -54,7 +47,7 @@ export default function SuggestedEmojis({
           <div
             key={index}
             className="clickable flex h-8 w-8 items-center justify-center rounded-lg text-xl"
-            onClick={() => onEmojiClick(emoji)}
+            onClick={() => handlePick(emoji)}
           >
             {emoji}
           </div>
@@ -62,7 +55,7 @@ export default function SuggestedEmojis({
           <div
             className="clickable flex flex-col items-center justify-center rounded-lg p-1"
             key={index}
-            onClick={() => onEmojiClick(emoji)}
+            onClick={() => handlePick(emoji)}
           >
             <Emoji emoji={emoji} classNames={{ img: 'size-6 rounded-md' }} />
           </div>

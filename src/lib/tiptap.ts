@@ -63,7 +63,7 @@ function _parseEditorJsonToText(node?: JSONContent): string {
 
 function parseEmojiNodeName(name?: string): string {
   if (!name) return ''
-  if (customEmojiService.isCustomEmojiId(name)) {
+  if (customEmojiService.getEmojiById(name)) {
     return `:${name}:`
   }
   const emoji = shortcodeToEmoji(name, emojis)

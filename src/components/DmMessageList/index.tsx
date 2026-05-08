@@ -716,12 +716,10 @@ function MessageBubble({
           {onReact && (
             <Popover open={isEmojiOpen} onOpenChange={setIsEmojiOpen}>
               <PopoverAnchor asChild>{reactButton}</PopoverAnchor>
-              <PopoverContent side="top" className="w-fit border-0 p-0 shadow-lg">
+              <PopoverContent side="top" className="w-fit overflow-hidden border-0 p-0 shadow-lg">
                 {isPickerOpen ? (
                   <EmojiPicker
-                    onEmojiClick={(emoji, e) => {
-                      e.stopPropagation()
-                      if (!emoji) return
+                    onEmojiClick={(emoji) => {
                       handleEmojiSelect(emoji)
                     }}
                   />

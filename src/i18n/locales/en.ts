@@ -853,6 +853,19 @@ export default {
     Today: 'Today',
     'This week': 'This week',
     'This month': 'This month',
-    Earlier: 'Earlier'
+    Earlier: 'Earlier',
+    'Search emojis': 'Search emojis',
+    'Recently used': 'Recently used',
+    'Smileys & Emotion': 'Smileys & Emotion',
+    'People & Body': 'People & Body',
+    'Animals & Nature': 'Animals & Nature',
+    'Food & Drink': 'Food & Drink',
+    'Travel & Places': 'Travel & Places',
+    Activities: 'Activities',
+    Objects: 'Objects',
+    Symbols: 'Symbols',
+    Flags: 'Flags',
+    'My emojis': 'My emojis',
+    'No emojis found': 'No emojis found'
   }
 }

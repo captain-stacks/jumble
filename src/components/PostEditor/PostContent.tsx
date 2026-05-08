@@ -9,7 +9,6 @@ import {
   deleteDraftEventCache
 } from '@/lib/draft-event'
 import { getDefaultRelayUrls } from '@/lib/relay'
-import { isTouchDevice } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import postEditorCache from '@/services/post-editor-cache.service'
 import threadService from '@/services/thread.service'
@@ -321,21 +320,16 @@ export default function PostContent({
               <ImageUp />
             </Button>
           </Uploader>
-          {/* I'm not sure why, but after triggering the virtual keyboard,
-              opening the emoji picker drawer causes an issue,
-              the emoji I tap isn't the one that gets inserted. */}
-          {!isTouchDevice() && (
-            <EmojiPickerDialog
-              onEmojiClick={(emoji) => {
-                if (!emoji) return
-                textareaRef.current?.insertEmoji(emoji)
-              }}
-            >
-              <Button variant="ghost" size="icon">
-                <Smile />
-              </Button>
-            </EmojiPickerDialog>
-          )}
+          <EmojiPickerDialog
+            onEmojiClick={(emoji) => {
+              if (!emoji) return
+              textareaRef.current?.insertEmoji(emoji)
+            }}
+          >
+            <Button variant="ghost" size="icon">
+              <Smile />
+            </Button>
+          </EmojiPickerDialog>
           {!parentStuff && (
             <Button
               variant="ghost"

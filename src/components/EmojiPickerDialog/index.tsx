@@ -15,29 +15,34 @@ export default function EmojiPickerDialog({
   onOpenChange
 }: {
   children: React.ReactNode
-  onEmojiClick?: (emoji: string | TEmoji | undefined) => void
+  onEmojiClick?: (emoji: string | TEmoji) => void
   onOpenChange?: (open: boolean) => void
 }) {
   const { isSmallScreen } = useScreenSize()
   const [open, setOpen] = useState(false)
 
   const handleOpenChange = (value: boolean) => {
+    // Dismiss virtual keyboard before opening the drawer so the layout stays
+    // stable and tapped emojis land on the intended cell.
+    if (value && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
     setOpen(value)
     onOpenChange?.(value)
+  }
+
+  const handlePick = (emoji: string | TEmoji) => {
+    setOpen(false)
+    onOpenChange?.(false)
+    onEmojiClick?.(emoji)
   }
 
   if (isSmallScreen) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent>
-          <EmojiPicker
-            onEmojiClick={(emoji, e) => {
-              e.stopPropagation()
-              setOpen(false)
-              onEmojiClick?.(emoji)
-            }}
-          />
+        <DrawerContent onClick={(e) => e.stopPropagation()}>
+          <EmojiPicker onEmojiClick={handlePick} />
         </DrawerContent>
       </Drawer>
     )
@@ -46,14 +51,12 @@ export default function EmojiPickerDialog({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent side="top" className="w-fit p-0">
-        <EmojiPicker
-          onEmojiClick={(emoji, e) => {
-            e.stopPropagation()
-            setOpen(false)
-            onEmojiClick?.(emoji)
-          }}
-        />
+      <DropdownMenuContent
+        side="top"
+        className="w-fit p-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <EmojiPicker onEmojiClick={handlePick} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

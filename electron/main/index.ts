@@ -7,6 +7,7 @@ import path from 'node:path'
 import WebSocket from 'ws'
 import { registerIpcHandlers, unregisterIpcHandlers } from './ipc.js'
 import { RelayManager } from './relay-manager.js'
+import { RendererServer } from './renderer-server.js'
 import { SecretsStore } from './secrets-store.js'
 import { Updater } from './updater.js'
 import { attachWindowStatePersistence, loadWindowState } from './window-state.js'
@@ -33,6 +34,8 @@ const secrets = new SecretsStore()
 // Auto-update is only meaningful for packaged builds — in dev the binary
 // is not what would actually be replaced.
 const updater = new Updater(app.isPackaged)
+const rendererServer = new RendererServer(RENDERER_DIST)
+let rendererOrigin: string | null = null
 
 function createWindow() {
   const savedState = loadWindowState()
@@ -74,8 +77,8 @@ function createWindow() {
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
-  } else {
-    win.loadFile(path.join(RENDERER_DIST, 'index.html'))
+  } else if (rendererOrigin) {
+    win.loadURL(rendererOrigin + '/')
   }
 
   win.on('closed', () => {
@@ -83,11 +86,39 @@ function createWindow() {
   })
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  if (VITE_DEV_SERVER_URL) {
+    rendererOrigin = new URL(VITE_DEV_SERVER_URL).origin
+  } else {
+    try {
+      const url = await rendererServer.start()
+      rendererOrigin = new URL(url).origin
+    } catch (err) {
+      console.error('Failed to start renderer server:', err)
+      app.quit()
+      return
+    }
+  }
+
   // Bypass renderer-side CORS by injecting a permissive ACAO header on every
   // cross-origin response. Affects fetch/XHR as well as <video>/<img>/<audio>
-  // since they share Chromium's network stack.
+  // since they share Chromium's network stack. Scope this to requests
+  // initiated by the renderer itself — third-party iframes (e.g. YouTube
+  // embeds) make credentialed XHRs where `ACAO: *` is rejected by spec.
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    let frameOrigin: string | null = null
+    const frameUrl = details.frame?.url
+    if (frameUrl) {
+      try {
+        frameOrigin = new URL(frameUrl).origin
+      } catch {
+        // ignore unparseable URLs
+      }
+    }
+    if (frameOrigin !== rendererOrigin) {
+      callback({})
+      return
+    }
     const headers = { ...(details.responseHeaders ?? {}) }
     delete headers['access-control-allow-origin']
     delete headers['Access-Control-Allow-Origin']
@@ -108,6 +139,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     manager.shutdown()
     updater.stop()
+    rendererServer.stop()
     unregisterIpcHandlers()
     app.quit()
   }
@@ -116,4 +148,5 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   manager.shutdown()
   updater.stop()
+  rendererServer.stop()
 })

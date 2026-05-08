@@ -114,9 +114,9 @@ const Player = memo(({ videoId, isShort, className }: PlayerProps) => {
                 }
               }, 200)
             },
-            onError: () => {
+            onError: (event: any) => {
               if (unmountedRef.current) return
-              console.error('YouTube player error')
+              console.error('YouTube player error', event?.data)
             }
           }
         })

@@ -128,6 +128,7 @@ export default function Note({
   } else if (
     event.kind === ExtendedKind.FOLLOW_PACK ||
     event.kind === ExtendedKind.FOLLOW_SET ||
+    event.kind === kinds.Followsets ||
     event.kind === kinds.Mutelist
   ) {
     content = <FollowPack className="mt-2" event={event} />

@@ -1,5 +1,5 @@
 import { ExtendedKind } from '@/constants'
-import { toFollowPack } from '@/lib/link'
+import { toFollowPack, toNote } from '@/lib/link'
 import { useSecondaryPage } from '@/PageManager'
 import { kinds, Event } from 'nostr-tools'
 import UserAvatar from '@/components/UserAvatar'
@@ -27,12 +27,14 @@ export default function InListEventCard({ event }: { event: Event }) {
   const handleClick = () => {
     if (event.kind === ExtendedKind.FOLLOW_PACK) {
       push(toFollowPack(event))
+    } else {
+      push(toNote(event))
     }
   }
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2 hover:bg-muted/50 transition-colors ${event.kind === ExtendedKind.FOLLOW_PACK ? 'cursor-pointer' : ''}`}
+      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50 transition-colors cursor-pointer"
       onClick={handleClick}
     >
       <UserAvatar userId={event.pubkey} className="size-7 shrink-0" />

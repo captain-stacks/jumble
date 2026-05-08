@@ -133,6 +133,7 @@ export const ALLOWED_FILTER_KINDS = [
   ExtendedKind.ADDRESSABLE_SHORT_VIDEO,
   ExtendedKind.RELAY_REVIEW,
   kinds.Emojisets,
+  kinds.Followsets,
   ExtendedKind.FOLLOW_SET,
   ExtendedKind.FOLLOW_PACK,
   kinds.Mutelist,

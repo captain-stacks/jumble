@@ -13,7 +13,7 @@ import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
 import relayInfoService from '@/services/relay-info.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
-import { NostrEvent } from 'nostr-tools'
+import { NostrEvent, kinds } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { RefreshButton } from '../RefreshButton'
 
@@ -47,7 +47,6 @@ export default function ProfileFeed({
       { value: 'images', label: 'Images' },
       { value: 'gallery', label: 'Gallery' },
       { value: 'lists', label: 'Lists' },
-      { value: 'inLists', label: "In lists" },
       { value: 'youtube', label: 'YouTube' }
     ]
 
@@ -140,20 +139,7 @@ export default function ProfileFeed({
         setSubRequests([
           {
             urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
-            filter: { authors: [pubkey], kinds: [ExtendedKind.FOLLOW_SET] }
-          }
-        ])
-        return
-      }
-
-      if (listMode === 'inLists') {
-        setSubRequests([
-          {
-            urls: relayList.write.concat(getDefaultRelayUrls()).slice(0, 8),
-            filter: {
-              kinds: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000],
-              '#p': [pubkey]
-            }
+            filter: { authors: [pubkey], kinds: [kinds.Followsets, ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, kinds.Mutelist] }
           }
         ])
         return
@@ -205,7 +191,7 @@ export default function ProfileFeed({
         }}
         threshold={Math.max(800, topSpace)}
         options={
-          listMode !== 'gallery' && listMode !== 'lists' && listMode !== 'inLists' && listMode !== 'youtube' ? (
+          listMode !== 'gallery' && listMode !== 'lists' && listMode !== 'youtube' ? (
             <>
               {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
               <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
@@ -220,15 +206,13 @@ export default function ProfileFeed({
           listMode === 'gallery'
             ? [ExtendedKind.PICTURE]
             : listMode === 'lists'
-              ? [ExtendedKind.FOLLOW_SET]
-              : listMode === 'inLists'
-                ? [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, 10000]
-                : temporaryShowKinds
+              ? [kinds.Followsets, ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, kinds.Mutelist]
+              : temporaryShowKinds
         }
         hideReplies={listMode === 'posts' || listMode === 'images'}
         filterMutedNotes={false}
         showMutedContent={isMuted}
-        pinnedEventIds={listMode === 'you' || listMode === 'lists' || listMode === 'inLists' || listMode === 'youtube' || !!search ? [] : pinnedEventIds}
+        pinnedEventIds={listMode === 'you' || listMode === 'lists' || listMode === 'youtube' || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
         filterFn={
           listMode === 'images'

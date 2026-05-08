@@ -109,7 +109,12 @@ export default function ContentPreview({
     return <EmojiPackPreview event={event} className={className} />
   }
 
-  if (event.kind === ExtendedKind.FOLLOW_PACK) {
+  if (
+    event.kind === ExtendedKind.FOLLOW_PACK ||
+    event.kind === ExtendedKind.FOLLOW_SET ||
+    event.kind === kinds.Followsets ||
+    event.kind === kinds.Mutelist
+  ) {
     return <FollowPackPreview event={event} className={className} />
   }
 

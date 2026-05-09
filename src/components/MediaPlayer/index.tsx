@@ -87,15 +87,17 @@ export default function MediaPlayer({
   }
 
   if (!mediaType) {
-    if (dim?.width && dim?.height) {
-      return (
-        <div
-          className={cn('rounded-xl border bg-muted', className)}
-          style={{ aspectRatio: `${dim.width} / ${dim.height}`, width: '100%' }}
-        />
-      )
-    }
-    return null
+    return (
+      <div
+        className={cn(
+          'w-full rounded-xl border bg-muted sm:h-[60vh] sm:w-auto sm:max-w-full',
+          className
+        )}
+        style={{
+          aspectRatio: dim?.width && dim?.height ? `${dim.width} / ${dim.height}` : '16 / 9'
+        }}
+      />
+    )
   }
 
   if (mediaType === 'video') {

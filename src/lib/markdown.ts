@@ -27,7 +27,6 @@ export function containsMarkdown(content: string): boolean {
     /__[^_\n]+__/, // bold __text__
     /\[[^\]]+\]\([^)]+\)/, // link [text](url)
     /^>\s+\S/m, // blockquote > text
-    /^\d+\.\s+\S/m, // ordered list 1. item
     /^---$/m, // horizontal rule
     /~~[^~\n]+~~/ // strikethrough ~~text~~
   ]
@@ -60,9 +59,7 @@ export function estimateReadingMinutes(content: string): number {
   const cjkMatches = stripped.match(/[぀-ヿ㐀-䶿一-鿿가-힯]/g)
   const cjkCount = cjkMatches ? cjkMatches.length : 0
 
-  const latinMatches = stripped
-    .replace(/[぀-ヿ㐀-䶿一-鿿가-힯]/g, ' ')
-    .match(/[\p{L}\p{N}]+/gu)
+  const latinMatches = stripped.replace(/[぀-ヿ㐀-䶿一-鿿가-힯]/g, ' ').match(/[\p{L}\p{N}]+/gu)
   const latinCount = latinMatches ? latinMatches.length : 0
 
   const minutes = cjkCount / 300 + latinCount / 220

@@ -13,7 +13,7 @@ export default function MessagesButton() {
   return (
     <BottomNavigationBarItem active={active} onClick={() => checkLogin(() => navigate('dms'))}>
       <div className="relative">
-        <ChatCircleIcon weight={active ? 'fill' : 'bold'} />
+        <ChatCircleIcon weight={active ? 'fill' : 'regular'} />
         {hasUnread && (
           <div className="bg-primary ring-background absolute -top-0.5 right-0.5 h-2 w-2 rounded-full ring-2" />
         )}

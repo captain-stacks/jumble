@@ -8,7 +8,7 @@ export default function HomeButton() {
 
   return (
     <BottomNavigationBarItem active={active} onClick={() => navigate('home')}>
-      <HouseIcon weight={active ? 'fill' : 'bold'} />
+      <HouseIcon weight={active ? 'fill' : 'regular'} />
     </BottomNavigationBarItem>
   )
 }

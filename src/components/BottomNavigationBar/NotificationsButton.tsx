@@ -16,7 +16,7 @@ export default function NotificationsButton() {
       onClick={() => checkLogin(() => navigate('notifications'))}
     >
       <div className="relative">
-        <BellIcon weight={active ? 'fill' : 'bold'} />
+        <BellIcon weight={active ? 'fill' : 'regular'} />
         {hasNewNotification && (
           <div className="bg-primary ring-background absolute -top-0.5 right-0.5 h-2 w-2 rounded-full ring-2" />
         )}

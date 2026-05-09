@@ -8,7 +8,7 @@ export default function SearchButton() {
 
   return (
     <BottomNavigationBarItem active={active} onClick={() => navigate('search')}>
-      <MagnifyingGlassIcon weight={active ? 'fill' : 'bold'} />
+      <MagnifyingGlassIcon weight={active ? 'fill' : 'regular'} />
     </BottomNavigationBarItem>
   )
 }

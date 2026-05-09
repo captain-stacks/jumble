@@ -17,7 +17,7 @@ export default function PostButton() {
           })
         }}
       >
-        <PlusCircleIcon weight="bold" className="size-7!" />
+        <PlusCircleIcon weight="regular" className="size-7!" />
       </BottomNavigationBarItem>
       <PostEditor open={open} setOpen={setOpen} />
     </>

@@ -395,13 +395,14 @@ export function getVideoMetadataFromEvent(event: Event) {
     if (tagName === 'title') {
       title = tagValue
     } else if (tagName === 't' && tagValue && tags.size < 6) {
-      tags.add(tagValue.toLocaleLowerCase())
+      const normalizedTagValue = tagValue.toLocaleLowerCase()
+      if (normalizedTagValue.startsWith('#')) {
+        tags.add(normalizedTagValue)
+      } else {
+        tags.add(`#${normalizedTagValue}`) // Ensure the tag is treated as a hashtag
+      }
     }
   })
-
-  if (!title) {
-    title = event.tags.find(tagNameEquals('d'))?.[1]
-  }
 
   return { title, tags: Array.from(tags) }
 }

@@ -838,6 +838,39 @@ export default {
     Today: '오늘',
     'This week': '이번 주',
     'This month': '이번 달',
-    Earlier: '이전'
+    Earlier: '이전',
+    Preferences: '환경 설정',
+    Account: '계정',
+    'Network & system': '네트워크 및 시스템',
+    'Theme & color': '테마 및 색상',
+    'Column layout': '열 레이아웃',
+    'Content filtering': '콘텐츠 필터링',
+    Language: '언어',
+    Updates: '업데이트',
+    Connection: '연결',
+    'Web display': '웹 표시',
+    'Media upload': '미디어 업로드',
+    'Private key': '개인 키',
+    'Your private key controls your account. Keep it safe and never share it.':
+      '개인 키는 계정을 제어합니다. 안전하게 보관하고 절대로 공유하지 마세요.',
+    'Template URL used to fetch website favicons':
+      '웹사이트 파비콘을 가져오는 데 사용되는 템플릿 URL',
+    'Display language': '표시 언어',
+    'Translation service': '번역 서비스',
+    'API key': 'API 키',
+    'Enter server address': '서버 주소 입력',
+    'Enter API key': 'API 키 입력',
+    'Choose amount': '금액 선택',
+    'Custom amount': '사용자 지정 금액',
+    'The invoice has expired or the payment was not successful':
+      '인보이스가 만료되었거나 결제가 성공하지 않았습니다',
+    'Top up failed': '충전 실패',
+    'An error occurred while topping up': '충전 중 오류가 발생했습니다',
+    'Connected wallet': '연결된 지갑',
+    'Zap defaults': 'Zap 기본값',
+    'Connect wallet': '지갑 연결',
+    'Connect wallet via NWC': 'NWC로 지갑 연결',
+    'Use any NWC-compatible Lightning wallet': 'NWC를 지원하는 모든 라이트닝 지갑 사용',
+    'Quickly create a custodial Lightning vault': '관리형 라이트닝 지갑을 빠르게 생성'
   }
 }

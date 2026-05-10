@@ -832,6 +832,41 @@ export default {
     Today: 'วันนี้',
     'This week': 'สัปดาห์นี้',
     'This month': 'เดือนนี้',
-    Earlier: 'ก่อนหน้า'
+    Earlier: 'ก่อนหน้า',
+    Preferences: 'การตั้งค่า',
+    Account: 'บัญชี',
+    'Network & system': 'เครือข่ายและระบบ',
+    'Theme & color': 'ธีมและสี',
+    'Column layout': 'การจัดวางคอลัมน์',
+    'Content filtering': 'การกรองเนื้อหา',
+    Language: 'ภาษา',
+    Updates: 'การอัปเดต',
+    Connection: 'การเชื่อมต่อ',
+    'Web display': 'การแสดงผลเว็บ',
+    'Media upload': 'การอัปโหลดสื่อ',
+    'Private key': 'คีย์ส่วนตัว',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'คีย์ส่วนตัวควบคุมบัญชีของคุณ โปรดเก็บรักษาให้ปลอดภัยและอย่าเปิดเผยให้ผู้อื่น',
+    'Template URL used to fetch website favicons':
+      'เทมเพลต URL ที่ใช้ดึงไอคอนเว็บไซต์',
+    'Display language': 'ภาษาที่แสดง',
+    'Translation service': 'บริการแปล',
+    'API key': 'คีย์ API',
+    'Enter server address': 'กรอกที่อยู่เซิร์ฟเวอร์',
+    'Enter API key': 'กรอกคีย์ API',
+    'Choose amount': 'เลือกจำนวน',
+    'Custom amount': 'จำนวนกำหนดเอง',
+    'The invoice has expired or the payment was not successful':
+      'ใบแจ้งหนี้หมดอายุหรือการชำระเงินไม่สำเร็จ',
+    'Top up failed': 'การเติมเงินไม่สำเร็จ',
+    'An error occurred while topping up': 'เกิดข้อผิดพลาดขณะเติมเงิน',
+    'Connected wallet': 'กระเป๋าเงินที่เชื่อมต่อ',
+    'Zap defaults': 'ค่าเริ่มต้น zap',
+    'Connect wallet': 'เชื่อมต่อกระเป๋าเงิน',
+    'Connect wallet via NWC': 'เชื่อมต่อกระเป๋าเงินผ่าน NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'ใช้กระเป๋าเงินไลท์นิงที่รองรับ NWC ใดก็ได้',
+    'Quickly create a custodial Lightning vault':
+      'สร้างกระเป๋าไลท์นิงแบบฝากดูแลได้อย่างรวดเร็ว'
   }
 }

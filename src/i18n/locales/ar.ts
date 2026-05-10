@@ -832,6 +832,40 @@ export default {
     Today: 'اليوم',
     'This week': 'هذا الأسبوع',
     'This month': 'هذا الشهر',
-    Earlier: 'الأقدم'
+    Earlier: 'الأقدم',
+    Preferences: 'التفضيلات',
+    Account: 'الحساب',
+    'Network & system': 'الشبكة والنظام',
+    'Theme & color': 'السمة واللون',
+    'Column layout': 'تخطيط الأعمدة',
+    'Content filtering': 'تصفية المحتوى',
+    Language: 'اللغة',
+    Updates: 'التحديثات',
+    Connection: 'الاتصال',
+    'Web display': 'عرض الويب',
+    'Media upload': 'رفع الوسائط',
+    'Private key': 'المفتاح الخاص',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'يتحكم مفتاحك الخاص في حسابك. احتفظ به في مكان آمن ولا تشاركه مع أحد أبداً.',
+    'Template URL used to fetch website favicons': 'قالب الرابط المستخدم لجلب أيقونات المواقع',
+    'Display language': 'لغة العرض',
+    'Translation service': 'خدمة الترجمة',
+    'API key': 'مفتاح API',
+    'Enter server address': 'أدخل عنوان الخادم',
+    'Enter API key': 'أدخل مفتاح API',
+    'Choose amount': 'اختر المبلغ',
+    'Custom amount': 'مبلغ مخصص',
+    'The invoice has expired or the payment was not successful':
+      'انتهت صلاحية الفاتورة أو لم يتم الدفع بنجاح',
+    'Top up failed': 'فشل الشحن',
+    'An error occurred while topping up': 'حدث خطأ أثناء الشحن',
+    'Connected wallet': 'المحفظة المتصلة',
+    'Zap defaults': 'الإعدادات الافتراضية لـ Zap',
+    'Connect wallet': 'ربط المحفظة',
+    'Connect wallet via NWC': 'ربط المحفظة عبر NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'استخدم أي محفظة لايتنينغ متوافقة مع NWC',
+    'Quickly create a custodial Lightning vault':
+      'أنشئ بسرعة محفظة لايتنينغ بإدارة الطرف الثالث'
   }
 }

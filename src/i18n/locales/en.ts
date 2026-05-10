@@ -866,6 +866,39 @@ export default {
     Symbols: 'Symbols',
     Flags: 'Flags',
     'My emojis': 'My emojis',
-    'No emojis found': 'No emojis found'
+    'No emojis found': 'No emojis found',
+    Preferences: 'Preferences',
+    Account: 'Account',
+    'Network & system': 'Network & system',
+    'Theme & color': 'Theme & color',
+    'Column layout': 'Column layout',
+    'Content filtering': 'Content filtering',
+    Language: 'Language',
+    Updates: 'Updates',
+    Connection: 'Connection',
+    'Web display': 'Web display',
+    'Media upload': 'Media upload',
+    'Private key': 'Private key',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Your private key controls your account. Keep it safe and never share it.',
+    'Template URL used to fetch website favicons':
+      'Template URL used to fetch website favicons',
+    'Display language': 'Display language',
+    'Translation service': 'Translation service',
+    'API key': 'API key',
+    'Enter server address': 'Enter server address',
+    'Enter API key': 'Enter API key',
+    'Choose amount': 'Choose amount',
+    'Custom amount': 'Custom amount',
+    'The invoice has expired or the payment was not successful':
+      'The invoice has expired or the payment was not successful',
+    'Top up failed': 'Top up failed',
+    'An error occurred while topping up': 'An error occurred while topping up',
+    'Connected wallet': 'Connected wallet',
+    'Zap defaults': 'Zap defaults',
+    'Connect wallet': 'Connect wallet',
+    'Connect wallet via NWC': 'Connect wallet via NWC',
+    'Use any NWC-compatible Lightning wallet': 'Use any NWC-compatible Lightning wallet',
+    'Quickly create a custodial Lightning vault': 'Quickly create a custodial Lightning vault'
   }
 }

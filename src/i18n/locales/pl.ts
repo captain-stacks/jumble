@@ -854,6 +854,41 @@ export default {
     Today: 'Dziś',
     'This week': 'W tym tygodniu',
     'This month': 'W tym miesiącu',
-    Earlier: 'Wcześniej'
+    Earlier: 'Wcześniej',
+    Preferences: 'Preferencje',
+    Account: 'Konto',
+    'Network & system': 'Sieć i system',
+    'Theme & color': 'Motyw i kolor',
+    'Column layout': 'Układ kolumn',
+    'Content filtering': 'Filtrowanie treści',
+    Language: 'Język',
+    Updates: 'Aktualizacje',
+    Connection: 'Połączenie',
+    'Web display': 'Wyświetlanie stron',
+    'Media upload': 'Przesyłanie multimediów',
+    'Private key': 'Klucz prywatny',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Twój klucz prywatny kontroluje Twoje konto. Przechowuj go bezpiecznie i nigdy nikomu nie udostępniaj.',
+    'Template URL used to fetch website favicons':
+      'Szablon URL używany do pobierania favikon stron',
+    'Display language': 'Język wyświetlania',
+    'Translation service': 'Usługa tłumaczeń',
+    'API key': 'Klucz API',
+    'Enter server address': 'Wprowadź adres serwera',
+    'Enter API key': 'Wprowadź klucz API',
+    'Choose amount': 'Wybierz kwotę',
+    'Custom amount': 'Niestandardowa kwota',
+    'The invoice has expired or the payment was not successful':
+      'Faktura wygasła lub płatność się nie powiodła',
+    'Top up failed': 'Nie udało się doładować',
+    'An error occurred while topping up': 'Wystąpił błąd podczas doładowania',
+    'Connected wallet': 'Połączony portfel',
+    'Zap defaults': 'Domyślne ustawienia zap',
+    'Connect wallet': 'Połącz portfel',
+    'Connect wallet via NWC': 'Połącz portfel przez NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'Użyj dowolnego portfela Lightning zgodnego z NWC',
+    'Quickly create a custodial Lightning vault':
+      'Szybko utwórz portfel Lightning z depozytem'
   }
 }

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { SettingsRow } from '@/components/ui/settings'
 import { Switch } from '@/components/ui/switch'
 import { isElectron } from '@/lib/platform'
 import { cn } from '@/lib/utils'
@@ -18,38 +18,34 @@ export default function UpdateSettings() {
   const hasNewVersion = state.status === 'available' || state.status === 'downloaded'
 
   return (
-    <div className="space-y-4">
-      <div className="flex min-h-9 items-center justify-between px-4">
-        <Label htmlFor="auto-update" className="text-base font-normal">
-          <div>{t('Automatic updates')}</div>
-          <div className="text-muted-foreground">
-            {t('Check for and download updates in the background')}
+    <>
+      <SettingsRow
+        htmlFor="auto-update"
+        title={t('Automatic updates')}
+        description={t('Check for and download updates in the background')}
+        control={
+          <Switch
+            id="auto-update"
+            checked={state.autoUpdateEnabled}
+            onCheckedChange={(checked) => setAutoUpdate(checked)}
+          />
+        }
+      />
+      <SettingsRow
+        title={
+          <div className="flex items-center gap-2">
+            {t('Check for updates')}
+            {hasNewVersion && (
+              <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-medium leading-none text-primary-foreground">
+                {t('NEW')}
+              </span>
+            )}
           </div>
-        </Label>
-        <Switch
-          id="auto-update"
-          checked={state.autoUpdateEnabled}
-          onCheckedChange={(checked) => setAutoUpdate(checked)}
-        />
-      </div>
-
-      <div className="space-y-2 px-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 text-base">
-              {t('Check for updates')}
-              {hasNewVersion && (
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-medium leading-none text-primary-foreground">
-                  {t('NEW')}
-                </span>
-              )}
-            </div>
-            <UpdateStatusLine />
-          </div>
-          <UpdateActionButton />
-        </div>
-      </div>
-    </div>
+        }
+        description={<UpdateStatusLine />}
+        control={<UpdateActionButton />}
+      />
+    </>
   )
 }
 
@@ -61,40 +57,28 @@ function UpdateStatusLine() {
 
   switch (state.status) {
     case 'checking':
-      return <div className="text-sm text-muted-foreground">{t('Checking for updates…')}</div>
+      return <>{t('Checking for updates…')}</>
     case 'available':
-      return (
-        <div className="text-sm text-muted-foreground">
-          {t('Update available: v{{version}}', { version: state.newVersion ?? '' })}
-        </div>
-      )
+      return <>{t('Update available: v{{version}}', { version: state.newVersion ?? '' })}</>
     case 'not-available':
-      return (
-        <div className="text-sm text-muted-foreground">
-          {t('You are on the latest version ({{version}})', { version })}
-        </div>
-      )
+      return <>{t('You are on the latest version ({{version}})', { version })}</>
     case 'downloading':
       return (
-        <div className="text-sm text-muted-foreground">
+        <>
           {t('Downloading update v{{version}}…', { version: state.newVersion ?? '' })}
           {typeof state.progressPercent === 'number' ? ` ${state.progressPercent}%` : null}
-        </div>
+        </>
       )
     case 'downloaded':
-      return (
-        <div className="text-sm text-muted-foreground">
-          {t('Update ready: v{{version}}', { version: state.newVersion ?? '' })}
-        </div>
-      )
+      return <>{t('Update ready: v{{version}}', { version: state.newVersion ?? '' })}</>
     case 'error':
       return (
-        <div className="text-sm text-destructive">
+        <span className="text-destructive">
           {state.error ?? t('Failed to check for updates')}
-        </div>
+        </span>
       )
     default:
-      return <div className="text-sm text-muted-foreground">{version}</div>
+      return <>{version}</>
   }
 }
 
@@ -109,7 +93,9 @@ function UpdateActionButton() {
     prevStatusRef.current = state.status
     if (prev !== 'checking') return
     if (state.status === 'not-available') {
-      toast.success(t('You are on the latest version ({{version}})', { version: `v${state.currentVersion}` }))
+      toast.success(
+        t('You are on the latest version ({{version}})', { version: `v${state.currentVersion}` })
+      )
     } else if (state.status === 'available') {
       toast.info(t('Update available: v{{version}}', { version: state.newVersion ?? '' }))
     } else if (state.status === 'error') {

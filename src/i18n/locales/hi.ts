@@ -846,6 +846,41 @@ export default {
     Today: 'आज',
     'This week': 'इस सप्ताह',
     'This month': 'इस महीने',
-    Earlier: 'पहले'
+    Earlier: 'पहले',
+    Preferences: 'प्राथमिकताएँ',
+    Account: 'खाता',
+    'Network & system': 'नेटवर्क और सिस्टम',
+    'Theme & color': 'थीम और रंग',
+    'Column layout': 'कॉलम लेआउट',
+    'Content filtering': 'सामग्री फ़िल्टरिंग',
+    Language: 'भाषा',
+    Updates: 'अपडेट',
+    Connection: 'कनेक्शन',
+    'Web display': 'वेब प्रदर्शन',
+    'Media upload': 'मीडिया अपलोड',
+    'Private key': 'निजी कुंजी',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'आपकी निजी कुंजी आपके खाते को नियंत्रित करती है। इसे सुरक्षित रखें और कभी भी किसी के साथ साझा न करें।',
+    'Template URL used to fetch website favicons':
+      'वेबसाइट फ़ेविकॉन प्राप्त करने के लिए उपयोग किया जाने वाला टेम्पलेट URL',
+    'Display language': 'प्रदर्शन भाषा',
+    'Translation service': 'अनुवाद सेवा',
+    'API key': 'API कुंजी',
+    'Enter server address': 'सर्वर पता दर्ज करें',
+    'Enter API key': 'API कुंजी दर्ज करें',
+    'Choose amount': 'राशि चुनें',
+    'Custom amount': 'कस्टम राशि',
+    'The invoice has expired or the payment was not successful':
+      'चालान समाप्त हो गया है या भुगतान सफल नहीं हुआ',
+    'Top up failed': 'टॉप अप विफल',
+    'An error occurred while topping up': 'टॉप अप करते समय त्रुटि हुई',
+    'Connected wallet': 'कनेक्टेड वॉलेट',
+    'Zap defaults': 'Zap डिफ़ॉल्ट',
+    'Connect wallet': 'वॉलेट कनेक्ट करें',
+    'Connect wallet via NWC': 'NWC के माध्यम से वॉलेट कनेक्ट करें',
+    'Use any NWC-compatible Lightning wallet':
+      'किसी भी NWC-संगत लाइटनिंग वॉलेट का उपयोग करें',
+    'Quickly create a custodial Lightning vault':
+      'जल्दी से एक कस्टोडियल लाइटनिंग वॉलेट बनाएँ'
   }
 }

@@ -1,3 +1,4 @@
+import AccountSettingsPage from '@/pages/secondary/AccountSettingsPage'
 import AppearanceSettingsPage from '@/pages/secondary/AppearanceSettingsPage'
 import BookmarkPage from '@/pages/secondary/BookmarkPage'
 import DmConversationPage from '@/pages/secondary/DmConversationPage'
@@ -52,6 +53,7 @@ const SECONDARY_ROUTE_CONFIGS: {
   { path: '/settings/translation', element: <TranslationPage /> },
   { path: '/settings/emoji-packs', element: <EmojiPackSettingsPage /> },
   { path: '/settings/system', element: <SystemSettingsPage /> },
+  { path: '/settings/account', element: <AccountSettingsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },
   { path: '/mutes', element: <MuteListPage /> },
   { path: '/rizful', element: <RizfulPage /> },

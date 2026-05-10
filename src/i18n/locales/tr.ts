@@ -855,6 +855,41 @@ export default {
     Today: 'Bugün',
     'This week': 'Bu hafta',
     'This month': 'Bu ay',
-    Earlier: 'Daha eski'
+    Earlier: 'Daha eski',
+    Preferences: 'Tercihler',
+    Account: 'Hesap',
+    'Network & system': 'Ağ ve sistem',
+    'Theme & color': 'Tema ve renk',
+    'Column layout': 'Sütun düzeni',
+    'Content filtering': 'İçerik filtreleme',
+    Language: 'Dil',
+    Updates: 'Güncellemeler',
+    Connection: 'Bağlantı',
+    'Web display': 'Web görünümü',
+    'Media upload': 'Medya yükleme',
+    'Private key': 'Özel anahtar',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Özel anahtarınız hesabınızı kontrol eder. Güvende tutun ve asla kimseyle paylaşmayın.',
+    'Template URL used to fetch website favicons':
+      'Web sitesi simgelerini almak için kullanılan şablon URL',
+    'Display language': 'Görüntüleme dili',
+    'Translation service': 'Çeviri hizmeti',
+    'API key': 'API anahtarı',
+    'Enter server address': 'Sunucu adresini girin',
+    'Enter API key': 'API anahtarını girin',
+    'Choose amount': 'Tutar seçin',
+    'Custom amount': 'Özel tutar',
+    'The invoice has expired or the payment was not successful':
+      'Faturanın süresi doldu veya ödeme başarılı olmadı',
+    'Top up failed': 'Yükleme başarısız',
+    'An error occurred while topping up': 'Yükleme sırasında bir hata oluştu',
+    'Connected wallet': 'Bağlı cüzdan',
+    'Zap defaults': 'Zap varsayılanları',
+    'Connect wallet': 'Cüzdan bağla',
+    'Connect wallet via NWC': 'NWC ile cüzdan bağla',
+    'Use any NWC-compatible Lightning wallet':
+      'NWC uyumlu herhangi bir Lightning cüzdanını kullanın',
+    'Quickly create a custodial Lightning vault':
+      'Hızlıca emanet bir Lightning cüzdanı oluşturun'
   }
 }

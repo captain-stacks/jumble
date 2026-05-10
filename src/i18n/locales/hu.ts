@@ -842,6 +842,41 @@ export default {
     Today: 'Ma',
     'This week': 'Ezen a héten',
     'This month': 'Ebben a hónapban',
-    Earlier: 'Korábbi'
+    Earlier: 'Korábbi',
+    Preferences: 'Beállítások',
+    Account: 'Fiók',
+    'Network & system': 'Hálózat és rendszer',
+    'Theme & color': 'Téma és szín',
+    'Column layout': 'Oszlopelrendezés',
+    'Content filtering': 'Tartalom szűrése',
+    Language: 'Nyelv',
+    Updates: 'Frissítések',
+    Connection: 'Kapcsolat',
+    'Web display': 'Webes megjelenítés',
+    'Media upload': 'Média feltöltése',
+    'Private key': 'Privát kulcs',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'A privát kulcs irányítja a fiókodat. Tartsd biztonságban, és soha ne oszd meg senkivel.',
+    'Template URL used to fetch website favicons':
+      'Sablon URL a weboldalak favikonjainak lekéréséhez',
+    'Display language': 'Megjelenítés nyelve',
+    'Translation service': 'Fordítási szolgáltatás',
+    'API key': 'API-kulcs',
+    'Enter server address': 'Adja meg a szerver címét',
+    'Enter API key': 'Adja meg az API-kulcsot',
+    'Choose amount': 'Összeg kiválasztása',
+    'Custom amount': 'Egyéni összeg',
+    'The invoice has expired or the payment was not successful':
+      'A számla lejárt vagy a fizetés sikertelen volt',
+    'Top up failed': 'Feltöltés sikertelen',
+    'An error occurred while topping up': 'Hiba történt a feltöltés során',
+    'Connected wallet': 'Csatlakoztatott tárca',
+    'Zap defaults': 'Zap alapértelmezések',
+    'Connect wallet': 'Tárca csatlakoztatása',
+    'Connect wallet via NWC': 'Tárca csatlakoztatása NWC-vel',
+    'Use any NWC-compatible Lightning wallet':
+      'Használj bármilyen NWC-kompatibilis Lightning tárcát',
+    'Quickly create a custodial Lightning vault':
+      'Hozz létre gyorsan egy letétkezelős Lightning tárcát'
   }
 }

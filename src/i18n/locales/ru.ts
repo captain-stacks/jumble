@@ -851,6 +851,41 @@ export default {
     Today: 'Сегодня',
     'This week': 'На этой неделе',
     'This month': 'В этом месяце',
-    Earlier: 'Ранее'
+    Earlier: 'Ранее',
+    Preferences: 'Настройки',
+    Account: 'Учётная запись',
+    'Network & system': 'Сеть и система',
+    'Theme & color': 'Тема и цвет',
+    'Column layout': 'Расположение колонок',
+    'Content filtering': 'Фильтрация контента',
+    Language: 'Язык',
+    Updates: 'Обновления',
+    Connection: 'Соединение',
+    'Web display': 'Отображение сайтов',
+    'Media upload': 'Загрузка медиа',
+    'Private key': 'Приватный ключ',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Ваш приватный ключ управляет учётной записью. Храните его в безопасности и никогда никому не передавайте.',
+    'Template URL used to fetch website favicons':
+      'Шаблон URL для получения значков сайтов',
+    'Display language': 'Язык интерфейса',
+    'Translation service': 'Сервис перевода',
+    'API key': 'API-ключ',
+    'Enter server address': 'Введите адрес сервера',
+    'Enter API key': 'Введите API-ключ',
+    'Choose amount': 'Выберите сумму',
+    'Custom amount': 'Произвольная сумма',
+    'The invoice has expired or the payment was not successful':
+      'Срок действия счёта истёк или платёж не прошёл',
+    'Top up failed': 'Не удалось пополнить',
+    'An error occurred while topping up': 'Произошла ошибка при пополнении',
+    'Connected wallet': 'Подключённый кошелёк',
+    'Zap defaults': 'Настройки zap по умолчанию',
+    'Connect wallet': 'Подключить кошелёк',
+    'Connect wallet via NWC': 'Подключить кошелёк через NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'Подключите любой Lightning-кошелёк с поддержкой NWC',
+    'Quickly create a custodial Lightning vault':
+      'Быстро создайте кастодиальный Lightning-кошелёк'
   }
 }

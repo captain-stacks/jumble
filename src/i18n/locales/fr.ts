@@ -856,6 +856,41 @@ export default {
     Today: "Aujourd'hui",
     'This week': 'Cette semaine',
     'This month': 'Ce mois-ci',
-    Earlier: 'Plus ancien'
+    Earlier: 'Plus ancien',
+    Preferences: 'Préférences',
+    Account: 'Compte',
+    'Network & system': 'Réseau et système',
+    'Theme & color': 'Thème et couleur',
+    'Column layout': 'Disposition des colonnes',
+    'Content filtering': 'Filtrage du contenu',
+    Language: 'Langue',
+    Updates: 'Mises à jour',
+    Connection: 'Connexion',
+    'Web display': 'Affichage web',
+    'Media upload': 'Téléversement de médias',
+    'Private key': 'Clé privée',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Votre clé privée contrôle votre compte. Gardez-la en sécurité et ne la partagez jamais.',
+    'Template URL used to fetch website favicons':
+      'Modèle d’URL utilisé pour récupérer les favicons des sites web',
+    'Display language': 'Langue d’affichage',
+    'Translation service': 'Service de traduction',
+    'API key': 'Clé API',
+    'Enter server address': 'Saisir l’adresse du serveur',
+    'Enter API key': 'Saisir la clé API',
+    'Choose amount': 'Choisir le montant',
+    'Custom amount': 'Montant personnalisé',
+    'The invoice has expired or the payment was not successful':
+      'La facture a expiré ou le paiement n’a pas été effectué',
+    'Top up failed': 'Échec de la recharge',
+    'An error occurred while topping up': 'Une erreur s’est produite lors de la recharge',
+    'Connected wallet': 'Portefeuille connecté',
+    'Zap defaults': 'Valeurs par défaut des zaps',
+    'Connect wallet': 'Connecter le portefeuille',
+    'Connect wallet via NWC': 'Connecter un portefeuille via NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'Utilisez n’importe quel portefeuille Lightning compatible NWC',
+    'Quickly create a custodial Lightning vault':
+      'Créez rapidement un portefeuille Lightning custodial'
   }
 }

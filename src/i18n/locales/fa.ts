@@ -846,6 +846,41 @@ export default {
     Today: 'امروز',
     'This week': 'این هفته',
     'This month': 'این ماه',
-    Earlier: 'قدیمی‌تر'
+    Earlier: 'قدیمی‌تر',
+    Preferences: 'ترجیحات',
+    Account: 'حساب',
+    'Network & system': 'شبکه و سیستم',
+    'Theme & color': 'پوسته و رنگ',
+    'Column layout': 'چیدمان ستونی',
+    'Content filtering': 'فیلتر محتوا',
+    Language: 'زبان',
+    Updates: 'به‌روزرسانی‌ها',
+    Connection: 'اتصال',
+    'Web display': 'نمایش وب',
+    'Media upload': 'بارگذاری رسانه',
+    'Private key': 'کلید خصوصی',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'کلید خصوصی شما حساب شما را کنترل می‌کند. آن را ایمن نگه دارید و هرگز با کسی به اشتراک نگذارید.',
+    'Template URL used to fetch website favicons':
+      'الگوی نشانی اینترنتی برای دریافت نمادک وب‌سایت‌ها',
+    'Display language': 'زبان نمایش',
+    'Translation service': 'سرویس ترجمه',
+    'API key': 'کلید API',
+    'Enter server address': 'آدرس سرور را وارد کنید',
+    'Enter API key': 'کلید API را وارد کنید',
+    'Choose amount': 'مبلغ را انتخاب کنید',
+    'Custom amount': 'مبلغ سفارشی',
+    'The invoice has expired or the payment was not successful':
+      'فاکتور منقضی شده یا پرداخت موفق نبود',
+    'Top up failed': 'شارژ ناموفق',
+    'An error occurred while topping up': 'هنگام شارژ خطایی رخ داد',
+    'Connected wallet': 'کیف پول متصل',
+    'Zap defaults': 'پیش‌فرض‌های زپ',
+    'Connect wallet': 'اتصال کیف پول',
+    'Connect wallet via NWC': 'اتصال کیف پول از طریق NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'از هر کیف پول لایتنینگ سازگار با NWC استفاده کنید',
+    'Quickly create a custodial Lightning vault':
+      'به سرعت یک کیف پول لایتنینگ نگهبانی شده بسازید'
   }
 }

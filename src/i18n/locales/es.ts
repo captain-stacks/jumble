@@ -850,6 +850,41 @@ export default {
     Today: 'Hoy',
     'This week': 'Esta semana',
     'This month': 'Este mes',
-    Earlier: 'Anterior'
+    Earlier: 'Anterior',
+    Preferences: 'Preferencias',
+    Account: 'Cuenta',
+    'Network & system': 'Red y sistema',
+    'Theme & color': 'Tema y color',
+    'Column layout': 'Diseño de columnas',
+    'Content filtering': 'Filtrado de contenido',
+    Language: 'Idioma',
+    Updates: 'Actualizaciones',
+    Connection: 'Conexión',
+    'Web display': 'Visualización web',
+    'Media upload': 'Subida de medios',
+    'Private key': 'Clave privada',
+    'Your private key controls your account. Keep it safe and never share it.':
+      'Tu clave privada controla tu cuenta. Mantenla segura y nunca la compartas.',
+    'Template URL used to fetch website favicons':
+      'URL de plantilla utilizada para obtener favicons de sitios web',
+    'Display language': 'Idioma de visualización',
+    'Translation service': 'Servicio de traducción',
+    'API key': 'Clave API',
+    'Enter server address': 'Introduce la dirección del servidor',
+    'Enter API key': 'Introduce la clave API',
+    'Choose amount': 'Elige la cantidad',
+    'Custom amount': 'Cantidad personalizada',
+    'The invoice has expired or the payment was not successful':
+      'La factura ha expirado o el pago no se realizó con éxito',
+    'Top up failed': 'Recarga fallida',
+    'An error occurred while topping up': 'Se produjo un error al recargar',
+    'Connected wallet': 'Cartera conectada',
+    'Zap defaults': 'Valores predeterminados de zap',
+    'Connect wallet': 'Conectar cartera',
+    'Connect wallet via NWC': 'Conectar cartera mediante NWC',
+    'Use any NWC-compatible Lightning wallet':
+      'Usa cualquier cartera Lightning compatible con NWC',
+    'Quickly create a custodial Lightning vault':
+      'Crea rápidamente una cartera Lightning custodiada'
   }
 }

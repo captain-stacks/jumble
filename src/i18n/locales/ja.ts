@@ -845,6 +845,39 @@ export default {
     Today: '今日',
     'This week': '今週',
     'This month': '今月',
-    Earlier: 'それ以前'
+    Earlier: 'それ以前',
+    Preferences: '設定',
+    Account: 'アカウント',
+    'Network & system': 'ネットワークとシステム',
+    'Theme & color': 'テーマと色',
+    'Column layout': 'カラムレイアウト',
+    'Content filtering': 'コンテンツフィルタリング',
+    Language: '言語',
+    Updates: 'アップデート',
+    Connection: '接続',
+    'Web display': 'ウェブ表示',
+    'Media upload': 'メディアアップロード',
+    'Private key': '秘密鍵',
+    'Your private key controls your account. Keep it safe and never share it.':
+      '秘密鍵はあなたのアカウントを制御します。安全に保管し、決して共有しないでください。',
+    'Template URL used to fetch website favicons':
+      'ウェブサイトのファビコンを取得するためのテンプレートURL',
+    'Display language': '表示言語',
+    'Translation service': '翻訳サービス',
+    'API key': 'APIキー',
+    'Enter server address': 'サーバーアドレスを入力',
+    'Enter API key': 'APIキーを入力',
+    'Choose amount': '金額を選択',
+    'Custom amount': 'カスタム金額',
+    'The invoice has expired or the payment was not successful':
+      '請求書の有効期限が切れたか、支払いが成功しませんでした',
+    'Top up failed': 'チャージに失敗しました',
+    'An error occurred while topping up': 'チャージ中にエラーが発生しました',
+    'Connected wallet': '接続中のウォレット',
+    'Zap defaults': 'Zap デフォルト設定',
+    'Connect wallet': 'ウォレットを接続',
+    'Connect wallet via NWC': 'NWC 経由でウォレットを接続',
+    'Use any NWC-compatible Lightning wallet': 'NWC 対応の任意のライトニングウォレットを使用',
+    'Quickly create a custodial Lightning vault': 'カストディアル型ライトニングウォレットをすぐに作成'
   }
 }

@@ -885,6 +885,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'Usa cualquier cartera Lightning compatible con NWC',
     'Quickly create a custodial Lightning vault':
-      'Crea rápidamente una cartera Lightning custodiada'
+      'Crea rápidamente una cartera Lightning custodiada',
+    'Recent Searches': 'Búsquedas recientes',
+    'Clear all': 'Borrar todo'
   }
 }

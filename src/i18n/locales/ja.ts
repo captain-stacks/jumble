@@ -878,6 +878,8 @@ export default {
     'Connect wallet': 'ウォレットを接続',
     'Connect wallet via NWC': 'NWC 経由でウォレットを接続',
     'Use any NWC-compatible Lightning wallet': 'NWC 対応の任意のライトニングウォレットを使用',
-    'Quickly create a custodial Lightning vault': 'カストディアル型ライトニングウォレットをすぐに作成'
+    'Quickly create a custodial Lightning vault': 'カストディアル型ライトニングウォレットをすぐに作成',
+    'Recent Searches': '最近の検索',
+    'Clear all': 'すべてクリア'
   }
 }

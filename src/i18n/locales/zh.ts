@@ -853,6 +853,8 @@ export default {
     'Connect wallet': '连接钱包',
     'Connect wallet via NWC': '通过 NWC 连接钱包',
     'Use any NWC-compatible Lightning wallet': '使用任意支持 NWC 的闪电钱包',
-    'Quickly create a custodial Lightning vault': '快速创建一个托管闪电钱包'
+    'Quickly create a custodial Lightning vault': '快速创建一个托管闪电钱包',
+    'Recent Searches': '最近搜索',
+    'Clear all': '清除全部'
   }
 }

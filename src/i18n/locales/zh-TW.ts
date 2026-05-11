@@ -846,6 +846,8 @@ export default {
     'Connect wallet': '連線錢包',
     'Connect wallet via NWC': '透過 NWC 連線錢包',
     'Use any NWC-compatible Lightning wallet': '使用任何支援 NWC 的閃電錢包',
-    'Quickly create a custodial Lightning vault': '快速建立一個託管閃電錢包'
+    'Quickly create a custodial Lightning vault': '快速建立一個託管閃電錢包',
+    'Recent Searches': '最近搜尋',
+    'Clear all': '清除全部'
   }
 }

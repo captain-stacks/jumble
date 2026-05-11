@@ -73,6 +73,7 @@ class LocalStorageService {
   private nsfwDisplayPolicy: TNsfwDisplayPolicy = NSFW_DISPLAY_POLICY.HIDE_CONTENT
   private defaultRelayUrls: string[] = BIG_RELAY_URLS
   private searchRelayUrls: string[] = SEARCHABLE_RELAY_URLS
+  private searchHistory: string[] = []
   private mutedWords: string[] = []
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
@@ -471,6 +472,18 @@ class LocalStorageService {
         }
       } catch {
         // Invalid JSON, use default
+      }
+    }
+
+    const searchHistoryStr = window.localStorage.getItem(StorageKey.SEARCH_HISTORY)
+    if (searchHistoryStr) {
+      try {
+        const history = JSON.parse(searchHistoryStr)
+        if (Array.isArray(history)) {
+          this.searchHistory = history
+        }
+      } catch {
+        // ignore
       }
     }
 
@@ -1102,6 +1115,26 @@ class LocalStorageService {
   setSearchRelayUrls(urls: string[]) {
     this.searchRelayUrls = urls
     window.localStorage.setItem(StorageKey.SEARCH_RELAY_URLS, JSON.stringify(urls))
+  }
+
+  getSearchHistory() {
+    return this.searchHistory
+  }
+
+  addSearchHistory(text: string) {
+    if (!text) return
+    this.searchHistory = [text, ...this.searchHistory.filter((h) => h !== text)].slice(0, 20)
+    window.localStorage.setItem(StorageKey.SEARCH_HISTORY, JSON.stringify(this.searchHistory))
+  }
+
+  removeSearchHistory(index: number) {
+    this.searchHistory = this.searchHistory.filter((_, i) => i !== index)
+    window.localStorage.setItem(StorageKey.SEARCH_HISTORY, JSON.stringify(this.searchHistory))
+  }
+
+  clearSearchHistory() {
+    this.searchHistory = []
+    window.localStorage.removeItem(StorageKey.SEARCH_HISTORY)
   }
 
   getMutedWords() {

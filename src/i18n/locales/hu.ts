@@ -877,6 +877,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'Használj bármilyen NWC-kompatibilis Lightning tárcát',
     'Quickly create a custodial Lightning vault':
-      'Hozz létre gyorsan egy letétkezelős Lightning tárcát'
+      'Hozz létre gyorsan egy letétkezelős Lightning tárcát',
+    'Recent Searches': 'Legutóbbi keresések',
+    'Clear all': 'Összes törlése'
   }
 }

@@ -871,6 +871,8 @@ export default {
     'Connect wallet': '지갑 연결',
     'Connect wallet via NWC': 'NWC로 지갑 연결',
     'Use any NWC-compatible Lightning wallet': 'NWC를 지원하는 모든 라이트닝 지갑 사용',
-    'Quickly create a custodial Lightning vault': '관리형 라이트닝 지갑을 빠르게 생성'
+    'Quickly create a custodial Lightning vault': '관리형 라이트닝 지갑을 빠르게 생성',
+    'Recent Searches': '최근 검색',
+    'Clear all': '모두 지우기'
   }
 }

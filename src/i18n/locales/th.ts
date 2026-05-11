@@ -867,6 +867,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'ใช้กระเป๋าเงินไลท์นิงที่รองรับ NWC ใดก็ได้',
     'Quickly create a custodial Lightning vault':
-      'สร้างกระเป๋าไลท์นิงแบบฝากดูแลได้อย่างรวดเร็ว'
+      'สร้างกระเป๋าไลท์นิงแบบฝากดูแลได้อย่างรวดเร็ว',
+    'Recent Searches': 'การค้นหาล่าสุด',
+    'Clear all': 'ล้างทั้งหมด'
   }
 }

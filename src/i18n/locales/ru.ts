@@ -886,6 +886,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'Подключите любой Lightning-кошелёк с поддержкой NWC',
     'Quickly create a custodial Lightning vault':
-      'Быстро создайте кастодиальный Lightning-кошелёк'
+      'Быстро создайте кастодиальный Lightning-кошелёк',
+    'Recent Searches': 'Недавние поиски',
+    'Clear all': 'Очистить всё'
   }
 }

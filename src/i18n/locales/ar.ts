@@ -866,6 +866,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'استخدم أي محفظة لايتنينغ متوافقة مع NWC',
     'Quickly create a custodial Lightning vault':
-      'أنشئ بسرعة محفظة لايتنينغ بإدارة الطرف الثالث'
+      'أنشئ بسرعة محفظة لايتنينغ بإدارة الطرف الثالث',
+    'Recent Searches': 'عمليات البحث الأخيرة',
+    'Clear all': 'مسح الكل'
   }
 }

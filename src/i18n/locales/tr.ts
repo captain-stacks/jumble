@@ -890,6 +890,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'NWC uyumlu herhangi bir Lightning cüzdanını kullanın',
     'Quickly create a custodial Lightning vault':
-      'Hızlıca emanet bir Lightning cüzdanı oluşturun'
+      'Hızlıca emanet bir Lightning cüzdanı oluşturun',
+    'Recent Searches': 'Son Aramalar',
+    'Clear all': 'Tümünü temizle'
   }
 }

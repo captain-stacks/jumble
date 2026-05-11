@@ -891,6 +891,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'Utilisez n’importe quel portefeuille Lightning compatible NWC',
     'Quickly create a custodial Lightning vault':
-      'Créez rapidement un portefeuille Lightning custodial'
+      'Créez rapidement un portefeuille Lightning custodial',
+    'Recent Searches': 'Recherches récentes',
+    'Clear all': 'Tout effacer'
   }
 }

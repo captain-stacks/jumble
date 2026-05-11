@@ -881,6 +881,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'از هر کیف پول لایتنینگ سازگار با NWC استفاده کنید',
     'Quickly create a custodial Lightning vault':
-      'به سرعت یک کیف پول لایتنینگ نگهبانی شده بسازید'
+      'به سرعت یک کیف پول لایتنینگ نگهبانی شده بسازید',
+    'Recent Searches': 'جستجوهای اخیر',
+    'Clear all': 'پاک کردن همه'
   }
 }

@@ -899,6 +899,8 @@ export default {
     'Connect wallet': 'Connect wallet',
     'Connect wallet via NWC': 'Connect wallet via NWC',
     'Use any NWC-compatible Lightning wallet': 'Use any NWC-compatible Lightning wallet',
-    'Quickly create a custodial Lightning vault': 'Quickly create a custodial Lightning vault'
+    'Quickly create a custodial Lightning vault': 'Quickly create a custodial Lightning vault',
+    'Recent Searches': 'Recent Searches',
+    'Clear all': 'Clear all'
   }
 }

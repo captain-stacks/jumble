@@ -881,6 +881,8 @@ export default {
     'Use any NWC-compatible Lightning wallet':
       'किसी भी NWC-संगत लाइटनिंग वॉलेट का उपयोग करें',
     'Quickly create a custodial Lightning vault':
-      'जल्दी से एक कस्टोडियल लाइटनिंग वॉलेट बनाएँ'
+      'जल्दी से एक कस्टोडियल लाइटनिंग वॉलेट बनाएँ',
+    'Recent Searches': 'हाल की खोजें',
+    'Clear all': 'सभी साफ़ करें'
   }
 }

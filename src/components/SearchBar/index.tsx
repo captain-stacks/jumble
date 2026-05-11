@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import modalManager from '@/services/modal-manager.service'
+import storage from '@/services/local-storage.service'
 import { TSearchParams } from '@/types'
-import { Hash, MessageSquare, Notebook, Search, Server, Terminal } from 'lucide-react'
+import { Hash, History, MessageSquare, Notebook, Search, Server, Terminal, X } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import {
   forwardRef,
@@ -51,6 +52,7 @@ const SearchBar = forwardRef<
   const [displayList, setDisplayList] = useState(false)
   const [selectableOptions, setSelectableOptions] = useState<TSearchParams[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => storage.getSearchHistory())
   const searchInputRef = useRef<HTMLInputElement>(null)
   const normalizedUrl = useMemo(() => {
     if (['w', 'ws', 'ws:', 'ws:/', 'wss', 'wss:', 'wss:/'].includes(input)) {
@@ -98,7 +100,15 @@ const SearchBar = forwardRef<
     searchInputRef.current?.blur()
   }
 
+  const saveHistory = useCallback(() => {
+    const text = input.trim()
+    if (!text) return
+    storage.addSearchHistory(text)
+    setSearchHistory(storage.getSearchHistory())
+  }, [input])
+
   const updateSearch = (params: TSearchParams) => {
+    saveHistory()
     blur()
 
     if (params.type === 'note') {
@@ -108,6 +118,21 @@ const SearchBar = forwardRef<
     } else {
       onSearch(params)
     }
+  }
+
+  const handleHistoryClick = (text: string) => {
+    setInput(text)
+  }
+
+  const handleHistoryRemove = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    storage.removeSearchHistory(index)
+    setSearchHistory(storage.getSearchHistory())
+  }
+
+  const handleClearHistory = () => {
+    storage.clearSearchHistory()
+    setSearchHistory([])
   }
 
   useEffect(() => {
@@ -271,18 +296,18 @@ const SearchBar = forwardRef<
   }, [selectableOptions, selectedIndex, isFetchingProfiles, profiles])
 
   useEffect(() => {
-    setDisplayList(searching && !!input)
-  }, [searching, input])
+    setDisplayList(searching && (!!input || searchHistory.length > 0))
+  }, [searching, input, searchHistory])
 
   useEffect(() => {
-    if (displayList && list) {
+    if (displayList && (list || searchHistory.length > 0)) {
       modalManager.register(id, () => {
         setDisplayList(false)
       })
     } else {
       modalManager.unregister(id)
     }
-  }, [displayList, list])
+  }, [displayList, list, searchHistory])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -291,6 +316,7 @@ const SearchBar = forwardRef<
         if (selectableOptions.length <= 0) {
           return
         }
+        saveHistory()
         onSearch(selectableOptions[selectedIndex >= 0 ? selectedIndex : 0])
         blur()
         return
@@ -319,12 +345,41 @@ const SearchBar = forwardRef<
         return
       }
     },
-    [input, onSearch, selectableOptions, selectedIndex]
+    [input, onSearch, saveHistory, selectableOptions, selectedIndex]
   )
+
+  const historyList =
+    !input && searchHistory.length > 0 ? (
+      <>
+        <div className="flex items-center justify-between px-3 pb-1 pt-2">
+          <span className="text-xs font-medium text-muted-foreground">{t('Recent Searches')}</span>
+          <button
+            className="text-xs text-muted-foreground hover:text-foreground"
+            onClick={handleClearHistory}
+          >
+            {t('Clear all')}
+          </button>
+        </div>
+        {searchHistory.map((text, index) => (
+          <Item key={index} onClick={() => handleHistoryClick(text)}>
+            <div className="flex size-10 items-center justify-center">
+              <History className="shrink-0 text-muted-foreground" size={18} />
+            </div>
+            <div className="min-w-0 flex-1 truncate font-semibold">{text}</div>
+            <button
+              className="shrink-0 rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              onClick={(e) => handleHistoryRemove(index, e)}
+            >
+              <X size={14} />
+            </button>
+          </Item>
+        ))}
+      </>
+    ) : null
 
   return (
     <div className="relative flex h-full w-full items-center gap-1">
-      {displayList && list && (
+      {displayList && (list || historyList) && (
         <>
           <div
             className={cn(
@@ -335,7 +390,7 @@ const SearchBar = forwardRef<
             )}
             onMouseDown={(e) => e.preventDefault()}
           >
-            <div className="h-fit">{list}</div>
+            <div className="h-fit">{input ? list : historyList}</div>
           </div>
           <div className="fixed inset-0 h-full w-full" onClick={() => blur()} />
         </>

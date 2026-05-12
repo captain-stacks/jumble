@@ -127,7 +127,7 @@ export default function Settings() {
         </AboutInfoDialog>
       </SettingsGroup>
 
-      <div>
+      <div className="pt-6">
         <Donation />
       </div>
     </SettingsPageContainer>

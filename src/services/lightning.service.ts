@@ -13,7 +13,12 @@ import { makeZapRequest } from 'nostr-tools/nip57'
 import { utf8Decoder } from 'nostr-tools/utils'
 import client from './client.service'
 
-export type TRecentSupporter = { pubkey: string; amount: number; comment?: string }
+export type TRecentSupporter = {
+  pubkey: string
+  amount: number
+  comment?: string
+  createdAt: number
+}
 
 const OFFICIAL_PUBKEYS = [JUMBLE_PUBKEY, CODY_PUBKEY]
 
@@ -188,7 +193,7 @@ class LightningService {
       since: dayjs().subtract(1, 'month').unix()
     })
     events.sort((a, b) => b.created_at - a.created_at)
-    const map = new Map<string, { pubkey: string; amount: number; comment?: string }>()
+    const map = new Map<string, TRecentSupporter>()
     events.forEach((event) => {
       const info = getZapInfoFromEvent(event)
       if (!info || !info.senderPubkey || OFFICIAL_PUBKEYS.includes(info.senderPubkey)) return
@@ -196,7 +201,12 @@ class LightningService {
       const { amount, comment, senderPubkey } = info
       const item = map.get(senderPubkey)
       if (!item) {
-        map.set(senderPubkey, { pubkey: senderPubkey, amount, comment })
+        map.set(senderPubkey, {
+          pubkey: senderPubkey,
+          amount,
+          comment,
+          createdAt: event.created_at
+        })
       } else {
         item.amount += amount
         if (!item.comment && comment) item.comment = comment

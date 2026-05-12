@@ -873,6 +873,13 @@ export default {
     'Use any NWC-compatible Lightning wallet': 'NWC를 지원하는 모든 라이트닝 지갑 사용',
     'Quickly create a custodial Lightning vault': '관리형 라이트닝 지갑을 빠르게 생성',
     'Recent Searches': '최근 검색',
-    'Clear all': '모두 지우기'
+    'Clear all': '모두 지우기',
+    'Donate to': '후원',
+    'Leave a message (optional)': '메시지 남기기 (선택)',
+    'Say hi or share what you love about Jumble': '인사하거나 Jumble의 어떤 점이 좋은지 알려주세요',
+    'Donate n sats': '{{n}} sats 후원',
+    'Donation failed': '후원 실패',
+    'Thank you for supporting Jumble! 💛': 'Jumble을 후원해 주셔서 감사합니다! 💛',
+    'Your donation will appear in Recent Supporters': '당신의 후원이 최근 후원자 목록에 표시됩니다'
   }
 }

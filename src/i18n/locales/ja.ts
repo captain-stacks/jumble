@@ -878,8 +878,16 @@ export default {
     'Connect wallet': 'ウォレットを接続',
     'Connect wallet via NWC': 'NWC 経由でウォレットを接続',
     'Use any NWC-compatible Lightning wallet': 'NWC 対応の任意のライトニングウォレットを使用',
-    'Quickly create a custodial Lightning vault': 'カストディアル型ライトニングウォレットをすぐに作成',
+    'Quickly create a custodial Lightning vault':
+      'カストディアル型ライトニングウォレットをすぐに作成',
     'Recent Searches': '最近の検索',
-    'Clear all': 'すべてクリア'
+    'Clear all': 'すべてクリア',
+    'Donate to': '寄付先',
+    'Leave a message (optional)': 'メッセージを残す（任意）',
+    'Say hi or share what you love about Jumble': '挨拶や Jumble の好きなところを教えてください',
+    'Donate n sats': '{{n}} sats を寄付',
+    'Donation failed': '寄付に失敗しました',
+    'Thank you for supporting Jumble! 💛': 'Jumble をサポートしていただきありがとうございます！💛',
+    'Your donation will appear in Recent Supporters': 'あなたの寄付は最近のサポーターに表示されます'
   }
 }

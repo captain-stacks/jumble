@@ -878,11 +878,17 @@ export default {
     'Zap defaults': 'پیش‌فرض‌های زپ',
     'Connect wallet': 'اتصال کیف پول',
     'Connect wallet via NWC': 'اتصال کیف پول از طریق NWC',
-    'Use any NWC-compatible Lightning wallet':
-      'از هر کیف پول لایتنینگ سازگار با NWC استفاده کنید',
-    'Quickly create a custodial Lightning vault':
-      'به سرعت یک کیف پول لایتنینگ نگهبانی شده بسازید',
+    'Use any NWC-compatible Lightning wallet': 'از هر کیف پول لایتنینگ سازگار با NWC استفاده کنید',
+    'Quickly create a custodial Lightning vault': 'به سرعت یک کیف پول لایتنینگ نگهبانی شده بسازید',
     'Recent Searches': 'جستجوهای اخیر',
-    'Clear all': 'پاک کردن همه'
+    'Clear all': 'پاک کردن همه',
+    'Donate to': 'اهدا به',
+    'Leave a message (optional)': 'پیامی بگذارید (اختیاری)',
+    'Say hi or share what you love about Jumble':
+      'سلام کنید یا چیزی که در Jumble دوست دارید را به اشتراک بگذارید',
+    'Donate n sats': 'اهدا {{n}} ساتوشی',
+    'Donation failed': 'اهدا ناموفق بود',
+    'Thank you for supporting Jumble! 💛': 'ممنون از حمایتت از Jumble! 💛',
+    'Your donation will appear in Recent Supporters': 'اهدای شما در حامیان اخیر نمایش داده می‌شود'
   }
 }

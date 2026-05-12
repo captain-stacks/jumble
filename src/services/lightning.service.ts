@@ -181,8 +181,12 @@ class LightningService {
     })
   }
 
-  async fetchRecentSupporters() {
-    if (this.recentSupportersCache) {
+  invalidateRecentSupportersCache() {
+    this.recentSupportersCache = null
+  }
+
+  async fetchRecentSupporters(force = false) {
+    if (!force && this.recentSupportersCache) {
       return this.recentSupportersCache
     }
     const relayList = await client.fetchRelayList(CODY_PUBKEY)

@@ -842,9 +842,9 @@ export default {
     'Update available: v{{version}}': 'Update available: v{{version}}',
     'You are on the latest version ({{version}})': 'You are on the latest version ({{version}})',
     'Failed to check for updates': 'Failed to check for updates',
-    'Check': 'Check',
-    'Download': 'Download',
-    'NEW': 'NEW',
+    Check: 'Check',
+    Download: 'Download',
+    NEW: 'NEW',
     'Updates are not available in development mode':
       'Updates are not available in development mode',
     'Try the desktop app': 'Try the desktop app',
@@ -881,8 +881,7 @@ export default {
     'Private key': 'Private key',
     'Your private key controls your account. Keep it safe and never share it.':
       'Your private key controls your account. Keep it safe and never share it.',
-    'Template URL used to fetch website favicons':
-      'Template URL used to fetch website favicons',
+    'Template URL used to fetch website favicons': 'Template URL used to fetch website favicons',
     'Display language': 'Display language',
     'Translation service': 'Translation service',
     'API key': 'API key',
@@ -901,6 +900,14 @@ export default {
     'Use any NWC-compatible Lightning wallet': 'Use any NWC-compatible Lightning wallet',
     'Quickly create a custodial Lightning vault': 'Quickly create a custodial Lightning vault',
     'Recent Searches': 'Recent Searches',
-    'Clear all': 'Clear all'
+    'Clear all': 'Clear all',
+    'Donate to': 'Donate to',
+    'Leave a message (optional)': 'Leave a message (optional)',
+    'Say hi or share what you love about Jumble': 'Say hi or share what you love about Jumble',
+    'Donate n sats': 'Donate {{n}} sats',
+    'Donation failed': 'Donation failed',
+    'Thank you for supporting Jumble! 💛': 'Thank you for supporting Jumble! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Your donation will appear in Recent Supporters'
   }
 }

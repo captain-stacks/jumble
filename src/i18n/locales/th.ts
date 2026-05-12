@@ -847,8 +847,7 @@ export default {
     'Private key': 'คีย์ส่วนตัว',
     'Your private key controls your account. Keep it safe and never share it.':
       'คีย์ส่วนตัวควบคุมบัญชีของคุณ โปรดเก็บรักษาให้ปลอดภัยและอย่าเปิดเผยให้ผู้อื่น',
-    'Template URL used to fetch website favicons':
-      'เทมเพลต URL ที่ใช้ดึงไอคอนเว็บไซต์',
+    'Template URL used to fetch website favicons': 'เทมเพลต URL ที่ใช้ดึงไอคอนเว็บไซต์',
     'Display language': 'ภาษาที่แสดง',
     'Translation service': 'บริการแปล',
     'API key': 'คีย์ API',
@@ -864,11 +863,16 @@ export default {
     'Zap defaults': 'ค่าเริ่มต้น zap',
     'Connect wallet': 'เชื่อมต่อกระเป๋าเงิน',
     'Connect wallet via NWC': 'เชื่อมต่อกระเป๋าเงินผ่าน NWC',
-    'Use any NWC-compatible Lightning wallet':
-      'ใช้กระเป๋าเงินไลท์นิงที่รองรับ NWC ใดก็ได้',
-    'Quickly create a custodial Lightning vault':
-      'สร้างกระเป๋าไลท์นิงแบบฝากดูแลได้อย่างรวดเร็ว',
+    'Use any NWC-compatible Lightning wallet': 'ใช้กระเป๋าเงินไลท์นิงที่รองรับ NWC ใดก็ได้',
+    'Quickly create a custodial Lightning vault': 'สร้างกระเป๋าไลท์นิงแบบฝากดูแลได้อย่างรวดเร็ว',
     'Recent Searches': 'การค้นหาล่าสุด',
-    'Clear all': 'ล้างทั้งหมด'
+    'Clear all': 'ล้างทั้งหมด',
+    'Donate to': 'บริจาคให้',
+    'Leave a message (optional)': 'ฝากข้อความ (ไม่บังคับ)',
+    'Say hi or share what you love about Jumble': 'ทักทายหรือแบ่งปันสิ่งที่คุณชอบเกี่ยวกับ Jumble',
+    'Donate n sats': 'บริจาค {{n}} sats',
+    'Donation failed': 'การบริจาคล้มเหลว',
+    'Thank you for supporting Jumble! 💛': 'ขอบคุณที่สนับสนุน Jumble! 💛',
+    'Your donation will appear in Recent Supporters': 'การบริจาคของคุณจะปรากฏในผู้สนับสนุนล่าสุด'
   }
 }

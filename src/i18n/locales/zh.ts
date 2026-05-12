@@ -844,8 +844,7 @@ export default {
     'Enter API key': '输入 API 密钥',
     'Choose amount': '选择金额',
     'Custom amount': '自定义金额',
-    'The invoice has expired or the payment was not successful':
-      '发票已过期或支付未成功',
+    'The invoice has expired or the payment was not successful': '发票已过期或支付未成功',
     'Top up failed': '充值失败',
     'An error occurred while topping up': '充值时发生错误',
     'Connected wallet': '已连接的钱包',
@@ -855,6 +854,13 @@ export default {
     'Use any NWC-compatible Lightning wallet': '使用任意支持 NWC 的闪电钱包',
     'Quickly create a custodial Lightning vault': '快速创建一个托管闪电钱包',
     'Recent Searches': '最近搜索',
-    'Clear all': '清除全部'
+    'Clear all': '清除全部',
+    'Donate to': '捐赠给',
+    'Leave a message (optional)': '留言（可选）',
+    'Say hi or share what you love about Jumble': '打个招呼，或分享你喜欢 Jumble 的地方',
+    'Donate n sats': '捐赠 {{n}} sats',
+    'Donation failed': '捐赠失败',
+    'Thank you for supporting Jumble! 💛': '感谢你支持 Jumble！💛',
+    'Your donation will appear in Recent Supporters': '你的捐赠将显示在近期支持者中'
   }
 }

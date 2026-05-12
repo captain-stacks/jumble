@@ -878,11 +878,17 @@ export default {
     'Zap defaults': 'Zap डिफ़ॉल्ट',
     'Connect wallet': 'वॉलेट कनेक्ट करें',
     'Connect wallet via NWC': 'NWC के माध्यम से वॉलेट कनेक्ट करें',
-    'Use any NWC-compatible Lightning wallet':
-      'किसी भी NWC-संगत लाइटनिंग वॉलेट का उपयोग करें',
-    'Quickly create a custodial Lightning vault':
-      'जल्दी से एक कस्टोडियल लाइटनिंग वॉलेट बनाएँ',
+    'Use any NWC-compatible Lightning wallet': 'किसी भी NWC-संगत लाइटनिंग वॉलेट का उपयोग करें',
+    'Quickly create a custodial Lightning vault': 'जल्दी से एक कस्टोडियल लाइटनिंग वॉलेट बनाएँ',
     'Recent Searches': 'हाल की खोजें',
-    'Clear all': 'सभी साफ़ करें'
+    'Clear all': 'सभी साफ़ करें',
+    'Donate to': 'दान करें',
+    'Leave a message (optional)': 'संदेश छोड़ें (वैकल्पिक)',
+    'Say hi or share what you love about Jumble':
+      'नमस्ते कहें या Jumble के बारे में जो पसंद है साझा करें',
+    'Donate n sats': '{{n}} सैट्स दान करें',
+    'Donation failed': 'दान विफल',
+    'Thank you for supporting Jumble! 💛': 'Jumble का समर्थन करने के लिए धन्यवाद! 💛',
+    'Your donation will appear in Recent Supporters': 'आपका दान हाल के समर्थकों में दिखाई देगा'
   }
 }

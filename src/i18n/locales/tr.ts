@@ -892,6 +892,15 @@ export default {
     'Quickly create a custodial Lightning vault':
       'Hızlıca emanet bir Lightning cüzdanı oluşturun',
     'Recent Searches': 'Son Aramalar',
-    'Clear all': 'Tümünü temizle'
+    'Clear all': 'Tümünü temizle',
+    'Donate to': 'Bağış yap',
+    'Leave a message (optional)': 'Mesaj bırak (isteğe bağlı)',
+    'Say hi or share what you love about Jumble':
+      "Merhaba de veya Jumble'da neyi sevdiğini paylaş",
+    'Donate n sats': '{{n}} sats bağışla',
+    'Donation failed': 'Bağış başarısız',
+    'Thank you for supporting Jumble! 💛': "Jumble'ı desteklediğin için teşekkürler! 💛",
+    'Your donation will appear in Recent Supporters':
+      'Bağışın Son Destekçiler bölümünde görünecek'
   }
 }

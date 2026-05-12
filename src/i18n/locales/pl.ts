@@ -886,11 +886,18 @@ export default {
     'Zap defaults': 'Domyślne ustawienia zap',
     'Connect wallet': 'Połącz portfel',
     'Connect wallet via NWC': 'Połącz portfel przez NWC',
-    'Use any NWC-compatible Lightning wallet':
-      'Użyj dowolnego portfela Lightning zgodnego z NWC',
-    'Quickly create a custodial Lightning vault':
-      'Szybko utwórz portfel Lightning z depozytem',
+    'Use any NWC-compatible Lightning wallet': 'Użyj dowolnego portfela Lightning zgodnego z NWC',
+    'Quickly create a custodial Lightning vault': 'Szybko utwórz portfel Lightning z depozytem',
     'Recent Searches': 'Ostatnie wyszukiwania',
-    'Clear all': 'Wyczyść wszystko'
+    'Clear all': 'Wyczyść wszystko',
+    'Donate to': 'Wesprzyj',
+    'Leave a message (optional)': 'Zostaw wiadomość (opcjonalnie)',
+    'Say hi or share what you love about Jumble':
+      'Przywitaj się lub podziel się, co lubisz w Jumble',
+    'Donate n sats': 'Przekaż {{n}} satów',
+    'Donation failed': 'Wsparcie nieudane',
+    'Thank you for supporting Jumble! 💛': 'Dziękujemy za wsparcie Jumble! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Twoja darowizna pojawi się wśród Ostatnich wspierających'
   }
 }

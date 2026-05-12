@@ -13,19 +13,23 @@ import { Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const FEATURED_COUNT = 3
+const FEATURED_COUNT = 10
 
-export default function RecentSupporters() {
+export default function RecentSupporters({ refreshKey = 0 }: { refreshKey?: number }) {
   const { t } = useTranslation()
   const [supporters, setSupporters] = useState<TRecentSupporter[]>([])
 
   useEffect(() => {
-    const init = async () => {
-      const items = await lightning.fetchRecentSupporters()
-      setSupporters(items)
+    let cancelled = false
+    const load = async () => {
+      const items = await lightning.fetchRecentSupporters(refreshKey > 0)
+      if (!cancelled) setSupporters(items)
     }
-    init()
-  }, [])
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [refreshKey])
 
   if (!supporters.length) return null
 
@@ -34,7 +38,7 @@ export default function RecentSupporters() {
 
   return (
     <section className="space-y-3">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
         {t('Recent Supporters')}
       </div>
 
@@ -55,13 +59,7 @@ export default function RecentSupporters() {
   )
 }
 
-function FeaturedSupporter({
-  supporter,
-  rank
-}: {
-  supporter: TRecentSupporter
-  rank: number
-}) {
+function FeaturedSupporter({ supporter, rank }: { supporter: TRecentSupporter; rank: number }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const isTop = rank === 0
@@ -70,9 +68,7 @@ function FeaturedSupporter({
     <div
       className={cn(
         'rounded-xl border p-3 sm:p-4',
-        isTop
-          ? 'border-yellow-500/30 bg-gradient-to-br from-yellow-400/10 to-card'
-          : 'bg-card'
+        isTop ? 'to-card border-yellow-500/30 bg-gradient-to-br from-yellow-400/10' : 'bg-card'
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -84,7 +80,7 @@ function FeaturedSupporter({
               className="flex w-fit truncate font-semibold"
               skeletonClassName="h-4"
             />
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <Nip05 pubkey={supporter.pubkey} append="·" />
               <FormattedTimestamp
                 timestamp={supporter.createdAt}
@@ -101,10 +97,7 @@ function FeaturedSupporter({
           </span>
         </div>
       </div>
-      <Content
-        className="mt-2 select-text break-words"
-        content={supporter.comment}
-      />
+      <Content className="mt-2 break-words select-text" content={supporter.comment} />
     </div>
   )
 }
@@ -115,7 +108,7 @@ function CompactSupporter({ supporter }: { supporter: TRecentSupporter }) {
 
   return (
     <div
-      className="flex cursor-pointer items-center gap-1.5 rounded-full border ps-1 pe-2 py-1 transition-colors hover:bg-muted/40"
+      className="hover:bg-muted/40 flex cursor-pointer items-center gap-1.5 rounded-full border py-1 ps-1 pe-2 transition-colors"
       onClick={() => push(toProfile(supporter.pubkey))}
     >
       <UserAvatar userId={supporter.pubkey} size="small" />
@@ -124,7 +117,7 @@ function CompactSupporter({ supporter }: { supporter: TRecentSupporter }) {
         className="max-w-32 truncate text-sm font-medium"
         skeletonClassName="h-3"
       />
-      <span className="flex items-center gap-0.5 rounded-full bg-yellow-400/10 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-yellow-500 ring-1 ring-yellow-500/20">
+      <span className="flex items-center gap-0.5 rounded-full bg-yellow-400/10 px-1.5 py-0.5 text-xs font-semibold text-yellow-500 tabular-nums ring-1 ring-yellow-500/20">
         <Zap className="size-3 fill-yellow-500" />
         {formatAmount(supporter.amount)} {t('sats')}
       </span>

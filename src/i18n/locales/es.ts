@@ -882,11 +882,18 @@ export default {
     'Zap defaults': 'Valores predeterminados de zap',
     'Connect wallet': 'Conectar cartera',
     'Connect wallet via NWC': 'Conectar cartera mediante NWC',
-    'Use any NWC-compatible Lightning wallet':
-      'Usa cualquier cartera Lightning compatible con NWC',
+    'Use any NWC-compatible Lightning wallet': 'Usa cualquier cartera Lightning compatible con NWC',
     'Quickly create a custodial Lightning vault':
       'Crea rápidamente una cartera Lightning custodiada',
     'Recent Searches': 'Búsquedas recientes',
-    'Clear all': 'Borrar todo'
+    'Clear all': 'Borrar todo',
+    'Donate to': 'Donar a',
+    'Leave a message (optional)': 'Deja un mensaje (opcional)',
+    'Say hi or share what you love about Jumble': 'Saluda o comparte lo que te gusta de Jumble',
+    'Donate n sats': 'Donar {{n}} sats',
+    'Donation failed': 'Donación fallida',
+    'Thank you for supporting Jumble! 💛': '¡Gracias por apoyar a Jumble! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Tu donación aparecerá en Patrocinadores recientes'
   }
 }

@@ -893,6 +893,15 @@ export default {
     'Quickly create a custodial Lightning vault':
       'Créez rapidement un portefeuille Lightning custodial',
     'Recent Searches': 'Recherches récentes',
-    'Clear all': 'Tout effacer'
+    'Clear all': 'Tout effacer',
+    'Donate to': 'Faire un don à',
+    'Leave a message (optional)': 'Laisser un message (optionnel)',
+    'Say hi or share what you love about Jumble':
+      'Dites bonjour ou partagez ce que vous aimez sur Jumble',
+    'Donate n sats': 'Donner {{n}} sats',
+    'Donation failed': 'Échec du don',
+    'Thank you for supporting Jumble! 💛': 'Merci de soutenir Jumble ! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Votre don apparaîtra dans les soutiens récents'
   }
 }

@@ -879,6 +879,15 @@ export default {
     'Quickly create a custodial Lightning vault':
       'Hozz létre gyorsan egy letétkezelős Lightning tárcát',
     'Recent Searches': 'Legutóbbi keresések',
-    'Clear all': 'Összes törlése'
+    'Clear all': 'Összes törlése',
+    'Donate to': 'Adományozás',
+    'Leave a message (optional)': 'Hagyj üzenetet (opcionális)',
+    'Say hi or share what you love about Jumble':
+      'Köszönj vagy oszd meg, mit szeretsz a Jumble-ben',
+    'Donate n sats': '{{n}} sats adományozása',
+    'Donation failed': 'Adományozás sikertelen',
+    'Thank you for supporting Jumble! 💛': 'Köszönjük, hogy támogatod a Jumble-t! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Adományod megjelenik a legutóbbi támogatók között'
   }
 }

@@ -866,8 +866,7 @@ export default {
     'Private key': 'Приватный ключ',
     'Your private key controls your account. Keep it safe and never share it.':
       'Ваш приватный ключ управляет учётной записью. Храните его в безопасности и никогда никому не передавайте.',
-    'Template URL used to fetch website favicons':
-      'Шаблон URL для получения значков сайтов',
+    'Template URL used to fetch website favicons': 'Шаблон URL для получения значков сайтов',
     'Display language': 'Язык интерфейса',
     'Translation service': 'Сервис перевода',
     'API key': 'API-ключ',
@@ -885,9 +884,17 @@ export default {
     'Connect wallet via NWC': 'Подключить кошелёк через NWC',
     'Use any NWC-compatible Lightning wallet':
       'Подключите любой Lightning-кошелёк с поддержкой NWC',
-    'Quickly create a custodial Lightning vault':
-      'Быстро создайте кастодиальный Lightning-кошелёк',
+    'Quickly create a custodial Lightning vault': 'Быстро создайте кастодиальный Lightning-кошелёк',
     'Recent Searches': 'Недавние поиски',
-    'Clear all': 'Очистить всё'
+    'Clear all': 'Очистить всё',
+    'Donate to': 'Пожертвовать',
+    'Leave a message (optional)': 'Оставьте сообщение (необязательно)',
+    'Say hi or share what you love about Jumble':
+      'Поздоровайтесь или поделитесь, что вам нравится в Jumble',
+    'Donate n sats': 'Пожертвовать {{n}} сатоши',
+    'Donation failed': 'Пожертвование не удалось',
+    'Thank you for supporting Jumble! 💛': 'Спасибо за поддержку Jumble! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Ваше пожертвование появится в списке последних сторонников'
   }
 }

@@ -863,11 +863,16 @@ export default {
     'Zap defaults': 'الإعدادات الافتراضية لـ Zap',
     'Connect wallet': 'ربط المحفظة',
     'Connect wallet via NWC': 'ربط المحفظة عبر NWC',
-    'Use any NWC-compatible Lightning wallet':
-      'استخدم أي محفظة لايتنينغ متوافقة مع NWC',
-    'Quickly create a custodial Lightning vault':
-      'أنشئ بسرعة محفظة لايتنينغ بإدارة الطرف الثالث',
+    'Use any NWC-compatible Lightning wallet': 'استخدم أي محفظة لايتنينغ متوافقة مع NWC',
+    'Quickly create a custodial Lightning vault': 'أنشئ بسرعة محفظة لايتنينغ بإدارة الطرف الثالث',
     'Recent Searches': 'عمليات البحث الأخيرة',
-    'Clear all': 'مسح الكل'
+    'Clear all': 'مسح الكل',
+    'Donate to': 'التبرع لـ',
+    'Leave a message (optional)': 'اترك رسالة (اختياري)',
+    'Say hi or share what you love about Jumble': 'قل مرحبًا أو شارك ما تحبه في Jumble',
+    'Donate n sats': 'تبرع بـ {{n}} ساتوشي',
+    'Donation failed': 'فشل التبرع',
+    'Thank you for supporting Jumble! 💛': 'شكرًا لدعمك Jumble! 💛',
+    'Your donation will appear in Recent Supporters': 'سيظهر تبرعك في الداعمين الأخيرين'
   }
 }

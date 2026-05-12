@@ -874,8 +874,7 @@ export default {
     'Private key': 'Privater Schlüssel',
     'Your private key controls your account. Keep it safe and never share it.':
       'Dein privater Schlüssel kontrolliert dein Konto. Bewahre ihn sicher auf und teile ihn niemals.',
-    'Template URL used to fetch website favicons':
-      'Vorlagen-URL zum Abrufen von Website-Favicons',
+    'Template URL used to fetch website favicons': 'Vorlagen-URL zum Abrufen von Website-Favicons',
     'Display language': 'Anzeigesprache',
     'Translation service': 'Übersetzungsdienst',
     'API key': 'API-Schlüssel',
@@ -896,6 +895,14 @@ export default {
     'Quickly create a custodial Lightning vault':
       'Schnell einen verwalteten Lightning-Tresor erstellen',
     'Recent Searches': 'Letzte Suchen',
-    'Clear all': 'Alle löschen'
+    'Clear all': 'Alle löschen',
+    'Donate to': 'Spenden an',
+    'Leave a message (optional)': 'Nachricht hinterlassen (optional)',
+    'Say hi or share what you love about Jumble': 'Sag hallo oder erzähl, was du an Jumble liebst',
+    'Donate n sats': '{{n}} Sats spenden',
+    'Donation failed': 'Spende fehlgeschlagen',
+    'Thank you for supporting Jumble! 💛': 'Danke für deine Unterstützung von Jumble! 💛',
+    'Your donation will appear in Recent Supporters':
+      'Deine Spende erscheint in den letzten Unterstützern'
   }
 }

@@ -22,7 +22,8 @@ export const IPC_CHANNELS = {
   updateGetState: 'update:get-state',
   updateState: 'update:state',
   updateSetAuto: 'update:set-auto',
-  proxyFetch: 'proxy:fetch'
+  proxyFetch: 'proxy:fetch',
+  mediaGetShimOrigin: 'media:get-shim-origin'
 } as const
 
 export type TSecretsBundle = {
@@ -146,9 +147,19 @@ export type TProxyBridge = {
   fetch: (url: string, options?: TProxyFetchOptions) => Promise<TProxyFetchResponse>
 }
 
+export type TMediaBridge = {
+  /**
+   * Origin (e.g. http://127.0.0.1:54321) of the local HTTP server that hosts
+   * the YouTube IFrame API shim page. Returns null if the server isn't running
+   * (e.g. dev mode where the renderer is served by Vite over http already).
+   */
+  getShimOrigin: () => Promise<string | null>
+}
+
 export type TElectronBridge = {
   relay: TElectronRelayBridge
   secrets: TSecretsBridge
   update: TUpdateBridge
   proxy: TProxyBridge
+  media: TMediaBridge
 }

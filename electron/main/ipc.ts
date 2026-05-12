@@ -6,6 +6,7 @@ import {
   TProxyFetchOptions,
   TSecretsBundle
 } from '../shared/ipc-types.js'
+import type { MediaServer } from './media-server.js'
 import { proxyFetch } from './proxy-fetch.js'
 import type { RelayManager } from './relay-manager.js'
 import type { SecretsStore } from './secrets-store.js'
@@ -14,19 +15,17 @@ import type { Updater } from './updater.js'
 export function registerIpcHandlers(
   manager: RelayManager,
   secrets: SecretsStore,
-  updater: Updater
+  updater: Updater,
+  mediaServer: MediaServer
 ) {
   ipcMain.handle(IPC_CHANNELS.ensure, (_e, url: string) => manager.ensure(url))
 
-  ipcMain.handle(
-    IPC_CHANNELS.publish,
-    (_e, url: string, event: NEvent, timeoutMs: number) => manager.publish(url, event, timeoutMs)
+  ipcMain.handle(IPC_CHANNELS.publish, (_e, url: string, event: NEvent, timeoutMs: number) =>
+    manager.publish(url, event, timeoutMs)
   )
 
-  ipcMain.handle(
-    IPC_CHANNELS.subscribe,
-    (_e, subId: string, url: string, filters: Filter[]) =>
-      manager.subscribe(subId, url, filters)
+  ipcMain.handle(IPC_CHANNELS.subscribe, (_e, subId: string, url: string, filters: Filter[]) =>
+    manager.subscribe(subId, url, filters)
   )
 
   ipcMain.handle(IPC_CHANNELS.closeSub, (_e, subId: string) => manager.closeSub(subId))
@@ -58,6 +57,8 @@ export function registerIpcHandlers(
   ipcMain.handle(IPC_CHANNELS.proxyFetch, (_e, url: string, options?: TProxyFetchOptions) =>
     proxyFetch(url, options)
   )
+
+  ipcMain.handle(IPC_CHANNELS.mediaGetShimOrigin, () => mediaServer.getUrl())
 }
 
 export function unregisterIpcHandlers() {

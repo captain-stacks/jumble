@@ -23,8 +23,7 @@ const bridge: TElectronBridge = {
     closeSub: (subId: string) => ipcRenderer.invoke(IPC_CHANNELS.closeSub, subId),
     auth: (url: string) => ipcRenderer.invoke(IPC_CHANNELS.auth, url),
     close: (urls?: string[]) => ipcRenderer.invoke(IPC_CHANNELS.close, urls),
-    setAllowInsecure: (allow: boolean) =>
-      ipcRenderer.invoke(IPC_CHANNELS.setAllowInsecure, allow),
+    setAllowInsecure: (allow: boolean) => ipcRenderer.invoke(IPC_CHANNELS.setAllowInsecure, allow),
     onSubEvent: (cb) => {
       const listener = (_e: unknown, payload: TSubEventPayload) => cb(payload)
       ipcRenderer.on(IPC_CHANNELS.subEvent, listener)
@@ -63,12 +62,14 @@ const bridge: TElectronBridge = {
       ipcRenderer.on(IPC_CHANNELS.updateState, listener)
       return () => ipcRenderer.off(IPC_CHANNELS.updateState, listener)
     },
-    setAutoUpdate: (enabled: boolean) =>
-      ipcRenderer.invoke(IPC_CHANNELS.updateSetAuto, enabled)
+    setAutoUpdate: (enabled: boolean) => ipcRenderer.invoke(IPC_CHANNELS.updateSetAuto, enabled)
   },
   proxy: {
     fetch: (url: string, options?: TProxyFetchOptions) =>
       ipcRenderer.invoke(IPC_CHANNELS.proxyFetch, url, options)
+  },
+  media: {
+    getShimOrigin: () => ipcRenderer.invoke(IPC_CHANNELS.mediaGetShimOrigin)
   }
 }
 

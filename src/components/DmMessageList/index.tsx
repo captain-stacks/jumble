@@ -14,7 +14,6 @@ import MediaPlayer from '@/components/MediaPlayer'
 import SuggestedEmojis from '@/components/SuggestedEmojis'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
-import UserAvatar from '@/components/UserAvatar'
 import { SimpleUsername } from '@/components/Username'
 import XEmbeddedPost from '@/components/XEmbeddedPost'
 import YoutubeEmbeddedPlayer from '@/components/YoutubeEmbeddedPlayer'
@@ -32,7 +31,6 @@ import {
 } from '@/lib/content-parser'
 import { getEmojiInfosFromEmojiTags } from '@/lib/tag'
 import { cn } from '@/lib/utils'
-import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePageActive } from '@/providers/PageActiveProvider'
 import cryptoFileService from '@/services/crypto-file.service'
@@ -90,7 +88,6 @@ export default function DmMessageList({
 }) {
   const { t } = useTranslation()
   const { pubkey } = useNostr()
-  const { autoLoadProfilePicture } = useContentPolicy()
   const active = usePageActive()
   const [messages, setMessages] = useState<TDmMessage[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -356,7 +353,7 @@ export default function DmMessageList({
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -373,13 +370,13 @@ export default function DmMessageList({
     <div className="relative flex-1 overflow-hidden">
       <div
         ref={containerRef}
-        className="flex h-full select-text flex-col-reverse overflow-y-auto p-4 [overflow-anchor:none]"
+        className="flex h-full flex-col-reverse overflow-y-auto p-4 select-text [overflow-anchor:none]"
         onScroll={handleScroll}
       >
         <div>
           {isLoadingMore && (
             <div className="flex justify-center py-2">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           )}
           {(() => {
@@ -417,27 +414,22 @@ export default function DmMessageList({
                 <Fragment key={group.items[0].id}>
                   {group.showTime && (
                     <div className={cn('flex justify-center', group.isFirst ? '' : 'mt-3')}>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {formatDmTime(group.timeCreatedAt, t)}
                       </span>
                     </div>
                   )}
                   <div
                     className={cn(
-                      'flex gap-2',
+                      'flex',
                       group.isOwn ? 'flex-row-reverse' : 'flex-row',
                       group.showTime ? 'mt-1' : 'mt-3',
                       lastMsgHasReactions && 'pb-7'
                     )}
                   >
-                    {!group.isOwn && autoLoadProfilePicture && (
-                      <div className="w-9 shrink-0 self-end">
-                        <UserAvatar userId={group.items[0].senderPubkey} size="medium" />
-                      </div>
-                    )}
                     <div
                       className={cn(
-                        'flex min-w-0 flex-1 flex-col gap-0.5 sm:max-w-[80%]',
+                        'flex max-w-[80%] min-w-0 flex-1 flex-col gap-0.5',
                         group.isOwn ? 'items-end' : 'items-start'
                       )}
                     >
@@ -467,7 +459,6 @@ export default function DmMessageList({
                         />
                       ))}
                     </div>
-                    {group.isOwn && autoLoadProfilePicture && <div className="w-9 shrink-0" />}
                   </div>
                 </Fragment>
               )
@@ -480,7 +471,7 @@ export default function DmMessageList({
         <div className="pointer-events-none absolute bottom-3 flex w-full justify-center">
           <button
             onClick={scrollToBottom}
-            className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary-hover"
+            className="bg-primary text-primary-foreground hover:bg-primary-hover pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium shadow-lg"
           >
             <ArrowDown className="h-4 w-4" />
             {t('{{n}} new messages', { n: pendingCount > 99 ? '99+' : pendingCount })}
@@ -652,7 +643,7 @@ function MessageBubble({
   const reactButton = (
     <button
       onClick={() => setIsEmojiOpen(true)}
-      className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-secondary"
+      className="text-muted-foreground hover:bg-secondary shrink-0 rounded-full p-1.5"
     >
       <SmilePlus className="h-4 w-4" />
     </button>
@@ -667,35 +658,15 @@ function MessageBubble({
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
       className={cn(
-        'group/msg flex w-full max-w-full select-none flex-col',
+        'group/msg flex w-full max-w-full flex-col select-none',
         isOwn ? 'items-end' : 'items-start',
         isElevated && 'relative z-10',
         hasReactions && !isLastInGroup && 'mb-7'
       )}
     >
-      {message.replyTo && (
-        <button
-          onClick={() => onScrollToMessage?.(message.replyTo!.id)}
-          className="mb-0.5 flex min-w-0 max-w-full items-center overflow-hidden rounded py-0.5 ps-1.5 pe-2 text-[11px] text-muted-foreground hover:bg-muted"
-        >
-          <span className="me-1.5 self-stretch border-s-2 border-muted-foreground/50" />
-          {message.replyTo.senderPubkey ? (
-            <SimpleUsername
-              userId={message.replyTo.senderPubkey}
-              className="me-1 shrink-0 font-medium"
-              withoutSkeleton
-            />
-          ) : null}
-          <ContentPreviewContent
-            content={message.replyTo.content || '...'}
-            className="truncate"
-            emojiInfos={getEmojiInfosFromEmojiTags(message.replyTo.tags)}
-          />
-        </button>
-      )}
       <div
         className={cn(
-          'flex min-w-0 max-w-full items-end gap-1',
+          'flex max-w-full min-w-0 items-end gap-1',
           hasBlocks && !isOwn && 'w-full',
           isFileMessage && 'justify-end',
           isOwn ? 'flex-row' : 'flex-row-reverse'
@@ -709,7 +680,7 @@ function MessageBubble({
         >
           <button
             onClick={handleCopy}
-            className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-secondary"
+            className="text-muted-foreground hover:bg-secondary shrink-0 rounded-full p-1.5"
           >
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
@@ -735,7 +706,7 @@ function MessageBubble({
           {onReply && (
             <button
               onClick={() => onReply(message)}
-              className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-secondary"
+              className="text-muted-foreground hover:bg-secondary shrink-0 rounded-full p-1.5"
             >
               <Reply className="h-4 w-4" />
             </button>
@@ -752,9 +723,9 @@ function MessageBubble({
                       setIsActionDrawerOpen(false)
                       onReply(message)
                     }}
-                    className="flex items-center gap-3 px-4 py-3 text-base active:bg-secondary"
+                    className="active:bg-secondary flex items-center gap-3 px-4 py-3 text-base"
                   >
-                    <Reply className="h-5 w-5 text-muted-foreground" />
+                    <Reply className="text-muted-foreground h-5 w-5" />
                     {t('Reply')}
                   </button>
                 )}
@@ -764,9 +735,9 @@ function MessageBubble({
                       if (Date.now() - actionDrawerOpenTimeRef.current < 400) return
                       setDrawerMode('emoji')
                     }}
-                    className="flex items-center gap-3 px-4 py-3 text-base active:bg-secondary"
+                    className="active:bg-secondary flex items-center gap-3 px-4 py-3 text-base"
                   >
-                    <SmilePlus className="h-5 w-5 text-muted-foreground" />
+                    <SmilePlus className="text-muted-foreground h-5 w-5" />
                     {t('React')}
                   </button>
                 )}
@@ -776,9 +747,9 @@ function MessageBubble({
                     handleCopy()
                     setIsActionDrawerOpen(false)
                   }}
-                  className="flex items-center gap-3 px-4 py-3 text-base active:bg-secondary"
+                  className="active:bg-secondary flex items-center gap-3 px-4 py-3 text-base"
                 >
-                  <Copy className="h-5 w-5 text-muted-foreground" />
+                  <Copy className="text-muted-foreground h-5 w-5" />
                   {t('Copy')}
                 </button>
               </div>
@@ -803,7 +774,33 @@ function MessageBubble({
             />
           </div>
         )}
-        <div className={cn('relative min-w-0 max-w-full', hasBlocks && !isFileMessage && 'flex-1')}>
+        <div
+          className={cn(
+            'relative flex max-w-full min-w-0 flex-col',
+            isOwn ? 'items-end' : 'items-start',
+            hasBlocks && !isFileMessage && 'flex-1'
+          )}
+        >
+          {message.replyTo && (
+            <button
+              onClick={() => onScrollToMessage?.(message.replyTo!.id)}
+              className="text-muted-foreground hover:bg-muted mb-0.5 inline-block max-w-full rounded-lg px-2 py-1 align-bottom text-[11px]"
+            >
+              <div className="border-muted-foreground/50 line-clamp-2 border-s-2 ps-1.5 text-start">
+                {message.replyTo.senderPubkey && (
+                  <SimpleUsername
+                    userId={message.replyTo.senderPubkey}
+                    className="me-1 inline font-bold after:content-[':']"
+                    withoutSkeleton
+                  />
+                )}
+                <ContentPreviewContent
+                  content={message.replyTo.content}
+                  emojiInfos={getEmojiInfosFromEmojiTags(message.replyTo.tags)}
+                />
+              </div>
+            </button>
+          )}
           {isFileMessage ? (
             <EncryptedFileMessage message={message} isOwn={isOwn} isHighlighted={isHighlighted} />
           ) : (
@@ -826,7 +823,7 @@ function MessageBubble({
                 <div
                   key={r.emoji}
                   className={cn(
-                    'relative flex h-6 cursor-pointer select-none items-center gap-1 overflow-hidden rounded-full border px-1.5 text-sm shadow-xs transition-all duration-200',
+                    'relative flex h-6 cursor-pointer items-center gap-1 overflow-hidden rounded-full border px-1.5 text-sm shadow-xs transition-all duration-200 select-none',
                     r.hasOwn
                       ? 'border-primary/50 bg-primary/10 hover:border-primary hover:bg-primary/20'
                       : 'border-border bg-background hover:border-primary/30 hover:bg-primary/5',
@@ -847,7 +844,7 @@ function MessageBubble({
                   {(chipLongPressing === r.emoji || chipCompleted === r.emoji) && (
                     <div className="absolute inset-0 overflow-hidden rounded-full">
                       <div
-                        className="h-full bg-linear-to-r from-primary/40 via-primary/60 to-primary/80"
+                        className="from-primary/40 via-primary/60 to-primary/80 h-full bg-linear-to-r"
                         style={{
                           width: chipCompleted === r.emoji ? '100%' : '0%',
                           animation:
@@ -879,7 +876,7 @@ function MessageBubble({
                       )}
                     </div>
                     {r.count > 1 && (
-                      <span className="text-xs text-muted-foreground">{r.count}</span>
+                      <span className="text-muted-foreground text-xs">{r.count}</span>
                     )}
                   </div>
                 </div>
@@ -988,9 +985,7 @@ function DmContent({
     const segments = segmentDmContent(nodes)
 
     // Detect emoji-only content (1-3 emojis, no other content)
-    const nonWhitespace = nodes.filter(
-      (node) => !(node.type === 'text' && /^\s*$/.test(node.data))
-    )
+    const nonWhitespace = nodes.filter((node) => !(node.type === 'text' && /^\s*$/.test(node.data)))
     let emojiCount = 0
     let emojiOnly = true
     for (const node of nonWhitespace) {
@@ -1022,10 +1017,10 @@ function DmContent({
   return (
     <div
       className={cn(
-        'flex min-w-0 max-w-full flex-col gap-0.5 rounded-lg transition-all duration-500',
+        'flex max-w-full min-w-0 flex-col gap-0.5 rounded-lg transition-all duration-500',
         segments.some((s) => s.kind === 'block') && 'flex-1',
         isOwn ? 'items-end' : 'items-start',
-        isHighlighted && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+        isHighlighted && 'ring-primary ring-offset-background ring-2 ring-offset-2'
       )}
     >
       {segments.map((seg, si) => {
@@ -1035,7 +1030,11 @@ function DmContent({
               <div key={si} className="flex items-end gap-1">
                 {seg.nodes.map((node, ni) => {
                   if (node.type === 'text')
-                    return <span key={ni} className="text-7xl leading-none">{node.data}</span>
+                    return (
+                      <span key={ni} className="text-7xl leading-none">
+                        {node.data}
+                      </span>
+                    )
                   if (node.type === 'emoji') {
                     const shortcode = node.data.split(':')[1]
                     const emoji = emojiInfos.find((e) => e.shortcode === shortcode)
@@ -1052,9 +1051,9 @@ function DmContent({
               <div
                 dir="auto"
                 className={cn(
-                  'whitespace-pre-wrap text-wrap wrap-break-word text-base',
+                  'text-base text-wrap wrap-break-word whitespace-pre-wrap',
                   isOwn &&
-                    '[&>div]:text-foreground [&_.text-primary]:text-primary-foreground [&_.text-primary]:underline [&_.text-primary]:decoration-primary-foreground/50',
+                    '[&>div]:text-foreground [&_.text-primary]:text-primary-foreground [&_.text-primary]:decoration-primary-foreground/50 [&_.text-primary]:underline',
                   '[&_.bg-card:hover]:bg-accent'
                 )}
               >
@@ -1214,9 +1213,9 @@ function EncryptedFileMessage({
             )}
           >
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
             ) : error ? (
-              <AlertCircle className="h-4 w-4 text-destructive" />
+              <AlertCircle className="text-destructive h-4 w-4" />
             ) : (
               <Download className="h-4 w-4" />
             )}
@@ -1250,7 +1249,7 @@ function EncryptedFileMessage({
             isOwn ? 'bg-primary/20' : 'bg-secondary'
           )}
         >
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
         </div>
       </div>
     )
@@ -1267,8 +1266,8 @@ function EncryptedFileMessage({
             isOwn ? 'bg-primary/20' : 'bg-secondary'
           )}
         >
-          <AlertCircle className="h-4 w-4 text-destructive" />
-          <span className="text-xs text-muted-foreground">{t('Failed to decrypt')}</span>
+          <AlertCircle className="text-destructive h-4 w-4" />
+          <span className="text-muted-foreground text-xs">{t('Failed to decrypt')}</span>
         </div>
       </div>
     )
@@ -1315,13 +1314,13 @@ function SendingStatusIcon({
 }) {
   switch (status) {
     case 'sending':
-      return <Clock className="h-3 w-3 text-muted-foreground" />
+      return <Clock className="text-muted-foreground h-3 w-3" />
     case 'sent':
-      return <Check className="h-3 w-3 text-muted-foreground" />
+      return <Check className="text-muted-foreground h-3 w-3" />
     case 'failed':
       return (
         <button onClick={onRetry} className="flex items-center">
-          <AlertCircle className="h-3 w-3 text-destructive" />
+          <AlertCircle className="text-destructive h-3 w-3" />
         </button>
       )
   }

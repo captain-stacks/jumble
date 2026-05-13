@@ -1,5 +1,6 @@
 import DmInput from '@/components/DmInput'
 import DmMessageList from '@/components/DmMessageList'
+import UserAvatar from '@/components/UserAvatar'
 import { ExtendedKind } from '@/constants'
 import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
@@ -125,7 +126,13 @@ const DmConversationPage = forwardRef(
     }
 
     return (
-      <SecondaryPageLayout index={index} title={profile?.username} ref={ref} noScrollArea>
+      <SecondaryPageLayout
+        index={index}
+        title={profile?.username}
+        controls={<UserAvatar userId={pubkey} size="small" className="me-2" />}
+        ref={ref}
+        noScrollArea
+      >
         <DmMessageList otherPubkey={pubkey} onReply={handleReply} />
         {dmSupportStatus === 'loading' ? (
           <div

@@ -363,7 +363,7 @@ function DmPageTitlebar({
             <div className="flex min-w-0 items-center justify-center px-1">
               <div className="truncate text-lg font-semibold">{t('Messages')}</div>
             </div>
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-1">
               {showSettings && (
                 <>
                   <Button variant="ghost" size="titlebar-icon" onClick={openSearch}>
@@ -459,7 +459,7 @@ function DmPageTitlebar({
             <ChatCircleIcon />
             <div className="text-lg font-semibold">{t('Messages')}</div>
           </div>
-          <div className="ms-auto flex items-center">
+          <div className="ms-auto flex items-center gap-1">
             {showSettings && (
               <>
                 <Button variant="ghost" size="titlebar-icon" onClick={openSearch}>

@@ -901,6 +901,8 @@ export default {
     'View all releases on GitHub': "Tüm sürümleri GitHub'da görüntüle",
     'No auto-updates — manual re-download required':
       'Otomatik güncelleme yok — manuel olarak yeniden indirmeniz gerekir',
-    Download: 'İndir'
+    Download: 'İndir',
+    'Followed by your follows': 'Takip ettiklerinin takip ettiği kişiler',
+    Shuffle: 'Karıştır'
   }
 }

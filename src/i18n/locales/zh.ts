@@ -866,6 +866,8 @@ export default {
     'Pick a build for your operating system.': '选择适合你操作系统的版本。',
     'View all releases on GitHub': '在 GitHub 上查看所有版本',
     'No auto-updates — manual re-download required': '不支持自动更新 — 需要手动重新下载',
-    Download: '下载'
+    Download: '下载',
+    'Followed by your follows': '你关注的人也关注',
+    Shuffle: '换一批'
   }
 }

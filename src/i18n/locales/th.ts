@@ -879,6 +879,8 @@ export default {
     'View all releases on GitHub': 'ดูรุ่นทั้งหมดบน GitHub',
     'No auto-updates — manual re-download required':
       'ไม่รองรับอัปเดตอัตโนมัติ — ต้องดาวน์โหลดใหม่ด้วยตนเอง',
-    Download: 'ดาวน์โหลด'
+    Download: 'ดาวน์โหลด',
+    'Followed by your follows': 'ติดตามโดยคนที่คุณติดตาม',
+    Shuffle: 'สุ่ม'
   }
 }

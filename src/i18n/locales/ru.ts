@@ -901,6 +901,8 @@ export default {
     'View all releases on GitHub': 'Все релизы на GitHub',
     'No auto-updates — manual re-download required':
       'Без автообновлений — требуется ручная повторная загрузка',
-    Download: 'Скачать'
+    Download: 'Скачать',
+    'Followed by your follows': 'На кого подписаны ваши подписки',
+    Shuffle: 'Перемешать'
   }
 }

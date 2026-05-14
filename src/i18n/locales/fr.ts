@@ -909,6 +909,8 @@ export default {
     'View all releases on GitHub': 'Voir toutes les versions sur GitHub',
     'No auto-updates — manual re-download required':
       'Pas de mise à jour automatique — nouveau téléchargement manuel requis',
-    Download: 'Télécharger'
+    Download: 'Télécharger',
+    'Followed by your follows': 'Suivis par vos abonnements',
+    Shuffle: 'Mélanger'
   }
 }

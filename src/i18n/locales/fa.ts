@@ -895,6 +895,8 @@ export default {
     'View all releases on GitHub': 'مشاهده همه نسخه‌ها در GitHub',
     'No auto-updates — manual re-download required':
       'بدون به‌روزرسانی خودکار — نیاز به دانلود مجدد دستی',
-    Download: 'دانلود'
+    Download: 'دانلود',
+    'Followed by your follows': 'دنبال‌شده توسط افرادی که دنبال می‌کنید',
+    Shuffle: 'بُر زدن'
   }
 }

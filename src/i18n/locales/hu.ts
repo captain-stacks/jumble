@@ -895,6 +895,8 @@ export default {
     'View all releases on GitHub': 'Az összes kiadás megtekintése a GitHubon',
     'No auto-updates — manual re-download required':
       'Nincs automatikus frissítés — kézi újraletöltés szükséges',
-    Download: 'Letöltés'
+    Download: 'Letöltés',
+    'Followed by your follows': 'Akiket a követéseid követnek',
+    Shuffle: 'Keverés'
   }
 }

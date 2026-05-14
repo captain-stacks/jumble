@@ -912,6 +912,9 @@ export default {
     'Download Jumble Desktop': 'Download Jumble Desktop',
     'Pick a build for your operating system.': 'Pick a build for your operating system.',
     'View all releases on GitHub': 'View all releases on GitHub',
-    'No auto-updates — manual re-download required': 'No auto-updates — manual re-download required'
+    'No auto-updates — manual re-download required':
+      'No auto-updates — manual re-download required',
+    'Followed by your follows': 'Followed by your follows',
+    Shuffle: 'Shuffle'
   }
 }

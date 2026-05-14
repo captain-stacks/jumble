@@ -895,6 +895,8 @@ export default {
     'View all releases on GitHub': 'GitHub ですべてのリリースを表示',
     'No auto-updates — manual re-download required':
       '自動アップデート非対応 — 手動で再ダウンロードが必要',
-    Download: 'ダウンロード'
+    Download: 'ダウンロード',
+    'Followed by your follows': 'フォロー中のユーザーがフォローしている人',
+    Shuffle: 'シャッフル'
   }
 }

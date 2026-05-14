@@ -895,6 +895,8 @@ export default {
     'View all releases on GitHub': 'GitHub पर सभी रिलीज़ देखें',
     'No auto-updates — manual re-download required':
       'कोई स्वचालित अपडेट नहीं — मैन्युअल रूप से दोबारा डाउनलोड करना होगा',
-    Download: 'डाउनलोड करें'
+    Download: 'डाउनलोड करें',
+    'Followed by your follows': 'जिन्हें आप फ़ॉलो करते हैं वे इन्हें फ़ॉलो करते हैं',
+    Shuffle: 'फेरबदल'
   }
 }

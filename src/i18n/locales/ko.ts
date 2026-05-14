@@ -886,6 +886,8 @@ export default {
     'View all releases on GitHub': 'GitHub에서 모든 릴리스 보기',
     'No auto-updates — manual re-download required':
       '자동 업데이트 미지원 — 수동으로 다시 다운로드해야 함',
-    Download: '다운로드'
+    Download: '다운로드',
+    'Followed by your follows': '내가 팔로우한 사람들이 팔로우하는 사람',
+    Shuffle: '셔플'
   }
 }

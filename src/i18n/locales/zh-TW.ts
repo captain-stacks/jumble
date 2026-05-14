@@ -859,6 +859,8 @@ export default {
     'Pick a build for your operating system.': '選擇適合你作業系統的版本。',
     'View all releases on GitHub': '在 GitHub 上檢視所有版本',
     'No auto-updates — manual re-download required': '不支援自動更新 — 需要手動重新下載',
-    Download: '下載'
+    Download: '下載',
+    'Followed by your follows': '你關注的人也關注',
+    Shuffle: '換一批'
   }
 }

@@ -107,7 +107,7 @@ export default function VideoPlayer({
         controls
         playsInline
         loop={videoLoop}
-        className="block h-full w-full object-cover"
+        className="block h-full w-full object-contain"
         src={src}
         onClick={(e) => e.stopPropagation()}
         onPlay={(event) => {

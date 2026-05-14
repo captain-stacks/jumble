@@ -658,7 +658,7 @@ function MessageBubble({
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
       className={cn(
-        'group/msg flex w-full max-w-full flex-col select-none',
+        'group/msg flex w-full max-w-full flex-col select-none [@media(hover:hover)]:select-text',
         isOwn ? 'items-end' : 'items-start',
         isElevated && 'relative z-10',
         hasReactions && !isLastInGroup && 'mb-7'

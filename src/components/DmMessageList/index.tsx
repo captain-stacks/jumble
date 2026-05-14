@@ -764,16 +764,6 @@ function MessageBubble({
             )}
           </DrawerContent>
         </Drawer>
-        {sendingStatus && (
-          <div className="pb-1">
-            <SendingStatusIcon
-              status={sendingStatus}
-              onRetry={
-                sendingStatus === 'failed' ? () => dmService.resendMessage(message.id) : undefined
-              }
-            />
-          </div>
-        )}
         <div
           className={cn(
             'relative flex max-w-full min-w-0 flex-col',
@@ -881,6 +871,22 @@ function MessageBubble({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {isOwn && sendingStatus && (
+            <div
+              className={cn(
+                'absolute inset-e-full bottom-1 me-1 transition-opacity duration-150',
+                sendingStatus !== 'failed' &&
+                  '[@media(hover:hover)]:group-hover/msg:pointer-events-none [@media(hover:hover)]:group-hover/msg:opacity-0'
+              )}
+            >
+              <SendingStatusIcon
+                status={sendingStatus}
+                onRetry={
+                  sendingStatus === 'failed' ? () => dmService.resendMessage(message.id) : undefined
+                }
+              />
             </div>
           )}
         </div>

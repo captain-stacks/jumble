@@ -1,6 +1,8 @@
+import { FormattedTimestamp } from '@/components/FormattedTimestamp'
+import PullToRefresh from '@/components/PullToRefresh'
 import { RefreshButton } from '@/components/RefreshButton'
-import TextWithEmojis from '@/components/TextWithEmojis'
 import Tabs from '@/components/Tabs'
+import TextWithEmojis from '@/components/TextWithEmojis'
 import TrustScoreFilter from '@/components/TrustScoreFilter'
 import {
   AlertDialog,
@@ -23,10 +25,9 @@ import {
 } from '@/components/ui/drawer'
 import UserAvatar, { SimpleUserAvatar } from '@/components/UserAvatar'
 import Username, { SimpleUsername } from '@/components/Username'
-import { FormattedTimestamp } from '@/components/FormattedTimestamp'
 import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
-import { getEmojiInfosFromEmojiTags } from '@/lib/tag'
 import { toDmConversation } from '@/lib/link'
+import { getEmojiInfosFromEmojiTags } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
@@ -35,11 +36,10 @@ import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import dmService from '@/services/dm.service'
 import { TDmConversation } from '@/types'
-import { MessageSquare, Trash2 } from 'lucide-react'
+import { MessageCircle, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import PullToRefresh from '@/components/PullToRefresh'
 
 type TDmTab = 'messages' | 'requests'
 
@@ -175,7 +175,7 @@ export default function DmList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+        <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2" />
       </div>
     )
   }
@@ -242,12 +242,12 @@ function ConversationListContent({
   if (filteredConversations.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center gap-4 p-8 pt-[25vh] text-center">
-        <MessageSquare className="h-16 w-16 text-muted-foreground" />
+        <MessageCircle className="text-muted-foreground h-16 w-16" />
         <div className="space-y-2">
           {activeTab === 'messages' ? (
             <>
               <h3 className="font-medium">{t('No conversations yet')}</h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
+              <p className="text-muted-foreground max-w-sm text-sm">
                 {t(
                   "Start a conversation by visiting someone's profile and clicking the message button."
                 )}
@@ -256,7 +256,7 @@ function ConversationListContent({
           ) : (
             <>
               <h3 className="font-medium">{t('No message requests')}</h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
+              <p className="text-muted-foreground max-w-sm text-sm">
                 {t("Messages from people you haven't replied to will appear here.")}
               </p>
             </>
@@ -335,7 +335,7 @@ function ContextMenuConversationItem({
   return (
     <>
       <button
-        className="flex w-full items-center gap-3 p-3 text-start transition-colors hover:bg-accent/50"
+        className="hover:bg-accent/50 flex w-full items-center gap-3 px-4 py-3 text-start transition-colors"
         onClick={onClick}
         onContextMenu={handleContextMenu}
       >
@@ -352,12 +352,12 @@ function ContextMenuConversationItem({
             }}
           >
             <div
-              className="absolute min-w-48 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+              className="bg-popover text-popover-foreground absolute min-w-48 rounded-lg border p-1 shadow-md"
               style={{ left: contextMenu.x, top: contextMenu.y }}
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-destructive transition-colors hover:bg-accent"
+                className="text-destructive hover:bg-accent flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
                 onClick={() => {
                   setContextMenu(null)
                   onDelete()
@@ -457,7 +457,7 @@ function SwipeableConversationItem({
     <div className="relative overflow-hidden">
       <div className="absolute inset-y-0 right-0 flex items-center" style={{ width: THRESHOLD }}>
         <button
-          className="flex h-full w-full items-center justify-center bg-destructive text-destructive-foreground"
+          className="bg-destructive text-destructive-foreground flex h-full w-full items-center justify-center"
           onClick={(e) => {
             e.stopPropagation()
             applyTransform(0, true)
@@ -470,14 +470,14 @@ function SwipeableConversationItem({
       </div>
       <div
         ref={slideRef}
-        className="relative bg-background ease-out"
+        className="bg-background relative ease-out"
         style={{ transitionProperty: 'transform', transitionDuration: '200ms' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <button
-          className="flex w-full items-center gap-3 p-3 text-start transition-colors hover:bg-accent/50"
+          className="hover:bg-accent/50 flex w-full items-center gap-3 px-4 py-3 text-start transition-colors"
           onClick={handleClick}
         >
           <ConversationItemContent conversation={conversation} />
@@ -487,11 +487,7 @@ function SwipeableConversationItem({
   )
 }
 
-function ConversationItemContent({
-  conversation
-}: {
-  conversation: TDmConversation
-}) {
+function ConversationItemContent({ conversation }: { conversation: TDmConversation }) {
   const { t } = useTranslation()
   const supportTouch = useMemo(() => isTouchDevice(), [])
 
@@ -538,18 +534,18 @@ function ConversationItemContent({
           )}
           <FormattedTimestamp
             timestamp={conversation.lastMessageAt}
-            className="shrink-0 text-xs text-muted-foreground"
+            className="text-muted-foreground shrink-0 text-xs"
           />
         </div>
         <div className="flex items-center justify-between gap-2">
           <TextWithEmojis
-            className="truncate text-sm text-muted-foreground"
+            className="text-muted-foreground truncate text-sm"
             text={displayContent}
             emojis={emojis}
             emojiClassName="h-4 w-4"
           />
           {conversation.unreadCount > 0 && (
-            <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
+            <span className="bg-primary text-primary-foreground flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1 text-xs font-medium">
               {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
             </span>
           )}

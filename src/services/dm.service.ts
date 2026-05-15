@@ -2,6 +2,7 @@ import { DM_TIME_RANDOMIZATION_SECONDS, ExtendedKind } from '@/constants'
 import { isValidPubkey } from '@/lib/pubkey'
 import { tagNameEquals } from '@/lib/tag'
 import { TDmConversation, TDmMessage, TEncryptionKeypair } from '@/types'
+import dayjs from 'dayjs'
 import { Event, Filter, kinds } from 'nostr-tools'
 import client from './client.service'
 import cryptoFileService from './crypto-file.service'
@@ -755,7 +756,8 @@ class DmService {
     const myDmRelays = await client.fetchDmRelays(accountPubkey)
 
     const myClientKeypair = encryptionKeyService.getClientKeypair(accountPubkey)
-    const fiveMinutesAgo = Math.floor(Date.now() / 1000) - 300
+    const fiveMinutesAgo = dayjs().subtract(5, 'minute').unix()
+    const now = dayjs().unix()
 
     const sub = client.subscribe(
       myDmRelays,
@@ -789,7 +791,9 @@ class DmService {
 
           if (event.kind === ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT) {
             const newPubkey = encryptionKeyService.getEncryptionPubkeyFromEvent(event)
-            if (!newPubkey || newPubkey === encryptionKeypair.pubkey) return
+            if (!newPubkey || newPubkey === encryptionKeypair.pubkey || event.created_at < now) {
+              return
+            }
             this.emitEncryptionKeyChanged(newPubkey)
             return
           }
@@ -1089,8 +1093,7 @@ class DmService {
 
     const isReaction = message.decryptedRumor?.kind === kinds.Reaction
     const isNewest = message.createdAt >= (existing?.lastMessageAt ?? 0)
-    const isNewestFromSelf =
-      isNewest && !isReaction && message.senderPubkey === accountPubkey
+    const isNewestFromSelf = isNewest && !isReaction && message.senderPubkey === accountPubkey
     if (isNewestFromSelf && message.createdAt > lastReadTime) {
       storage.setLastReadDmTime(accountPubkey, otherPubkey, message.createdAt)
     }
@@ -1161,8 +1164,7 @@ class DmService {
       const latestMessage = sortedMessages[0]
 
       // If the newest chat message is from self, treat the conversation as read.
-      const latestIsFromSelf =
-        !!latestMessage && latestMessage.senderPubkey === accountPubkey
+      const latestIsFromSelf = !!latestMessage && latestMessage.senderPubkey === accountPubkey
       if (latestIsFromSelf && latestMessage.createdAt > lastReadTime) {
         storage.setLastReadDmTime(accountPubkey, otherPubkey, latestMessage.createdAt)
       }
@@ -1170,9 +1172,8 @@ class DmService {
       // Count unread messages (from other user, after last read time, excluding reactions)
       const unreadCount = latestIsFromSelf
         ? 0
-        : chatMessages.filter(
-            (m) => m.senderPubkey !== accountPubkey && m.createdAt > lastReadTime
-          ).length
+        : chatMessages.filter((m) => m.senderPubkey !== accountPubkey && m.createdAt > lastReadTime)
+            .length
 
       // Check if the user has ever replied in this conversation
       const hasReplied =

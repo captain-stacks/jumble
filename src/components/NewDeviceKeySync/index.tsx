@@ -126,15 +126,6 @@ export default function NewDeviceKeySync({ onComplete }: { onComplete?: () => vo
     )
   }
 
-  if (state === 'error') {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 gap-4">
-        <p className="text-sm text-destructive">{error}</p>
-        <Button onClick={() => window.location.reload()}>{t('Try Again')}</Button>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col items-center p-6 gap-6">
       <Smartphone className="h-16 w-16 text-muted-foreground" />
@@ -171,6 +162,16 @@ export default function NewDeviceKeySync({ onComplete }: { onComplete?: () => vo
             {countdown > 0
               ? t('Retry ({{seconds}}s)', { seconds: countdown })
               : t('Retry')}
+          </Button>
+        </div>
+      )}
+
+      {state === 'error' && (
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm text-destructive text-center">{error}</p>
+          <Button variant="outline" size="sm" onClick={handleRetry}>
+            <RefreshCw className="h-3.5 w-3.5 me-1.5" />
+            {t('Retry')}
           </Button>
         </div>
       )}

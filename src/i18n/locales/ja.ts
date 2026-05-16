@@ -709,8 +709,8 @@ export default {
     'Waiting for key from another device...': '別のデバイスからのキーを待っています...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       '別のデバイスを開き、メッセージに移動してこのデバイスに暗号化キーを送信してください。',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      '別のデバイスにアクセスできませんか？暗号化キーをリセットして新しいキーを生成できますが、古いキーで送信されたメッセージは復号できなくなります。',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      '別のデバイスにアクセスできませんか？暗号化キーをリセットして新しいキーを生成できます。古いキーで暗号化されたメッセージは復号できなくなりますが、この端末に保存済みのチャット履歴は失われません。',
     'Generate New Key': '新しいキーを生成',
     'New encryption key generated': '新しい暗号化キーが生成されました',
     'Failed to generate encryption key': '暗号化キーの生成に失敗しました',
@@ -765,10 +765,10 @@ export default {
     'Encryption Key': '暗号化キー',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       '暗号化キーはダイレクトメッセージの暗号化と復号に使用される専用のキーペアです。Nostr IDキーとは別で、デバイスにローカルに保存されます。',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'リセットすると新しいキーが生成されます。古いメッセージは読めなくなります。続行する前にチャット履歴をエクスポートしてバックアップしてください。',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'この操作は元に戻せません。リセット後、古いキーで暗号化されたメッセージは復号できなくなります。先にチャット履歴をエクスポートしてバックアップすることを強くお勧めします。',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'リセットすると新しいキーが生成されます。古いキーで暗号化されたメッセージは復号できなくなりますが、この端末に保存済みのチャット履歴は失われません。安全のため、続行する前にチャット履歴をエクスポートしてバックアップしてください。',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'この操作は元に戻せません。リセット後、古いキーで暗号化されたメッセージは復号できなくなりますが、この端末に保存済みのチャット履歴は失われません。',
     'No message requests': 'メッセージリクエストなし',
     "Messages from people you haven't replied to will appear here.":
       'まだ返信していない人からのメッセージがここに表示されます。',

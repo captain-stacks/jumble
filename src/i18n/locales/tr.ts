@@ -714,8 +714,8 @@ export default {
     'Waiting for key from another device...': 'Başka bir cihazdan anahtar bekleniyor...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       "Şifreleme anahtarını bu cihaza göndermek için diğer cihazınızı açın ve Mesajlar'a gidin.",
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Başka bir cihaza erişiminiz yok mu? Yeni bir tane oluşturmak için şifreleme anahtarınızı sıfırlayabilirsiniz, ancak eski anahtarla gönderilen mesajların şifresini artık çözemeyeceksiniz.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Başka bir cihaza erişiminiz yok mu? Yeni bir tane oluşturmak için şifreleme anahtarınızı sıfırlayabilirsiniz. Eski anahtarla şifrelenmiş mesajların şifresi artık çözülemez, ancak bu cihazda zaten kayıtlı olan sohbet geçmişi kaybolmaz.',
     'Generate New Key': 'Yeni Anahtar Oluştur',
     'New encryption key generated': 'Yeni şifreleme anahtarı oluşturuldu',
     'Failed to generate encryption key': 'Şifreleme anahtarı oluşturulamadı',
@@ -770,10 +770,10 @@ export default {
     'Encryption Key': 'Şifreleme Anahtarı',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'Şifreleme anahtarınız, doğrudan mesajları şifrelemek ve şifresini çözmek için kullanılan özel bir anahtar çiftidir. Nostr kimlik anahtarınızdan ayrıdır ve cihazınızda yerel olarak depolanır.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'Sıfırlama yeni bir anahtar oluşturacaktır. Eski mesajları artık okuyamayacaksınız. Devam etmeden önce lütfen sohbet geçmişinizi dışa aktarın ve yedekleyin.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Bu işlem geri alınamaz. Sıfırlamadan sonra, eski anahtarla şifrelenmiş mesajların şifresini artık çözemeyeceksiniz. Önce sohbet geçmişinizi dışa aktarmanız ve yedeklemeniz şiddetle önerilir.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'Sıfırlama yeni bir anahtar oluşturacaktır. Eski anahtarla şifrelenmiş mesajların şifresi artık çözülemez, ancak bu cihazda zaten kayıtlı olan sohbet geçmişi kaybolmaz. Güvenlik için, devam etmeden önce sohbet geçmişinizi dışa aktarın ve yedekleyin.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Bu işlem geri alınamaz. Sıfırlamadan sonra eski anahtarla şifrelenmiş mesajların şifresi artık çözülemez, ancak bu cihazda zaten kayıtlı olan sohbet geçmişi kaybolmaz.',
     'No message requests': 'Mesaj isteği yok',
     "Messages from people you haven't replied to will appear here.":
       'Henüz yanıt vermediğiniz kişilerden gelen mesajlar burada görünecektir.',

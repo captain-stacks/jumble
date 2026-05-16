@@ -127,62 +127,57 @@ export default function NewDeviceKeySync({ onComplete }: { onComplete?: () => vo
   }
 
   return (
-    <div className="flex flex-col items-center p-6 gap-6">
-      <Smartphone className="h-16 w-16 text-muted-foreground" />
+    <div className="flex justify-center p-6">
+      <div className="flex w-full max-w-sm flex-col items-center gap-6">
+        <Smartphone className="text-muted-foreground h-16 w-16" />
 
-      <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold">{t('Sync Encryption Key')}</h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          {t(
-            'An encryption key was found for your account. Please open a client that already has your DM encryption key set up to approve the sync request.'
-          )}
-        </p>
-      </div>
-
-      {state === 'publishing' && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">{t('Publishing sync request...')}</span>
+        <div className="space-y-2 text-center">
+          <h3 className="text-lg font-semibold">{t('Sync Encryption Key')}</h3>
+          <p className="text-muted-foreground text-sm">
+            {t(
+              'An encryption key was found for your account. Please open a client that already has your DM encryption key set up to approve the sync request.'
+            )}
+          </p>
         </div>
-      )}
 
-      {state === 'waiting' && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
+        {state === 'publishing' && (
+          <div className="text-muted-foreground flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">{t('Waiting for key from another device...')}</span>
+            <span className="text-sm">{t('Publishing sync request...')}</span>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={countdown > 0}
-            onClick={handleRetry}
-          >
-            <RefreshCw className="h-3.5 w-3.5 me-1.5" />
-            {countdown > 0
-              ? t('Retry ({{seconds}}s)', { seconds: countdown })
-              : t('Retry')}
-          </Button>
-        </div>
-      )}
+        )}
 
-      {state === 'error' && (
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-sm text-destructive text-center">{error}</p>
-          <Button variant="outline" size="sm" onClick={handleRetry}>
-            <RefreshCw className="h-3.5 w-3.5 me-1.5" />
-            {t('Retry')}
-          </Button>
-        </div>
-      )}
+        {state === 'waiting' && (
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-muted-foreground flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">{t('Waiting for key from another device...')}</span>
+            </div>
+            <Button variant="outline" size="sm" disabled={countdown > 0} onClick={handleRetry}>
+              <RefreshCw className="h-3.5 w-3.5 me-1.5" />
+              {countdown > 0 ? t('Retry ({{seconds}}s)', { seconds: countdown }) : t('Retry')}
+            </Button>
+          </div>
+        )}
 
-      <div className="border-t pt-4 w-full space-y-3">
-        <p className="text-sm text-muted-foreground text-center">
-          {t(
-            "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key."
-          )}
-        </p>
-        <ResetEncryptionKeyButton onConfirm={handleGenerateNew} className="w-full" />
+        {state === 'error' && (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-destructive text-center text-sm">{error}</p>
+            <Button variant="outline" size="sm" onClick={handleRetry}>
+              <RefreshCw className="h-3.5 w-3.5 me-1.5" />
+              {t('Retry')}
+            </Button>
+          </div>
+        )}
+
+        <div className="w-full space-y-3 border-t pt-6">
+          <p className="text-muted-foreground text-center text-sm">
+            {t(
+              "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost."
+            )}
+          </p>
+          <ResetEncryptionKeyButton onConfirm={handleGenerateNew} className="w-full" />
+        </div>
       </div>
     </div>
   )

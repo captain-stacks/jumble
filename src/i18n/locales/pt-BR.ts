@@ -713,8 +713,8 @@ export default {
     'Waiting for key from another device...': 'Aguardando chave de outro dispositivo...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'Abra seu outro dispositivo e vá para Mensagens para enviar a chave de criptografia para este dispositivo.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Não tem acesso a outro dispositivo? Você pode redefinir sua chave de criptografia para gerar uma nova, mas não poderá mais descriptografar mensagens enviadas com a chave antiga.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Não tem acesso a outro dispositivo? Você pode redefinir sua chave de criptografia para gerar uma nova. As mensagens criptografadas com a chave antiga não poderão mais ser descriptografadas, mas o histórico de chat já salvo neste dispositivo não será perdido.',
     'Generate New Key': 'Gerar nova chave',
     'New encryption key generated': 'Nova chave de criptografia gerada',
     'Failed to generate encryption key': 'Falha ao gerar chave de criptografia',
@@ -770,10 +770,10 @@ export default {
     'Encryption Key': 'Chave de criptografia',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'Sua chave de criptografia é um par de chaves dedicado para criptografar e descriptografar mensagens diretas. É separada da sua chave de identidade Nostr e armazenada localmente no seu dispositivo.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'A redefinição gerará uma nova chave. Você não poderá mais ler mensagens antigas. Exporte e faça backup do seu histórico de chat antes de continuar.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Esta ação não pode ser desfeita. Após a redefinição, você não poderá mais descriptografar mensagens criptografadas com a chave antiga. É fortemente recomendado exportar e fazer backup do histórico de chat primeiro.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'A redefinição gerará uma nova chave. As mensagens criptografadas com a chave antiga não poderão mais ser descriptografadas, mas o histórico de chat já salvo neste dispositivo não será perdido. Por segurança, exporte e faça backup do seu histórico de chat antes de continuar.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Esta ação não pode ser desfeita. Após a redefinição, as mensagens criptografadas com a chave antiga não poderão mais ser descriptografadas, mas o histórico de chat já salvo neste dispositivo não será perdido.',
     'No message requests': 'Sem solicitações de mensagens',
     "Messages from people you haven't replied to will appear here.":
       'Mensagens de pessoas que você ainda não respondeu aparecerão aqui.',

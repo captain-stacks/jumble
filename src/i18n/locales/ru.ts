@@ -715,8 +715,8 @@ export default {
     'Waiting for key from another device...': 'Ожидание ключа с другого устройства...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'Откройте другое устройство и перейдите в Сообщения, чтобы отправить ключ шифрования на это устройство.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Нет доступа к другому устройству? Вы можете сбросить ключ шифрования для генерации нового, но больше не сможете расшифровать сообщения, отправленные со старым ключом.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Нет доступа к другому устройству? Вы можете сбросить ключ шифрования для генерации нового. Сообщения, зашифрованные старым ключом, больше нельзя будет расшифровать, но история чата, уже сохранённая на этом устройстве, не будет потеряна.',
     'Generate New Key': 'Сгенерировать новый ключ',
     'New encryption key generated': 'Новый ключ шифрования сгенерирован',
     'Failed to generate encryption key': 'Не удалось сгенерировать ключ шифрования',
@@ -771,10 +771,10 @@ export default {
     'Encryption Key': 'Ключ шифрования',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'Ваш ключ шифрования — это выделенная пара ключей для шифрования и расшифровки личных сообщений. Он отделён от вашего ключа идентификации Nostr и хранится локально на вашем устройстве.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'Сброс сгенерирует новый ключ. Вы больше не сможете читать старые сообщения. Пожалуйста, экспортируйте и сохраните историю чата перед продолжением.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Это действие нельзя отменить. После сброса вы не сможете расшифровать сообщения, зашифрованные старым ключом. Настоятельно рекомендуется сначала экспортировать и сохранить историю чата.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'Сброс сгенерирует новый ключ. Сообщения, зашифрованные старым ключом, больше нельзя будет расшифровать, но история чата, уже сохранённая на этом устройстве, не будет потеряна. Для надёжности экспортируйте и сохраните резервную копию истории чата перед продолжением.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Это действие нельзя отменить. После сброса сообщения, зашифрованные старым ключом, больше нельзя будет расшифровать, но история чата, уже сохранённая на этом устройстве, не будет потеряна.',
     'No message requests': 'Нет запросов сообщений',
     "Messages from people you haven't replied to will appear here.":
       'Сообщения от людей, которым вы ещё не ответили, появятся здесь.',

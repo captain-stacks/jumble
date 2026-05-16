@@ -699,8 +699,8 @@ export default {
     'Waiting for key from another device...': 'กำลังรอคีย์จากอุปกรณ์อื่น...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'เปิดอุปกรณ์อื่นของคุณและไปที่ข้อความเพื่อส่งคีย์เข้ารหัสไปยังอุปกรณ์นี้',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'ไม่มีสิทธิ์เข้าถึงอุปกรณ์อื่น? คุณสามารถรีเซ็ตคีย์เข้ารหัสเพื่อสร้างคีย์ใหม่ได้ แต่จะไม่สามารถถอดรหัสข้อความที่ส่งด้วยคีย์เดิมได้',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'ไม่มีสิทธิ์เข้าถึงอุปกรณ์อื่น? คุณสามารถรีเซ็ตคีย์เข้ารหัสเพื่อสร้างคีย์ใหม่ได้ ข้อความที่เข้ารหัสด้วยคีย์เดิมจะไม่สามารถถอดรหัสได้อีกต่อไป แต่ประวัติแชทที่บันทึกไว้แล้วบนอุปกรณ์นี้จะไม่สูญหาย',
     'Generate New Key': 'สร้างคีย์ใหม่',
     'New encryption key generated': 'สร้างคีย์เข้ารหัสใหม่แล้ว',
     'Failed to generate encryption key': 'ไม่สามารถสร้างคีย์เข้ารหัส',
@@ -754,10 +754,10 @@ export default {
     'Encryption Key': 'คีย์เข้ารหัส',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'คีย์เข้ารหัสของคุณเป็นคู่คีย์เฉพาะสำหรับเข้ารหัสและถอดรหัสข้อความส่วนตัว แยกจากคีย์ตัวตน Nostr และจัดเก็บในอุปกรณ์ของคุณ',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'การรีเซ็ตจะสร้างคีย์ใหม่ คุณจะไม่สามารถอ่านข้อความเก่าได้อีก กรุณาส่งออกและสำรองประวัติแชทก่อนดำเนินการ',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'การดำเนินการนี้ไม่สามารถย้อนกลับได้ หลังจากรีเซ็ต คุณจะไม่สามารถถอดรหัสข้อความที่เข้ารหัสด้วยคีย์เดิมได้ แนะนำอย่างยิ่งให้ส่งออกและสำรองประวัติแชทก่อน',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'การรีเซ็ตจะสร้างคีย์ใหม่ ข้อความที่เข้ารหัสด้วยคีย์เดิมจะไม่สามารถถอดรหัสได้อีกต่อไป แต่ประวัติแชทที่บันทึกไว้แล้วบนอุปกรณ์นี้จะไม่สูญหาย เพื่อความปลอดภัย โปรดส่งออกและสำรองประวัติแชทก่อนดำเนินการ',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'การดำเนินการนี้ไม่สามารถย้อนกลับได้ หลังจากรีเซ็ต ข้อความที่เข้ารหัสด้วยคีย์เดิมจะไม่สามารถถอดรหัสได้อีกต่อไป แต่ประวัติแชทที่บันทึกไว้แล้วบนอุปกรณ์นี้จะไม่สูญหาย',
     'No message requests': 'ไม่มีคำขอข้อความ',
     "Messages from people you haven't replied to will appear here.":
       'ข้อความจากคนที่คุณยังไม่ได้ตอบจะปรากฏที่นี่',

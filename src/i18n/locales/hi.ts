@@ -710,8 +710,8 @@ export default {
     'Waiting for key from another device...': 'दूसरे डिवाइस से कुंजी की प्रतीक्षा...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'अपना दूसरा डिवाइस खोलें और इस डिवाइस पर एन्क्रिप्शन कुंजी भेजने के लिए संदेश पर जाएँ।',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'दूसरे डिवाइस तक पहुँच नहीं है? आप नई कुंजी बनाने के लिए अपनी एन्क्रिप्शन कुंजी रीसेट कर सकते हैं, लेकिन पुरानी कुंजी से भेजे गए संदेशों को डिक्रिप्ट नहीं कर पाएँगे।',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'दूसरे डिवाइस तक पहुँच नहीं है? आप नई कुंजी बनाने के लिए अपनी एन्क्रिप्शन कुंजी रीसेट कर सकते हैं। पुरानी कुंजी से एन्क्रिप्ट किए गए संदेश अब डिक्रिप्ट नहीं हो पाएँगे, लेकिन इस डिवाइस पर पहले से सहेजा गया चैट इतिहास नहीं खोएगा।',
     'Generate New Key': 'नई कुंजी बनाएँ',
     'New encryption key generated': 'नई एन्क्रिप्शन कुंजी बनाई गई',
     'Failed to generate encryption key': 'एन्क्रिप्शन कुंजी बनाने में विफल',
@@ -766,10 +766,10 @@ export default {
     'Encryption Key': 'एन्क्रिप्शन कुंजी',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'आपकी एन्क्रिप्शन कुंजी सीधे संदेशों को एन्क्रिप्ट और डिक्रिप्ट करने के लिए एक समर्पित कुंजी जोड़ी है। यह आपकी Nostr पहचान कुंजी से अलग है और आपके डिवाइस पर स्थानीय रूप से संग्रहीत है।',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'रीसेट करने से नई कुंजी बनेगी। आप पुराने संदेश नहीं पढ़ पाएँगे। कृपया आगे बढ़ने से पहले चैट इतिहास निर्यात और बैकअप करें।',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'यह कार्रवाई पूर्ववत नहीं की जा सकती। रीसेट के बाद, पुरानी कुंजी से एन्क्रिप्ट किए गए संदेशों को डिक्रिप्ट नहीं कर पाएँगे। पहले चैट इतिहास निर्यात और बैकअप करने की दृढ़ता से अनुशंसा की जाती है।',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'रीसेट करने से नई कुंजी बनेगी। पुरानी कुंजी से एन्क्रिप्ट किए गए संदेश अब डिक्रिप्ट नहीं हो पाएँगे, लेकिन इस डिवाइस पर पहले से सहेजा गया चैट इतिहास नहीं खोएगा। सुरक्षा के लिए, आगे बढ़ने से पहले अपना चैट इतिहास निर्यात और बैकअप करें।',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'यह कार्रवाई पूर्ववत नहीं की जा सकती। रीसेट के बाद, पुरानी कुंजी से एन्क्रिप्ट किए गए संदेश अब डिक्रिप्ट नहीं हो पाएँगे, लेकिन इस डिवाइस पर पहले से सहेजा गया चैट इतिहास नहीं खोएगा।',
     'No message requests': 'कोई संदेश अनुरोध नहीं',
     "Messages from people you haven't replied to will appear here.":
       'जिन लोगों को आपने अभी तक जवाब नहीं दिया है उनके संदेश यहाँ दिखाई देंगे।',

@@ -716,8 +716,8 @@ export default {
     'Waiting for key from another device...': 'Oczekiwanie na klucz z innego urządzenia...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'Otwórz inne urządzenie i przejdź do Wiadomości, aby wysłać klucz szyfrowania na to urządzenie.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Nie masz dostępu do innego urządzenia? Możesz zresetować klucz szyfrowania, aby wygenerować nowy, ale nie będziesz mógł odszyfrować wiadomości wysłanych starym kluczem.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Nie masz dostępu do innego urządzenia? Możesz zresetować klucz szyfrowania, aby wygenerować nowy. Wiadomości zaszyfrowane starym kluczem nie będą już mogły zostać odszyfrowane, ale historia czatu już zapisana na tym urządzeniu nie zostanie utracona.',
     'Generate New Key': 'Wygeneruj nowy klucz',
     'New encryption key generated': 'Wygenerowano nowy klucz szyfrowania',
     'Failed to generate encryption key': 'Nie udało się wygenerować klucza szyfrowania',
@@ -772,10 +772,10 @@ export default {
     'Encryption Key': 'Klucz szyfrowania',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'Twój klucz szyfrowania to dedykowana para kluczy do szyfrowania i deszyfrowania wiadomości prywatnych. Jest oddzielony od klucza tożsamości Nostr i przechowywany lokalnie na twoim urządzeniu.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'Reset wygeneruje nowy klucz. Nie będziesz mógł czytać starych wiadomości. Wyeksportuj i zabezpiecz historię czatu przed kontynuowaniem.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Tej akcji nie można cofnąć. Po resecie nie będziesz mógł odszyfrować wiadomości zaszyfrowanych starym kluczem. Zdecydowanie zaleca się wcześniejsze wyeksportowanie i zabezpieczenie historii czatu.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'Reset wygeneruje nowy klucz. Wiadomości zaszyfrowane starym kluczem nie będą już mogły zostać odszyfrowane, ale historia czatu już zapisana na tym urządzeniu nie zostanie utracona. Dla bezpieczeństwa wyeksportuj i wykonaj kopię zapasową historii czatu przed kontynuowaniem.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Tej akcji nie można cofnąć. Po resecie wiadomości zaszyfrowane starym kluczem nie będą już mogły zostać odszyfrowane, ale historia czatu już zapisana na tym urządzeniu nie zostanie utracona.',
     'No message requests': 'Brak zapytań o wiadomości',
     "Messages from people you haven't replied to will appear here.":
       'Wiadomości od osób, którym jeszcze nie odpowiedziałeś, pojawią się tutaj.',

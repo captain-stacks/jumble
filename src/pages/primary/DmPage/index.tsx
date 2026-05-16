@@ -696,7 +696,7 @@ function ResetEncryptionKeySection({ onReset }: { onReset: () => Promise<void> }
       </p>
       <p className="text-muted-foreground text-sm">
         {t(
-          'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.'
+          'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.'
         )}
       </p>
       <ResetEncryptionKeyButton onConfirm={onReset} />

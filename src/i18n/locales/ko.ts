@@ -703,8 +703,8 @@ export default {
     'Waiting for key from another device...': '다른 기기의 키를 기다리는 중...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       '다른 기기를 열고 메시지로 이동하여 이 기기로 암호화 키를 보내세요.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      '다른 기기에 접근할 수 없나요? 암호화 키를 재설정하여 새 키를 생성할 수 있지만, 이전 키로 전송된 메시지를 해독할 수 없게 됩니다.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      '다른 기기에 접근할 수 없나요? 암호화 키를 재설정하여 새 키를 생성할 수 있습니다. 이전 키로 암호화된 메시지는 더 이상 해독할 수 없지만, 이 기기에 이미 저장된 채팅 기록은 사라지지 않습니다.',
     'Generate New Key': '새 키 생성',
     'New encryption key generated': '새 암호화 키가 생성되었습니다',
     'Failed to generate encryption key': '암호화 키 생성 실패',
@@ -759,10 +759,10 @@ export default {
     'Encryption Key': '암호화 키',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       '암호화 키는 다이렉트 메시지를 암호화하고 해독하는 데 사용되는 전용 키 쌍입니다. Nostr 신원 키와 별도이며 기기에 로컬로 저장됩니다.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      '재설정하면 새 키가 생성됩니다. 이전 메시지를 읽을 수 없게 됩니다. 계속하기 전에 채팅 기록을 내보내고 백업하세요.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      '이 작업은 되돌릴 수 없습니다. 재설정 후 이전 키로 암호화된 메시지를 해독할 수 없게 됩니다. 먼저 채팅 기록을 내보내고 백업하는 것을 강력히 권장합니다.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      '재설정하면 새 키가 생성됩니다. 이전 키로 암호화된 메시지는 더 이상 해독할 수 없지만, 이 기기에 이미 저장된 채팅 기록은 사라지지 않습니다. 안전을 위해 계속하기 전에 채팅 기록을 내보내고 백업하세요.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      '이 작업은 되돌릴 수 없습니다. 재설정 후에는 이전 키로 암호화된 메시지를 더 이상 해독할 수 없지만, 이 기기에 이미 저장된 채팅 기록은 사라지지 않습니다.',
     'No message requests': '메시지 요청 없음',
     "Messages from people you haven't replied to will appear here.":
       '아직 답장하지 않은 사람들의 메시지가 여기에 표시됩니다.',

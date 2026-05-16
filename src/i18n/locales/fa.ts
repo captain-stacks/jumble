@@ -709,8 +709,8 @@ export default {
     'Waiting for key from another device...': 'در انتظار کلید از دستگاه دیگر...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'دستگاه دیگر خود را باز کنید و به پیام‌ها بروید تا کلید رمزنگاری را به این دستگاه ارسال کنید.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'به دستگاه دیگری دسترسی ندارید؟ می‌توانید کلید رمزنگاری خود را بازنشانی کنید تا کلید جدیدی ایجاد شود، اما دیگر نمی‌توانید پیام‌های ارسال‌شده با کلید قدیمی را رمزگشایی کنید.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'به دستگاه دیگری دسترسی ندارید؟ می‌توانید کلید رمزنگاری خود را بازنشانی کنید تا کلید جدیدی ایجاد شود. پیام‌های رمزنگاری‌شده با کلید قدیمی دیگر قابل رمزگشایی نخواهند بود، اما تاریخچه گفتگوی ذخیره‌شده روی این دستگاه از بین نمی‌رود.',
     'Generate New Key': 'ساخت کلید جدید',
     'New encryption key generated': 'کلید رمزنگاری جدید ساخته شد',
     'Failed to generate encryption key': 'ساخت کلید رمزنگاری ناموفق بود',
@@ -765,10 +765,10 @@ export default {
     'Encryption Key': 'کلید رمزنگاری',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'کلید رمزنگاری شما یک جفت کلید اختصاصی برای رمزنگاری و رمزگشایی پیام‌های مستقیم است. از کلید هویت Nostr شما جداست و به صورت محلی در دستگاه شما ذخیره می‌شود.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'بازنشانی کلید جدیدی ایجاد خواهد کرد. دیگر نمی‌توانید پیام‌های قدیمی را بخوانید. لطفاً قبل از ادامه تاریخچه گفتگو را صادر و پشتیبان‌گیری کنید.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'این عمل قابل بازگشت نیست. پس از بازنشانی، دیگر نمی‌توانید پیام‌های رمزنگاری‌شده با کلید قدیمی را رمزگشایی کنید. اکیداً توصیه می‌شود ابتدا تاریخچه گفتگو را صادر و پشتیبان‌گیری کنید.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'بازنشانی کلید جدیدی ایجاد می‌کند. پیام‌های رمزنگاری‌شده با کلید قدیمی دیگر قابل رمزگشایی نخواهند بود، اما تاریخچه گفتگوی ذخیره‌شده روی این دستگاه از بین نمی‌رود. برای اطمینان، پیش از ادامه تاریخچه گفتگو را صادر و پشتیبان‌گیری کنید.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'این عمل قابل بازگشت نیست. پس از بازنشانی، پیام‌های رمزنگاری‌شده با کلید قدیمی دیگر قابل رمزگشایی نخواهند بود، اما تاریخچه گفتگوی ذخیره‌شده روی این دستگاه از بین نمی‌رود.',
     'No message requests': 'درخواست پیامی وجود ندارد',
     "Messages from people you haven't replied to will appear here.":
       'پیام‌های افرادی که هنوز به آنها پاسخ نداده‌اید اینجا نمایش داده می‌شود.',

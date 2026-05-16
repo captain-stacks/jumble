@@ -722,8 +722,8 @@ export default {
     'Waiting for key from another device...': 'Warte auf Schlüssel von einem anderen Gerät...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'Öffne dein anderes Gerät und gehe zu Nachrichten, um den Verschlüsselungsschlüssel an dieses Gerät zu senden.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Kein Zugriff auf ein anderes Gerät? Du kannst deinen Verschlüsselungsschlüssel zurücksetzen, um einen neuen zu generieren, aber du wirst Nachrichten, die mit dem alten Schlüssel gesendet wurden, nicht mehr entschlüsseln können.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Kein Zugriff auf ein anderes Gerät? Du kannst deinen Verschlüsselungsschlüssel zurücksetzen, um einen neuen zu generieren. Mit dem alten Schlüssel verschlüsselte Nachrichten können nicht mehr entschlüsselt werden, aber der bereits auf diesem Gerät gespeicherte Chatverlauf geht nicht verloren.',
     'Generate New Key': 'Neuen Schlüssel generieren',
     'New encryption key generated': 'Neuer Verschlüsselungsschlüssel generiert',
     'Failed to generate encryption key': 'Verschlüsselungsschlüssel konnte nicht generiert werden',
@@ -779,10 +779,10 @@ export default {
     'Encryption Key': 'Verschlüsselungsschlüssel',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'Dein Verschlüsselungsschlüssel ist ein dediziertes Schlüsselpaar zum Ver- und Entschlüsseln von Direktnachrichten. Er ist von deinem Nostr-Identitätsschlüssel getrennt und wird lokal auf deinem Gerät gespeichert.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'Beim Zurücksetzen wird ein neuer Schlüssel generiert. Du kannst alte Nachrichten nicht mehr lesen. Bitte exportiere und sichere deinen Chatverlauf, bevor du fortfährst.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Diese Aktion kann nicht rückgängig gemacht werden. Nach dem Zurücksetzen kannst du Nachrichten, die mit dem alten Schlüssel verschlüsselt wurden, nicht mehr entschlüsseln. Es wird dringend empfohlen, zuerst deinen Chatverlauf zu exportieren und zu sichern.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'Beim Zurücksetzen wird ein neuer Schlüssel generiert. Mit dem alten Schlüssel verschlüsselte Nachrichten können nicht mehr entschlüsselt werden, aber der bereits auf diesem Gerät gespeicherte Chatverlauf geht nicht verloren. Exportiere und sichere zur Sicherheit deinen Chatverlauf, bevor du fortfährst.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Diese Aktion kann nicht rückgängig gemacht werden. Nach dem Zurücksetzen können mit dem alten Schlüssel verschlüsselte Nachrichten nicht mehr entschlüsselt werden, aber der bereits auf diesem Gerät gespeicherte Chatverlauf geht nicht verloren.',
     'No message requests': 'Keine Nachrichtenanfragen',
     "Messages from people you haven't replied to will appear here.":
       'Nachrichten von Personen, denen du noch nicht geantwortet hast, werden hier angezeigt.',

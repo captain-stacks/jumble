@@ -704,8 +704,8 @@ export default {
     'Waiting for key from another device...': 'Várakozás a kulcsra egy másik eszközről...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'Nyisd meg a másik eszközödet, és menj az Üzenetekhez, hogy elküldd a titkosítási kulcsot erre az eszközre.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'Nincs hozzáférésed másik eszközhöz? Visszaállíthatod a titkosítási kulcsodat egy új generálásához, de a régi kulccsal küldött üzeneteket többé nem tudod visszafejteni.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'Nincs hozzáférésed másik eszközhöz? Visszaállíthatod a titkosítási kulcsodat egy új generálásához. A régi kulccsal titkosított üzenetek többé nem fejthetők vissza, de az ezen az eszközön már elmentett csevegéstörténet nem vész el.',
     'Generate New Key': 'Új kulcs generálása',
     'New encryption key generated': 'Új titkosítási kulcs generálva',
     'Failed to generate encryption key': 'Nem sikerült generálni a titkosítási kulcsot',
@@ -761,10 +761,10 @@ export default {
     'Encryption Key': 'Titkosítási kulcs',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'A titkosítási kulcsod egy dedikált kulcspár a közvetlen üzenetek titkosításához és visszafejtéséhez. Elkülönül a Nostr identitáskulcsodtól és helyileg van tárolva az eszközödön.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'A visszaállítás új kulcsot generál. A régi üzeneteket többé nem tudod olvasni. Kérjük, exportáld és mentsd el a csevegéstörténeted a folytatás előtt.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'Ez a művelet nem vonható vissza. A visszaállítás után a régi kulccsal titkosított üzeneteket nem tudod visszafejteni. Erősen ajánlott először exportálni és menteni a csevegéstörténetet.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'A visszaállítás új kulcsot generál. A régi kulccsal titkosított üzenetek többé nem fejthetők vissza, de az ezen az eszközön már elmentett csevegéstörténet nem vész el. A biztonság kedvéért exportáld és mentsd el a csevegéstörténetedet a folytatás előtt.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'Ez a művelet nem vonható vissza. A visszaállítás után a régi kulccsal titkosított üzenetek többé nem fejthetők vissza, de az ezen az eszközön már elmentett csevegéstörténet nem vész el.',
     'No message requests': 'Nincsenek üzenetkérelmek',
     "Messages from people you haven't replied to will appear here.":
       'Azok üzenetei, akiknek még nem válaszoltál, itt jelennek meg.',

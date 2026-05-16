@@ -47,7 +47,7 @@ export default function ResetEncryptionKeyButton({
           <AlertDialogTitle>{t('Reset Encryption Key')}</AlertDialogTitle>
           <AlertDialogDescription>
             {t(
-              'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.'
+              'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.'
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>

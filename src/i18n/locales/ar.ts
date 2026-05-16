@@ -697,8 +697,8 @@ export default {
     'Waiting for key from another device...': 'في انتظار المفتاح من جهاز آخر...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       'افتح جهازك الآخر وانتقل إلى الرسائل لإرسال مفتاح التشفير إلى هذا الجهاز.',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      'ليس لديك وصول إلى جهاز آخر؟ يمكنك إعادة تعيين مفتاح التشفير لإنشاء مفتاح جديد، لكنك لن تتمكن من فك تشفير الرسائل المرسلة بالمفتاح القديم.',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      'ليس لديك وصول إلى جهاز آخر؟ يمكنك إعادة تعيين مفتاح التشفير لإنشاء مفتاح جديد. لن يعد بالإمكان فك تشفير الرسائل المشفّرة بالمفتاح القديم، لكن سجل المحادثات المحفوظ بالفعل على هذا الجهاز لن يُفقد.',
     'Generate New Key': 'إنشاء مفتاح جديد',
     'New encryption key generated': 'تم إنشاء مفتاح تشفير جديد',
     'Failed to generate encryption key': 'فشل في إنشاء مفتاح التشفير',
@@ -753,10 +753,10 @@ export default {
     'Encryption Key': 'مفتاح التشفير',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       'مفتاح التشفير الخاص بك هو زوج مفاتيح مخصص لتشفير وفك تشفير الرسائل المباشرة. وهو منفصل عن مفتاح هوية Nostr ومخزن محليًا على جهازك.',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      'ستؤدي إعادة التعيين إلى إنشاء مفتاح جديد. لن تتمكن من قراءة الرسائل القديمة. يرجى تصدير سجل المحادثات ونسخه احتياطيًا قبل المتابعة.',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      'لا يمكن التراجع عن هذا الإجراء. بعد إعادة التعيين، لن تتمكن من فك تشفير الرسائل المشفرة بالمفتاح القديم. يوصى بشدة بتصدير سجل المحادثات ونسخه احتياطيًا أولاً.',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      'ستؤدي إعادة التعيين إلى إنشاء مفتاح جديد. لن يعد بالإمكان فك تشفير الرسائل المشفّرة بالمفتاح القديم، لكن سجل المحادثات المحفوظ بالفعل على هذا الجهاز لن يُفقد. لمزيد من الأمان، صدّر سجل محادثاتك وانسخه احتياطيًا قبل المتابعة.',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      'لا يمكن التراجع عن هذا الإجراء. بعد إعادة التعيين، لن يعد بالإمكان فك تشفير الرسائل المشفّرة بالمفتاح القديم، لكن سجل المحادثات المحفوظ بالفعل على هذا الجهاز لن يُفقد.',
     'No message requests': 'لا توجد طلبات رسائل',
     "Messages from people you haven't replied to will appear here.":
       'ستظهر هنا الرسائل من الأشخاص الذين لم ترد عليهم بعد.',

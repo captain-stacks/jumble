@@ -681,8 +681,8 @@ export default {
     'Waiting for key from another device...': '等待其他裝置的金鑰...',
     'Open your other device and go to Messages to send the encryption key to this device.':
       '開啟你的其他裝置，前往訊息頁面將加密金鑰傳送到此裝置。',
-    "Don't have access to another device? You can reset your encryption key to generate a new one, but you will no longer be able to decrypt messages sent with the old key.":
-      '無法存取其他裝置？你可以重置加密金鑰來產生新金鑰，但將無法解密使用舊金鑰傳送的訊息。',
+    "Don't have access to another device? You can reset your encryption key to generate a new one. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.":
+      '無法存取其他裝置？你可以重置加密金鑰來產生新金鑰。使用舊金鑰加密的訊息將無法再解密，但本裝置上已儲存的聊天記錄不會遺失。',
     'Generate New Key': '產生新金鑰',
     'New encryption key generated': '已產生新加密金鑰',
     'Failed to generate encryption key': '產生加密金鑰失敗',
@@ -736,10 +736,10 @@ export default {
     'Encryption Key': '加密金鑰',
     'Your encryption key is a dedicated key pair used to encrypt and decrypt direct messages. It is separate from your Nostr identity key and stored locally on your device.':
       '你的加密金鑰是用於加密和解密私訊的專用金鑰對。它與你的 Nostr 身分金鑰分開，並儲存在你的裝置本機。',
-    'Resetting will generate a new key. You will no longer be able to read old messages. Please export and backup your chat history before proceeding.':
-      '重置將產生新金鑰。你將無法再閱讀舊訊息。請在繼續之前匯出並備份聊天記錄。',
-    'This action cannot be undone. After resetting, you will no longer be able to decrypt messages encrypted with the old key. It is strongly recommended to export and backup your chat history first.':
-      '此操作無法復原。重置後，你將無法解密使用舊金鑰加密的訊息。強烈建議先匯出並備份聊天記錄。',
+    'Resetting will generate a new key. Messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost. To keep it safe, export and back up your chat history before proceeding.':
+      '重置將產生新金鑰。使用舊金鑰加密的訊息將無法再解密，但本裝置上已儲存的聊天記錄不會遺失。為安全起見，請在繼續前匯出並備份聊天記錄。',
+    'This action cannot be undone. After resetting, messages encrypted with the old key can no longer be decrypted, but the chat history already saved on this device will not be lost.':
+      '此操作無法復原。重置後，使用舊金鑰加密的訊息將無法再解密，但本裝置上已儲存的聊天記錄不會遺失。',
     'No message requests': '沒有訊息請求',
     "Messages from people you haven't replied to will appear here.":
       '你尚未回覆的人傳送的訊息將顯示在這裡。',

@@ -1,3 +1,4 @@
+import { compressImage, TImageCompressionOptions } from '@/lib/image-compression'
 import { stripImageMetadata } from '@/lib/strip-image-metadata'
 import { simplifyUrl } from '@/lib/url'
 import { TDraftEvent, TMediaUploadServiceConfig } from '@/types'
@@ -9,6 +10,7 @@ import storage from './local-storage.service'
 type UploadOptions = {
   onProgress?: (progressPercent: number) => void
   signal?: AbortSignal
+  compressionOptions?: TImageCompressionOptions
 }
 
 export const UPLOAD_ABORTED_ERROR_MSG = 'Upload aborted'
@@ -32,8 +34,12 @@ class MediaUploadService {
   }
 
   async upload(file: File, options?: UploadOptions) {
-    // Strip potentially sensitive metadata (EXIF/GPS, ...) before uploading.
-    const safeFile = await stripImageMetadata(file)
+    // Prepare the file before upload: compress oversized images when requested,
+    // otherwise just strip sensitive metadata. Both re-encode through a canvas,
+    // which removes metadata such as EXIF/GPS.
+    const safeFile = options?.compressionOptions
+      ? await compressImage(file, options.compressionOptions)
+      : await stripImageMetadata(file)
 
     let result: { url: string; tags: string[][] }
     if (this.serviceConfig.type === 'nip96') {

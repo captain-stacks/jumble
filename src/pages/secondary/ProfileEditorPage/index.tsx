@@ -17,6 +17,9 @@ import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+// Avatars are displayed small, so shrink oversized uploads before publishing.
+const AVATAR_COMPRESSION_OPTIONS = { maxWidthOrHeight: 1600, maxSizeMB: 2 }
+
 const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { pop } = useSecondaryPage()
@@ -163,6 +166,7 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
           onUploadSuccess={onAvatarUploadSuccess}
           onUploadStart={() => setUploadingAvatar(true)}
           onUploadEnd={() => setUploadingAvatar(false)}
+          compressionOptions={AVATAR_COMPRESSION_OPTIONS}
           className="border-background absolute bottom-0 left-4 h-24 w-24 translate-y-1/2 cursor-pointer rounded-full border-4"
         >
           <Avatar className="h-full w-full">

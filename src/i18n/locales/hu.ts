@@ -897,6 +897,11 @@ export default {
       'Nincs automatikus frissítés — kézi újraletöltés szükséges',
     Download: 'Letöltés',
     'Followed by your follows': 'Akiket a követéseid követnek',
-    Shuffle: 'Keverés'
+    Shuffle: 'Keverés',
+    'Verification code': 'Ellenőrző kód',
+    'Make sure this code matches the one shown on your other device.':
+      'Győződj meg róla, hogy ez a kód megegyezik a másik eszközödön megjelenővel.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Hogy elkerüld a titkosítási kulcsod ismeretlen eszközre küldését, ellenőrizd, hogy ez a kód megegyezik-e a másik eszközön megjelenővel.'
   }
 }

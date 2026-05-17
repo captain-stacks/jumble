@@ -901,6 +901,11 @@ export default {
       'Nessun aggiornamento automatico — richiede il riscaricamento manuale',
     Download: 'Scarica',
     'Followed by your follows': 'Seguiti da persone che segui',
-    Shuffle: 'Mescola'
+    Shuffle: 'Mescola',
+    'Verification code': 'Codice di verifica',
+    'Make sure this code matches the one shown on your other device.':
+      "Assicurati che questo codice corrisponda a quello mostrato sull'altro dispositivo.",
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      "Per evitare di inviare la tua chiave di crittografia a un dispositivo sconosciuto, verifica che questo codice corrisponda a quello mostrato sull'altro dispositivo."
   }
 }

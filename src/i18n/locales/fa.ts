@@ -897,6 +897,11 @@ export default {
       'بدون به‌روزرسانی خودکار — نیاز به دانلود مجدد دستی',
     Download: 'دانلود',
     'Followed by your follows': 'دنبال‌شده توسط افرادی که دنبال می‌کنید',
-    Shuffle: 'بُر زدن'
+    Shuffle: 'بُر زدن',
+    'Verification code': 'کد تأیید',
+    'Make sure this code matches the one shown on your other device.':
+      'مطمئن شوید این کد با کدی که روی دستگاه دیگرتان نمایش داده می‌شود مطابقت دارد.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'برای جلوگیری از ارسال کلید رمزنگاری به دستگاه ناشناس، بررسی کنید که این کد با کد نمایش‌داده‌شده روی دستگاه دیگر مطابقت دارد.'
   }
 }

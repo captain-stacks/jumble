@@ -906,6 +906,11 @@ export default {
       'Brak automatycznych aktualizacji — wymagane ponowne ręczne pobranie',
     Download: 'Pobierz',
     'Followed by your follows': 'Obserwowani przez Twoje obserwacje',
-    Shuffle: 'Tasuj'
+    Shuffle: 'Tasuj',
+    'Verification code': 'Kod weryfikacyjny',
+    'Make sure this code matches the one shown on your other device.':
+      'Upewnij się, że ten kod jest zgodny z kodem wyświetlanym na drugim urządzeniu.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Aby uniknąć wysłania klucza szyfrującego do nieznanego urządzenia, sprawdź, czy ten kod jest zgodny z kodem wyświetlanym na drugim urządzeniu.'
   }
 }

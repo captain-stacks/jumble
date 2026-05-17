@@ -900,6 +900,11 @@ export default {
       'Sem atualizações automáticas — é necessário baixar novamente manualmente',
     Download: 'Baixar',
     'Followed by your follows': 'Seguidos por quem você segue',
-    Shuffle: 'Embaralhar'
+    Shuffle: 'Embaralhar',
+    'Verification code': 'Código de verificação',
+    'Make sure this code matches the one shown on your other device.':
+      'Certifique-se de que este código corresponde ao exibido no seu outro dispositivo.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Para evitar enviar sua chave de criptografia para um dispositivo desconhecido, verifique se este código corresponde ao exibido no outro dispositivo.'
   }
 }

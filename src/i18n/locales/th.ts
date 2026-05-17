@@ -881,6 +881,11 @@ export default {
       'ไม่รองรับอัปเดตอัตโนมัติ — ต้องดาวน์โหลดใหม่ด้วยตนเอง',
     Download: 'ดาวน์โหลด',
     'Followed by your follows': 'ติดตามโดยคนที่คุณติดตาม',
-    Shuffle: 'สุ่ม'
+    Shuffle: 'สุ่ม',
+    'Verification code': 'รหัสยืนยัน',
+    'Make sure this code matches the one shown on your other device.':
+      'ตรวจสอบให้แน่ใจว่ารหัสนี้ตรงกับรหัสที่แสดงบนอุปกรณ์อีกเครื่องของคุณ',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'เพื่อหลีกเลี่ยงการส่งกุญแจเข้ารหัสของคุณไปยังอุปกรณ์ที่ไม่รู้จัก โปรดตรวจสอบว่ารหัสนี้ตรงกับรหัสที่แสดงบนอุปกรณ์อีกเครื่อง'
   }
 }

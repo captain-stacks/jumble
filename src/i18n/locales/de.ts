@@ -911,6 +911,11 @@ export default {
       'Keine automatischen Updates — manueller erneuter Download nötig',
     Download: 'Herunterladen',
     'Followed by your follows': 'Von Personen gefolgt, denen du folgst',
-    Shuffle: 'Mischen'
+    Shuffle: 'Mischen',
+    'Verification code': 'Bestätigungscode',
+    'Make sure this code matches the one shown on your other device.':
+      'Stelle sicher, dass dieser Code mit dem auf deinem anderen Gerät angezeigten übereinstimmt.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Um zu vermeiden, dass dein Verschlüsselungsschlüssel an ein unbekanntes Gerät gesendet wird, überprüfe, ob dieser Code mit dem auf dem anderen Gerät angezeigten übereinstimmt.'
   }
 }

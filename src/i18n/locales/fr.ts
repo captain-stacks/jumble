@@ -911,6 +911,11 @@ export default {
       'Pas de mise à jour automatique — nouveau téléchargement manuel requis',
     Download: 'Télécharger',
     'Followed by your follows': 'Suivis par vos abonnements',
-    Shuffle: 'Mélanger'
+    Shuffle: 'Mélanger',
+    'Verification code': 'Code de vérification',
+    'Make sure this code matches the one shown on your other device.':
+      'Assurez-vous que ce code correspond à celui affiché sur votre autre appareil.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      "Pour éviter d'envoyer votre clé de chiffrement à un appareil inconnu, vérifiez que ce code correspond à celui affiché sur l'autre appareil."
   }
 }

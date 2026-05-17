@@ -881,6 +881,11 @@ export default {
       'لا توجد تحديثات تلقائية — يتطلب التنزيل مجددًا يدويًا',
     Download: 'تنزيل',
     'Followed by your follows': 'يتابعه من تتابعهم',
-    Shuffle: 'تبديل'
+    Shuffle: 'تبديل',
+    'Verification code': 'رمز التحقق',
+    'Make sure this code matches the one shown on your other device.':
+      'تأكد من تطابق هذا الرمز مع الرمز المعروض على جهازك الآخر.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'لتجنب إرسال مفتاح التشفير الخاص بك إلى جهاز غير معروف، تحقق من تطابق هذا الرمز مع الرمز المعروض على الجهاز الآخر.'
   }
 }

@@ -897,6 +897,11 @@ export default {
       'कोई स्वचालित अपडेट नहीं — मैन्युअल रूप से दोबारा डाउनलोड करना होगा',
     Download: 'डाउनलोड करें',
     'Followed by your follows': 'जिन्हें आप फ़ॉलो करते हैं वे इन्हें फ़ॉलो करते हैं',
-    Shuffle: 'फेरबदल'
+    Shuffle: 'फेरबदल',
+    'Verification code': 'सत्यापन कोड',
+    'Make sure this code matches the one shown on your other device.':
+      'सुनिश्चित करें कि यह कोड आपके दूसरे डिवाइस पर दिखाए गए कोड से मेल खाता है।',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'अपनी एन्क्रिप्शन कुंजी किसी अज्ञात डिवाइस को भेजने से बचने के लिए, जांचें कि यह कोड दूसरे डिवाइस पर दिखाए गए कोड से मेल खाता है।'
   }
 }

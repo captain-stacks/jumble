@@ -903,6 +903,11 @@ export default {
       'Без автообновлений — требуется ручная повторная загрузка',
     Download: 'Скачать',
     'Followed by your follows': 'На кого подписаны ваши подписки',
-    Shuffle: 'Перемешать'
+    Shuffle: 'Перемешать',
+    'Verification code': 'Код подтверждения',
+    'Make sure this code matches the one shown on your other device.':
+      'Убедитесь, что этот код совпадает с кодом, показанным на вашем другом устройстве.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Чтобы не отправить ключ шифрования на неизвестное устройство, проверьте, что этот код совпадает с кодом, показанным на другом устройстве.'
   }
 }

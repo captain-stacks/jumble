@@ -897,6 +897,11 @@ export default {
       '自動アップデート非対応 — 手動で再ダウンロードが必要',
     Download: 'ダウンロード',
     'Followed by your follows': 'フォロー中のユーザーがフォローしている人',
-    Shuffle: 'シャッフル'
+    Shuffle: 'シャッフル',
+    'Verification code': '確認コード',
+    'Make sure this code matches the one shown on your other device.':
+      'このコードがもう一方のデバイスに表示されているコードと一致していることを確認してください。',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      '暗号鍵を不明なデバイスに送信しないよう、このコードがもう一方のデバイスに表示されているコードと一致しているか確認してください。'
   }
 }

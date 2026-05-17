@@ -902,6 +902,11 @@ export default {
       'Sin actualizaciones automáticas — requiere descargar de nuevo manualmente',
     Download: 'Descargar',
     'Followed by your follows': 'Seguidos por las personas a las que sigues',
-    Shuffle: 'Mezclar'
+    Shuffle: 'Mezclar',
+    'Verification code': 'Código de verificación',
+    'Make sure this code matches the one shown on your other device.':
+      'Asegúrate de que este código coincida con el que se muestra en tu otro dispositivo.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Para evitar enviar tu clave de cifrado a un dispositivo desconocido, comprueba que este código coincida con el que se muestra en el otro dispositivo.'
   }
 }

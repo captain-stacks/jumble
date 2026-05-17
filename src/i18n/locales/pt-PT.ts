@@ -903,6 +903,11 @@ export default {
       'Sem atualizações automáticas — é necessário transferir novamente manualmente',
     Download: 'Transferir',
     'Followed by your follows': 'Seguidos por quem segue',
-    Shuffle: 'Baralhar'
+    Shuffle: 'Baralhar',
+    'Verification code': 'Código de verificação',
+    'Make sure this code matches the one shown on your other device.':
+      'Certifique-se de que este código corresponde ao apresentado no seu outro dispositivo.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Para evitar enviar a sua chave de encriptação para um dispositivo desconhecido, verifique se este código corresponde ao apresentado no outro dispositivo.'
   }
 }

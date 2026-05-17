@@ -903,6 +903,11 @@ export default {
       'Otomatik güncelleme yok — manuel olarak yeniden indirmeniz gerekir',
     Download: 'İndir',
     'Followed by your follows': 'Takip ettiklerinin takip ettiği kişiler',
-    Shuffle: 'Karıştır'
+    Shuffle: 'Karıştır',
+    'Verification code': 'Doğrulama kodu',
+    'Make sure this code matches the one shown on your other device.':
+      'Bu kodun diğer cihazınızda gösterilen kodla eşleştiğinden emin olun.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'Şifreleme anahtarınızı bilinmeyen bir cihaza göndermemek için, bu kodun diğer cihazda gösterilen kodla eşleştiğini kontrol edin.'
   }
 }

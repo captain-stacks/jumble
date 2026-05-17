@@ -888,6 +888,11 @@ export default {
       '자동 업데이트 미지원 — 수동으로 다시 다운로드해야 함',
     Download: '다운로드',
     'Followed by your follows': '내가 팔로우한 사람들이 팔로우하는 사람',
-    Shuffle: '셔플'
+    Shuffle: '셔플',
+    'Verification code': '확인 코드',
+    'Make sure this code matches the one shown on your other device.':
+      '이 코드가 다른 기기에 표시된 코드와 일치하는지 확인하세요.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      '암호화 키를 알 수 없는 기기로 보내지 않도록, 이 코드가 다른 기기에 표시된 코드와 일치하는지 확인하세요.'
   }
 }

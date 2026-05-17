@@ -915,6 +915,11 @@ export default {
     'No auto-updates — manual re-download required':
       'No auto-updates — manual re-download required',
     'Followed by your follows': 'Followed by your follows',
-    Shuffle: 'Shuffle'
+    Shuffle: 'Shuffle',
+    'Verification code': 'Verification code',
+    'Make sure this code matches the one shown on your other device.':
+      'Make sure this code matches the one shown on your other device.',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.'
   }
 }

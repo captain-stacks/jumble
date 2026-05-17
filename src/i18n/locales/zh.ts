@@ -868,6 +868,11 @@ export default {
     'No auto-updates — manual re-download required': '不支持自动更新 — 需要手动重新下载',
     Download: '下载',
     'Followed by your follows': '你关注的人也关注',
-    Shuffle: '换一批'
+    Shuffle: '换一批',
+    'Verification code': '验证码',
+    'Make sure this code matches the one shown on your other device.':
+      '请确认此验证码与你另一台设备上显示的一致。',
+    'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
+      '为避免将加密密钥发送给未知设备，请检查验证码是否与另一台设备上显示的一致。'
   }
 }

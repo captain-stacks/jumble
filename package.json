@@ -67,6 +67,7 @@
     "@webbtc/webln-types": "^3.0.0",
     "blossom-client-sdk": "^4.1.0",
     "blurhash": "^2.0.5",
+    "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

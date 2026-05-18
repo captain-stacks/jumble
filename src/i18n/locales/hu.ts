@@ -898,7 +898,7 @@ export default {
     Download: 'Letöltés',
     'Followed by your follows': 'Akiket a követéseid követnek',
     Shuffle: 'Keverés',
-    'Verification code': 'Ellenőrző kód',
+    'Pairing code': 'Párosítási kód',
     'Make sure this code matches the one shown on your other device.':
       'Győződj meg róla, hogy ez a kód megegyezik a másik eszközödön megjelenővel.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

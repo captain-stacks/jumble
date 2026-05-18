@@ -889,7 +889,7 @@ export default {
     Download: '다운로드',
     'Followed by your follows': '내가 팔로우한 사람들이 팔로우하는 사람',
     Shuffle: '셔플',
-    'Verification code': '확인 코드',
+    'Pairing code': '페어링 코드',
     'Make sure this code matches the one shown on your other device.':
       '이 코드가 다른 기기에 표시된 코드와 일치하는지 확인하세요.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

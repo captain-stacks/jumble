@@ -912,7 +912,7 @@ export default {
     Download: 'Herunterladen',
     'Followed by your follows': 'Von Personen gefolgt, denen du folgst',
     Shuffle: 'Mischen',
-    'Verification code': 'Bestätigungscode',
+    'Pairing code': 'Kopplungscode',
     'Make sure this code matches the one shown on your other device.':
       'Stelle sicher, dass dieser Code mit dem auf deinem anderen Gerät angezeigten übereinstimmt.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

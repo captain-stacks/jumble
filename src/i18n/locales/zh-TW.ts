@@ -862,10 +862,10 @@ export default {
     Download: '下載',
     'Followed by your follows': '你關注的人也關注',
     Shuffle: '換一批',
-    'Verification code': '驗證碼',
+    'Pairing code': '配對碼',
     'Make sure this code matches the one shown on your other device.':
-      '請確認此驗證碼與你另一台裝置上顯示的一致。',
+      '請確認此配對碼與你另一台裝置上顯示的一致。',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':
-      '為避免將加密金鑰發送給未知裝置，請檢查驗證碼是否與另一台裝置上顯示的一致。'
+      '為避免將加密金鑰發送給未知裝置，請檢查配對碼是否與另一台裝置上顯示的一致。'
   }
 }

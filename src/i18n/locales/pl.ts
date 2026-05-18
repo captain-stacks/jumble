@@ -907,7 +907,7 @@ export default {
     Download: 'Pobierz',
     'Followed by your follows': 'Obserwowani przez Twoje obserwacje',
     Shuffle: 'Tasuj',
-    'Verification code': 'Kod weryfikacyjny',
+    'Pairing code': 'Kod parowania',
     'Make sure this code matches the one shown on your other device.':
       'Upewnij się, że ten kod jest zgodny z kodem wyświetlanym na drugim urządzeniu.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

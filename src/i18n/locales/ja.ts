@@ -898,7 +898,7 @@ export default {
     Download: 'ダウンロード',
     'Followed by your follows': 'フォロー中のユーザーがフォローしている人',
     Shuffle: 'シャッフル',
-    'Verification code': '確認コード',
+    'Pairing code': 'ペアリングコード',
     'Make sure this code matches the one shown on your other device.':
       'このコードがもう一方のデバイスに表示されているコードと一致していることを確認してください。',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

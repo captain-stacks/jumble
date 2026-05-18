@@ -898,7 +898,7 @@ export default {
     Download: 'دانلود',
     'Followed by your follows': 'دنبال‌شده توسط افرادی که دنبال می‌کنید',
     Shuffle: 'بُر زدن',
-    'Verification code': 'کد تأیید',
+    'Pairing code': 'کد جفت‌سازی',
     'Make sure this code matches the one shown on your other device.':
       'مطمئن شوید این کد با کدی که روی دستگاه دیگرتان نمایش داده می‌شود مطابقت دارد.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

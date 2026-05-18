@@ -904,7 +904,7 @@ export default {
     Download: 'İndir',
     'Followed by your follows': 'Takip ettiklerinin takip ettiği kişiler',
     Shuffle: 'Karıştır',
-    'Verification code': 'Doğrulama kodu',
+    'Pairing code': 'Eşleştirme kodu',
     'Make sure this code matches the one shown on your other device.':
       'Bu kodun diğer cihazınızda gösterilen kodla eşleştiğinden emin olun.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

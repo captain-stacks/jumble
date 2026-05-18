@@ -903,7 +903,7 @@ export default {
     Download: 'Descargar',
     'Followed by your follows': 'Seguidos por las personas a las que sigues',
     Shuffle: 'Mezclar',
-    'Verification code': 'Código de verificación',
+    'Pairing code': 'Código de emparejamiento',
     'Make sure this code matches the one shown on your other device.':
       'Asegúrate de que este código coincida con el que se muestra en tu otro dispositivo.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

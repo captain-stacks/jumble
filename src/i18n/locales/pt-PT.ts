@@ -904,7 +904,7 @@ export default {
     Download: 'Transferir',
     'Followed by your follows': 'Seguidos por quem segue',
     Shuffle: 'Baralhar',
-    'Verification code': 'Código de verificação',
+    'Pairing code': 'Código de emparelhamento',
     'Make sure this code matches the one shown on your other device.':
       'Certifique-se de que este código corresponde ao apresentado no seu outro dispositivo.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

@@ -88,7 +88,7 @@ export default function KeySyncRequestHandler() {
     <div className="flex flex-col gap-3">
       <div className="bg-muted flex flex-col items-center gap-2 rounded-lg p-4">
         <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          {t('Verification code')}
+          {t('Pairing code')}
         </span>
         <div className="font-mono text-2xl font-semibold tracking-[0.2em]">{verificationCode}</div>
       </div>

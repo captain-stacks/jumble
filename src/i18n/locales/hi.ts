@@ -898,7 +898,7 @@ export default {
     Download: 'डाउनलोड करें',
     'Followed by your follows': 'जिन्हें आप फ़ॉलो करते हैं वे इन्हें फ़ॉलो करते हैं',
     Shuffle: 'फेरबदल',
-    'Verification code': 'सत्यापन कोड',
+    'Pairing code': 'पेयरिंग कोड',
     'Make sure this code matches the one shown on your other device.':
       'सुनिश्चित करें कि यह कोड आपके दूसरे डिवाइस पर दिखाए गए कोड से मेल खाता है।',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

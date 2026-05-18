@@ -904,7 +904,7 @@ export default {
     Download: 'Скачать',
     'Followed by your follows': 'На кого подписаны ваши подписки',
     Shuffle: 'Перемешать',
-    'Verification code': 'Код подтверждения',
+    'Pairing code': 'Код сопряжения',
     'Make sure this code matches the one shown on your other device.':
       'Убедитесь, что этот код совпадает с кодом, показанным на вашем другом устройстве.',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

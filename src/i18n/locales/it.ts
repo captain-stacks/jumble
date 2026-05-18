@@ -902,7 +902,7 @@ export default {
     Download: 'Scarica',
     'Followed by your follows': 'Seguiti da persone che segui',
     Shuffle: 'Mescola',
-    'Verification code': 'Codice di verifica',
+    'Pairing code': 'Codice di abbinamento',
     'Make sure this code matches the one shown on your other device.':
       "Assicurati che questo codice corrisponda a quello mostrato sull'altro dispositivo.",
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

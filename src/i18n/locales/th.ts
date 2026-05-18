@@ -882,7 +882,7 @@ export default {
     Download: 'ดาวน์โหลด',
     'Followed by your follows': 'ติดตามโดยคนที่คุณติดตาม',
     Shuffle: 'สุ่ม',
-    'Verification code': 'รหัสยืนยัน',
+    'Pairing code': 'รหัสจับคู่',
     'Make sure this code matches the one shown on your other device.':
       'ตรวจสอบให้แน่ใจว่ารหัสนี้ตรงกับรหัสที่แสดงบนอุปกรณ์อีกเครื่องของคุณ',
     'To avoid sending your encryption key to an unknown device, check that this code matches the one shown on the other device.':

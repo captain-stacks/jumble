@@ -148,7 +148,7 @@ export default function NewDeviceKeySync({ onComplete }: { onComplete?: () => vo
         {(state === 'publishing' || state === 'waiting') && verificationCode && (
           <div className="bg-muted flex w-full flex-col items-center gap-2 rounded-lg p-4">
             <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              {t('Verification code')}
+              {t('Pairing code')}
             </span>
             <div className="font-mono text-2xl font-semibold tracking-[0.2em]">
               {verificationCode}

@@ -1,4 +1,3 @@
-import { TImageCompressionOptions } from '@/lib/image-compression'
 import mediaUpload, { UPLOAD_ABORTED_ERROR_MSG } from '@/services/media-upload.service'
 import { useRef } from 'react'
 import { toast } from 'sonner'
@@ -10,8 +9,7 @@ export default function Uploader({
   onUploadEnd,
   onProgress,
   className,
-  accept = 'image/*',
-  compressionOptions
+  accept = 'image/*'
 }: {
   children: React.ReactNode
   onUploadSuccess: ({ url, tags }: { url: string; tags: string[][] }, file: File) => void
@@ -20,7 +18,6 @@ export default function Uploader({
   onProgress?: (file: File, progress: number) => void
   className?: string
   accept?: string
-  compressionOptions?: TImageCompressionOptions
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -40,8 +37,7 @@ export default function Uploader({
         const abortController = abortControllerMap.get(file)
         const result = await mediaUpload.upload(file, {
           onProgress: (p) => onProgress?.(file, p),
-          signal: abortController?.signal,
-          compressionOptions
+          signal: abortController?.signal
         })
         onUploadSuccess(result, file)
         onUploadEnd?.(file)

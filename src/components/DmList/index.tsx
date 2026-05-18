@@ -1,4 +1,5 @@
 import { FormattedTimestamp } from '@/components/FormattedTimestamp'
+import { LoadingBar } from '@/components/LoadingBar'
 import PullToRefresh from '@/components/PullToRefresh'
 import { RefreshButton } from '@/components/RefreshButton'
 import Tabs from '@/components/Tabs'
@@ -204,6 +205,7 @@ export default function DmList() {
         }
         active={trustFilterOpen}
       />
+      {isReloading && <LoadingBar />}
       <PullToRefresh isPullable={isPullable} onRefresh={refresh}>
         <ConversationListContent
           filteredConversations={filteredConversations}

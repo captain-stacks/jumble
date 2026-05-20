@@ -111,7 +111,7 @@ export function isLocalNetworkUrl(urlString: string): boolean {
     const hostname = url.hostname
 
     // Check if it's localhost or an mDNS .local hostname (e.g. umbrel.local)
-    if (hostname === 'localhost' || hostname === '::1' || hostname.endsWith('.local')) {
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local')) {
       return true
     }
 

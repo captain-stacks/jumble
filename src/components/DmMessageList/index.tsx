@@ -50,7 +50,7 @@ import {
   SmilePlus
 } from 'lucide-react'
 import { kinds } from 'nostr-tools'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 function formatDmTime(timestamp: number, t: ReturnType<typeof useTranslation>['t']): string {
@@ -628,6 +628,11 @@ function MessageBubble({
   const bubbleClass = cn(
     'overflow-hidden wrap-break-word rounded-lg px-3 py-1.5',
     'w-fit min-w-9 max-w-full',
+    // Smooth out width re-measures (e.g. when a mention resolves from npub to
+    // @username). The initial measure goes from `w-fit` (a keyword) to a px
+    // value — that transition is discrete and won't animate, so the first set
+    // is still instant.
+    'transition-[width] duration-200',
     isOwn ? 'bg-primary text-primary-foreground' : 'bg-secondary'
   )
 
@@ -1084,35 +1089,35 @@ function DmContent({
             )
           }
           return (
-            <div key={si} className={bubbleClass}>
-              <div
-                dir="auto"
-                className={cn(
-                  'text-base text-wrap wrap-break-word whitespace-pre-wrap',
-                  isOwn &&
-                    '[&>div]:text-foreground [&_.text-primary]:text-primary-foreground [&_.text-primary]:decoration-primary-foreground/50 [&_.text-primary]:underline',
-                  '[&_.bg-card:hover]:bg-accent'
-                )}
-              >
-                {seg.nodes.map((node, ni) => {
-                  if (node.type === 'text') return node.data
-                  if (node.type === 'url') return <ExternalLink url={node.data} key={ni} />
-                  if (node.type === 'mention')
-                    return <EmbeddedMention key={ni} userId={node.data.split(':')[1]} />
-                  if (node.type === 'hashtag')
-                    return <EmbeddedHashtag hashtag={node.data} key={ni} />
-                  if (node.type === 'websocket-url')
-                    return <EmbeddedWebsocketUrl url={node.data} key={ni} />
-                  if (node.type === 'emoji') {
-                    const shortcode = node.data.split(':')[1]
-                    const emoji = emojiInfos.find((e) => e.shortcode === shortcode)
-                    if (!emoji) return node.data
-                    return <Emoji classNames={{ img: 'mb-1' }} emoji={emoji} key={ni} />
-                  }
-                  return null
-                })}
-              </div>
-            </div>
+            <MeasuredTextBubble
+              key={si}
+              bubbleClass={bubbleClass}
+              innerClassName={cn(
+                'text-base text-wrap wrap-break-word whitespace-pre-wrap',
+                isOwn &&
+                  '[&>div]:text-foreground [&_.text-primary]:text-primary-foreground [&_.text-primary]:decoration-primary-foreground/50 [&_.text-primary]:underline',
+                '[&_.bg-card:hover]:bg-accent'
+              )}
+              measureDep={content}
+            >
+              {seg.nodes.map((node, ni) => {
+                if (node.type === 'text') return node.data
+                if (node.type === 'url') return <ExternalLink url={node.data} key={ni} />
+                if (node.type === 'mention')
+                  return <EmbeddedMention key={ni} userId={node.data.split(':')[1]} />
+                if (node.type === 'hashtag')
+                  return <EmbeddedHashtag hashtag={node.data} key={ni} />
+                if (node.type === 'websocket-url')
+                  return <EmbeddedWebsocketUrl url={node.data} key={ni} />
+                if (node.type === 'emoji') {
+                  const shortcode = node.data.split(':')[1]
+                  const emoji = emojiInfos.find((e) => e.shortcode === shortcode)
+                  if (!emoji) return node.data
+                  return <Emoji classNames={{ img: 'mb-1' }} emoji={emoji} key={ni} />
+                }
+                return null
+              })}
+            </MeasuredTextBubble>
           )
         }
 
@@ -1142,6 +1147,118 @@ function DmContent({
         }
         return null
       })}
+    </div>
+  )
+}
+
+// A bubble that shrink-wraps its width to the actual rendered max-line-width,
+// not to the unwrapped max-content. CSS alone can't do this when the bubble
+// sits inside nested flex columns — `w-fit` reads the unwrapped intrinsic
+// size, so the bubble always inflates to max-width even when the wrapped text
+// is much narrower. We compute the longest line via Range.getClientRects()
+// and set width inline. Re-measures on container resize and on emoji-image
+// loads.
+function MeasuredTextBubble({
+  bubbleClass,
+  innerClassName,
+  measureDep,
+  children
+}: {
+  bubbleClass: string
+  innerClassName: string
+  measureDep: unknown
+  children: React.ReactNode
+}) {
+  const bubbleRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const bubble = bubbleRef.current
+    const text = textRef.current
+    if (!bubble || !text) return
+
+    const measure = () => {
+      bubble.style.width = ''
+
+      const range = document.createRange()
+      range.selectNodeContents(text)
+      const rects = Array.from(range.getClientRects())
+      if (rects.length === 0) return
+
+      // Inline-block children (emoji images, mentions) emit their own rects.
+      // Group everything by rounded top coord so each visual line is one row.
+      const lines = new Map<number, { left: number; right: number }>()
+      for (const r of rects) {
+        if (r.width === 0 || r.height === 0) continue
+        const key = Math.round(r.top)
+        const existing = lines.get(key)
+        if (existing) {
+          existing.left = Math.min(existing.left, r.left)
+          existing.right = Math.max(existing.right, r.right)
+        } else {
+          lines.set(key, { left: r.left, right: r.right })
+        }
+      }
+
+      let maxLineW = 0
+      for (const { left, right } of lines.values()) {
+        const w = right - left
+        if (w > maxLineW) maxLineW = w
+      }
+      if (maxLineW <= 0) return
+
+      const cs = getComputedStyle(bubble)
+      const padL = parseFloat(cs.paddingLeft) || 0
+      const padR = parseFloat(cs.paddingRight) || 0
+      bubble.style.width = `${Math.ceil(maxLineW + padL + padR)}px`
+    }
+
+    measure()
+
+    let rafId = 0
+    const schedule = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(measure)
+    }
+
+    // ResizeObserver fires once on observe to deliver the initial size; that
+    // fire is redundant with the measure we just did and can cause a 1px
+    // re-layout jitter, so we skip it.
+    const parent = bubble.parentElement
+    let initialObserverFire = true
+    const observer = parent
+      ? new ResizeObserver(() => {
+          if (initialObserverFire) {
+            initialObserverFire = false
+            return
+          }
+          schedule()
+        })
+      : undefined
+    if (parent && observer) observer.observe(parent)
+
+    // Mention chips render as @npub1xxx until the user profile resolves, then
+    // swap to @username — a real DOM mutation that ResizeObserver can't see.
+    // Watch text content/children for changes and re-measure on swap.
+    const mutationObserver = new MutationObserver(schedule)
+    mutationObserver.observe(text, { childList: true, subtree: true, characterData: true })
+
+    const pendingImgs = Array.from(text.querySelectorAll('img')).filter((img) => !img.complete)
+    pendingImgs.forEach((img) => img.addEventListener('load', schedule, { once: true }))
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      observer?.disconnect()
+      mutationObserver.disconnect()
+      pendingImgs.forEach((img) => img.removeEventListener('load', schedule))
+    }
+  }, [measureDep])
+
+  return (
+    <div ref={bubbleRef} className={bubbleClass}>
+      <div ref={textRef} dir="auto" className={innerClassName}>
+        {children}
+      </div>
     </div>
   )
 }

@@ -807,9 +807,9 @@ function MessageBubble({
           {message.replyTo && (
             <button
               onClick={() => onScrollToMessage?.(message.replyTo!.id)}
-              className="text-muted-foreground hover:bg-muted mb-0.5 inline-block max-w-full rounded-lg px-2 py-1 align-bottom text-[11px]"
+              className="bg-secondary/50 hover:bg-secondary text-muted-foreground mb-0.5 inline-block max-w-full rounded-lg px-2 py-1 align-bottom text-[11px] transition-colors"
             >
-              <div className="border-muted-foreground/50 line-clamp-2 border-s-2 ps-1.5 text-start">
+              <div className="relative line-clamp-2 ps-2 text-start before:absolute before:inset-y-0.5 before:start-0 before:w-0.5 before:rounded-full before:bg-primary">
                 {message.replyTo.senderPubkey && (
                   <SimpleUsername
                     userId={message.replyTo.senderPubkey}

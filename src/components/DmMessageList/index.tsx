@@ -12,6 +12,13 @@ import ExternalLink from '@/components/ExternalLink'
 import ImageGallery from '@/components/ImageGallery'
 import MediaPlayer from '@/components/MediaPlayer'
 import SuggestedEmojis from '@/components/SuggestedEmojis'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { SimpleUsername } from '@/components/Username'
@@ -47,6 +54,7 @@ import {
   Download,
   Loader2,
   Reply,
+  ShieldAlert,
   SmilePlus
 } from 'lucide-react'
 import { kinds } from 'nostr-tools'
@@ -732,6 +740,11 @@ function MessageBubble({
             </button>
           )}
         </div>
+        {message.verified === false && (
+          <div className="flex shrink-0 items-end pb-1.5">
+            <VerificationStatusIcon />
+          </div>
+        )}
         <Drawer open={isActionDrawerOpen} onOpenChange={setIsActionDrawerOpen}>
           <DrawerContent>
             {drawerMode === 'actions' ? (
@@ -1105,8 +1118,7 @@ function DmContent({
                 if (node.type === 'url') return <ExternalLink url={node.data} key={ni} />
                 if (node.type === 'mention')
                   return <EmbeddedMention key={ni} userId={node.data.split(':')[1]} />
-                if (node.type === 'hashtag')
-                  return <EmbeddedHashtag hashtag={node.data} key={ni} />
+                if (node.type === 'hashtag') return <EmbeddedHashtag hashtag={node.data} key={ni} />
                 if (node.type === 'websocket-url')
                   return <EmbeddedWebsocketUrl url={node.data} key={ni} />
                 if (node.type === 'emoji') {
@@ -1478,4 +1490,47 @@ function SendingStatusIcon({
         </button>
       )
   }
+}
+
+function VerificationStatusIcon() {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsOpen(true)
+        }}
+        className="flex items-center"
+        aria-label={t('Sender could not be verified')}
+        title={t('Sender could not be verified')}
+      >
+        <ShieldAlert className="h-3 w-3 text-amber-500 dark:text-amber-400" />
+      </button>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+              {t('Sender could not be verified')}
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-3 text-start">
+                <div>{t('dm verification dialog body')}</div>
+                <ul className="ms-4 list-disc space-y-1">
+                  <li>{t('dm verification reason rotated')}</li>
+                  <li>{t('dm verification reason not found')}</li>
+                  <li>{t('dm verification reason impersonated')}</li>
+                </ul>
+                <div className="text-muted-foreground">{t('dm verification dialog footer')}</div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }

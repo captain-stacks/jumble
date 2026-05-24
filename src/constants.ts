@@ -540,3 +540,12 @@ export const COMMUNITY_RELAY_SETS = import.meta.env.VITE_COMMUNITY_RELAY_SETS as
 export const COMMUNITY_RELAYS = import.meta.env.VITE_COMMUNITY_RELAYS as string[]
 
 export const IS_COMMUNITY_MODE = COMMUNITY_RELAY_SETS.length > 0 || COMMUNITY_RELAYS.length > 0
+
+// Pomegranate (threshold-key-shard NIP-46 remote signer) — "Login with Google".
+export const POMEGRANATE_ENABLED = false
+export const POMEGRANATE_CENTRAL_URL = 'https://auth.njump.me/'
+export const POMEGRANATE_OPERATOR_URLS = [
+  'https://po.njump.me/',
+  'https://po.f7z.io/',
+  'https://po.nostrver.se/'
+]

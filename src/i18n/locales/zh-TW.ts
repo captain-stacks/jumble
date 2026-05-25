@@ -941,6 +941,12 @@ export default {
     'Connect a remote signer': '連接遠端簽名器',
     'Scan with your signer app': '用你的簽名應用程式掃碼',
     'Open with Nostr signer app': '用 Nostr 簽名應用程式開啟',
-    'Scan QR code': '掃描二維碼'
+    'Scan QR code': '掃描二維碼',
+    Options: '選項',
+    Remove: '移除',
+    'End date': '結束日期',
+    'Advanced options': '進階選項',
+    'Polls may not display on clients that don’t support them.':
+      '不支援投票的客戶端可能無法顯示此投票。'
   }
 }

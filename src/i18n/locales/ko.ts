@@ -971,6 +971,12 @@ export default {
     'Connect a remote signer': '원격 서명자 연결',
     'Scan with your signer app': '서명 앱으로 스캔',
     'Open with Nostr signer app': 'Nostr 서명 앱으로 열기',
-    'Scan QR code': 'QR 코드 스캔'
+    'Scan QR code': 'QR 코드 스캔',
+    Options: '옵션',
+    Remove: '제거',
+    'End date': '종료 날짜',
+    'Advanced options': '고급 옵션',
+    'Polls may not display on clients that don’t support them.':
+      '투표를 지원하지 않는 클라이언트에서는 표시되지 않을 수 있습니다.'
   }
 }

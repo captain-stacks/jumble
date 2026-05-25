@@ -964,6 +964,12 @@ export default {
     'Connect a remote signer': 'เชื่อมต่อผู้ลงนามระยะไกล',
     'Scan with your signer app': 'สแกนด้วยแอปลงนามของคุณ',
     'Open with Nostr signer app': 'เปิดด้วยแอปลงนาม Nostr',
-    'Scan QR code': 'สแกนรหัส QR'
+    'Scan QR code': 'สแกนรหัส QR',
+    Options: 'ตัวเลือก',
+    Remove: 'ลบ',
+    'End date': 'วันที่สิ้นสุด',
+    'Advanced options': 'ตัวเลือกขั้นสูง',
+    'Polls may not display on clients that don’t support them.':
+      'โพลอาจไม่แสดงบนไคลเอนต์ที่ไม่รองรับ'
   }
 }

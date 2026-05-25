@@ -988,6 +988,12 @@ export default {
     'Connect a remote signer': 'Ligar um signatário remoto',
     'Scan with your signer app': 'Digitalize com a sua app de assinatura',
     'Open with Nostr signer app': 'Abrir com app de assinatura Nostr',
-    'Scan QR code': 'Digitalizar código QR'
+    'Scan QR code': 'Digitalizar código QR',
+    Options: 'Opções',
+    Remove: 'Remover',
+    'End date': 'Data de fim',
+    'Advanced options': 'Opções avançadas',
+    'Polls may not display on clients that don’t support them.':
+      'As sondagens podem não ser apresentadas em clientes que não as suportem.'
   }
 }

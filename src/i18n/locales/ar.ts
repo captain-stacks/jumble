@@ -965,6 +965,12 @@ export default {
     'Connect a remote signer': 'الاتصال بموقّع عن بُعد',
     'Scan with your signer app': 'امسح برمز التطبيق الموقّع',
     'Open with Nostr signer app': 'افتح باستخدام تطبيق توقيع Nostr',
-    'Scan QR code': 'مسح رمز QR'
+    'Scan QR code': 'مسح رمز QR',
+    Options: 'الخيارات',
+    Remove: 'إزالة',
+    'End date': 'تاريخ الانتهاء',
+    'Advanced options': 'خيارات متقدمة',
+    'Polls may not display on clients that don’t support them.':
+      'قد لا تظهر الاستطلاعات على العملاء الذين لا يدعمونها.'
   }
 }

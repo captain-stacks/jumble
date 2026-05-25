@@ -1,14 +1,15 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 import { normalizeUrl } from '@/lib/url'
 import { TPollCreateData } from '@/types'
 import dayjs from 'dayjs'
-import { Eraser, X } from 'lucide-react'
+import { ChevronRight, Eraser, ListTodo, Plus, Trash2, TriangleAlert, X } from 'lucide-react'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import InfoCard from '../InfoCard'
 
 export default function PollEditor({
   pollCreateData,
@@ -26,6 +27,7 @@ export default function PollEditor({
     pollCreateData.endsAt ? dayjs(pollCreateData.endsAt * 1000).format('YYYY-MM-DDTHH:mm') : ''
   )
   const [relayUrls, setRelayUrls] = useState(pollCreateData.relays.join(', '))
+  const [showAdvanced, setShowAdvanced] = useState(pollCreateData.relays.length > 0)
 
   useEffect(() => {
     setPollCreateData({
@@ -58,84 +60,131 @@ export default function PollEditor({
   }
 
   return (
-    <div className="space-y-4 rounded-lg border p-3">
+    <div className="bg-muted/10 space-y-5 rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <ListTodo className="text-primary size-4" />
+          <span>{t('Poll')}</span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost-destructive"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={() => setIsPoll(false)}
+        >
+          <Trash2 />
+          {t('Remove poll')}
+        </Button>
+      </div>
+
       <div className="space-y-2">
+        <div className="text-muted-foreground text-xs font-medium">{t('Options')}</div>
         {options.map((option, index) => (
-          <div key={index} className="flex gap-2">
+          <div key={index} className="group relative">
+            <div className="text-muted-foreground pointer-events-none absolute inset-y-0 start-3 flex items-center text-xs font-medium tabular-nums">
+              {index + 1}.
+            </div>
             <Input
               value={option}
               onChange={(e) => handleOptionChange(index, e.target.value)}
               placeholder={t('Option {{number}}', { number: index + 1 })}
+              className="ps-9 pe-10"
+              maxLength={200}
             />
-            <Button
-              type="button"
-              variant="ghost-destructive"
-              size="icon"
-              onClick={() => handleRemoveOption(index)}
-              disabled={options.length <= 2}
-            >
-              <X />
-            </Button>
+            {options.length > 2 && (
+              <button
+                type="button"
+                onClick={() => handleRemoveOption(index)}
+                title={t('Remove')}
+                className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive absolute inset-y-0 end-2 my-auto flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
         ))}
-        <Button type="button" variant="outline" onClick={handleAddOption}>
+        <button
+          type="button"
+          onClick={handleAddOption}
+          className="border-input bg-background text-muted-foreground hover:border-ring/50 hover:bg-accent/40 hover:text-foreground flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-dashed text-sm transition-all duration-200"
+        >
+          <Plus className="size-4" />
           {t('Add Option')}
-        </Button>
+        </button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Label htmlFor="multiple-choice">{t('Allow multiple choices')}</Label>
-        <Switch
-          id="multiple-choice"
-          checked={isMultipleChoice}
-          onCheckedChange={setIsMultipleChoice}
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="ends-at">{t('End Date (optional)')}</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            id="ends-at"
-            type="datetime-local"
-            value={endsAt}
-            onChange={(e) => setEndsAt(e.target.value)}
+      <div className="bg-background overflow-hidden rounded-lg border">
+        <div className="flex items-center justify-between gap-3 px-3 py-2.5">
+          <Label htmlFor="multiple-choice" className="cursor-pointer text-sm">
+            {t('Allow multiple choices')}
+          </Label>
+          <Switch
+            id="multiple-choice"
+            checked={isMultipleChoice}
+            onCheckedChange={setIsMultipleChoice}
           />
-          <Button
-            type="button"
-            variant="ghost-destructive"
-            size="icon"
-            onClick={() => setEndsAt('')}
-            disabled={!endsAt}
-            title={t('Clear end date')}
-          >
-            <Eraser />
-          </Button>
+        </div>
+        <Separator />
+        <div className="flex items-center justify-between gap-3 px-3 py-2.5">
+          <Label htmlFor="ends-at" className="cursor-pointer text-sm">
+            {t('End date')}
+          </Label>
+          <div className="flex items-center gap-1">
+            <Input
+              id="ends-at"
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+              className="h-8 w-auto text-sm"
+            />
+            {endsAt && (
+              <button
+                type="button"
+                onClick={() => setEndsAt('')}
+                title={t('Clear end date')}
+                className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive flex h-7 w-7 items-center justify-center rounded-md transition"
+              >
+                <Eraser className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="relay-urls">{t('Relay URLs (optional, comma-separated)')}</Label>
-        <Input
-          id="relay-urls"
-          value={relayUrls}
-          onChange={(e) => setRelayUrls(e.target.value)}
-          placeholder="wss://relay1.com, wss://relay2.com"
-        />
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs font-medium transition"
+        >
+          <ChevronRight
+            className={cn(
+              'size-3 transition-transform rtl:-scale-x-100',
+              showAdvanced && 'rotate-90'
+            )}
+          />
+          {t('Advanced options')}
+        </button>
+        {showAdvanced && (
+          <div className="mt-2 grid gap-1.5">
+            <Label htmlFor="relay-urls" className="text-muted-foreground text-xs">
+              {t('Relay URLs (optional, comma-separated)')}
+            </Label>
+            <Input
+              id="relay-urls"
+              value={relayUrls}
+              onChange={(e) => setRelayUrls(e.target.value)}
+              placeholder="wss://relay1.com, wss://relay2.com"
+              className="text-sm"
+            />
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-2">
-        <InfoCard
-          variant="alert"
-          title={t('This is a poll note.')}
-          content={t(
-            'Unlike regular notes, polls are not widely supported and may not display on other clients.'
-          )}
-        />
-
-        <Button variant="ghost-destructive" className="w-full" onClick={() => setIsPoll(false)}>
-          {t('Remove poll')}
-        </Button>
+      <div className="text-muted-foreground flex items-start gap-2 text-xs">
+        <TriangleAlert className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+        <span>{t('Polls may not display on clients that don’t support them.')}</span>
       </div>
     </div>
   )

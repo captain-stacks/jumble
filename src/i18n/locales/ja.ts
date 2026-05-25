@@ -982,6 +982,12 @@ export default {
     'Connect a remote signer': 'リモート署名者に接続',
     'Scan with your signer app': '署名アプリでスキャン',
     'Open with Nostr signer app': 'Nostr 署名アプリで開く',
-    'Scan QR code': 'QR コードをスキャン'
+    'Scan QR code': 'QR コードをスキャン',
+    Options: '選択肢',
+    Remove: '削除',
+    'End date': '終了日',
+    'Advanced options': '詳細オプション',
+    'Polls may not display on clients that don’t support them.':
+      '投票機能に対応していないクライアントでは表示されない場合があります。'
   }
 }

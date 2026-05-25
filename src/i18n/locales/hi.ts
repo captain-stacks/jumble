@@ -981,6 +981,12 @@ export default {
     'Connect a remote signer': 'रिमोट साइनर कनेक्ट करें',
     'Scan with your signer app': 'अपने साइनर ऐप से स्कैन करें',
     'Open with Nostr signer app': 'Nostr साइनर ऐप से खोलें',
-    'Scan QR code': 'QR कोड स्कैन करें'
+    'Scan QR code': 'QR कोड स्कैन करें',
+    Options: 'विकल्प',
+    Remove: 'हटाएं',
+    'End date': 'समाप्ति तिथि',
+    'Advanced options': 'उन्नत विकल्प',
+    'Polls may not display on clients that don’t support them.':
+      'पोल उन क्लाइंट पर प्रदर्शित नहीं हो सकते जो इनका समर्थन नहीं करते।'
   }
 }

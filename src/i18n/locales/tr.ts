@@ -987,6 +987,12 @@ export default {
     'Connect a remote signer': 'Uzak imzalayıcı bağla',
     'Scan with your signer app': 'İmzalayıcı uygulamanızla tarayın',
     'Open with Nostr signer app': 'Nostr imzalayıcı uygulamayla aç',
-    'Scan QR code': 'QR kodu tara'
+    'Scan QR code': 'QR kodu tara',
+    Options: 'Seçenekler',
+    Remove: 'Kaldır',
+    'End date': 'Bitiş tarihi',
+    'Advanced options': 'Gelişmiş seçenekler',
+    'Polls may not display on clients that don’t support them.':
+      'Anketler, onları desteklemeyen istemcilerde görüntülenmeyebilir.'
   }
 }

@@ -948,6 +948,12 @@ export default {
     'Connect a remote signer': '连接远程签名器',
     'Scan with your signer app': '用你的签名应用扫码',
     'Open with Nostr signer app': '用 Nostr 签名应用打开',
-    'Scan QR code': '扫描二维码'
+    'Scan QR code': '扫描二维码',
+    Options: '选项',
+    Remove: '移除',
+    'End date': '结束日期',
+    'Advanced options': '高级选项',
+    'Polls may not display on clients that don’t support them.':
+      '不支持投票的客户端可能无法显示此投票。'
   }
 }

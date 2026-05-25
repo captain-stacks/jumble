@@ -981,6 +981,12 @@ export default {
     'Connect a remote signer': 'Távoli aláíró csatlakoztatása',
     'Scan with your signer app': 'Olvasd be az aláíró alkalmazásoddal',
     'Open with Nostr signer app': 'Megnyitás Nostr aláíró alkalmazással',
-    'Scan QR code': 'QR-kód beolvasása'
+    'Scan QR code': 'QR-kód beolvasása',
+    Options: 'Lehetőségek',
+    Remove: 'Eltávolítás',
+    'End date': 'Befejezés dátuma',
+    'Advanced options': 'Speciális beállítások',
+    'Polls may not display on clients that don’t support them.':
+      'A szavazások előfordulhat, hogy nem jelennek meg azokon a klienseken, amelyek nem támogatják őket.'
   }
 }

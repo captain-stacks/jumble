@@ -981,6 +981,12 @@ export default {
     'Connect a remote signer': 'اتصال به امضاکننده‌ی راه‌دور',
     'Scan with your signer app': 'با اپلیکیشن امضاکننده اسکن کنید',
     'Open with Nostr signer app': 'با اپلیکیشن امضاکننده‌ی Nostr باز کنید',
-    'Scan QR code': 'اسکن کد QR'
+    'Scan QR code': 'اسکن کد QR',
+    Options: 'گزینه‌ها',
+    Remove: 'حذف',
+    'End date': 'تاریخ پایان',
+    'Advanced options': 'گزینه‌های پیشرفته',
+    'Polls may not display on clients that don’t support them.':
+      'نظرسنجی‌ها ممکن است در کلاینت‌هایی که از آن‌ها پشتیبانی نمی‌کنند نمایش داده نشوند.'
   }
 }

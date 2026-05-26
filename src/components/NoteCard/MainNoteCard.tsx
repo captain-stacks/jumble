@@ -31,16 +31,22 @@ export default function MainNoteCard({
   return (
     <div
       className={className}
+      data-clickable-card
       onClick={(e) => {
         // We can't stopPropagation() on inner interactive elements: React's
         // stopPropagation() also calls nativeEvent.stopPropagation(), which
         // breaks Radix Dialog's touch-mode outside-click detection (it
         // listens for native `click` bubbling to `document`). So filter
-        // here instead — skip portal-rendered descendants (overlays/menus)
-        // and skip interactive controls inside the card.
+        // here instead — skip portal-rendered descendants (overlays/menus),
+        // skip interactive controls inside the card, and skip clicks that
+        // belong to a nested clickable card (e.g. embedded note).
         const target = e.target
         if (!(target instanceof Node) || !e.currentTarget.contains(target)) return
-        if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR)) return
+        if (target instanceof Element) {
+          if (target.closest(INTERACTIVE_SELECTOR)) return
+          const nearestClickableCard = target.closest('[data-clickable-card]')
+          if (nearestClickableCard && nearestClickableCard !== e.currentTarget) return
+        }
         push(toNote(originalNoteId ?? event))
       }}
     >

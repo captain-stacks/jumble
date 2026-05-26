@@ -3,13 +3,12 @@ import { toNote } from '@/lib/link'
 import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { Event } from 'nostr-tools'
+import ClickableCard from '../ClickableCard'
 import Collapsible from '../Collapsible'
 import Note from '../Note'
 import StuffStats from '../StuffStats'
 import PinnedButton from './PinnedButton'
 import RepostDescription from './RepostDescription'
-
-const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [role="button"]'
 
 export default function MainNoteCard({
   event,
@@ -29,27 +28,7 @@ export default function MainNoteCard({
   const { push } = useSecondaryPage()
 
   return (
-    <div
-      className={className}
-      data-clickable-card
-      onClick={(e) => {
-        // We can't stopPropagation() on inner interactive elements: React's
-        // stopPropagation() also calls nativeEvent.stopPropagation(), which
-        // breaks Radix Dialog's touch-mode outside-click detection (it
-        // listens for native `click` bubbling to `document`). So filter
-        // here instead — skip portal-rendered descendants (overlays/menus),
-        // skip interactive controls inside the card, and skip clicks that
-        // belong to a nested clickable card (e.g. embedded note).
-        const target = e.target
-        if (!(target instanceof Node) || !e.currentTarget.contains(target)) return
-        if (target instanceof Element) {
-          if (target.closest(INTERACTIVE_SELECTOR)) return
-          const nearestClickableCard = target.closest('[data-clickable-card]')
-          if (nearestClickableCard && nearestClickableCard !== e.currentTarget) return
-        }
-        push(toNote(originalNoteId ?? event))
-      }}
-    >
+    <ClickableCard className={className} onClick={() => push(toNote(originalNoteId ?? event))}>
       <div
         className={cn(
           'clickable transition-all duration-200',
@@ -69,6 +48,6 @@ export default function MainNoteCard({
         {!embedded && <StuffStats className="mt-3 px-4" stuff={event} />}
       </div>
       {!embedded && <Separator />}
-    </div>
+    </ClickableCard>
   )
 }

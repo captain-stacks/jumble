@@ -298,6 +298,12 @@ class DmService {
       client.fetchEncryptionKeyAnnouncementEvent(pubkey, true, skipCache)
     ])
 
+    // A Kind 10050 event can exist while listing zero relays (e.g. the user
+    // removed them all). Treat that as "no DM relays" so setup gates on it
+    // rather than letting messaging proceed against an empty relay set.
+    const hasDmRelays =
+      !!dmRelaysEvent && dmRelaysEvent.tags.some((tag) => tag[0] === 'relay' && !!tag[1])
+
     let encryptionPubkey = encryptionKeyEvent
       ? encryptionKeyService.getEncryptionPubkeyFromEvent(encryptionKeyEvent)
       : null
@@ -324,7 +330,7 @@ class DmService {
     }
 
     return {
-      hasDmRelays: !!dmRelaysEvent,
+      hasDmRelays,
       hasEncryptionKey,
       encryptionPubkey
     }

@@ -1,4 +1,5 @@
 import { ExtendedKind } from '@/constants'
+import { getDefaultRelayUrls } from '@/lib/relay'
 import { tagNameEquals } from '@/lib/tag'
 import { ISigner, TEncryptionKeypair } from '@/types'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
@@ -267,7 +268,10 @@ class EncryptionKeyService {
       client.fetchRelayList(accountPubkey)
     ])
     const writeRelays = relayList.write.slice(0, 5)
-    const relays = Array.from(new Set([...dmRelays, ...writeRelays]))
+    // These are non-private setup events (key announcements, sync requests, key
+    // transfers). Always include the big default relays so a flaky or
+    // misconfigured DM/write relay set can't strand the sync handshake.
+    const relays = Array.from(new Set([...dmRelays, ...writeRelays, ...getDefaultRelayUrls()]))
 
     return {
       dmRelays,

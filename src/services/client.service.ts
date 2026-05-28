@@ -148,7 +148,8 @@ class ClientService extends EventTarget {
           kinds.Contacts,
           ExtendedKind.FAVORITE_RELAYS,
           ExtendedKind.BLOSSOM_SERVER_LIST,
-          ExtendedKind.RELAY_REVIEW
+          ExtendedKind.RELAY_REVIEW,
+          ExtendedKind.DM_RELAYS
         ].includes(event.kind)
       ) {
         defaultRelays.forEach((url) => relaySet.add(url))

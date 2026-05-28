@@ -1,8 +1,9 @@
 import { isInsecureUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
+import recentEmojiService from '@/services/recent-emoji.service'
 import { TEmoji } from '@/types'
-import { Heart } from 'lucide-react'
+import { Heart, ImageOff } from 'lucide-react'
 import { HTMLAttributes, useState } from 'react'
 
 export default function Emoji({
@@ -27,6 +28,19 @@ export default function Emoji({
   }
 
   if (hasError || (!allowInsecureConnection && isInsecureUrl(emoji.url))) {
+    if (!classNames?.text) {
+      return (
+        <span
+          title={`:${emoji.shortcode}:`}
+          className={cn(
+            'inline-flex items-center justify-center align-middle text-muted-foreground',
+            classNames?.img
+          )}
+        >
+          <ImageOff className="size-1/2" />
+        </span>
+      )
+    }
     return (
       <span className={cn('whitespace-nowrap', classNames?.text)}>{`:${emoji.shortcode}:`}</span>
     )
@@ -43,6 +57,7 @@ export default function Emoji({
       }}
       onError={() => {
         setHasError(true)
+        recentEmojiService.markBroken(emoji.url)
       }}
     />
   )

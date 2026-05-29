@@ -11,7 +11,15 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Text from '@tiptap/extension-text'
 import { TextSelection } from '@tiptap/pm/state'
 import { Content, EditorContent, useEditor } from '@tiptap/react'
-import { Dispatch, forwardRef, SetStateAction, useImperativeHandle, useState } from 'react'
+import {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { ClipboardAndDropHandler } from './ClipboardAndDropHandler'
 import Emoji from './Emoji'
@@ -59,6 +67,32 @@ const PostTextarea = forwardRef<
   ) => {
     const { t } = useTranslation()
     const [tabValue, setTabValue] = useState('edit')
+    // Keep the tabs and the (mobile) action buttons on one row when they fit;
+    // when a long translation would crowd them, stack the buttons above the tabs.
+    const headerRef = useRef<HTMLDivElement>(null)
+    const tabsRef = useRef<HTMLDivElement>(null)
+    const actionsRef = useRef<HTMLDivElement>(null)
+    const [stackActions, setStackActions] = useState(false)
+    useLayoutEffect(() => {
+      const container = headerRef.current
+      if (!container) return
+      const measure = () => {
+        const tabsEl = tabsRef.current
+        const actionsEl = actionsRef.current
+        if (!tabsEl || !actionsEl) {
+          setStackActions(false)
+          return
+        }
+        const GAP = 8
+        setStackActions(tabsEl.offsetWidth + actionsEl.offsetWidth + GAP > container.clientWidth)
+      }
+      measure()
+      const ro = new ResizeObserver(measure)
+      ro.observe(container)
+      if (tabsRef.current) ro.observe(tabsRef.current)
+      if (actionsRef.current) ro.observe(actionsRef.current)
+      return () => ro.disconnect()
+    }, [])
     const editor = useEditor({
       extensions: [
         Document,
@@ -159,22 +193,36 @@ const PostTextarea = forwardRef<
 
     return (
       <Tabs defaultValue="edit" value={tabValue} onValueChange={(v) => setTabValue(v)}>
-        <div className="flex items-center gap-2 px-5 pt-3 sm:px-6">
-          <TabsList className="h-auto gap-1 bg-transparent p-0">
-            <TabsTrigger
-              value="edit"
-              className="h-8 rounded-md bg-transparent px-2.5 text-sm text-muted-foreground shadow-none hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none"
-            >
-              {t('Edit')}
-            </TabsTrigger>
-            <TabsTrigger
-              value="preview"
-              className="h-8 rounded-md bg-transparent px-2.5 text-sm text-muted-foreground shadow-none hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none"
-            >
-              {t('Preview')}
-            </TabsTrigger>
-          </TabsList>
-          {topRightActions && <div className="ms-auto sm:hidden">{topRightActions}</div>}
+        <div className="px-5 pt-3 sm:px-6">
+          <div
+            ref={headerRef}
+            className={cn('flex gap-2', stackActions ? 'flex-col-reverse gap-1' : 'items-center')}
+          >
+            <div ref={tabsRef} className={stackActions ? 'self-start' : ''}>
+              <TabsList className="h-auto gap-1 bg-transparent p-0">
+                <TabsTrigger
+                  value="edit"
+                  className="h-8 rounded-md bg-transparent px-2.5 text-sm text-muted-foreground shadow-none hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                >
+                  {t('Edit')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="preview"
+                  className="h-8 rounded-md bg-transparent px-2.5 text-sm text-muted-foreground shadow-none hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                >
+                  {t('Preview')}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            {topRightActions && (
+              <div
+                ref={actionsRef}
+                className={cn('sm:hidden', stackActions ? 'self-end' : 'ms-auto')}
+              >
+                {topRightActions}
+              </div>
+            )}
+          </div>
         </div>
         <TabsContent value="edit" className="mt-0">
           <EditorContent className="tiptap" editor={editor} />

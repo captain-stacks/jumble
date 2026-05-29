@@ -997,6 +997,15 @@ export default {
     'Show thread context': 'Показать контекст треда',
     'Hide thread context': 'Скрыть контекст треда',
     Enable: 'Включить',
-    Upload: 'Загрузить'
+    Upload: 'Загрузить',
+    Drafts: 'Черновики',
+    Failed: 'Не удалось',
+    'Save as draft?': 'Сохранить как черновик?',
+    'Your changes will be saved to the drafts box.': 'Ваши изменения будут сохранены в черновиках.',
+    Discard: 'Не сохранять',
+    'Keep editing': 'Продолжить редактирование',
+    'Open drafts': 'Открыть черновики',
+    'No drafts yet': 'Пока нет черновиков',
+    Empty: 'Пусто'
   }
 }

@@ -991,6 +991,16 @@ export default {
     'Show thread context': 'Beszélgetés kontextusának megjelenítése',
     'Hide thread context': 'Beszélgetés kontextusának elrejtése',
     Enable: 'Engedélyezés',
-    Upload: 'Feltöltés'
+    Upload: 'Feltöltés',
+    Drafts: 'Piszkozatok',
+    Failed: 'Sikertelen',
+    'Save as draft?': 'Mentés piszkozatként?',
+    'Your changes will be saved to the drafts box.':
+      'A módosításaid a piszkozatok közé lesznek mentve.',
+    Discard: 'Elvetés',
+    'Keep editing': 'Szerkesztés folytatása',
+    'Open drafts': 'Piszkozatok megnyitása',
+    'No drafts yet': 'Még nincsenek piszkozatok',
+    Empty: 'Üres'
   }
 }

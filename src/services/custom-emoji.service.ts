@@ -105,6 +105,12 @@ class CustomEmojiService {
     return this.emojiMap.get(id)
   }
 
+  registerExternalEmoji(emoji: TEmoji) {
+    const id = this.getEmojiId(emoji)
+    if (this.emojiMap.has(id)) return
+    this.emojiMap.set(id, emoji)
+  }
+
   getEmojiId(emoji: TEmoji): string {
     const data = new TextEncoder().encode(`${emoji.shortcode}:${emoji.url}`.toLowerCase())
     const hash = sha256(data)

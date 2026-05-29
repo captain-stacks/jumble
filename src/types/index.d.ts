@@ -142,6 +142,11 @@ export type TPublishOptions = {
   minPow?: number
 }
 
+export type TPostTargetItem =
+  | { type: 'optimalRelays' }
+  | { type: 'relay'; url: string }
+  | { type: 'relaySet'; id: string; urls: string[] }
+
 export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you' | '24h' | 'articles'
 
 export type TFeedTabBuiltin = 'posts' | 'postsAndReplies' | '24h' | 'articles'

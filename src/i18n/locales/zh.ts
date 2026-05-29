@@ -958,6 +958,15 @@ export default {
     'Show thread context': '展开对话上下文',
     'Hide thread context': '收起对话上下文',
     Enable: '启用',
-    Upload: '上传'
+    Upload: '上传',
+    Drafts: '草稿',
+    Failed: '失败',
+    'Save as draft?': '保存为草稿？',
+    'Your changes will be saved to the drafts box.': '你的修改将保存到草稿箱。',
+    Discard: '丢弃',
+    'Keep editing': '继续编辑',
+    'Open drafts': '打开草稿箱',
+    'No drafts yet': '暂无草稿',
+    Empty: '空'
   }
 }

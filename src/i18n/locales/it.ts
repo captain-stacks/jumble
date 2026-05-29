@@ -996,6 +996,16 @@ export default {
     'Show thread context': 'Mostra contesto del thread',
     'Hide thread context': 'Nascondi contesto del thread',
     Enable: 'Abilita',
-    Upload: 'Carica'
+    Upload: 'Carica',
+    Drafts: 'Bozze',
+    Failed: 'Non riuscito',
+    'Save as draft?': 'Salvare come bozza?',
+    'Your changes will be saved to the drafts box.':
+      'Le tue modifiche verranno salvate nelle bozze.',
+    Discard: 'Scarta',
+    'Keep editing': 'Continua a modificare',
+    'Open drafts': 'Apri bozze',
+    'No drafts yet': 'Ancora nessuna bozza',
+    Empty: 'Vuoto'
   }
 }

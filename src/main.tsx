@@ -9,6 +9,7 @@ import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import localBlossomCache from './services/local-blossom-cache.service'
 import storage from './services/local-storage.service'
+import postDraftService from './services/post-draft.service'
 
 const setVh = () => {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`)
@@ -25,6 +26,9 @@ Promise.allSettled([
   }),
   localBlossomCache.init().catch((err) => {
     console.error('[main] local blossom cache probe failed:', err)
+  }),
+  postDraftService.init().catch((err) => {
+    console.error('[main] post draft init failed:', err)
   })
 ]).finally(() => {
   root.render(

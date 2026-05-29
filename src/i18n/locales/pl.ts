@@ -999,6 +999,16 @@ export default {
     'Show thread context': 'Pokaż kontekst wątku',
     'Hide thread context': 'Ukryj kontekst wątku',
     Enable: 'Włącz',
-    Upload: 'Prześlij'
+    Upload: 'Prześlij',
+    Drafts: 'Wersje robocze',
+    Failed: 'Niepowodzenie',
+    'Save as draft?': 'Zapisać jako wersję roboczą?',
+    'Your changes will be saved to the drafts box.':
+      'Twoje zmiany zostaną zapisane w wersjach roboczych.',
+    Discard: 'Odrzuć',
+    'Keep editing': 'Kontynuuj edycję',
+    'Open drafts': 'Otwórz wersje robocze',
+    'No drafts yet': 'Brak wersji roboczych',
+    Empty: 'Pusty'
   }
 }

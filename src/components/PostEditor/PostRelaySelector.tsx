@@ -14,43 +14,45 @@ import { useCurrentRelays } from '@/providers/CurrentRelaysProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import client from '@/services/client.service'
+import { TPostTargetItem } from '@/types'
 import { Check, ChevronDown, Radio } from 'lucide-react'
 import { NostrEvent } from 'nostr-tools'
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import RelayIcon from '../RelayIcon'
-
-type TPostTargetItem =
-  | {
-      type: 'optimalRelays'
-    }
-  | {
-      type: 'relay'
-      url: string
-    }
-  | {
-      type: 'relaySet'
-      id: string
-      urls: string[]
-    }
 
 export default function PostRelaySelector({
   parentEvent,
   openFrom,
   onProtectedSuggestionChange,
-  setAdditionalRelayUrls
+  setAdditionalRelayUrls,
+  initialItems,
+  onItemsChange
 }: {
   parentEvent?: NostrEvent
   openFrom?: string[]
   onProtectedSuggestionChange: (suggested: boolean) => void
   setAdditionalRelayUrls: Dispatch<SetStateAction<string[]>>
+  initialItems?: TPostTargetItem[]
+  onItemsChange?: (items: TPostTargetItem[]) => void
 }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { relayUrls } = useCurrentRelays()
   const { relaySets, favoriteRelays } = useFavoriteRelays()
-  const [postTargetItems, setPostTargetItems] = useState<TPostTargetItem[]>([])
+  const [postTargetItems, setPostTargetItems] = useState<TPostTargetItem[]>(
+    initialItems && initialItems.length ? initialItems : []
+  )
+  const restoredFromDraft = useRef(!!(initialItems && initialItems.length))
   const parentEventSeenOnRelays = useMemo(() => {
     if (!parentEvent || !isProtectedEvent(parentEvent)) {
       return []
@@ -95,6 +97,10 @@ export default function PostRelaySelector({
   }, [postTargetItems])
 
   useEffect(() => {
+    // A restored draft already carries the user's chosen targets — don't clobber them.
+    if (restoredFromDraft.current) {
+      return
+    }
     if (openFrom && openFrom.length) {
       setPostTargetItems(Array.from(new Set(openFrom)).map((url) => ({ type: 'relay', url })))
       return
@@ -121,6 +127,7 @@ export default function PostRelaySelector({
 
     onProtectedSuggestionChange(shouldProtect)
     setAdditionalRelayUrls(relayUrls)
+    onItemsChange?.(postTargetItems)
   }, [postTargetItems])
 
   const handleOptimalRelaysCheckedChange = useCallback((checked: boolean) => {

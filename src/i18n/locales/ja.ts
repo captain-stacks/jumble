@@ -992,6 +992,15 @@ export default {
     'Show thread context': 'スレッドの文脈を表示',
     'Hide thread context': 'スレッドの文脈を非表示',
     Enable: '有効化',
-    Upload: 'アップロード'
+    Upload: 'アップロード',
+    Drafts: '下書き',
+    Failed: '失敗',
+    'Save as draft?': '下書きとして保存しますか？',
+    'Your changes will be saved to the drafts box.': '変更は下書きボックスに保存されます。',
+    Discard: '破棄',
+    'Keep editing': '編集を続ける',
+    'Open drafts': '下書きを開く',
+    'No drafts yet': '下書きはまだありません',
+    Empty: '空'
   }
 }

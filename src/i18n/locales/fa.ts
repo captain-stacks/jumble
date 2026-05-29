@@ -991,6 +991,16 @@ export default {
     'Show thread context': 'نمایش بافت گفت‌وگو',
     'Hide thread context': 'پنهان کردن بافت گفت‌وگو',
     Enable: 'فعال‌سازی',
-    Upload: 'بارگذاری'
+    Upload: 'بارگذاری',
+    Drafts: 'پیش‌نویس‌ها',
+    Failed: 'ناموفق',
+    'Save as draft?': 'ذخیره به‌عنوان پیش‌نویس؟',
+    'Your changes will be saved to the drafts box.':
+      'تغییرات شما در صندوق پیش‌نویس‌ها ذخیره می‌شود.',
+    Discard: 'دور انداختن',
+    'Keep editing': 'ادامهٔ ویرایش',
+    'Open drafts': 'باز کردن پیش‌نویس‌ها',
+    'No drafts yet': 'هنوز پیش‌نویسی نیست',
+    Empty: 'خالی'
   }
 }

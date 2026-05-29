@@ -1007,6 +1007,16 @@ export default {
     'Show thread context': 'Thread-Kontext anzeigen',
     'Hide thread context': 'Thread-Kontext ausblenden',
     Enable: 'Aktivieren',
-    Upload: 'Hochladen'
+    Upload: 'Hochladen',
+    Drafts: 'Entwürfe',
+    Failed: 'Fehlgeschlagen',
+    'Save as draft?': 'Als Entwurf speichern?',
+    'Your changes will be saved to the drafts box.':
+      'Deine Änderungen werden im Entwurfsordner gespeichert.',
+    Discard: 'Verwerfen',
+    'Keep editing': 'Weiter bearbeiten',
+    'Open drafts': 'Entwürfe öffnen',
+    'No drafts yet': 'Noch keine Entwürfe',
+    Empty: 'Leer'
   }
 }

@@ -1,5 +1,12 @@
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { formatError } from '@/lib/error'
+import DraftsButton from './DraftsButton'
+import {
+  collectCustomEmojisInText,
+  collectImetaTagsForUrls,
+  rehydrateDraftRuntime
+} from '@/lib/post-draft'
 import {
   createCommentDraftEvent,
   createHighlightDraftEvent,
@@ -7,24 +14,27 @@ import {
   createShortTextNoteDraftEvent,
   deleteDraftEventCache
 } from '@/lib/draft-event'
+import { minePow } from '@/lib/event'
+import { randomId } from '@/lib/utils'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { useNostr } from '@/providers/NostrProvider'
 import mediaUpload from '@/services/media-upload.service'
-import postEditorCache from '@/services/post-editor-cache.service'
-import threadService from '@/services/thread.service'
-import { TPollCreateData } from '@/types'
+import client from '@/services/client.service'
+import postDraftService from '@/services/post-draft.service'
+import { TPollCreateData, TPostTargetItem } from '@/types'
+import { TPostDraftUnsigned } from '@/types/post-draft'
+import { Content } from '@tiptap/react'
+import { CircleHelp, ImageUp, ListTodo, Lock, Settings, Smile, X } from 'lucide-react'
+import { Event, kinds, VerifiedEvent } from 'nostr-tools'
 import {
-  CircleHelp,
-  ImageUp,
-  ListTodo,
-  LoaderCircle,
-  Lock,
-  Settings,
-  Smile,
-  X
-} from 'lucide-react'
-import { Event, kinds } from 'nostr-tools'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import ExpressionPickerDialog from '../ExpressionPickerDialog'
@@ -35,47 +45,97 @@ import PostOptions from './PostOptions'
 import PostRelaySelector from './PostRelaySelector'
 import PostTextarea, { TPostTextareaHandle } from './PostTextarea'
 import Uploader from './Uploader'
-import { formatError } from '@/lib/error'
 
-export default function PostContent({
-  defaultContent = '',
-  parentStuff,
-  close,
-  openFrom,
-  highlightedText
-}: {
+export type TPostContentHandle = {
+  isDirty: () => boolean
+  saveDraft: () => Promise<TPostDraftUnsigned | undefined>
+  hasPersistedDraft: () => boolean
+}
+
+type Props = {
   defaultContent?: string
   parentStuff?: Event | string
   close: () => void
+  requestClose?: () => void
+  onOpenDrafts?: () => void
   openFrom?: string[]
   highlightedText?: string
-}) {
+  initialDraft?: TPostDraftUnsigned
+}
+
+const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
+  {
+    defaultContent = '',
+    parentStuff: parentStuffProp,
+    close,
+    requestClose,
+    onOpenDrafts,
+    openFrom,
+    highlightedText,
+    initialDraft
+  },
+  ref
+) {
   const { t } = useTranslation()
-  const { pubkey, publish, checkLogin } = useNostr()
+  const { pubkey, signEvent, checkLogin, account } = useNostr()
+
+  const initialParentStuff = useMemo<Event | string | undefined>(() => {
+    if (initialDraft?.parentEvent) return initialDraft.parentEvent
+    if (initialDraft?.parentEventCoordinate) return initialDraft.parentEventCoordinate
+    return parentStuffProp
+  }, [initialDraft, parentStuffProp])
+
+  const initialContent = useMemo<Content | undefined>(() => {
+    if (initialDraft) return initialDraft.tiptapJson as Content
+    return defaultContent
+  }, [initialDraft, defaultContent])
+
+  const draftIdRef = useRef<string>(initialDraft?.id ?? randomId())
+  const draftCreatedAtRef = useRef<number>(initialDraft?.createdAt ?? Date.now())
+  const hasPersistedRef = useRef<boolean>(!!initialDraft)
+
+  // Rehydrate runtime (imeta tags, custom emojis) before editor mounts content
+  const rehydrated = useRef(false)
+  if (initialDraft && !rehydrated.current) {
+    rehydrateDraftRuntime(initialDraft)
+    rehydrated.current = true
+  }
+
   const [text, setText] = useState('')
   const textareaRef = useRef<TPostTextareaHandle>(null)
-  const [posting, setPosting] = useState(false)
   const [uploadProgresses, setUploadProgresses] = useState<
     { file: File; progress: number; cancel: () => void }[]
   >([])
   const parentEvent = useMemo(
-    () => (parentStuff && typeof parentStuff !== 'string' ? parentStuff : undefined),
-    [parentStuff]
+    () =>
+      initialParentStuff && typeof initialParentStuff !== 'string'
+        ? initialParentStuff
+        : undefined,
+    [initialParentStuff]
   )
   const [showMoreOptions, setShowMoreOptions] = useState(false)
-  const [addClientTag, setAddClientTag] = useState(false)
-  const [mentions, setMentions] = useState<string[]>([])
-  const [isNsfw, setIsNsfw] = useState(false)
-  const [isPoll, setIsPoll] = useState(false)
-  const [isProtectedEvent, setIsProtectedEvent] = useState(false)
-  const [additionalRelayUrls, setAdditionalRelayUrls] = useState<string[]>([])
-  const [pollCreateData, setPollCreateData] = useState<TPollCreateData>({
-    isMultipleChoice: false,
-    options: ['', ''],
-    endsAt: undefined,
-    relays: []
-  })
-  const [minPow, setMinPow] = useState(0)
+  const [addClientTag, setAddClientTag] = useState(initialDraft?.addClientTag ?? false)
+  const [mentions, setMentions] = useState<string[]>(initialDraft?.mentions ?? [])
+  const [isNsfw, setIsNsfw] = useState(initialDraft?.isNsfw ?? false)
+  const [isPoll, setIsPoll] = useState(initialDraft?.isPoll ?? false)
+  const [isProtectedEvent, setIsProtectedEvent] = useState(
+    initialDraft?.isProtectedEvent ?? false
+  )
+  const [additionalRelayUrls, setAdditionalRelayUrls] = useState<string[]>(
+    initialDraft?.additionalRelayUrls ?? []
+  )
+  const [relayTargetItems, setRelayTargetItems] = useState<TPostTargetItem[]>(
+    initialDraft?.postTargetItems ?? []
+  )
+  const [pollCreateData, setPollCreateData] = useState<TPollCreateData>(
+    initialDraft?.pollCreateData ?? {
+      isMultipleChoice: false,
+      options: ['', ''],
+      endsAt: undefined,
+      relays: []
+    }
+  )
+  const [minPow, setMinPow] = useState(initialDraft?.minPow ?? 0)
   const userDismissedProtected = useRef(false)
   const handleProtectedSuggestionChange = useCallback((suggested: boolean) => {
     if (suggested && !userDismissedProtected.current) {
@@ -88,12 +148,14 @@ export default function PostContent({
     }
     setIsProtectedEvent(checked)
   }, [])
-  const isFirstRender = useRef(true)
+
+  const hasContent =
+    !!text.trim() || (isPoll && pollCreateData.options.some((o) => o.trim()))
+
   const canPost = useMemo(() => {
     return (
       !!pubkey &&
       (!!text || !!highlightedText) &&
-      !posting &&
       !uploadProgresses.length &&
       (!isPoll || pollCreateData.options.filter((option) => !!option.trim()).length >= 2) &&
       (!isProtectedEvent || additionalRelayUrls.length > 0)
@@ -102,7 +164,6 @@ export default function PostContent({
     pubkey,
     text,
     highlightedText,
-    posting,
     uploadProgresses,
     isPoll,
     pollCreateData,
@@ -110,51 +171,157 @@ export default function PostContent({
     additionalRelayUrls
   ])
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      const cachedSettings = postEditorCache.getPostSettingsCache({
-        defaultContent,
-        parentStuff
-      })
-      if (cachedSettings) {
-        setIsNsfw(cachedSettings.isNsfw ?? false)
-        setIsPoll(cachedSettings.isPoll ?? false)
-        setPollCreateData(
-          cachedSettings.pollCreateData ?? {
-            isMultipleChoice: false,
-            options: ['', ''],
-            endsAt: undefined,
-            relays: []
-          }
-        )
-        setAddClientTag(cachedSettings.addClientTag ?? false)
-      }
-      return
+  const buildUnsignedDraft = useCallback((): TPostDraftUnsigned | undefined => {
+    if (!pubkey) return undefined
+    const tiptapJson = (textareaRef.current?.getJSON() as unknown) ?? null
+    const parentEventObj = parentEvent
+    const parentCoord =
+      typeof initialParentStuff === 'string' ? initialParentStuff : undefined
+    return {
+      id: draftIdRef.current,
+      pubkey,
+      status: 'draft',
+      createdAt: draftCreatedAtRef.current,
+      updatedAt: Date.now(),
+      tiptapJson,
+      text,
+      mentions,
+      isNsfw,
+      isPoll,
+      pollCreateData,
+      addClientTag,
+      isProtectedEvent,
+      additionalRelayUrls,
+      postTargetItems: relayTargetItems,
+      minPow,
+      parentEvent: parentEventObj,
+      parentEventCoordinate: parentCoord,
+      defaultContent: defaultContent || undefined,
+      highlightedText,
+      openFrom,
+      imetaTags: collectImetaTagsForUrls(text),
+      customEmojis: collectCustomEmojisInText(text)
     }
-    postEditorCache.setPostSettingsCache(
-      { defaultContent, parentStuff },
-      {
-        isNsfw,
+  }, [
+    pubkey,
+    text,
+    mentions,
+    isNsfw,
+    isPoll,
+    pollCreateData,
+    addClientTag,
+    isProtectedEvent,
+    additionalRelayUrls,
+    relayTargetItems,
+    minPow,
+    parentEvent,
+    initialParentStuff,
+    defaultContent,
+    highlightedText,
+    openFrom
+  ])
+
+  const saveDraft = useCallback(async (): Promise<TPostDraftUnsigned | undefined> => {
+    if (!pubkey) return undefined
+    if (!hasContent) {
+      // Editing an existing draft and clearing all its content means discard it,
+      // otherwise the now-emptied draft would keep its stale previous content.
+      if (hasPersistedRef.current) {
+        await postDraftService.delete(draftIdRef.current)
+        hasPersistedRef.current = false
+      }
+      return undefined
+    }
+    const record = buildUnsignedDraft()
+    if (!record) return undefined
+    try {
+      const draftEvent = await createDraftEvent({
+        parentStuff: initialParentStuff,
+        highlightedText,
+        text,
+        mentions,
         isPoll,
         pollCreateData,
-        addClientTag
-      }
+        pubkey,
+        addClientTag,
+        isProtectedEvent,
+        isNsfw
+      })
+      record.previewEvent = {
+        ...draftEvent,
+        id: record.id,
+        pubkey,
+        sig: ''
+      } as Event
+    } catch {
+      // best-effort preview; fall back to plain text rendering in the list
+    }
+    const saved = await postDraftService.saveDraft(record)
+    hasPersistedRef.current = true
+    return saved
+  }, [
+    pubkey,
+    hasContent,
+    buildUnsignedDraft,
+    initialParentStuff,
+    highlightedText,
+    text,
+    mentions,
+    isPoll,
+    pollCreateData,
+    addClientTag,
+    isProtectedEvent,
+    isNsfw
+  ])
+
+  const isDirty = useCallback(() => {
+    if (!hasContent) return false
+    if (!initialDraft) return true
+    // Compare against initial — cheap heuristic on text + settings
+    return (
+      text !== initialDraft.text ||
+      isNsfw !== initialDraft.isNsfw ||
+      isPoll !== initialDraft.isPoll ||
+      addClientTag !== initialDraft.addClientTag ||
+      isProtectedEvent !== initialDraft.isProtectedEvent ||
+      minPow !== initialDraft.minPow ||
+      JSON.stringify(mentions) !== JSON.stringify(initialDraft.mentions) ||
+      JSON.stringify(pollCreateData) !== JSON.stringify(initialDraft.pollCreateData) ||
+      JSON.stringify(additionalRelayUrls) !== JSON.stringify(initialDraft.additionalRelayUrls) ||
+      JSON.stringify(relayTargetItems) !== JSON.stringify(initialDraft.postTargetItems ?? [])
     )
-  }, [defaultContent, parentStuff, isNsfw, isPoll, pollCreateData, addClientTag])
+  }, [
+    hasContent,
+    initialDraft,
+    text,
+    isNsfw,
+    isPoll,
+    addClientTag,
+    isProtectedEvent,
+    minPow,
+    mentions,
+    pollCreateData,
+    additionalRelayUrls,
+    relayTargetItems
+  ])
+
+  useImperativeHandle(
+    ref,
+    () => ({ isDirty, saveDraft, hasPersistedDraft: () => hasPersistedRef.current }),
+    [isDirty, saveDraft]
+  )
 
   const postingRef = useRef(false)
 
   const post = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
     checkLogin(async () => {
-      if (!canPost || !pubkey || postingRef.current) return
-
+      if (!canPost || !pubkey || !account || account.signerType === 'npub') return
+      if (postingRef.current) return
       postingRef.current = true
-      setPosting(true)
       try {
         const draftEvent = await createDraftEvent({
-          parentStuff,
+          parentStuff: initialParentStuff,
           highlightedText,
           text,
           mentions,
@@ -167,36 +334,56 @@ export default function PostContent({
         })
 
         const _additionalRelayUrls = [...additionalRelayUrls]
-        if (parentStuff && typeof parentStuff === 'string') {
+        if (initialParentStuff && typeof initialParentStuff === 'string') {
           _additionalRelayUrls.push(...getDefaultRelayUrls())
         }
 
-        const newEvent = await publish(draftEvent, {
+        const publishOptions = {
           specifiedRelayUrls: isProtectedEvent ? additionalRelayUrls : undefined,
           additionalRelayUrls: isPoll ? pollCreateData.relays : _additionalRelayUrls,
           minPow
-        })
-        postEditorCache.clearPostCache({ defaultContent, parentStuff })
+        }
+
+        let signed: VerifiedEvent
+        if (minPow > 0) {
+          const mined = await minePow({ ...draftEvent, pubkey }, minPow)
+          signed = await signEvent(mined)
+        } else {
+          signed = await signEvent(draftEvent)
+        }
+
         deleteDraftEventCache(draftEvent)
-        threadService.addRepliesToThread([newEvent])
-        toast.success(t('Post successful'), { duration: 2000 })
+
+        // Resolve the concrete relay set now (needs the user's relay context) and
+        // persist it with the draft, so a background/interrupted resend can target
+        // the exact same relays without re-resolving.
+        const targetRelays = await client.determineTargetRelays(signed, publishOptions)
+
+        await postDraftService.enqueue({
+          id: draftIdRef.current,
+          pubkey,
+          createdAt: draftCreatedAtRef.current,
+          signedEvent: signed,
+          targetRelays,
+          parentEvent,
+          parentEventCoordinate:
+            typeof initialParentStuff === 'string' ? initialParentStuff : undefined,
+          highlightedText
+        })
         close()
       } catch (error) {
         const errors = formatError(error)
         errors.forEach((err) => {
           toast.error(`${t('Failed to post')}: ${err}`, { duration: 10_000 })
         })
-        return
       } finally {
-        setPosting(false)
         postingRef.current = false
       }
     })
   }
 
   const handlePollToggle = () => {
-    if (parentStuff) return
-
+    if (initialParentStuff) return
     setIsPoll((prev) => !prev)
   }
 
@@ -214,9 +401,15 @@ export default function PostContent({
     setUploadProgresses((prev) => prev.filter((item) => item.file !== file))
   }
 
+  // Keep mentions in sync with initialDraft load
+  useEffect(() => {
+    if (initialDraft) {
+      setMentions(initialDraft.mentions ?? [])
+    }
+  }, [initialDraft])
+
   return (
     <div className="pb-2">
-
       {uploadProgresses.length > 0 && (
         <div className="space-y-2 px-5 pb-3 sm:px-6">
           {uploadProgresses.map(({ file, progress, cancel }, index) => (
@@ -259,8 +452,7 @@ export default function PostContent({
         ref={textareaRef}
         text={text}
         setText={setText}
-        defaultContent={defaultContent}
-        parentStuff={parentStuff}
+        initialContent={initialContent}
         onSubmit={() => post()}
         className={isPoll ? 'min-h-20' : 'min-h-52'}
         onUploadStart={handleUploadStart}
@@ -270,16 +462,22 @@ export default function PostContent({
           highlightedText ? t('Write your thoughts about this highlight...') : undefined
         }
         topRightActions={
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!canPost}
-            onClick={post}
-            className="px-4 text-sm font-semibold shadow-sm"
-          >
-            {posting && <LoaderCircle className="animate-spin" />}
-            {parentStuff ? (highlightedText ? t('Publish Highlight') : t('Reply')) : t('Post')}
-          </Button>
+          <div className="flex items-center gap-1">
+            <DraftsButton onClick={() => onOpenDrafts?.()} />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!canPost}
+              onClick={post}
+              className="px-4 text-sm font-semibold shadow-sm"
+            >
+              {initialParentStuff
+                ? highlightedText
+                  ? t('Publish Highlight')
+                  : t('Reply')
+                : t('Post')}
+            </Button>
+          </div>
         }
       />
 
@@ -329,6 +527,8 @@ export default function PostContent({
               setAdditionalRelayUrls={setAdditionalRelayUrls}
               parentEvent={parentEvent}
               openFrom={openFrom}
+              initialItems={initialDraft?.postTargetItems}
+              onItemsChange={setRelayTargetItems}
             />
           </div>
         </div>
@@ -372,7 +572,7 @@ export default function PostContent({
               <Smile />
             </Button>
           </ExpressionPickerDialog>
-          {!parentStuff && (
+          {!initialParentStuff && (
             <Button
               variant="ghost"
               size="icon"
@@ -406,7 +606,7 @@ export default function PostContent({
               className="text-muted-foreground hover:text-foreground"
               onClick={(e) => {
                 e.stopPropagation()
-                close()
+                ;(requestClose ?? close)()
               }}
             >
               {t('Cancel')}
@@ -417,8 +617,11 @@ export default function PostContent({
               onClick={post}
               className="px-5 font-semibold shadow-sm"
             >
-              {posting && <LoaderCircle className="animate-spin" />}
-              {parentStuff ? (highlightedText ? t('Publish Highlight') : t('Reply')) : t('Post')}
+              {initialParentStuff
+                ? highlightedText
+                  ? t('Publish Highlight')
+                  : t('Reply')
+                : t('Post')}
             </Button>
           </div>
         </div>
@@ -429,7 +632,7 @@ export default function PostContent({
           <div className="h-px bg-border" />
           <div className="px-5 py-3 sm:px-6">
             <PostOptions
-              posting={posting}
+              posting={false}
               show={showMoreOptions}
               addClientTag={addClientTag}
               setAddClientTag={setAddClientTag}
@@ -443,7 +646,9 @@ export default function PostContent({
       )}
     </div>
   )
-}
+})
+
+export default PostContent
 
 async function createDraftEvent({
   parentStuff,

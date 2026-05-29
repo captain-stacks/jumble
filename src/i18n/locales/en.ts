@@ -1009,6 +1009,16 @@ export default {
     'Show thread context': 'Show thread context',
     'Hide thread context': 'Hide thread context',
     Enable: 'Enable',
-    Upload: 'Upload'
+    Upload: 'Upload',
+    Drafts: 'Drafts',
+    Failed: 'Failed',
+    'Save as draft?': 'Save as draft?',
+    'Your changes will be saved to the drafts box.':
+      'Your changes will be saved to the drafts box.',
+    Discard: 'Discard',
+    'Keep editing': 'Keep editing',
+    'Open drafts': 'Open drafts',
+    'No drafts yet': 'No drafts yet',
+    Empty: 'Empty'
   }
 }

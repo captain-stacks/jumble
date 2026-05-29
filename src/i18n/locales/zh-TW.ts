@@ -951,6 +951,15 @@ export default {
     'Show thread context': '展開對話上下文',
     'Hide thread context': '收起對話上下文',
     Enable: '啟用',
-    Upload: '上傳'
+    Upload: '上傳',
+    Drafts: '草稿',
+    Failed: '失敗',
+    'Save as draft?': '儲存為草稿？',
+    'Your changes will be saved to the drafts box.': '你的變更將儲存到草稿匣。',
+    Discard: '捨棄',
+    'Keep editing': '繼續編輯',
+    'Open drafts': '開啟草稿',
+    'No drafts yet': '尚無草稿',
+    Empty: '空'
   }
 }

@@ -991,6 +991,15 @@ export default {
     'Show thread context': 'थ्रेड संदर्भ दिखाएं',
     'Hide thread context': 'थ्रेड संदर्भ छिपाएं',
     Enable: 'सक्षम करें',
-    Upload: 'अपलोड'
+    Upload: 'अपलोड',
+    Drafts: 'ड्राफ़्ट',
+    Failed: 'विफल',
+    'Save as draft?': 'ड्राफ़्ट के रूप में सहेजें?',
+    'Your changes will be saved to the drafts box.': 'आपके बदलाव ड्राफ़्ट बॉक्स में सहेजे जाएंगे।',
+    Discard: 'खारिज करें',
+    'Keep editing': 'संपादन जारी रखें',
+    'Open drafts': 'ड्राफ़्ट खोलें',
+    'No drafts yet': 'अभी कोई ड्राफ़्ट नहीं',
+    Empty: 'खाली'
   }
 }

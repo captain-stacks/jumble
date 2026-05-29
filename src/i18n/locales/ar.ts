@@ -975,6 +975,15 @@ export default {
     'Show thread context': 'إظهار سياق المحادثة',
     'Hide thread context': 'إخفاء سياق المحادثة',
     Enable: 'تفعيل',
-    Upload: 'رفع'
+    Upload: 'رفع',
+    Drafts: 'المسودات',
+    Failed: 'فشل',
+    'Save as draft?': 'حفظ كمسودة؟',
+    'Your changes will be saved to the drafts box.': 'سيتم حفظ تغييراتك في صندوق المسودات.',
+    Discard: 'تجاهل',
+    'Keep editing': 'متابعة التحرير',
+    'Open drafts': 'فتح المسودات',
+    'No drafts yet': 'لا توجد مسودات بعد',
+    Empty: 'فارغ'
   }
 }

@@ -998,6 +998,16 @@ export default {
     'Show thread context': 'Mostrar contexto da conversa',
     'Hide thread context': 'Ocultar contexto da conversa',
     Enable: 'Ativar',
-    Upload: 'Carregar'
+    Upload: 'Carregar',
+    Drafts: 'Rascunhos',
+    Failed: 'Falhou',
+    'Save as draft?': 'Guardar como rascunho?',
+    'Your changes will be saved to the drafts box.':
+      'As tuas alterações serão guardadas na caixa de rascunhos.',
+    Discard: 'Descartar',
+    'Keep editing': 'Continuar a editar',
+    'Open drafts': 'Abrir rascunhos',
+    'No drafts yet': 'Ainda não há rascunhos',
+    Empty: 'Vazio'
   }
 }

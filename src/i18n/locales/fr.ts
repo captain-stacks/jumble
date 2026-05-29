@@ -1005,6 +1005,16 @@ export default {
     'Show thread context': 'Afficher le contexte du fil',
     'Hide thread context': 'Masquer le contexte du fil',
     Enable: 'Activer',
-    Upload: 'Téléverser'
+    Upload: 'Téléverser',
+    Drafts: 'Brouillons',
+    Failed: 'Échec',
+    'Save as draft?': 'Enregistrer comme brouillon ?',
+    'Your changes will be saved to the drafts box.':
+      'Vos modifications seront enregistrées dans les brouillons.',
+    Discard: 'Abandonner',
+    'Keep editing': 'Continuer la modification',
+    'Open drafts': 'Ouvrir les brouillons',
+    'No drafts yet': "Aucun brouillon pour l'instant",
+    Empty: 'Vide'
   }
 }

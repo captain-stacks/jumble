@@ -1,5 +1,6 @@
 import { POMEGRANATE_CENTRAL_URL, POMEGRANATE_OPERATOR_URLS } from '@/constants'
 import { isValidPubkey } from '@/lib/pubkey'
+import { randomId } from '@/lib/utils'
 import {
   aggregateSecretKeyShards,
   decodeShard,
@@ -208,7 +209,7 @@ class PomegranateService {
       throw new Error('At least 2 operators are required')
     }
     const threshold = Math.ceil((operators.length * 7) / 12)
-    const session = crypto.randomUUID()
+    const session = randomId()
 
     const secretKey = generateSecretKey()
     const masterSk = BigInt('0x' + bytesToHex(secretKey))

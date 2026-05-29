@@ -682,6 +682,12 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
     return event as VerifiedEvent
   }
 
+  const publishSignedEvent = async (event: Event, options: TPublishOptions = {}) => {
+    const relays = await client.determineTargetRelays(event, options)
+    await client.publishEvent(relays, event)
+    return event
+  }
+
   const publish = async (
     draftEvent: TDraftEvent,
     { minPow = 0, ...options }: TPublishOptions = {}
@@ -712,10 +718,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const relays = await client.determineTargetRelays(event, options)
-
-    await client.publishEvent(relays, event)
-    return event
+    return publishSignedEvent(event, options)
   }
 
   const attemptDelete = async (targetEvent: Event) => {

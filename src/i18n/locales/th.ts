@@ -974,6 +974,16 @@ export default {
     'Show thread context': 'แสดงบริบทของเธรด',
     'Hide thread context': 'ซ่อนบริบทของเธรด',
     Enable: 'เปิดใช้งาน',
-    Upload: 'อัปโหลด'
+    Upload: 'อัปโหลด',
+    Drafts: 'ฉบับร่าง',
+    Failed: 'ล้มเหลว',
+    'Save as draft?': 'บันทึกเป็นฉบับร่าง?',
+    'Your changes will be saved to the drafts box.':
+      'การเปลี่ยนแปลงของคุณจะถูกบันทึกไว้ในกล่องฉบับร่าง',
+    Discard: 'ละทิ้ง',
+    'Keep editing': 'แก้ไขต่อ',
+    'Open drafts': 'เปิดฉบับร่าง',
+    'No drafts yet': 'ยังไม่มีฉบับร่าง',
+    Empty: 'ว่างเปล่า'
   }
 }

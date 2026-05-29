@@ -981,6 +981,15 @@ export default {
     'Show thread context': '스레드 맥락 보기',
     'Hide thread context': '스레드 맥락 숨기기',
     Enable: '사용',
-    Upload: '업로드'
+    Upload: '업로드',
+    Drafts: '임시저장',
+    Failed: '실패',
+    'Save as draft?': '임시저장하시겠어요?',
+    'Your changes will be saved to the drafts box.': '변경 사항이 임시저장함에 저장됩니다.',
+    Discard: '버리기',
+    'Keep editing': '계속 편집',
+    'Open drafts': '임시저장 열기',
+    'No drafts yet': '임시저장된 항목이 없습니다',
+    Empty: '비어 있음'
   }
 }

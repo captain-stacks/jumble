@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { parseEditorJsonToText } from '@/lib/tiptap'
 import { cn } from '@/lib/utils'
 import customEmojiService from '@/services/custom-emoji.service'
-import postEditorCache from '@/services/post-editor-cache.service'
 import { TEmoji } from '@/types'
 import Document from '@tiptap/extension-document'
 import { HardBreak } from '@tiptap/extension-hard-break'
@@ -11,8 +10,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
 import Text from '@tiptap/extension-text'
 import { TextSelection } from '@tiptap/pm/state'
-import { EditorContent, useEditor } from '@tiptap/react'
-import { Event } from 'nostr-tools'
+import { Content, EditorContent, useEditor } from '@tiptap/react'
 import { Dispatch, forwardRef, SetStateAction, useImperativeHandle, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ClipboardAndDropHandler } from './ClipboardAndDropHandler'
@@ -26,6 +24,7 @@ export type TPostTextareaHandle = {
   appendText: (text: string, addNewline?: boolean) => void
   insertText: (text: string) => void
   insertEmoji: (emoji: string | TEmoji) => void
+  getJSON: () => unknown
 }
 
 const PostTextarea = forwardRef<
@@ -33,8 +32,7 @@ const PostTextarea = forwardRef<
   {
     text: string
     setText: Dispatch<SetStateAction<string>>
-    defaultContent?: string
-    parentStuff?: Event | string
+    initialContent?: Content
     onSubmit?: () => void
     className?: string
     onUploadStart?: (file: File, cancel: () => void) => void
@@ -48,8 +46,7 @@ const PostTextarea = forwardRef<
     {
       text = '',
       setText,
-      defaultContent,
-      parentStuff,
+      initialContent,
       onSubmit,
       className,
       onUploadStart,
@@ -105,10 +102,9 @@ const PostTextarea = forwardRef<
           return parseEditorJsonToText(content.toJSON())
         }
       },
-      content: postEditorCache.getPostContentCache({ defaultContent, parentStuff }),
+      content: initialContent,
       onUpdate(props) {
         setText(parseEditorJsonToText(props.editor.getJSON()))
-        postEditorCache.setPostContentCache({ defaultContent, parentStuff }, props.editor.getJSON())
       },
       onCreate(props) {
         setText(parseEditorJsonToText(props.editor.getJSON()))
@@ -153,7 +149,8 @@ const PostTextarea = forwardRef<
             editor.chain().insertContent(emojiNode).run()
           }
         }
-      }
+      },
+      getJSON: () => editor?.getJSON() ?? null
     }))
 
     if (!editor) {

@@ -15,6 +15,8 @@ import {
 } from 'react'
 import BackgroundAudio from './components/BackgroundAudio'
 import BottomNavigationBar from './components/BottomNavigationBar'
+import DraftBox from './components/DraftBox'
+import DraftEditorHost from './components/DraftBox/DraftEditorHost'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import { NotificationProvider } from './providers/NotificationProvider'
@@ -322,6 +324,8 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               ))}
               {!bottomBarHidden && <BottomNavigationBar />}
               <TooManyRelaysAlertDialog />
+              <DraftBox />
+              <DraftEditorHost />
               </div>
             </NotificationProvider>
           </CurrentRelaysProvider>
@@ -392,6 +396,8 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               </div>
               <TooManyRelaysAlertDialog />
               <BackgroundAudio className="fixed bottom-20 end-0 z-50 w-80 overflow-hidden rounded-s-full rounded-e-none border shadow-lg" />
+              <DraftBox />
+              <DraftEditorHost />
             </NotificationProvider>
           </CurrentRelaysProvider>
         </SecondaryPageContext.Provider>
@@ -471,6 +477,8 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
             </div>
             <TooManyRelaysAlertDialog />
             <BackgroundAudio className="fixed bottom-20 end-0 z-50 w-80 overflow-hidden rounded-s-full rounded-e-none border shadow-lg" />
+            <DraftBox />
+            <DraftEditorHost />
           </NotificationProvider>
         </CurrentRelaysProvider>
       </SecondaryPageContext.Provider>

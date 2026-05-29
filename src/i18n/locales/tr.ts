@@ -997,6 +997,16 @@ export default {
     'Show thread context': 'Konu bağlamını göster',
     'Hide thread context': 'Konu bağlamını gizle',
     Enable: 'Etkinleştir',
-    Upload: 'Yükle'
+    Upload: 'Yükle',
+    Drafts: 'Taslaklar',
+    Failed: 'Başarısız',
+    'Save as draft?': 'Taslak olarak kaydedilsin mi?',
+    'Your changes will be saved to the drafts box.':
+      'Değişiklikleriniz taslak kutusuna kaydedilecek.',
+    Discard: 'Vazgeç',
+    'Keep editing': 'Düzenlemeye devam et',
+    'Open drafts': 'Taslakları aç',
+    'No drafts yet': 'Henüz taslak yok',
+    Empty: 'Boş'
   }
 }

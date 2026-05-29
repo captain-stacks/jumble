@@ -996,6 +996,16 @@ export default {
     'Show thread context': 'Mostrar contexto del hilo',
     'Hide thread context': 'Ocultar contexto del hilo',
     Enable: 'Activar',
-    Upload: 'Subir'
+    Upload: 'Subir',
+    Drafts: 'Borradores',
+    Failed: 'Fallido',
+    'Save as draft?': '¿Guardar como borrador?',
+    'Your changes will be saved to the drafts box.':
+      'Tus cambios se guardarán en la caja de borradores.',
+    Discard: 'Descartar',
+    'Keep editing': 'Seguir editando',
+    'Open drafts': 'Abrir borradores',
+    'No drafts yet': 'Aún no hay borradores',
+    Empty: 'Vacío'
   }
 }

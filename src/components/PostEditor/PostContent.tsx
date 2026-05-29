@@ -468,6 +468,10 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
               type="submit"
               size="sm"
               disabled={!canPost}
+              // Don't let the press blur the editor: on mobile that dismisses the
+              // virtual keyboard and shifts the layout, so the first tap is eaten
+              // and the user has to tap "send" twice. Keeping focus fires post() now.
+              onMouseDown={(e) => e.preventDefault()}
               onClick={post}
               className="px-4 text-sm font-semibold shadow-sm"
             >

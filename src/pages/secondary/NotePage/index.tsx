@@ -9,6 +9,7 @@ import Nip05 from '@/components/Nip05'
 import Note from '@/components/Note'
 import NoteInteractions from '@/components/NoteInteractions'
 import NoteOptions from '@/components/NoteOptions'
+import RepostDescription from '@/components/NoteCard/RepostDescription'
 import ProtectedBadge from '@/components/ProtectedBadge'
 import StuffStats from '@/components/StuffStats'
 import TranslateButton from '@/components/TranslateButton'
@@ -19,7 +20,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ExtendedKind } from '@/constants'
-import { useFetchEvent } from '@/hooks'
+import { isRepostEvent, useFetchEvent, useRepostTarget } from '@/hooks'
 import { useAncestorChain } from '@/hooks/useThread'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import {
@@ -54,7 +55,16 @@ import NotFound from './NotFound'
 const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, index }, ref) => {
   const { t } = useTranslation()
   const { autoLoadProfilePicture } = useContentPolicy()
-  const { event, isFetching } = useFetchEvent(id)
+  const { event: fetchedEvent, isFetching } = useFetchEvent(id)
+  const isRepost = isRepostEvent(fetchedEvent)
+  const { targetEvent: repostTarget, isResolving: isResolvingRepostTarget } = useRepostTarget(
+    isRepost ? fetchedEvent : undefined
+  )
+  const event = isRepost ? (repostTarget ?? undefined) : fetchedEvent
+  const reposters = useMemo(
+    () => (isRepost && fetchedEvent ? [fetchedEvent.pubkey] : undefined),
+    [isRepost, fetchedEvent]
+  )
   const parentEventId = useMemo(() => getParentBech32Id(event), [event])
   const rootEventId = useMemo(() => getRootBech32Id(event), [event])
   const rootITag = useMemo(
@@ -112,7 +122,7 @@ const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, in
     if (!canExpand) setExpanded(false)
   }, [canExpand])
 
-  if (!event && isFetching) {
+  if (!event && (isFetching || isResolvingRepostTarget)) {
     return (
       <SecondaryPageLayout ref={layoutRef} index={index} title={t('Note')}>
         <div className="px-4 pt-3">
@@ -184,12 +194,13 @@ const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, in
             )}
         {canExpand && <ExpandThreadButton expanded={expanded} onToggle={handleToggleExpand} />}
         <div className={cn('relative px-4 pt-3', canExpand && 'pt-1')}>
+          {reposters && <RepostDescription reposters={reposters} />}
           <Note
             key={`note-${event.id}`}
             event={event}
             className="select-text"
             hideParentNotePreview
-            originalNoteId={id}
+            originalNoteId={isRepost ? undefined : id}
             showFull
           />
           <StuffStats

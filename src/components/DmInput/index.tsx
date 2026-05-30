@@ -665,6 +665,12 @@ export default function DmInput({
       if (files.length > 0) {
         e.preventDefault()
         uploadFiles(files)
+        return
+      }
+      const text = e.clipboardData.getData('text/plain')
+      if (text) {
+        e.preventDefault()
+        document.execCommand('insertText', false, text)
       }
     },
     [uploadFiles]

@@ -524,6 +524,7 @@ export default function DmInput({
   }, [serializeContent, detectAutocomplete])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.nativeEvent.isComposing) return
     if (mentionQuery !== null && mentionResults.length > 0) {
       if (e.key === 'ArrowUp') {
         e.preventDefault()

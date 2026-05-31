@@ -147,25 +147,45 @@ const PostTextarea = forwardRef<
 
     useImperativeHandle(ref, () => ({
       appendText: (text: string, addNewline = false) => {
-        if (editor) {
-          let chain = editor
-            .chain()
-            .focus()
-            .command(({ tr, dispatch }) => {
-              if (dispatch) {
-                const endPos = tr.doc.content.size
-                const selection = TextSelection.create(tr.doc, endPos)
-                tr.setSelection(selection)
-                dispatch(tr)
+        if (!editor || !text) return
+        editor
+          .chain()
+          .focus()
+          .command(({ tr, state, dispatch }) => {
+            if (!dispatch) return true
+            const doc = tr.doc
+            const hardBreakType = state.schema.nodes.hardBreak
+
+            // Land inside the LAST textblock, at the end of its content. Using
+            // doc.content.size directly would be a between-block position and
+            // insertContent there would mint a new paragraph for the URL,
+            // showing a paragraph-margin gap above it.
+            let lastTextblockEnd = -1
+            let lastIsEmpty = false
+            let lastEndsWithBr = false
+            let offset = 0
+            doc.forEach((node) => {
+              if (node.isTextblock) {
+                lastTextblockEnd = offset + 1 + node.content.size
+                lastIsEmpty = node.content.size === 0
+                lastEndsWithBr = node.lastChild?.type === hardBreakType
               }
-              return true
+              offset += node.nodeSize
             })
-            .insertContent(text)
-          if (addNewline) {
-            chain = chain.setHardBreak()
-          }
-          chain.run()
-        }
+
+            if (lastTextblockEnd === -1) return true
+
+            const nodes = []
+            if (!lastIsEmpty && !lastEndsWithBr) nodes.push(hardBreakType.create())
+            nodes.push(state.schema.text(text))
+            if (addNewline) nodes.push(hardBreakType.create())
+            tr.insert(lastTextblockEnd, nodes)
+            const insertedSize = nodes.reduce((acc, n) => acc + n.nodeSize, 0)
+            tr.setSelection(TextSelection.create(tr.doc, lastTextblockEnd + insertedSize))
+            dispatch(tr)
+            return true
+          })
+          .run()
       },
       insertText: (text: string) => {
         if (editor) {

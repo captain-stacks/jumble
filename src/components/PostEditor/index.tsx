@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/dialog'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { toNote } from '@/lib/link'
+import { useSecondaryPage } from '@/PageManager'
 import { useDraftBox } from '@/providers/DraftBoxProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
@@ -52,6 +54,7 @@ export default function PostEditor({
   const { isSmallScreen } = useScreenSize()
   const { pubkey } = useNostr()
   const { openDraftBox, startEditingDraft } = useDraftBox()
+  const { push } = useSecondaryPage()
   const contentRef = useRef<TPostContentHandle>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   // When this editor is opened straight from the drafts box, the drafts drawer's
@@ -114,6 +117,13 @@ export default function PostEditor({
     runWithSaveGuard(goToDraftBox)
   }
 
+  const navigateToParent = (parentEvent: Event) => {
+    runWithSaveGuard(() => {
+      closeWithoutConfirm()
+      push(toNote(parentEvent))
+    })
+  }
+
   const closeEditor = closeWithoutConfirm
 
   const handleOpenChange = (next: boolean) => {
@@ -171,6 +181,7 @@ export default function PostEditor({
         close={closeEditor}
         requestClose={() => setOpen(false)}
         onOpenDrafts={openDraftsFromEditor}
+        onParentClick={navigateToParent}
         openFrom={openFrom}
         highlightedText={highlightedText}
         initialDraft={resolvedInitialDraft}

@@ -58,6 +58,7 @@ type Props = {
   close: () => void
   requestClose?: () => void
   onOpenDrafts?: () => void
+  onParentClick?: (parentEvent: Event) => void
   openFrom?: string[]
   highlightedText?: string
   initialDraft?: TPostDraftUnsigned
@@ -70,6 +71,7 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
     close,
     requestClose,
     onOpenDrafts,
+    onParentClick,
     openFrom,
     highlightedText,
     initialDraft
@@ -443,7 +445,11 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
 
       {parentEvent && (
         <>
-          <ParentEventPreview parentEvent={parentEvent} highlightedText={highlightedText} />
+          <ParentEventPreview
+            parentEvent={parentEvent}
+            highlightedText={highlightedText}
+            onClick={onParentClick ? () => onParentClick(parentEvent) : undefined}
+          />
           <div className="h-px bg-border" />
         </>
       )}

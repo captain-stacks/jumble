@@ -5,10 +5,12 @@ import { useEffect, useRef, useState } from 'react'
 
 export default function ParentEventPreview({
   parentEvent,
-  highlightedText
+  highlightedText,
+  onClick
 }: {
   parentEvent: Event
   highlightedText?: string
+  onClick?: () => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [showTopFade, setShowTopFade] = useState(false)
@@ -38,7 +40,16 @@ export default function ParentEventPreview({
 
   return (
     <div className="relative">
-      <div ref={scrollRef} className="max-h-64 overflow-y-auto">
+      <div
+        ref={scrollRef}
+        className={cn(
+          'max-h-64 overflow-y-auto',
+          onClick && 'cursor-pointer hover:bg-accent/30'
+        )}
+        onClick={onClick}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+      >
         <div className="pointer-events-none px-5 py-3 sm:px-6">
           {highlightedText ? (
             <div className="flex gap-4">

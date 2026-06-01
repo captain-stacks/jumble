@@ -11,6 +11,7 @@ class BlossomService {
       resolve: (url: string) => void
       promise: Promise<string>
       tried: Set<string>
+      url: string
       validUrl?: string
     }
   >()
@@ -22,10 +23,19 @@ class BlossomService {
     return BlossomService.instance
   }
 
+  peekValidUrl(url: string, pubkey: string): string {
+    const cache = this.cacheMap.get(url)
+    if (cache?.validUrl) {
+      return cache.validUrl
+    }
+    const localUrl = localBlossomCache.rewriteUrl(url, pubkey)
+    return localUrl ?? url
+  }
+
   async getValidUrl(url: string, pubkey: string): Promise<string> {
     const cache = this.cacheMap.get(url)
     if (cache) {
-      return cache.validUrl ?? cache.promise
+      return cache.validUrl ?? cache.url
     }
 
     let resolveFunc: (url: string) => void
@@ -33,14 +43,15 @@ class BlossomService {
       resolveFunc = resolve
     })
     const tried = new Set<string>()
-    this.cacheMap.set(url, { pubkey, resolve: resolveFunc!, promise, tried })
 
     const localUrl = localBlossomCache.rewriteUrl(url, pubkey)
     if (localUrl) {
+      this.cacheMap.set(url, { pubkey, resolve: resolveFunc!, promise, tried, url: localUrl })
       tried.add(localBlossomCache.hostname)
       return localUrl
     }
 
+    this.cacheMap.set(url, { pubkey, resolve: resolveFunc!, promise, tried, url })
     try {
       const u = new URL(url)
       tried.add(u.hostname)
@@ -111,6 +122,7 @@ class BlossomService {
         resolve: () => {},
         promise: Promise.resolve(successUrl),
         tried: new Set<string>(),
+        url: successUrl,
         validUrl: successUrl
       })
       return

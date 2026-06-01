@@ -231,6 +231,7 @@ export default function Content({
                 className="mt-2"
                 key={index}
                 src={node.data}
+                pubkey={mediaInfo?.pubkey ?? event?.pubkey}
                 mustLoad={effectiveMustLoad}
                 dim={mediaInfo?.dim}
               />

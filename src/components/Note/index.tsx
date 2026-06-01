@@ -124,7 +124,7 @@ export default function Note({
       </>
     )
   } else if (event.kind === ExtendedKind.VOICE || event.kind === ExtendedKind.VOICE_COMMENT) {
-    content = <AudioPlayer className="mt-2" src={event.content} />
+    content = <AudioPlayer className="mt-2" src={event.content} pubkey={event.pubkey} />
   } else if (event.kind === ExtendedKind.PICTURE) {
     content = <PictureNote className="mt-2" event={event} />
   } else if (

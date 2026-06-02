@@ -27,7 +27,7 @@ class DmService {
   private sendingStatusListeners = new Set<() => void>()
   private pendingPublishData = new Map<
     string,
-    { giftWrap: Event; selfGiftWrap: Event; recipientDmRelays: string[] }
+    { recipientGiftWraps: Event[]; selfGiftWraps: Event[]; recipientDmRelays: string[] }
   >()
   private syncRequestListeners = new Set<(event: Event) => void>()
   private encryptionKeyChangedListeners = new Set<(newPubkey: string) => void>()
@@ -157,18 +157,12 @@ class DmService {
     try {
       const accountPubkey = this.currentAccountPubkey
       const myDmRelays = accountPubkey ? await client.fetchDmRelays(accountPubkey) : []
-      const [recipientResult, selfResult] = await Promise.allSettled([
-        client.publishEvent(data.recipientDmRelays, data.giftWrap),
+      await Promise.all([
+        this.publishGiftWraps(data.recipientDmRelays, data.recipientGiftWraps, true),
         myDmRelays.length > 0
-          ? client.publishEvent(myDmRelays, data.selfGiftWrap)
+          ? this.publishGiftWraps(myDmRelays, data.selfGiftWraps, false)
           : Promise.resolve()
       ])
-      if (selfResult.status === 'rejected') {
-        console.warn('[DM] selfGiftWrap publish failed:', selfResult.reason)
-      }
-      if (recipientResult.status === 'rejected') {
-        throw recipientResult.reason
-      }
 
       this.sendingStatuses.set(messageId, 'sent')
       this.pendingPublishData.delete(messageId)
@@ -182,6 +176,29 @@ class DmService {
       this.sendingStatuses.set(messageId, 'failed')
       this.emitSendingStatusChanged()
     }
+  }
+
+  /**
+   * Publishes a set of dual-format gift wraps to a relay set. Index 0 is the current
+   * (identity-signed) format; index 1+ are legacy compatibility copies. When
+   * `requirePrimary` is true, a failure of the current-format wrap is rethrown (so the
+   * message is marked failed); legacy-format failures are only logged.
+   */
+  private async publishGiftWraps(
+    relays: string[],
+    giftWraps: Event[],
+    requirePrimary: boolean
+  ): Promise<void> {
+    const results = await Promise.allSettled(
+      giftWraps.map((giftWrap) => client.publishEvent(relays, giftWrap))
+    )
+    results.forEach((result, i) => {
+      if (result.status !== 'rejected') return
+      if (i === 0 && requirePrimary) {
+        throw result.reason
+      }
+      console.warn(`[DM] gift wrap publish failed (${i === 0 ? 'current' : 'legacy'}):`, result.reason)
+    })
   }
 
   onSendingStatusChanged(listener: () => void): () => void {
@@ -374,14 +391,18 @@ class DmService {
    * One-shot verification at ingestion time. Result is persisted on the message and
    * never re-evaluated (per design — see docs/dm-feature.md / plan).
    *
-   * - For own messages: seal.pubkey must match the current encryption pubkey we
-   *   are using right now. (A message we just sent ourselves is verified by
-   *   construction; a self-copy received from another device verifies the same way.)
-   * - For peer messages: seal.pubkey must match rumor.pubkey's published Kind 10044
-   *   encryption pubkey. If the cached Kind 10044 disagrees, force-refetch once —
-   *   the sender may have rotated their key after our last cache update. Persistent
-   *   mismatches degrade to `false` (the message is still readable; the UI just
-   *   flags it).
+   * - For own messages: the sender encryption pubkey must match the current
+   *   encryption pubkey we are using right now. (A message we just sent ourselves is
+   *   verified by construction; a self-copy received from another device verifies the
+   *   same way.)
+   * - For peer messages with an identity-signed seal (current format): the seal
+   *   signature and rumor.pubkey === seal.pubkey were already checked in unwrap, so
+   *   the message is trusted with no relay round-trip.
+   * - For peer messages with a legacy encryption-key-signed seal: seal.pubkey must
+   *   match rumor.pubkey's published Kind 10044 encryption pubkey. If the cached Kind
+   *   10044 disagrees, force-refetch once — the sender may have rotated their key
+   *   after our last cache update. Persistent mismatches degrade to `false` (the
+   *   message is still readable; the UI just flags it).
    *
    * Per-batch dedupe of relay fetches is handled inside `client.fetchReplaceableEvent`
    * by its DataLoader, so no extra caching layer is needed here.
@@ -391,12 +412,20 @@ class DmService {
     accountPubkey: string,
     myEncryptionPubkey: string
   ): Promise<boolean> {
-    const { rumor, senderEncryptionPubkey } = unwrapped
+    const { rumor, senderEncryptionPubkey, sealSignedByIdentity } = unwrapped
+
+    // Identity-signed seals are self-authenticating: unwrapGiftWrap already verified
+    // seal.sig and rumor.pubkey === seal.pubkey, so no Kind 10044 round-trip needed.
+    if (sealSignedByIdentity) {
+      return true
+    }
+
     if (rumor.pubkey === accountPubkey) {
       return senderEncryptionPubkey === myEncryptionPubkey
     }
 
-    // First attempt: trust the cached Kind 10044 if there is one.
+    // Legacy encryption-key-signed seal: bind seal.pubkey to the sender's identity by
+    // cross-checking against the published Kind 10044. First trust the cache if present.
     let canonical = await this.getCanonicalEncryptionPubkey(rumor.pubkey)
     if (canonical && senderEncryptionPubkey === canonical) return true
 
@@ -572,24 +601,24 @@ class DmService {
 
     const recipientDmRelays = await client.fetchDmRelays(recipientPubkey)
 
+    const signer = client.signer
+    if (!signer) {
+      throw new Error('Signer not available')
+    }
+
     const replyRelayHint = recipientDmRelays[0] ?? ''
     const replyTags = replyTo ? [['e', replyTo.id, replyRelayHint]] : []
     const extraTags = [...replyTags, ...(additionalTags ?? [])]
-    const { giftWrap, rumor } = nip17GiftWrapService.createGiftWrappedMessage(
-      content,
-      accountPubkey,
-      keypair.privkey,
-      recipientPubkey,
-      recipientEncryptionPubkey,
-      extraTags
-    )
-
-    const selfGiftWrap = nip17GiftWrapService.createGiftWrapForSelf(
-      rumor,
-      keypair.privkey,
-      keypair.pubkey,
-      accountPubkey
-    )
+    const { rumor, recipientGiftWraps, selfGiftWraps } =
+      await nip17GiftWrapService.createDualGiftWraps(
+        content,
+        accountPubkey,
+        signer,
+        keypair.privkey,
+        recipientPubkey,
+        recipientEncryptionPubkey,
+        extraTags
+      )
 
     const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
@@ -598,7 +627,7 @@ class DmService {
       senderPubkey: accountPubkey,
       content: rumor.content,
       createdAt: rumor.created_at,
-      originalEvent: selfGiftWrap,
+      originalEvent: selfGiftWraps[0],
       decryptedRumor: rumor as unknown as Event,
       ...(replyTo ? { replyTo } : {})
     }
@@ -606,22 +635,16 @@ class DmService {
     // Save and show immediately (optimistic UI)
     await this.saveMessage(message)
     await this.updateConversation(accountPubkey, recipientPubkey, message)
-    this.pendingPublishData.set(message.id, { giftWrap, selfGiftWrap, recipientDmRelays })
+    this.pendingPublishData.set(message.id, { recipientGiftWraps, selfGiftWraps, recipientDmRelays })
     this.sendingStatuses.set(message.id, 'sending')
     this.emitNewMessage(message)
 
     try {
       const myDmRelays = await client.fetchDmRelays(accountPubkey)
-      const [recipientResult, selfResult] = await Promise.allSettled([
-        client.publishEvent(recipientDmRelays, giftWrap),
-        client.publishEvent(myDmRelays, selfGiftWrap)
+      await Promise.all([
+        this.publishGiftWraps(recipientDmRelays, recipientGiftWraps, true),
+        this.publishGiftWraps(myDmRelays, selfGiftWraps, false)
       ])
-      if (selfResult.status === 'rejected') {
-        console.warn('[DM] selfGiftWrap publish failed:', selfResult.reason)
-      }
-      if (recipientResult.status === 'rejected') {
-        throw recipientResult.reason
-      }
 
       this.sendingStatuses.set(message.id, 'sent')
       this.pendingPublishData.delete(message.id)
@@ -685,22 +708,22 @@ class DmService {
       fileTags.push(['thumbhash', thumbHash])
     }
 
-    const { giftWrap, rumor } = nip17GiftWrapService.createGiftWrappedMessage(
-      fileUrl,
-      accountPubkey,
-      keypair.privkey,
-      recipientPubkey,
-      recipientEncryptionPubkey,
-      fileTags,
-      ExtendedKind.RUMOR_FILE
-    )
+    const signer = client.signer
+    if (!signer) {
+      throw new Error('Signer not available')
+    }
 
-    const selfGiftWrap = nip17GiftWrapService.createGiftWrapForSelf(
-      rumor,
-      keypair.privkey,
-      keypair.pubkey,
-      accountPubkey
-    )
+    const { rumor, recipientGiftWraps, selfGiftWraps } =
+      await nip17GiftWrapService.createDualGiftWraps(
+        fileUrl,
+        accountPubkey,
+        signer,
+        keypair.privkey,
+        recipientPubkey,
+        recipientEncryptionPubkey,
+        fileTags,
+        ExtendedKind.RUMOR_FILE
+      )
 
     const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
@@ -709,28 +732,22 @@ class DmService {
       senderPubkey: accountPubkey,
       content: rumor.content,
       createdAt: rumor.created_at,
-      originalEvent: selfGiftWrap,
+      originalEvent: selfGiftWraps[0],
       decryptedRumor: rumor as unknown as Event
     }
 
     await this.saveMessage(message)
     await this.updateConversation(accountPubkey, recipientPubkey, message)
-    this.pendingPublishData.set(message.id, { giftWrap, selfGiftWrap, recipientDmRelays })
+    this.pendingPublishData.set(message.id, { recipientGiftWraps, selfGiftWraps, recipientDmRelays })
     this.sendingStatuses.set(message.id, 'sending')
     this.emitNewMessage(message)
 
     try {
       const myDmRelays = await client.fetchDmRelays(accountPubkey)
-      const [recipientResult, selfResult] = await Promise.allSettled([
-        client.publishEvent(recipientDmRelays, giftWrap),
-        client.publishEvent(myDmRelays, selfGiftWrap)
+      await Promise.all([
+        this.publishGiftWraps(recipientDmRelays, recipientGiftWraps, true),
+        this.publishGiftWraps(myDmRelays, selfGiftWraps, false)
       ])
-      if (selfResult.status === 'rejected') {
-        console.warn('[DM] selfGiftWrap publish failed:', selfResult.reason)
-      }
-      if (recipientResult.status === 'rejected') {
-        throw recipientResult.reason
-      }
 
       this.sendingStatuses.set(message.id, 'sent')
       this.pendingPublishData.delete(message.id)
@@ -770,27 +787,27 @@ class DmService {
     const recipientDmRelays = await client.fetchDmRelays(recipientPubkey)
     const relayHint = recipientDmRelays[0] ?? ''
 
+    const signer = client.signer
+    if (!signer) {
+      throw new Error('Signer not available')
+    }
+
     const extraTags: string[][] = [['e', messageId, relayHint]]
     if (emojiTag) {
       extraTags.push(emojiTag)
     }
 
-    const { giftWrap, rumor } = nip17GiftWrapService.createGiftWrappedMessage(
-      emoji,
-      accountPubkey,
-      keypair.privkey,
-      recipientPubkey,
-      recipientEncryptionPubkey,
-      extraTags,
-      kinds.Reaction
-    )
-
-    const selfGiftWrap = nip17GiftWrapService.createGiftWrapForSelf(
-      rumor,
-      keypair.privkey,
-      keypair.pubkey,
-      accountPubkey
-    )
+    const { rumor, recipientGiftWraps, selfGiftWraps } =
+      await nip17GiftWrapService.createDualGiftWraps(
+        emoji,
+        accountPubkey,
+        signer,
+        keypair.privkey,
+        recipientPubkey,
+        recipientEncryptionPubkey,
+        extraTags,
+        kinds.Reaction
+      )
 
     const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
@@ -799,7 +816,7 @@ class DmService {
       senderPubkey: accountPubkey,
       content: rumor.content,
       createdAt: rumor.created_at,
-      originalEvent: selfGiftWrap,
+      originalEvent: selfGiftWraps[0],
       decryptedRumor: rumor as unknown as Event
     }
 
@@ -807,9 +824,9 @@ class DmService {
     this.emitNewReaction(message)
 
     const myDmRelays = await client.fetchDmRelays(accountPubkey)
-    await Promise.allSettled([
-      client.publishEvent(recipientDmRelays, giftWrap),
-      client.publishEvent(myDmRelays, selfGiftWrap)
+    await Promise.all([
+      this.publishGiftWraps(recipientDmRelays, recipientGiftWraps, false),
+      this.publishGiftWraps(myDmRelays, selfGiftWraps, false)
     ])
 
     return message

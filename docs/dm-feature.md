@@ -20,7 +20,7 @@ All DM-related kinds are defined in `src/constants.ts` (`ExtendedKind`). Emoji r
 | Kind  | Constant                             | Source          | Purpose                                                           |
 | ----- | ------------------------------------ | --------------- | ----------------------------------------------------------------- |
 | 7     | `kinds.Reaction`                     | nostr-tools     | Emoji reaction to a DM message, wrapped the same way as chat     |
-| 13    | `kinds.Seal` / `ExtendedKind.SEAL`   | nostr-tools     | NIP-59 seal (encrypted rumor, signed by sender's encryption key)  |
+| 13    | `kinds.Seal` / `ExtendedKind.SEAL`   | nostr-tools     | NIP-59 seal (encrypted rumor, signed by sender's identity key)    |
 | 14    | `ExtendedKind.RUMOR_CHAT`            | extended        | Plaintext chat rumor (NIP-17 `kinds.PrivateDirectMessage`)        |
 | 15    | `ExtendedKind.RUMOR_FILE`            | extended        | Encrypted file attachment rumor                                    |
 | 1059  | `kinds.GiftWrap` / `GIFT_WRAP`       | nostr-tools     | NIP-59 outer gift wrap (random-key signed)                        |
@@ -35,11 +35,15 @@ All DM-related kinds are defined in `src/constants.ts` (`ExtendedKind`). Emoji r
 
 ```
 Rumor (kind 14 chat / 15 file / 7 reaction, unsigned) — plaintext
-  └─ Seal (kind 13, signed by sender's encryption privkey) — NIP-44 v2 to recipient's encryption pubkey
+  └─ Seal (kind 13, signed by sender's identity key) — NIP-44 v2 to recipient's encryption pubkey
       └─ Gift Wrap (kind 1059, signed by ephemeral random key) — NIP-44 v2 to recipient's encryption pubkey
 ```
 
-Two layers of NIP-44 encryption with two independent keypairs (the ephemeral random key in the gift wrap and the sender's real encryption key in the seal) is what gives NIP-17 its metadata privacy: a relay can only see "some ephemeral pubkey sent some gift wrap to some encryption pubkey", not who is talking to whom.
+The seal is **signed by the sender's identity key** (so `seal.pubkey === rumor.pubkey`, which is what authenticates the sender), but its NIP-44 payload is still encrypted with the **dedicated encryption keypair** (`senderEncryptionPriv ↔ recipientEncryptionPub`). Because the seal is identity-signed, `seal.pubkey` is no longer the encryption pubkey, so the sender's encryption pubkey is carried in an **`n` tag** on the seal — this lets the recipient derive the conversation key locally without a Kind 10044 lookup, and the identity signature over that tag makes the binding self-authenticating. The encryption privkey is still only ever used for NIP-44 encrypt/decrypt, never for signing.
+
+> **Legacy format & dual-send migration**: older clients signed the seal with the *encryption* key (so `seal.pubkey` was the encryption pubkey and there was no `n` tag). `unwrapGiftWrap` detects this by the absence of the `n` tag and falls back to reading `seal.pubkey`, so historical gift wraps re-synced from relays still decrypt. During the migration window, each send **dual-publishes** both formats: `createDualGiftWraps` wraps the *same* rumor as an identity-signed gift wrap (index 0) and a legacy encryption-key-signed gift wrap (index 1), for both the recipient and the sender's own devices. New clients read the identity-signed copy, clients still on the old code read the legacy copy. Because both copies share the same `rumor.id`, the receiver dedupes by id (`dmMessages` keyPath `id` + UI id-set filter) and only ever stores/shows one message. Once legacy clients are gone, drop `createLegacySeal` and send only index 0.
+
+Two layers of NIP-44 encryption with two independent keypairs (the ephemeral random key in the gift wrap and the sender's encryption key in the seal payload) is what gives NIP-17 its metadata privacy: a relay can only see "some ephemeral pubkey sent some gift wrap to some encryption pubkey", not who is talking to whom.
 
 The app uses **manual** gift wrap construction (see `src/services/nip17-gift-wrap.service.ts:32`) rather than `nostr-tools`' `createWrap`, because it needs **two `p` tags** on the gift wrap:
 
@@ -50,13 +54,13 @@ Gift wrap and seal `created_at` are both randomized up to 2 days in the past via
 
 ### Self-copies
 
-Every send also produces a **self gift wrap** via `createGiftWrapForSelf` (`nip17-gift-wrap.service.ts:64`), addressed to the sender's own encryption pubkey, and published to the sender's own DM relays. This is how the sender's other devices pick up their own outgoing messages during sync.
+Every send also produces **self gift wraps** via `createDualGiftWraps` (`nip17-gift-wrap.service.ts`), addressed to the sender's own encryption pubkey and published to the sender's own DM relays. This is how the sender's other devices pick up their own outgoing messages during sync. During the dual-send migration window this is a pair (identity-signed + legacy), same as the recipient copies.
 
 ### Dual Key System
 
 - **Encryption Key** (`Kind 10044`): Long-lived keypair used as the NIP-44 endpoint for DMs. The public key is published in an `n` tag; the private key is stored per-account in `LocalStorage` (`ENCRYPTION_KEY_PRIVKEY_MAP`) and can be re-shared with new devices via Key Transfer.
 - **Client Key** (`Kind 4454`): Per-device ephemeral keypair, one per browser/device. Its only purpose is to bootstrap Key Transfer so an old device can encrypt the Encryption privkey for a new device without the user typing a secret. Stored in `CLIENT_KEY_PRIVKEY_MAP`.
-- **Account / Identity Key**: The Nostr identity pubkey. **Never** used directly for DM encryption — it only signs the two announcement events (`10044`, `4454`, `10050`) and the `4455` key transfer envelope.
+- **Account / Identity Key**: The Nostr identity pubkey. **Never** used for DM encryption/decryption — that is exclusively the Encryption Key's job. It signs the announcement events (`10044`, `4454`, `10050`), the `4455` key transfer envelope, **and every message seal (kind 13)** so the recipient can authenticate the sender from the seal alone. (Identity-signing each seal means one signer call per send — acceptable because the privacy win of the dual-key system is that the signer never has to *decrypt*, which would otherwise happen constantly in the background.)
 
 ### Relay strategy
 
@@ -138,10 +142,10 @@ Implemented as `TSetupState` in `src/pages/primary/DmPage/index.tsx:27`.
 1. `DmInput` serializes content (mentions → `nostr:npub...`, custom emoji → `:shortcode:`).
 2. `dmService.sendMessage(accountPubkey, recipientPubkey, content, replyTo?, additionalTags?)`:
    a. `getRecipientEncryptionPubkey(recipientPubkey)` fetches `Kind 10044` (or falls back to the encryption pubkey learned from an earlier received gift wrap, stored on the conversation record).
-   b. `nip17GiftWrapService.createGiftWrappedMessage` produces `{ rumor, seal, giftWrap }`.
-   c. `createGiftWrapForSelf` produces a second gift wrap addressed to the sender's own encryption pubkey.
+   b. `nip17GiftWrapService.createDualGiftWraps` produces `{ rumor, recipientGiftWraps, selfGiftWraps }` — each array is `[identity-signed, legacy]` for the dual-send migration.
+   c. The self gift wraps are addressed to the sender's own encryption pubkey so other devices sync outgoing messages.
    d. Message record is written to IndexedDB and added to the optimistic UI (`sending` status).
-   e. Both gift wraps published in parallel — recipient-wrap to recipient DM relays, self-wrap to sender DM relays.
+   e. `publishGiftWraps` publishes each set in parallel — recipient set to recipient DM relays, self set to sender DM relays. A failure of the current-format recipient wrap (index 0) marks the message `failed`; legacy-format and self-copy failures are only logged.
    f. Sending status transitions to `sent` (auto-cleared after 3s) or `failed`. `pendingPublishData` holds the payload so `resendMessage(id)` can retry without reconstructing.
 
 ### Sending a file
@@ -352,8 +356,8 @@ onEncryptionKeyChanged(fn): unsubscribe  // remote Kind 10044 rotation observed
 1. **Always use `participantsKey` for message indexing, `conversationKey` for conversation indexing.** Mixing them is the exact bug v20 fixed.
 2. **Gift wraps must carry two `p` tags.** `nostr-tools`' `nip59.wrapEvent` only writes one — use the custom `createGiftWrap` in `nip17-gift-wrap.service.ts`.
 3. **Always randomize `created_at` for seal *and* gift wrap.** Using `dayjs().unix()` for either leaks timing.
-4. **Self gift wraps are not optional.** Without them, the sender's other devices never see their own outgoing messages.
-5. **The encryption privkey never touches the signer.** Only the three announcement/transfer events (10044, 4454, 4455) are signed by the identity key; everything else is signed by the encryption privkey (for seals) or an ephemeral key (for gift wraps).
+4. **Self gift wraps are not optional.** Without them, the sender's other devices never see their own outgoing messages. During the dual-send migration each send emits a `[identity-signed, legacy]` pair for the recipient AND for self; both copies share one `rumor.id` so the receiver dedupes to a single message.
+5. **The identity key signs, the encryption key encrypts — keep them separate.** Seals (kind 13) and the announcement/transfer events (10044, 4454, 4455) are signed by the **identity** key; gift wraps (1059) are signed by an ephemeral key. The **encryption** privkey is used only for NIP-44 encrypt/decrypt and the seal's `n` tag — never for signing. The recipient learns the sender's encryption pubkey from the seal's `n` tag (current format) or `seal.pubkey` (legacy format).
 6. **Soft-delete is per account, but messages are shared.** Filtering happens at read time using `conversation.deletedAt`. Never use `deleteDmMessagesByParticipantsKey` unless you are certain no other account on the device uses the same rows.
 7. **Key rotation is detected at DmPage init, not proactively.** If you want push-driven detection, the relay subscription already listens to `Kind 10044` and emits `onEncryptionKeyChanged`; wire it into your UI.
 8. **Forward-sync needs a 2-day slack.** Because NIP-59 randomizes `created_at` up to 2 days in the past, always subtract `DM_TIME_RANDOMIZATION_SECONDS` from the stored `lastSyncedAt` before using it as `since`.

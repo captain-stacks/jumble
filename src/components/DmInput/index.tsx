@@ -227,7 +227,7 @@ export default function DmInput({
   const [emojiResults, setEmojiResults] = useState<TEmoji[]>([])
   const [emojiIndex, setEmojiIndex] = useState(0)
   const [isFocused, setIsFocused] = useState(false)
-  const emojisRef = useRef<Map<string, string>>(new Map())
+  const emojisRef = useRef<Map<string, TEmoji>>(new Map())
 
   const isUploading = mediaItems.some((item) => item.status === 'uploading')
   const doneItems = mediaItems.filter((item) => item.status === 'done')
@@ -397,7 +397,7 @@ export default function DmInput({
       sel.removeAllRanges()
       sel.addRange(range)
 
-      emojisRef.current.set(emoji.shortcode, emoji.url)
+      emojisRef.current.set(customEmojiService.getEmojiId(emoji), emoji)
       recentEmojiService.add(emoji)
       setEmojiQuery(null)
       setEmojiResults([])
@@ -467,8 +467,12 @@ export default function DmInput({
       }
     )
     const emojiTags: string[][] = []
-    emojisRef.current.forEach((url, shortcode) => {
-      emojiTags.push(['emoji', shortcode, url])
+    emojisRef.current.forEach((emoji) => {
+      emojiTags.push(
+        emoji.setAddress
+          ? ['emoji', emoji.shortcode, emoji.url, emoji.setAddress]
+          : ['emoji', emoji.shortcode, emoji.url]
+      )
     })
 
     const filesToSend = [...doneItems]
@@ -767,7 +771,7 @@ export default function DmInput({
         range.collapse(true)
         sel!.removeAllRanges()
         sel!.addRange(range)
-        emojisRef.current.set(emoji.shortcode, emoji.url)
+        emojisRef.current.set(customEmojiService.getEmojiId(emoji), emoji)
       }
       setContent(serializeContent())
     },

@@ -883,7 +883,7 @@ function buildTTag(hashtag: string) {
 }
 
 function buildEmojiTag(emoji: TEmoji) {
-  return ['emoji', emoji.shortcode, emoji.url]
+  return trimTagEnd(['emoji', emoji.shortcode, emoji.url, emoji.setAddress ?? ''])
 }
 
 function buildTitleTag(title: string) {

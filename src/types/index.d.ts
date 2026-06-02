@@ -167,6 +167,8 @@ export type TPageRef = { scrollToTop: (behavior?: ScrollBehavior) => void }
 export type TEmoji = {
   shortcode: string
   url: string
+  // Address pointer (kind:pubkey:d-tag) to the kind 30030 emoji set this emoji belongs to, if any
+  setAddress?: string
 }
 
 export type TEmojiPack = {

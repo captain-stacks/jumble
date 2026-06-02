@@ -349,7 +349,12 @@ export default function DmMessageList({
     async (messageId: string, emoji: string | TEmoji) => {
       if (!pubkey) return
       const emojiContent = typeof emoji === 'string' ? emoji : `:${emoji.shortcode}:`
-      const emojiTag = typeof emoji !== 'string' ? ['emoji', emoji.shortcode, emoji.url] : undefined
+      const emojiTag =
+        typeof emoji !== 'string'
+          ? emoji.setAddress
+            ? ['emoji', emoji.shortcode, emoji.url, emoji.setAddress]
+            : ['emoji', emoji.shortcode, emoji.url]
+          : undefined
       try {
         await dmService.sendReaction(pubkey, otherPubkey, messageId, emojiContent, emojiTag)
       } catch (error) {

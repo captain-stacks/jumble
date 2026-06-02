@@ -984,6 +984,26 @@ export default {
     'Keep editing': 'متابعة التحرير',
     'Open drafts': 'فتح المسودات',
     'No drafts yet': 'لا توجد مسودات بعد',
-    Empty: 'فارغ'
+    Empty: 'فارغ',
+    'Add emoji': 'إضافة رمز تعبيري',
+    'Edit emoji': 'تعديل الرمز التعبيري',
+    Title: 'العنوان',
+    'Image URL': 'رابط الصورة',
+    shortcode: 'الرمز القصير',
+    Emojis: 'الرموز التعبيرية',
+    'Create emoji set': 'إنشاء مجموعة رموز تعبيرية',
+    'Edit emoji set': 'تعديل مجموعة الرموز التعبيرية',
+    'My emoji set': 'مجموعتي من الرموز التعبيرية',
+    'Emoji set not found': 'لم يتم العثور على مجموعة الرموز التعبيرية',
+    'You can only edit your own emoji sets': 'يمكنك تعديل مجموعات الرموز التعبيرية الخاصة بك فقط',
+    'No custom emojis yet': 'لا توجد رموز تعبيرية مخصصة بعد',
+    'Title is required': 'العنوان مطلوب',
+    'At least one emoji is required': 'مطلوب رمز تعبيري واحد على الأقل',
+    'Duplicate shortcode: {{shortcode}}': 'رمز قصير مكرر: {{shortcode}}',
+    'Shortcode is required': 'الرمز القصير مطلوب',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'يمكن أن يحتوي الرمز القصير على أحرف وأرقام وشرطات وشرطات سفلية فقط',
+    'Image URL is required': 'رابط الصورة مطلوب',
+    'Invalid image URL': 'رابط الصورة غير صالح'
   }
 }

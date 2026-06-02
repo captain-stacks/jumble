@@ -990,6 +990,26 @@ export default {
     'Keep editing': '계속 편집',
     'Open drafts': '임시저장 열기',
     'No drafts yet': '임시저장된 항목이 없습니다',
-    Empty: '비어 있음'
+    Empty: '비어 있음',
+    'Add emoji': '이모지 추가',
+    'Edit emoji': '이모지 편집',
+    Title: '제목',
+    'Image URL': '이미지 URL',
+    shortcode: '단축 코드',
+    Emojis: '이모지',
+    'Create emoji set': '이모지 세트 만들기',
+    'Edit emoji set': '이모지 세트 편집',
+    'My emoji set': '내 이모지 세트',
+    'Emoji set not found': '이모지 세트를 찾을 수 없습니다',
+    'You can only edit your own emoji sets': '자신의 이모지 세트만 편집할 수 있습니다',
+    'No custom emojis yet': '아직 사용자 지정 이모지가 없습니다',
+    'Title is required': '제목은 필수입니다',
+    'At least one emoji is required': '이모지가 하나 이상 필요합니다',
+    'Duplicate shortcode: {{shortcode}}': '중복된 단축 코드: {{shortcode}}',
+    'Shortcode is required': '단축 코드는 필수입니다',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      '단축 코드에는 영문자, 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
+    'Image URL is required': '이미지 URL은 필수입니다',
+    'Invalid image URL': '잘못된 이미지 URL입니다'
   }
 }

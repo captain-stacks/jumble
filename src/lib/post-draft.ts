@@ -1,4 +1,4 @@
-import { URL_REGEX } from '@/constants'
+import { EMOJI_SHORT_CODE_REGEX, URL_REGEX } from '@/constants'
 import customEmojiService from '@/services/custom-emoji.service'
 import mediaUpload from '@/services/media-upload.service'
 import { TEmoji } from '@/types'
@@ -20,7 +20,7 @@ export function collectImetaTagsForUrls(text: string): Record<string, string[]> 
 
 export function collectCustomEmojisInText(text: string): Record<string, TEmoji> {
   const result: Record<string, TEmoji> = {}
-  const matches = text.match(/:[a-zA-Z0-9]+:/g)
+  const matches = text.match(EMOJI_SHORT_CODE_REGEX)
   matches?.forEach((m) => {
     const id = m.slice(1, -1)
     if (result[id]) return

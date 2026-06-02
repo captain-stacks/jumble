@@ -1009,6 +1009,26 @@ export default {
     'Keep editing': 'Kontynuuj edycję',
     'Open drafts': 'Otwórz wersje robocze',
     'No drafts yet': 'Brak wersji roboczych',
-    Empty: 'Pusty'
+    Empty: 'Pusty',
+    'Add emoji': 'Dodaj emoji',
+    'Edit emoji': 'Edytuj emoji',
+    Title: 'Tytuł',
+    'Image URL': 'URL obrazu',
+    shortcode: 'krótki kod',
+    Emojis: 'Emoji',
+    'Create emoji set': 'Utwórz zestaw emoji',
+    'Edit emoji set': 'Edytuj zestaw emoji',
+    'My emoji set': 'Mój zestaw emoji',
+    'Emoji set not found': 'Nie znaleziono zestawu emoji',
+    'You can only edit your own emoji sets': 'Możesz edytować tylko własne zestawy emoji',
+    'No custom emojis yet': 'Brak własnych emoji',
+    'Title is required': 'Tytuł jest wymagany',
+    'At least one emoji is required': 'Wymagane jest co najmniej jedno emoji',
+    'Duplicate shortcode: {{shortcode}}': 'Zduplikowany krótki kod: {{shortcode}}',
+    'Shortcode is required': 'Krótki kod jest wymagany',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'Krótki kod może zawierać tylko litery, cyfry, myślniki i podkreślenia',
+    'Image URL is required': 'URL obrazu jest wymagany',
+    'Invalid image URL': 'Nieprawidłowy URL obrazu'
   }
 }

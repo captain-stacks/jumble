@@ -1015,6 +1015,27 @@ export default {
     'Keep editing': 'Continuer la modification',
     'Open drafts': 'Ouvrir les brouillons',
     'No drafts yet': "Aucun brouillon pour l'instant",
-    Empty: 'Vide'
+    Empty: 'Vide',
+    'Add emoji': 'Ajouter un emoji',
+    'Edit emoji': "Modifier l'emoji",
+    Title: 'Titre',
+    'Image URL': "URL de l'image",
+    shortcode: 'code court',
+    Emojis: 'Emojis',
+    'Create emoji set': "Créer un ensemble d'emojis",
+    'Edit emoji set': "Modifier l'ensemble d'emojis",
+    'My emoji set': "Mon ensemble d'emojis",
+    'Emoji set not found': "Ensemble d'emojis introuvable",
+    'You can only edit your own emoji sets':
+      "Vous ne pouvez modifier que vos propres ensembles d'emojis",
+    'No custom emojis yet': 'Aucun emoji personnalisé pour le moment',
+    'Title is required': 'Le titre est requis',
+    'At least one emoji is required': 'Au moins un emoji est requis',
+    'Duplicate shortcode: {{shortcode}}': 'Code court en double : {{shortcode}}',
+    'Shortcode is required': 'Le code court est requis',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'Le code court ne peut contenir que des lettres, des chiffres, des tirets et des traits de soulignement',
+    'Image URL is required': "L'URL de l'image est requise",
+    'Invalid image URL': "URL d'image invalide"
   }
 }

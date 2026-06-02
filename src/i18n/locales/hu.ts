@@ -1001,6 +1001,26 @@ export default {
     'Keep editing': 'Szerkesztés folytatása',
     'Open drafts': 'Piszkozatok megnyitása',
     'No drafts yet': 'Még nincsenek piszkozatok',
-    Empty: 'Üres'
+    Empty: 'Üres',
+    'Add emoji': 'Emoji hozzáadása',
+    'Edit emoji': 'Emoji szerkesztése',
+    Title: 'Cím',
+    'Image URL': 'Kép URL',
+    shortcode: 'rövid kód',
+    Emojis: 'Emojik',
+    'Create emoji set': 'Emoji-készlet létrehozása',
+    'Edit emoji set': 'Emoji-készlet szerkesztése',
+    'My emoji set': 'Saját emoji-készlet',
+    'Emoji set not found': 'Az emoji-készlet nem található',
+    'You can only edit your own emoji sets': 'Csak a saját emoji-készleteidet szerkesztheted',
+    'No custom emojis yet': 'Még nincsenek egyéni emojik',
+    'Title is required': 'A cím megadása kötelező',
+    'At least one emoji is required': 'Legalább egy emoji szükséges',
+    'Duplicate shortcode: {{shortcode}}': 'Ismétlődő rövid kód: {{shortcode}}',
+    'Shortcode is required': 'A rövid kód megadása kötelező',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'A rövid kód csak betűket, számokat, kötőjeleket és aláhúzásokat tartalmazhat',
+    'Image URL is required': 'A kép URL megadása kötelező',
+    'Invalid image URL': 'Érvénytelen kép-URL'
   }
 }

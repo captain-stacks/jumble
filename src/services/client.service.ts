@@ -1487,6 +1487,10 @@ class ClientService extends EventTarget {
     await this.updateReplaceableEventCache(evt)
   }
 
+  async updateEmojiSetCache(evt: NEvent) {
+    await this.updateReplaceableEventCache(evt)
+  }
+
   async fetchFollowListEvent(pubkey: string, updateCache = true) {
     return await this.fetchReplaceableEvent(pubkey, kinds.Contacts, undefined, updateCache)
   }

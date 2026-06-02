@@ -1001,6 +1001,26 @@ export default {
     'Keep editing': '編集を続ける',
     'Open drafts': '下書きを開く',
     'No drafts yet': '下書きはまだありません',
-    Empty: '空'
+    Empty: '空',
+    'Add emoji': '絵文字を追加',
+    'Edit emoji': '絵文字を編集',
+    Title: 'タイトル',
+    'Image URL': '画像URL',
+    shortcode: 'ショートコード',
+    Emojis: '絵文字',
+    'Create emoji set': '絵文字セットを作成',
+    'Edit emoji set': '絵文字セットを編集',
+    'My emoji set': 'マイ絵文字セット',
+    'Emoji set not found': '絵文字セットが見つかりません',
+    'You can only edit your own emoji sets': '自分の絵文字セットのみ編集できます',
+    'No custom emojis yet': 'カスタム絵文字はまだありません',
+    'Title is required': 'タイトルは必須です',
+    'At least one emoji is required': '絵文字が少なくとも1つ必要です',
+    'Duplicate shortcode: {{shortcode}}': 'ショートコードが重複しています: {{shortcode}}',
+    'Shortcode is required': 'ショートコードは必須です',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'ショートコードに使用できるのは英数字、ハイフン、アンダースコアのみです',
+    'Image URL is required': '画像URLは必須です',
+    'Invalid image URL': '無効な画像URLです'
   }
 }

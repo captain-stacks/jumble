@@ -1001,6 +1001,27 @@ export default {
     'Keep editing': 'ادامهٔ ویرایش',
     'Open drafts': 'باز کردن پیش‌نویس‌ها',
     'No drafts yet': 'هنوز پیش‌نویسی نیست',
-    Empty: 'خالی'
+    Empty: 'خالی',
+    'Add emoji': 'افزودن ایموجی',
+    'Edit emoji': 'ویرایش ایموجی',
+    Title: 'عنوان',
+    'Image URL': 'نشانی تصویر',
+    shortcode: 'کد کوتاه',
+    Emojis: 'ایموجی‌ها',
+    'Create emoji set': 'ساخت مجموعه ایموجی',
+    'Edit emoji set': 'ویرایش مجموعه ایموجی',
+    'My emoji set': 'مجموعه ایموجی من',
+    'Emoji set not found': 'مجموعه ایموجی یافت نشد',
+    'You can only edit your own emoji sets':
+      'فقط می‌توانید مجموعه‌های ایموجی خودتان را ویرایش کنید',
+    'No custom emojis yet': 'هنوز ایموجی سفارشی‌ای وجود ندارد',
+    'Title is required': 'عنوان الزامی است',
+    'At least one emoji is required': 'حداقل یک ایموجی لازم است',
+    'Duplicate shortcode: {{shortcode}}': 'کد کوتاه تکراری: {{shortcode}}',
+    'Shortcode is required': 'کد کوتاه الزامی است',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'کد کوتاه فقط می‌تواند شامل حروف، اعداد، خط تیره و زیرخط باشد',
+    'Image URL is required': 'نشانی تصویر الزامی است',
+    'Invalid image URL': 'نشانی تصویر نامعتبر است'
   }
 }

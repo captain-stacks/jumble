@@ -1006,6 +1006,26 @@ export default {
     'Keep editing': 'Продолжить редактирование',
     'Open drafts': 'Открыть черновики',
     'No drafts yet': 'Пока нет черновиков',
-    Empty: 'Пусто'
+    Empty: 'Пусто',
+    'Add emoji': 'Добавить эмодзи',
+    'Edit emoji': 'Изменить эмодзи',
+    Title: 'Название',
+    'Image URL': 'URL изображения',
+    shortcode: 'короткий код',
+    Emojis: 'Эмодзи',
+    'Create emoji set': 'Создать набор эмодзи',
+    'Edit emoji set': 'Изменить набор эмодзи',
+    'My emoji set': 'Мой набор эмодзи',
+    'Emoji set not found': 'Набор эмодзи не найден',
+    'You can only edit your own emoji sets': 'Вы можете изменять только свои наборы эмодзи',
+    'No custom emojis yet': 'Пока нет своих эмодзи',
+    'Title is required': 'Укажите название',
+    'At least one emoji is required': 'Требуется хотя бы одно эмодзи',
+    'Duplicate shortcode: {{shortcode}}': 'Повторяющийся короткий код: {{shortcode}}',
+    'Shortcode is required': 'Укажите короткий код',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'Короткий код может содержать только буквы, цифры, дефисы и подчёркивания',
+    'Image URL is required': 'Укажите URL изображения',
+    'Invalid image URL': 'Недействительный URL изображения'
   }
 }

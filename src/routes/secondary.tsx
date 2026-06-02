@@ -3,6 +3,7 @@ import AppearanceSettingsPage from '@/pages/secondary/AppearanceSettingsPage'
 import BookmarkPage from '@/pages/secondary/BookmarkPage'
 import DmConversationPage from '@/pages/secondary/DmConversationPage'
 import EmojiPackSettingsPage from '@/pages/secondary/EmojiPackSettingsPage'
+import EmojiSetEditorPage from '@/pages/secondary/EmojiSetEditorPage'
 import ExternalContentPage from '@/pages/secondary/ExternalContentPage'
 import FollowingListPage from '@/pages/secondary/FollowingListPage'
 import FollowPackPage from '@/pages/secondary/FollowPackPage'
@@ -52,6 +53,8 @@ const SECONDARY_ROUTE_CONFIGS: {
   { path: '/settings/appearance', element: <AppearanceSettingsPage /> },
   { path: '/settings/translation', element: <TranslationPage /> },
   { path: '/settings/emoji-packs', element: <EmojiPackSettingsPage /> },
+  { path: '/emoji-set-editor', element: <EmojiSetEditorPage /> },
+  { path: '/emoji-set-editor/:id', element: <EmojiSetEditorPage /> },
   { path: '/settings/system', element: <SystemSettingsPage /> },
   { path: '/settings/account', element: <AccountSettingsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },

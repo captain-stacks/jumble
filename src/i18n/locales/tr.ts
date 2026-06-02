@@ -1007,6 +1007,26 @@ export default {
     'Keep editing': 'Düzenlemeye devam et',
     'Open drafts': 'Taslakları aç',
     'No drafts yet': 'Henüz taslak yok',
-    Empty: 'Boş'
+    Empty: 'Boş',
+    'Add emoji': 'Emoji ekle',
+    'Edit emoji': 'Emoji düzenle',
+    Title: 'Başlık',
+    'Image URL': 'Görsel URL',
+    shortcode: 'kısa kod',
+    Emojis: 'Emojiler',
+    'Create emoji set': 'Emoji seti oluştur',
+    'Edit emoji set': 'Emoji setini düzenle',
+    'My emoji set': 'Emoji setim',
+    'Emoji set not found': 'Emoji seti bulunamadı',
+    'You can only edit your own emoji sets': 'Yalnızca kendi emoji setlerinizi düzenleyebilirsiniz',
+    'No custom emojis yet': 'Henüz özel emoji yok',
+    'Title is required': 'Başlık gereklidir',
+    'At least one emoji is required': 'En az bir emoji gereklidir',
+    'Duplicate shortcode: {{shortcode}}': 'Yinelenen kısa kod: {{shortcode}}',
+    'Shortcode is required': 'Kısa kod gereklidir',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'Kısa kod yalnızca harf, rakam, tire ve alt çizgi içerebilir',
+    'Image URL is required': 'Görsel URL gereklidir',
+    'Invalid image URL': 'Geçersiz görsel URL'
   }
 }

@@ -1000,6 +1000,26 @@ export default {
     'Keep editing': 'संपादन जारी रखें',
     'Open drafts': 'ड्राफ़्ट खोलें',
     'No drafts yet': 'अभी कोई ड्राफ़्ट नहीं',
-    Empty: 'खाली'
+    Empty: 'खाली',
+    'Add emoji': 'इमोजी जोड़ें',
+    'Edit emoji': 'इमोजी संपादित करें',
+    Title: 'शीर्षक',
+    'Image URL': 'छवि URL',
+    shortcode: 'शॉर्टकोड',
+    Emojis: 'इमोजी',
+    'Create emoji set': 'इमोजी सेट बनाएँ',
+    'Edit emoji set': 'इमोजी सेट संपादित करें',
+    'My emoji set': 'मेरा इमोजी सेट',
+    'Emoji set not found': 'इमोजी सेट नहीं मिला',
+    'You can only edit your own emoji sets': 'आप केवल अपने स्वयं के इमोजी सेट संपादित कर सकते हैं',
+    'No custom emojis yet': 'अभी तक कोई कस्टम इमोजी नहीं',
+    'Title is required': 'शीर्षक आवश्यक है',
+    'At least one emoji is required': 'कम से कम एक इमोजी आवश्यक है',
+    'Duplicate shortcode: {{shortcode}}': 'डुप्लिकेट शॉर्टकोड: {{shortcode}}',
+    'Shortcode is required': 'शॉर्टकोड आवश्यक है',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'शॉर्टकोड में केवल अक्षर, संख्याएँ, हाइफ़न और अंडरस्कोर हो सकते हैं',
+    'Image URL is required': 'छवि URL आवश्यक है',
+    'Invalid image URL': 'अमान्य छवि URL'
   }
 }

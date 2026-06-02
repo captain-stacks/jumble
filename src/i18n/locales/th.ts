@@ -984,6 +984,26 @@ export default {
     'Keep editing': 'แก้ไขต่อ',
     'Open drafts': 'เปิดฉบับร่าง',
     'No drafts yet': 'ยังไม่มีฉบับร่าง',
-    Empty: 'ว่างเปล่า'
+    Empty: 'ว่างเปล่า',
+    'Add emoji': 'เพิ่มอิโมจิ',
+    'Edit emoji': 'แก้ไขอิโมจิ',
+    Title: 'ชื่อ',
+    'Image URL': 'URL รูปภาพ',
+    shortcode: 'โค้ดย่อ',
+    Emojis: 'อิโมจิ',
+    'Create emoji set': 'สร้างชุดอิโมจิ',
+    'Edit emoji set': 'แก้ไขชุดอิโมจิ',
+    'My emoji set': 'ชุดอิโมจิของฉัน',
+    'Emoji set not found': 'ไม่พบชุดอิโมจิ',
+    'You can only edit your own emoji sets': 'คุณแก้ไขได้เฉพาะชุดอิโมจิของคุณเอง',
+    'No custom emojis yet': 'ยังไม่มีอิโมจิที่กำหนดเอง',
+    'Title is required': 'ต้องระบุชื่อ',
+    'At least one emoji is required': 'ต้องมีอิโมจิอย่างน้อยหนึ่งรายการ',
+    'Duplicate shortcode: {{shortcode}}': 'โค้ดย่อซ้ำ: {{shortcode}}',
+    'Shortcode is required': 'ต้องระบุโค้ดย่อ',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      'โค้ดย่อใช้ได้เฉพาะตัวอักษร ตัวเลข ขีดกลาง และขีดล่างเท่านั้น',
+    'Image URL is required': 'ต้องระบุ URL รูปภาพ',
+    'Invalid image URL': 'URL รูปภาพไม่ถูกต้อง'
   }
 }

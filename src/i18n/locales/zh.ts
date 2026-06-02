@@ -967,6 +967,26 @@ export default {
     'Keep editing': '继续编辑',
     'Open drafts': '打开草稿箱',
     'No drafts yet': '暂无草稿',
-    Empty: '空'
+    Empty: '空',
+    'Add emoji': '添加表情',
+    'Edit emoji': '编辑表情',
+    Title: '标题',
+    'Image URL': '图片 URL',
+    shortcode: '短代码',
+    Emojis: '表情',
+    'Create emoji set': '创建表情集',
+    'Edit emoji set': '编辑表情集',
+    'My emoji set': '我的表情集',
+    'Emoji set not found': '未找到表情集',
+    'You can only edit your own emoji sets': '只能编辑自己创建的表情集',
+    'No custom emojis yet': '还没有自定义表情',
+    'Title is required': '请填写标题',
+    'At least one emoji is required': '至少需要一个表情',
+    'Duplicate shortcode: {{shortcode}}': '短代码重复：{{shortcode}}',
+    'Shortcode is required': '请填写短代码',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      '短代码只能包含字母、数字、连字符和下划线',
+    'Image URL is required': '请填写图片 URL',
+    'Invalid image URL': '图片 URL 无效'
   }
 }

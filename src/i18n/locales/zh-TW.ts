@@ -960,6 +960,26 @@ export default {
     'Keep editing': '繼續編輯',
     'Open drafts': '開啟草稿',
     'No drafts yet': '尚無草稿',
-    Empty: '空'
+    Empty: '空',
+    'Add emoji': '新增表情',
+    'Edit emoji': '編輯表情',
+    Title: '標題',
+    'Image URL': '圖片 URL',
+    shortcode: '短代碼',
+    Emojis: '表情',
+    'Create emoji set': '建立表情集',
+    'Edit emoji set': '編輯表情集',
+    'My emoji set': '我的表情集',
+    'Emoji set not found': '找不到表情集',
+    'You can only edit your own emoji sets': '只能編輯自己建立的表情集',
+    'No custom emojis yet': '還沒有自訂表情',
+    'Title is required': '請填寫標題',
+    'At least one emoji is required': '至少需要一個表情',
+    'Duplicate shortcode: {{shortcode}}': '短代碼重複：{{shortcode}}',
+    'Shortcode is required': '請填寫短代碼',
+    'Shortcode can only contain letters, numbers, hyphens and underscores':
+      '短代碼只能包含字母、數字、連字號和底線',
+    'Image URL is required': '請填寫圖片 URL',
+    'Invalid image URL': '圖片 URL 無效'
   }
 }

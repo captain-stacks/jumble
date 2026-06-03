@@ -1004,6 +1004,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'โค้ดย่อใช้ได้เฉพาะตัวอักษร ตัวเลข ขีดกลาง และขีดล่างเท่านั้น',
     'Image URL is required': 'ต้องระบุ URL รูปภาพ',
-    'Invalid image URL': 'URL รูปภาพไม่ถูกต้อง'
+    'Invalid image URL': 'URL รูปภาพไม่ถูกต้อง',
+    'Post as': 'โพสต์ในนาม',
+    'Failed to get the signer for the selected account':
+      'ไม่สามารถรับตัวลงนามสำหรับบัญชีที่เลือกได้'
   }
 }

@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { parseEditorJsonToText } from '@/lib/tiptap'
 import { cn } from '@/lib/utils'
 import customEmojiService from '@/services/custom-emoji.service'
-import { TEmoji } from '@/types'
+import { TAccountPointer, TEmoji } from '@/types'
 import Document from '@tiptap/extension-document'
 import { HardBreak } from '@tiptap/extension-hard-break'
 import History from '@tiptap/extension-history'
@@ -26,6 +26,7 @@ import Emoji from './Emoji'
 import emojiSuggestion from './Emoji/suggestion'
 import Mention from './Mention'
 import mentionSuggestion from './Mention/suggestion'
+import PostAccountSelector from '../PostAccountSelector'
 import Preview from './Preview'
 
 export type TPostTextareaHandle = {
@@ -48,6 +49,9 @@ const PostTextarea = forwardRef<
     onUploadEnd?: (file: File) => void
     placeholder?: string
     topRightActions?: React.ReactNode
+    postAsAccount?: TAccountPointer | null
+    onPostAsAccountChange?: (account: TAccountPointer) => void
+    previewPubkey?: string
   }
 >(
   (
@@ -61,7 +65,10 @@ const PostTextarea = forwardRef<
       onUploadProgress,
       onUploadEnd,
       placeholder,
-      topRightActions
+      topRightActions,
+      postAsAccount,
+      onPostAsAccountChange,
+      previewPubkey
     },
     ref
   ) => {
@@ -245,6 +252,9 @@ const PostTextarea = forwardRef<
           </div>
         </div>
         <TabsContent value="edit" className="mt-0">
+          {postAsAccount && onPostAsAccountChange && (
+            <PostAccountSelector value={postAsAccount} onChange={onPostAsAccountChange} />
+          )}
           <EditorContent className="tiptap" editor={editor} />
         </TabsContent>
         <TabsContent
@@ -255,7 +265,7 @@ const PostTextarea = forwardRef<
             editor.commands.focus()
           }}
         >
-          <Preview content={text} className={className} />
+          <Preview content={text} pubkey={previewPubkey} className={className} />
         </TabsContent>
       </Tabs>
     )

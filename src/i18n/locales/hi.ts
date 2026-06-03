@@ -1020,6 +1020,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'शॉर्टकोड में केवल अक्षर, संख्याएँ, हाइफ़न और अंडरस्कोर हो सकते हैं',
     'Image URL is required': 'छवि URL आवश्यक है',
-    'Invalid image URL': 'अमान्य छवि URL'
+    'Invalid image URL': 'अमान्य छवि URL',
+    'Post as': 'इस रूप में पोस्ट करें',
+    'Failed to get the signer for the selected account':
+      'चयनित खाते के लिए हस्ताक्षरकर्ता प्राप्त करने में विफल'
   }
 }

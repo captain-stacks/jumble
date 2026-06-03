@@ -1026,6 +1026,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'Il codice breve può contenere solo lettere, numeri, trattini e trattini bassi',
     'Image URL is required': "L'URL dell'immagine è obbligatorio",
-    'Invalid image URL': 'URL immagine non valido'
+    'Invalid image URL': 'URL immagine non valido',
+    'Post as': 'Pubblica come',
+    'Failed to get the signer for the selected account':
+      "Impossibile ottenere il firmatario per l'account selezionato"
   }
 }

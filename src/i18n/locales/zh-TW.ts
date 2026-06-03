@@ -980,6 +980,8 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       '短代碼只能包含字母、數字、連字號和底線',
     'Image URL is required': '請填寫圖片 URL',
-    'Invalid image URL': '圖片 URL 無效'
+    'Invalid image URL': '圖片 URL 無效',
+    'Post as': '以此帳號發布',
+    'Failed to get the signer for the selected account': '無法取得所選帳號的簽名器'
   }
 }

@@ -1027,6 +1027,8 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'Kısa kod yalnızca harf, rakam, tire ve alt çizgi içerebilir',
     'Image URL is required': 'Görsel URL gereklidir',
-    'Invalid image URL': 'Geçersiz görsel URL'
+    'Invalid image URL': 'Geçersiz görsel URL',
+    'Post as': 'Şu hesapla gönder',
+    'Failed to get the signer for the selected account': 'Seçili hesap için imzalayıcı alınamadı'
   }
 }

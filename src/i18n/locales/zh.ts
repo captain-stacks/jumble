@@ -987,6 +987,8 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       '短代码只能包含字母、数字、连字符和下划线',
     'Image URL is required': '请填写图片 URL',
-    'Invalid image URL': '图片 URL 无效'
+    'Invalid image URL': '图片 URL 无效',
+    'Post as': '以此账号发布',
+    'Failed to get the signer for the selected account': '无法获取所选账号的签名器'
   }
 }

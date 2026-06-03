@@ -1026,6 +1026,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'Короткий код может содержать только буквы, цифры, дефисы и подчёркивания',
     'Image URL is required': 'Укажите URL изображения',
-    'Invalid image URL': 'Недействительный URL изображения'
+    'Invalid image URL': 'Недействительный URL изображения',
+    'Post as': 'Опубликовать от имени',
+    'Failed to get the signer for the selected account':
+      'Не удалось получить подписанта для выбранной учётной записи'
   }
 }

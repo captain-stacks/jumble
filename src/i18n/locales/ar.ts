@@ -1004,6 +1004,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'يمكن أن يحتوي الرمز القصير على أحرف وأرقام وشرطات وشرطات سفلية فقط',
     'Image URL is required': 'رابط الصورة مطلوب',
-    'Invalid image URL': 'رابط الصورة غير صالح'
+    'Invalid image URL': 'رابط الصورة غير صالح',
+    'Post as': 'النشر باسم',
+    'Failed to get the signer for the selected account':
+      'تعذّر الحصول على أداة التوقيع للحساب المحدد'
   }
 }

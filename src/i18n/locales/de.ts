@@ -1037,6 +1037,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'Kurzcode darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten',
     'Image URL is required': 'Bild-URL ist erforderlich',
-    'Invalid image URL': 'Ungültige Bild-URL'
+    'Invalid image URL': 'Ungültige Bild-URL',
+    'Post as': 'Posten als',
+    'Failed to get the signer for the selected account':
+      'Signierschlüssel für das ausgewählte Konto konnte nicht abgerufen werden'
   }
 }

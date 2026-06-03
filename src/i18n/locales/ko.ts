@@ -1010,6 +1010,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       '단축 코드에는 영문자, 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
     'Image URL is required': '이미지 URL은 필수입니다',
-    'Invalid image URL': '잘못된 이미지 URL입니다'
+    'Invalid image URL': '잘못된 이미지 URL입니다',
+    'Post as': '게시 계정',
+    'Failed to get the signer for the selected account':
+      '선택한 계정의 서명자를 가져오지 못했습니다'
   }
 }

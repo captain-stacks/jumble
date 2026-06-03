@@ -21,7 +21,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import mediaUpload from '@/services/media-upload.service'
 import client from '@/services/client.service'
 import postDraftService from '@/services/post-draft.service'
-import { TPollCreateData, TPostTargetItem } from '@/types'
+import { TAccountPointer, TPollCreateData, TPostTargetItem } from '@/types'
 import { TPostDraftUnsigned } from '@/types/post-draft'
 import { Content } from '@tiptap/react'
 import { CircleHelp, ImageUp, ListTodo, Lock, Settings, Smile, X } from 'lucide-react'
@@ -79,7 +79,16 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
   ref
 ) {
   const { t } = useTranslation()
-  const { pubkey, signEvent, checkLogin, account } = useNostr()
+  const { pubkey, checkLogin, account, getSignerForAccount } = useNostr()
+
+  // Which account this note will be published as. Defaults to the active account,
+  // but can be temporarily switched without changing the logged-in account.
+  const [postAsAccount, setPostAsAccount] = useState<TAccountPointer | null>(account)
+  // Reset the selection whenever the active account changes (e.g. user switches
+  // accounts globally while the editor stays mounted).
+  useEffect(() => {
+    setPostAsAccount(account)
+  }, [account])
 
   const initialParentStuff = useMemo<Event | string | undefined>(() => {
     if (initialDraft?.parentEvent) return initialDraft.parentEvent
@@ -312,10 +321,20 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
   const post = async (e?: React.MouseEvent) => {
     e?.stopPropagation()
     checkLogin(async () => {
-      if (!canPost || !pubkey || !account || account.signerType === 'npub') return
+      const targetAccount = postAsAccount ?? account
+      if (!canPost || !pubkey || !targetAccount || targetAccount.signerType === 'npub') return
       if (postingRef.current) return
       postingRef.current = true
       try {
+        // Obtain the signer for the chosen account. When it's the active account
+        // this returns the live signer; otherwise it builds a temporary one
+        // without changing the logged-in account.
+        const signer = await getSignerForAccount(targetAccount)
+        if (!signer) {
+          throw new Error(t('Failed to get the signer for the selected account'))
+        }
+        const targetPubkey = targetAccount.pubkey
+
         const draftEvent = await createDraftEvent({
           parentStuff: initialParentStuff,
           highlightedText,
@@ -323,7 +342,7 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
           mentions,
           isPoll,
           pollCreateData,
-          pubkey,
+          pubkey: targetPubkey,
           addClientTag,
           isProtectedEvent,
           isNsfw
@@ -342,10 +361,10 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
 
         let signed: VerifiedEvent
         if (minPow > 0) {
-          const mined = await minePow({ ...draftEvent, pubkey }, minPow)
-          signed = await signEvent(mined)
+          const mined = await minePow({ ...draftEvent, pubkey: targetPubkey }, minPow)
+          signed = await signer.signEvent(mined)
         } else {
-          signed = await signEvent(draftEvent)
+          signed = await signer.signEvent(draftEvent)
         }
 
         deleteDraftEventCache(draftEvent)
@@ -357,7 +376,7 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
 
         await postDraftService.enqueue({
           id: draftIdRef.current,
-          pubkey,
+          pubkey: targetPubkey,
           createdAt: draftCreatedAtRef.current,
           signedEvent: signed,
           targetRelays,
@@ -427,6 +446,9 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
         onUploadStart={handleUploadStart}
         onUploadProgress={handleUploadProgress}
         onUploadEnd={handleUploadEnd}
+        postAsAccount={postAsAccount}
+        onPostAsAccountChange={setPostAsAccount}
+        previewPubkey={postAsAccount?.pubkey ?? pubkey ?? undefined}
         placeholder={highlightedText ? t('Write your thoughts about this highlight...') : undefined}
         topRightActions={
           <div className="flex items-center gap-1">

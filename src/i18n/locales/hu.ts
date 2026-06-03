@@ -1021,6 +1021,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'A rövid kód csak betűket, számokat, kötőjeleket és aláhúzásokat tartalmazhat',
     'Image URL is required': 'A kép URL megadása kötelező',
-    'Invalid image URL': 'Érvénytelen kép-URL'
+    'Invalid image URL': 'Érvénytelen kép-URL',
+    'Post as': 'Közzététel mint',
+    'Failed to get the signer for the selected account':
+      'Nem sikerült lekérni a kiválasztott fiók aláíróját'
   }
 }

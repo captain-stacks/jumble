@@ -1021,6 +1021,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'ショートコードに使用できるのは英数字、ハイフン、アンダースコアのみです',
     'Image URL is required': '画像URLは必須です',
-    'Invalid image URL': '無効な画像URLです'
+    'Invalid image URL': '無効な画像URLです',
+    'Post as': '投稿アカウント',
+    'Failed to get the signer for the selected account':
+      '選択したアカウントの署名者を取得できませんでした'
   }
 }

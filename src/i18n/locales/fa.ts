@@ -1022,6 +1022,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'کد کوتاه فقط می‌تواند شامل حروف، اعداد، خط تیره و زیرخط باشد',
     'Image URL is required': 'نشانی تصویر الزامی است',
-    'Invalid image URL': 'نشانی تصویر نامعتبر است'
+    'Invalid image URL': 'نشانی تصویر نامعتبر است',
+    'Post as': 'انتشار به‌عنوان',
+    'Failed to get the signer for the selected account':
+      'دریافت امضاکننده برای حساب انتخاب‌شده ناموفق بود'
   }
 }

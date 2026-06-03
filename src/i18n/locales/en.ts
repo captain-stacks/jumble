@@ -1039,6 +1039,9 @@ export default {
     'Shortcode can only contain letters, numbers, hyphens and underscores':
       'Shortcode can only contain letters, numbers, hyphens and underscores',
     'Image URL is required': 'Image URL is required',
-    'Invalid image URL': 'Invalid image URL'
+    'Invalid image URL': 'Invalid image URL',
+    'Post as': 'Post as',
+    'Failed to get the signer for the selected account':
+      'Failed to get the signer for the selected account'
   }
 }

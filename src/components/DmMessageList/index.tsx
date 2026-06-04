@@ -843,8 +843,13 @@ function MessageBubble({
           {hasReactions && (
             <div
               className={cn(
-                'absolute top-full z-1 mt-0.5 flex flex-wrap gap-1',
-                isOwn ? 'left-0' : 'right-0'
+                // w-max lays the chips out in a single horizontal row (instead
+                // of collapsing to the narrow bubble width and stacking
+                // vertically); max-w-xs only wraps when there are a lot of them.
+                // Anchor on the bubble's inner side so the row grows toward the
+                // free space and never overflows past the column edge.
+                'absolute top-full z-1 mt-0.5 flex w-max max-w-xs flex-wrap gap-1',
+                isOwn ? 'end-0 justify-end' : 'start-0 justify-start'
               )}
             >
               {groupedReactions.map((r) => (

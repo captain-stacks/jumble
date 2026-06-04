@@ -84,8 +84,8 @@ const NoteList = forwardRef<
   ) => {
     const { t } = useTranslation()
     const active = usePageActive()
-    const { startLogin } = useNostr()
-    const { isWotReady, fetchScoreForPubkey, isScoreFetched, getTrustScore } = useUserTrust()
+    const { startLogin, pubkey: currentPubkey } = useNostr()
+    const { isWotReady, fetchScoreForPubkey, isScoreFetched, getTrustScore, muteVersion } = useUserTrust()
     const { mutePubkeySet } = useMuteList()
     const { followingSet } = useFollowList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
@@ -249,7 +249,7 @@ const NoteList = forwardRef<
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt, i) => {
-              if (followingSet.has(evt.pubkey)) {
+              if (followingSet.has(evt.pubkey) || evt.pubkey === currentPubkey) {
                 const key = keys[i]
                 return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
               }
@@ -285,7 +285,9 @@ const NoteList = forwardRef<
       getTrustScore,
       trustScoreThreshold,
       followingSet,
-      isWotReady
+      isWotReady,
+      muteVersion,
+      currentPubkey
     ])
 
     useEffect(() => {
@@ -318,7 +320,7 @@ const NoteList = forwardRef<
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt) => {
-              if (!followingSet.has(evt.pubkey)) {
+              if (!followingSet.has(evt.pubkey) && evt.pubkey !== currentPubkey) {
                 if (!isScoreFetched(evt.pubkey)) {
                   await fetchScoreForPubkey(evt.pubkey)
                 }
@@ -333,7 +335,7 @@ const NoteList = forwardRef<
         setFilteredNewEvents(_filteredNotes)
       }
       processNewEvents()
-    }, [newEvents, shouldHideEvent, isScoreFetched, hideSpam, fetchScoreForPubkey, getTrustScore, trustScoreThreshold, followingSet, isWotReady])
+    }, [newEvents, shouldHideEvent, isScoreFetched, hideSpam, fetchScoreForPubkey, getTrustScore, trustScoreThreshold, followingSet, isWotReady, muteVersion, currentPubkey])
 
     const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
       setTimeout(() => {

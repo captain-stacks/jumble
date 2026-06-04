@@ -28,13 +28,14 @@ export default function RelaysFeed() {
   )
 
   const filterFn = useMemo(() => {
+    const isSingleRelay = feedInfo?.feedType === 'relay'
     const isMostr = relayUrls.length === 1 && isMostrRelay(relayUrls[0])
     return (event: Event) => {
-      if (pubkey && event.pubkey === pubkey) return false
+      if (!isSingleRelay && pubkey && event.pubkey === pubkey) return false
       if (isMostr) return mostrFilterFn(event)
       return true
     }
-  }, [relayUrls, pubkey, mostrFilterFn])
+  }, [relayUrls, pubkey, mostrFilterFn, feedInfo])
   const trustScoreFilterId = useMemo(() => {
     if (feedInfo?.feedType === 'relay' && feedInfo.id) {
       return `relay-${feedInfo.id}`

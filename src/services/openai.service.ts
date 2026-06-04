@@ -411,12 +411,11 @@ class OpenAIService {
     }
 
     const response = await this.client.images.generate({
-      model: 'dall-e-3',
+      model: 'gpt-image-1',
       prompt,
       n: 1,
       size: '1024x1024',
-      quality: 'standard',
-      response_format: 'b64_json'
+      quality: 'medium'
     })
 
     const b64 = response.data?.[0]?.b64_json

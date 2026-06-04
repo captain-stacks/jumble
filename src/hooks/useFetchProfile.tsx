@@ -1,3 +1,4 @@
+import { getCachedProfile, setCachedProfile, subscribeToProfile } from '@/lib/profile-cache'
 import { userIdToPubkey } from '@/lib/pubkey'
 import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
@@ -8,11 +9,18 @@ export function useFetchProfile(id?: string) {
   const { profile: currentAccountProfile } = useNostr()
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const [profile, setProfile] = useState<TProfile | null>(null)
   const [pubkey, setPubkey] = useState<string | null>(null)
+  const [profile, setProfile] = useState<TProfile | null>(() => {
+    if (!id) return null
+    try {
+      const pk = userIdToPubkey(id)
+      return getCachedProfile(pk) ?? null
+    } catch {
+      return null
+    }
+  })
 
   useEffect(() => {
-    setProfile(null)
     setPubkey(null)
     const fetchProfile = async () => {
       setIsFetching(true)
@@ -23,11 +31,18 @@ export function useFetchProfile(id?: string) {
           return
         }
 
-        const pubkey = userIdToPubkey(id)
-        setPubkey(pubkey)
-        const profile = await client.fetchProfile(id)
-        if (profile) {
-          setProfile(profile)
+        const pk = userIdToPubkey(id)
+        setPubkey(pk)
+
+        const cached = getCachedProfile(pk)
+        if (cached) {
+          setProfile(cached)
+        }
+
+        const fetched = await client.fetchProfile(id)
+        if (fetched) {
+          setCachedProfile(pk, fetched)
+          setProfile(fetched)
         }
       } catch (err) {
         setError(err as Error)
@@ -40,8 +55,13 @@ export function useFetchProfile(id?: string) {
   }, [id])
 
   useEffect(() => {
+    if (!pubkey) return
+    return subscribeToProfile(pubkey, (updated) => setProfile(updated))
+  }, [pubkey])
+
+  useEffect(() => {
     if (currentAccountProfile && pubkey === currentAccountProfile.pubkey) {
-      setProfile(currentAccountProfile)
+      setCachedProfile(pubkey, currentAccountProfile)
     }
   }, [currentAccountProfile, pubkey])
 

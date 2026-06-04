@@ -1,6 +1,7 @@
 import {
   ALLOWED_FILTER_KINDS,
   BIG_RELAY_URLS,
+  DEFAULT_BLOSSOM_CACHE_SERVER_URL,
   DEFAULT_FAVICON_URL_TEMPLATE,
   DEFAULT_FEED_TABS,
   DEFAULT_NIP_96_SERVICE,
@@ -68,6 +69,8 @@ class LocalStorageService {
   private faviconUrlTemplate: string = DEFAULT_FAVICON_URL_TEMPLATE
   private filterOutOnionRelays: boolean = !isTorBrowser()
   private allowInsecureConnection: boolean = false
+  private blossomCacheServerUrl: string = DEFAULT_BLOSSOM_CACHE_SERVER_URL
+  private blossomCacheServerEnabled: boolean = false
   private quickReaction: boolean = false
   private quickReactionEmoji: string | TEmoji = '+'
   private nsfwDisplayPolicy: TNsfwDisplayPolicy = NSFW_DISPLAY_POLICY.HIDE_CONTENT
@@ -323,6 +326,12 @@ class LocalStorageService {
 
     this.allowInsecureConnection =
       window.localStorage.getItem(StorageKey.ALLOW_INSECURE_CONNECTION) === 'true'
+
+    this.blossomCacheServerUrl =
+      window.localStorage.getItem(StorageKey.BLOSSOM_CACHE_SERVER_URL) ??
+      DEFAULT_BLOSSOM_CACHE_SERVER_URL
+    this.blossomCacheServerEnabled =
+      window.localStorage.getItem(StorageKey.BLOSSOM_CACHE_SERVER_ENABLED) === 'true'
 
     this.quickReaction = window.localStorage.getItem(StorageKey.QUICK_REACTION) === 'true'
     const quickReactionEmojiStr =
@@ -1047,6 +1056,24 @@ class LocalStorageService {
   setAllowInsecureConnection(allow: boolean) {
     this.allowInsecureConnection = allow
     window.localStorage.setItem(StorageKey.ALLOW_INSECURE_CONNECTION, allow.toString())
+  }
+
+  getBlossomCacheServerUrl() {
+    return this.blossomCacheServerUrl
+  }
+
+  setBlossomCacheServerUrl(url: string) {
+    this.blossomCacheServerUrl = url
+    window.localStorage.setItem(StorageKey.BLOSSOM_CACHE_SERVER_URL, url)
+  }
+
+  getBlossomCacheServerEnabled() {
+    return this.blossomCacheServerEnabled
+  }
+
+  setBlossomCacheServerEnabled(enabled: boolean) {
+    this.blossomCacheServerEnabled = enabled
+    window.localStorage.setItem(StorageKey.BLOSSOM_CACHE_SERVER_ENABLED, enabled.toString())
   }
 
   getQuickReaction() {

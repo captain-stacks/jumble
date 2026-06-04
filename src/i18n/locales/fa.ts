@@ -1025,6 +1025,11 @@ export default {
     'Invalid image URL': 'نشانی تصویر نامعتبر است',
     'Post as': 'انتشار به‌عنوان',
     'Failed to get the signer for the selected account':
-      'دریافت امضاکننده برای حساب انتخاب‌شده ناموفق بود'
+      'دریافت امضاکننده برای حساب انتخاب‌شده ناموفق بود',
+    'Blossom cache server': 'سرور کش Blossom',
+    'Blossom cache server description':
+      'بارگذاری رسانه از طریق سرور کش Blossom. فقط پس از تأیید در دسترس بودن سرور آن را فعال کنید.',
+    'Server URL': 'آدرس سرور',
+    'Cannot reach the Blossom cache server': 'دسترسی به سرور کش Blossom ممکن نیست'
   }
 }

@@ -1040,6 +1040,11 @@ export default {
     'Invalid image URL': 'Ungültige Bild-URL',
     'Post as': 'Posten als',
     'Failed to get the signer for the selected account':
-      'Signierschlüssel für das ausgewählte Konto konnte nicht abgerufen werden'
+      'Signierschlüssel für das ausgewählte Konto konnte nicht abgerufen werden',
+    'Blossom cache server': 'Blossom-Cache-Server',
+    'Blossom cache server description':
+      'Medien über einen Blossom-Cache-Server laden. Aktiviere ihn erst, nachdem die Erreichbarkeit des Servers überprüft wurde.',
+    'Server URL': 'Server-URL',
+    'Cannot reach the Blossom cache server': 'Blossom-Cache-Server ist nicht erreichbar'
   }
 }

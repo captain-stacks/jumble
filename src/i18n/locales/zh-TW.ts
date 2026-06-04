@@ -982,6 +982,11 @@ export default {
     'Image URL is required': '請填寫圖片 URL',
     'Invalid image URL': '圖片 URL 無效',
     'Post as': '以此帳號發布',
-    'Failed to get the signer for the selected account': '無法取得所選帳號的簽名器'
+    'Failed to get the signer for the selected account': '無法取得所選帳號的簽名器',
+    'Blossom cache server': 'Blossom 快取伺服器',
+    'Blossom cache server description':
+      '透過 Blossom 快取伺服器載入媒體資源。僅在確認伺服器可存取後再啟用。',
+    'Server URL': '伺服器網址',
+    'Cannot reach the Blossom cache server': '無法存取該 Blossom 快取伺服器'
   }
 }

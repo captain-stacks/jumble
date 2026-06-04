@@ -1013,6 +1013,11 @@ export default {
     'Invalid image URL': '잘못된 이미지 URL입니다',
     'Post as': '게시 계정',
     'Failed to get the signer for the selected account':
-      '선택한 계정의 서명자를 가져오지 못했습니다'
+      '선택한 계정의 서명자를 가져오지 못했습니다',
+    'Blossom cache server': 'Blossom 캐시 서버',
+    'Blossom cache server description':
+      'Blossom 캐시 서버를 통해 미디어를 불러옵니다. 서버에 연결할 수 있는지 확인한 후에만 활성화하세요.',
+    'Server URL': '서버 URL',
+    'Cannot reach the Blossom cache server': 'Blossom 캐시 서버에 연결할 수 없습니다'
   }
 }

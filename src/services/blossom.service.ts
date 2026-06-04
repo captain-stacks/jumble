@@ -1,5 +1,5 @@
+import blossomCache from '@/services/blossom-cache.service'
 import client from '@/services/client.service'
-import localBlossomCache from '@/services/local-blossom-cache.service'
 import { getHashFromURL } from 'blossom-client-sdk'
 
 class BlossomService {
@@ -28,7 +28,7 @@ class BlossomService {
     if (cache?.validUrl) {
       return cache.validUrl
     }
-    const localUrl = localBlossomCache.rewriteUrl(url, pubkey)
+    const localUrl = blossomCache.rewriteUrl(url, pubkey)
     return localUrl ?? url
   }
 
@@ -44,10 +44,13 @@ class BlossomService {
     })
     const tried = new Set<string>()
 
-    const localUrl = localBlossomCache.rewriteUrl(url, pubkey)
+    const localUrl = blossomCache.rewriteUrl(url, pubkey)
     if (localUrl) {
       this.cacheMap.set(url, { pubkey, resolve: resolveFunc!, promise, tried, url: localUrl })
-      tried.add(localBlossomCache.hostname)
+      const cacheHostname = blossomCache.hostname
+      if (cacheHostname) {
+        tried.add(cacheHostname)
+      }
       return localUrl
     }
 

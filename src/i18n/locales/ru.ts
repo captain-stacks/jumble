@@ -1029,6 +1029,11 @@ export default {
     'Invalid image URL': 'Недействительный URL изображения',
     'Post as': 'Опубликовать от имени',
     'Failed to get the signer for the selected account':
-      'Не удалось получить подписанта для выбранной учётной записи'
+      'Не удалось получить подписанта для выбранной учётной записи',
+    'Blossom cache server': 'Сервер кэша Blossom',
+    'Blossom cache server description':
+      'Загружать медиа через сервер кэша Blossom. Включайте его только после проверки доступности сервера.',
+    'Server URL': 'URL сервера',
+    'Cannot reach the Blossom cache server': 'Не удаётся подключиться к серверу кэша Blossom'
   }
 }

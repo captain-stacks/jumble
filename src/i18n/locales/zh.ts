@@ -989,6 +989,11 @@ export default {
     'Image URL is required': '请填写图片 URL',
     'Invalid image URL': '图片 URL 无效',
     'Post as': '以此账号发布',
-    'Failed to get the signer for the selected account': '无法获取所选账号的签名器'
+    'Failed to get the signer for the selected account': '无法获取所选账号的签名器',
+    'Blossom cache server': 'Blossom 缓存服务器',
+    'Blossom cache server description':
+      '通过 Blossom 缓存服务器加载媒体资源。仅在确认服务器可访问后再开启。',
+    'Server URL': '服务器地址',
+    'Cannot reach the Blossom cache server': '无法访问该 Blossom 缓存服务器'
   }
 }

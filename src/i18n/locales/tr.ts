@@ -1029,6 +1029,11 @@ export default {
     'Image URL is required': 'Görsel URL gereklidir',
     'Invalid image URL': 'Geçersiz görsel URL',
     'Post as': 'Şu hesapla gönder',
-    'Failed to get the signer for the selected account': 'Seçili hesap için imzalayıcı alınamadı'
+    'Failed to get the signer for the selected account': 'Seçili hesap için imzalayıcı alınamadı',
+    'Blossom cache server': 'Blossom önbellek sunucusu',
+    'Blossom cache server description':
+      'Medyayı bir Blossom önbellek sunucusu üzerinden yükle. Yalnızca sunucuya erişilebildiği doğrulandıktan sonra etkinleştir.',
+    'Server URL': 'Sunucu adresi',
+    'Cannot reach the Blossom cache server': 'Blossom önbellek sunucusuna ulaşılamıyor'
   }
 }

@@ -42,6 +42,8 @@ export const StorageKey = {
   FAVICON_URL_TEMPLATE: 'faviconUrlTemplate',
   FILTER_OUT_ONION_RELAYS: 'filterOutOnionRelays',
   ALLOW_INSECURE_CONNECTION: 'allowInsecureConnection',
+  BLOSSOM_CACHE_SERVER_URL: 'blossomCacheServerUrl',
+  BLOSSOM_CACHE_SERVER_ENABLED: 'blossomCacheServerEnabled',
   QUICK_REACTION: 'quickReaction',
   QUICK_REACTION_EMOJI: 'quickReactionEmoji',
   NSFW_DISPLAY_POLICY: 'nsfwDisplayPolicy',
@@ -211,6 +213,8 @@ export const DEFAULT_DM_RELAYS = [
 export const DM_TIME_RANDOMIZATION_SECONDS = 2 * 24 * 60 * 60 // 2 days in seconds
 
 export const DEFAULT_FAVICON_URL_TEMPLATE = 'https://{hostname}/favicon.ico'
+
+export const DEFAULT_BLOSSOM_CACHE_SERVER_URL = 'http://127.0.0.1:24242'
 
 export const POLL_TYPE = {
   MULTIPLE_CHOICE: 'multiplechoice',

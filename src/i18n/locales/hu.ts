@@ -1024,6 +1024,11 @@ export default {
     'Invalid image URL': 'Érvénytelen kép-URL',
     'Post as': 'Közzététel mint',
     'Failed to get the signer for the selected account':
-      'Nem sikerült lekérni a kiválasztott fiók aláíróját'
+      'Nem sikerült lekérni a kiválasztott fiók aláíróját',
+    'Blossom cache server': 'Blossom gyorsítótár-kiszolgáló',
+    'Blossom cache server description':
+      'Média betöltése Blossom gyorsítótár-kiszolgálón keresztül. Csak akkor engedélyezd, ha a kiszolgáló elérhetősége ellenőrizve lett.',
+    'Server URL': 'Kiszolgáló URL-címe',
+    'Cannot reach the Blossom cache server': 'A Blossom gyorsítótár-kiszolgáló nem érhető el'
   }
 }

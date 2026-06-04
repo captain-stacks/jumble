@@ -1007,6 +1007,11 @@ export default {
     'Invalid image URL': 'رابط الصورة غير صالح',
     'Post as': 'النشر باسم',
     'Failed to get the signer for the selected account':
-      'تعذّر الحصول على أداة التوقيع للحساب المحدد'
+      'تعذّر الحصول على أداة التوقيع للحساب المحدد',
+    'Blossom cache server': 'خادم التخزين المؤقت Blossom',
+    'Blossom cache server description':
+      'تحميل الوسائط عبر خادم تخزين مؤقت Blossom. لا تُفعّله إلا بعد التحقق من إمكانية الوصول إلى الخادم.',
+    'Server URL': 'عنوان الخادم',
+    'Cannot reach the Blossom cache server': 'تعذّر الوصول إلى خادم التخزين المؤقت Blossom'
   }
 }

@@ -1007,6 +1007,11 @@ export default {
     'Invalid image URL': 'URL รูปภาพไม่ถูกต้อง',
     'Post as': 'โพสต์ในนาม',
     'Failed to get the signer for the selected account':
-      'ไม่สามารถรับตัวลงนามสำหรับบัญชีที่เลือกได้'
+      'ไม่สามารถรับตัวลงนามสำหรับบัญชีที่เลือกได้',
+    'Blossom cache server': 'เซิร์ฟเวอร์แคช Blossom',
+    'Blossom cache server description':
+      'โหลดสื่อผ่านเซิร์ฟเวอร์แคช Blossom เปิดใช้งานหลังจากตรวจสอบแล้วว่าเข้าถึงเซิร์ฟเวอร์ได้เท่านั้น',
+    'Server URL': 'URL ของเซิร์ฟเวอร์',
+    'Cannot reach the Blossom cache server': 'ไม่สามารถเข้าถึงเซิร์ฟเวอร์แคช Blossom ได้'
   }
 }

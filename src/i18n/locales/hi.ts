@@ -1023,6 +1023,11 @@ export default {
     'Invalid image URL': 'अमान्य छवि URL',
     'Post as': 'इस रूप में पोस्ट करें',
     'Failed to get the signer for the selected account':
-      'चयनित खाते के लिए हस्ताक्षरकर्ता प्राप्त करने में विफल'
+      'चयनित खाते के लिए हस्ताक्षरकर्ता प्राप्त करने में विफल',
+    'Blossom cache server': 'Blossom कैश सर्वर',
+    'Blossom cache server description':
+      'Blossom कैश सर्वर के माध्यम से मीडिया लोड करें। सर्वर तक पहुँच की पुष्टि होने के बाद ही इसे सक्षम करें।',
+    'Server URL': 'सर्वर URL',
+    'Cannot reach the Blossom cache server': 'Blossom कैश सर्वर तक नहीं पहुँचा जा सका'
   }
 }

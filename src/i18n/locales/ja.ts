@@ -1024,6 +1024,11 @@ export default {
     'Invalid image URL': '無効な画像URLです',
     'Post as': '投稿アカウント',
     'Failed to get the signer for the selected account':
-      '選択したアカウントの署名者を取得できませんでした'
+      '選択したアカウントの署名者を取得できませんでした',
+    'Blossom cache server': 'Blossom キャッシュサーバー',
+    'Blossom cache server description':
+      'Blossom キャッシュサーバー経由でメディアを読み込みます。サーバーに到達できることを確認してから有効にしてください。',
+    'Server URL': 'サーバー URL',
+    'Cannot reach the Blossom cache server': 'Blossom キャッシュサーバーに接続できません'
   }
 }

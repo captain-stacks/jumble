@@ -1032,6 +1032,12 @@ export default {
     'Invalid image URL': 'Nieprawidłowy URL obrazu',
     'Post as': 'Opublikuj jako',
     'Failed to get the signer for the selected account':
-      'Nie udało się uzyskać podpisującego dla wybranego konta'
+      'Nie udało się uzyskać podpisującego dla wybranego konta',
+    'Blossom cache server': 'Serwer pamięci podręcznej Blossom',
+    'Blossom cache server description':
+      'Ładuj multimedia przez serwer pamięci podręcznej Blossom. Włącz go dopiero po sprawdzeniu, że serwer jest osiągalny.',
+    'Server URL': 'Adres URL serwera',
+    'Cannot reach the Blossom cache server':
+      'Nie można połączyć się z serwerem pamięci podręcznej Blossom'
   }
 }

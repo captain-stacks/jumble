@@ -1042,6 +1042,11 @@ export default {
     'Invalid image URL': 'Invalid image URL',
     'Post as': 'Post as',
     'Failed to get the signer for the selected account':
-      'Failed to get the signer for the selected account'
+      'Failed to get the signer for the selected account',
+    'Blossom cache server': 'Blossom cache server',
+    'Blossom cache server description':
+      'Load media through a Blossom cache server. Enable it only after the server has been verified to be reachable.',
+    'Server URL': 'Server URL',
+    'Cannot reach the Blossom cache server': 'Cannot reach the Blossom cache server'
   }
 }

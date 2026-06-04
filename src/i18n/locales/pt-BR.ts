@@ -1029,6 +1029,11 @@ export default {
     'Invalid image URL': 'URL de imagem inválida',
     'Post as': 'Publicar como',
     'Failed to get the signer for the selected account':
-      'Falha ao obter o assinante da conta selecionada'
+      'Falha ao obter o assinante da conta selecionada',
+    'Blossom cache server': 'Servidor de cache Blossom',
+    'Blossom cache server description':
+      'Carregar mídia por meio de um servidor de cache Blossom. Ative-o somente após verificar que o servidor está acessível.',
+    'Server URL': 'URL do servidor',
+    'Cannot reach the Blossom cache server': 'Não foi possível acessar o servidor de cache Blossom'
   }
 }

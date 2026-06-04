@@ -846,28 +846,6 @@ export default function DmInput({
           ))}
         </div>
       )}
-      {replyTo && (
-        <div className="mb-2 flex items-center gap-2 rounded-md bg-secondary/50 px-3 py-1.5">
-          <div className="relative min-w-0 flex-1 ps-2 before:absolute before:inset-y-0.5 before:start-0 before:w-0.5 before:rounded-full before:bg-primary">
-            <SimpleUsername
-              userId={replyTo.senderPubkey}
-              className="text-xs font-medium text-primary"
-              withoutSkeleton
-            />
-            <ContentPreviewContent
-              content={replyTo.content || '...'}
-              className="block truncate text-xs text-muted-foreground"
-              emojiInfos={getEmojiInfosFromEmojiTags(replyTo.tags)}
-            />
-          </div>
-          <button
-            onClick={onCancelReply}
-            className="shrink-0 rounded-full p-0.5 text-muted-foreground hover:bg-secondary"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
       {mediaItems.length > 0 && (
         <div className="mb-2 flex gap-2 overflow-x-auto">
           <DndContext
@@ -924,23 +902,47 @@ export default function DmInput({
             <Smile className="h-5 w-5" />
           </button>
         </ExpressionPickerDialog>
-        <div
-          ref={editableRef}
-          contentEditable={!disabled}
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          onClick={detectAutocomplete}
-          onKeyUp={detectAutocomplete}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          data-placeholder={t('Type a message...')}
-          className={cn(
-            'max-h-40 min-h-[36px] flex-1 select-text overflow-y-auto wrap-break-word bg-transparent py-2 text-base focus:outline-hidden',
-            disabled && 'cursor-not-allowed opacity-50',
-            'empty:before:pointer-events-none empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]'
+        <div className="flex min-w-0 flex-1 flex-col">
+          {replyTo && (
+            <div className="mb-1 flex items-center gap-2 rounded-md bg-secondary/50 px-3 py-1.5">
+              <div className="relative min-w-0 flex-1 ps-2 before:absolute before:inset-y-0.5 before:start-0 before:w-0.5 before:rounded-full before:bg-primary">
+                <SimpleUsername
+                  userId={replyTo.senderPubkey}
+                  className="text-xs font-medium text-primary"
+                  withoutSkeleton
+                />
+                <ContentPreviewContent
+                  content={replyTo.content || '...'}
+                  className="block truncate text-xs text-muted-foreground"
+                  emojiInfos={getEmojiInfosFromEmojiTags(replyTo.tags)}
+                />
+              </div>
+              <button
+                onClick={onCancelReply}
+                className="shrink-0 rounded-full p-0.5 text-muted-foreground hover:bg-secondary"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
           )}
-        />
+          <div
+            ref={editableRef}
+            contentEditable={!disabled}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            onClick={detectAutocomplete}
+            onKeyUp={detectAutocomplete}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            data-placeholder={t('Type a message...')}
+            className={cn(
+              'max-h-40 min-h-[36px] w-full select-text overflow-y-auto wrap-break-word bg-transparent py-2 text-base focus:outline-hidden',
+              disabled && 'cursor-not-allowed opacity-50',
+              'empty:before:pointer-events-none empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]'
+            )}
+          />
+        </div>
         <button
           onMouseDown={(e) => {
             e.preventDefault()

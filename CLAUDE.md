@@ -360,7 +360,7 @@ Renderer counterparts:
 
 The bridge exposed at `window.electron` has three namespaces:
 
-- `relay.*` — `ensure / publish / subscribe / closeSub / auth / close / setAllowInsecure`, plus event-stream listeners (`onSubEvent`, `onSubEose`, `onSubClose`, `onAuthRequest`) and `sendAuthResponse`. The renderer streams events back through `ipcRenderer.on`; the main process triggers AUTH signing via a request/response over IPC so the signer stays in the renderer.
+- `relay.*` — `ensure / publish / subscribe / closeSub / auth / close / setAllowInsecure / setTrustedInsecureRelayUrls`, plus event-stream listeners (`onSubEvent`, `onSubEose`, `onSubClose`, `onAuthRequest`) and `sendAuthResponse`. The renderer streams events back through `ipcRenderer.on`; the main process triggers AUTH signing via a request/response over IPC so the signer stays in the renderer.
 - `secrets.*` — `isAvailable / load / save`. Writes are atomic (tmp + rename) and serialized via a Promise chain.
 - `proxy.fetch(url, options)` — **generic CORS-bypass HTTP proxy**. Any future renderer code that needs to bypass CORS should call this rather than add a new channel. Returns `{ ok, status, statusText, url, headers, body }`. Default 15s timeout, 5 MB body cap, custom UA. Renderer parses the body itself (no domain logic in main).
 

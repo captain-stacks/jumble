@@ -891,10 +891,9 @@ function MessageBubble({
                       }}
                     >
                       {r.emojiTag ? (
-                        <img
-                          src={r.emojiTag[2]}
-                          alt={r.emojiTag[1]}
-                          className="inline-block size-4"
+                        <Emoji
+                          emoji={{ shortcode: r.emojiTag[1], url: r.emojiTag[2] }}
+                          classNames={{ img: 'size-4', text: 'text-sm leading-none' }}
                         />
                       ) : (
                         <Emoji

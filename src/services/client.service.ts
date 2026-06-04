@@ -13,7 +13,7 @@ import { filterOutBigRelays, getDefaultRelayUrls, getSearchRelayUrls } from '@/l
 import { SmartPool } from '@/lib/smart-pool'
 import { getPubkeysFromPTags, getServersFromServerTags, tagNameEquals } from '@/lib/tag'
 import { mergeTimelines } from '@/lib/timeline'
-import { isLocalNetworkUrl, isWebsocketUrl, normalizeUrl } from '@/lib/url'
+import { isInsecureUrl, isLocalNetworkUrl, isWebsocketUrl, normalizeUrl } from '@/lib/url'
 import { isSafari } from '@/lib/utils'
 import { ISigner, TProfile, TPublishOptions, TRelayList, TSubRequestFilter } from '@/types'
 import { IRelay, IRelayPool } from '@/types/relay-pool'
@@ -41,9 +41,41 @@ class ClientService extends EventTarget {
 
   signer?: ISigner
   pubkey?: string
-  currentRelays: string[] = []
   private pool: IRelayPool
   private externalSeenOn = new Map<string, Set<string>>()
+
+  // Relays the user is actively browsing (set by CurrentRelaysProvider) and the
+  // user's own configured relays (set by FavoriteRelaysProvider). Their insecure
+  // (ws://) subset is pushed to the pool as the trusted-insecure allowlist, so
+  // insecure relays coming from other people's data stay blocked.
+  private browsingRelays: string[] = []
+  private ownRelays: string[] = []
+  private trustedInsecureRelaysKey = ''
+
+  setCurrentRelays(urls: string[]) {
+    this.browsingRelays = urls
+    this.refreshTrustedInsecureRelays()
+  }
+
+  setOwnRelayUrls(urls: string[]) {
+    this.ownRelays = urls
+    this.refreshTrustedInsecureRelays()
+  }
+
+  // SmartPool normalizes these URLs, so we collect them raw here.
+  private refreshTrustedInsecureRelays() {
+    const trusted = new Set<string>()
+    for (const url of this.ownRelays.concat(this.browsingRelays)) {
+      if (isWebsocketUrl(url) && isInsecureUrl(url)) {
+        trusted.add(url)
+      }
+    }
+    const sorted = Array.from(trusted).sort()
+    const key = sorted.join(',')
+    if (key === this.trustedInsecureRelaysKey) return
+    this.trustedInsecureRelaysKey = key
+    this.pool.setTrustedInsecureRelayUrls(sorted)
+  }
 
   private timelines: Record<
     string,
@@ -1152,7 +1184,7 @@ class ClientService extends EventTarget {
 
     // If the user has no relay list, try current relays
     if (!relays.length) {
-      relays = filterOutBigRelays(this.currentRelays)
+      relays = filterOutBigRelays(this.browsingRelays)
     }
 
     const profileEvent = await this.fetchEventFromRelays(relays, {

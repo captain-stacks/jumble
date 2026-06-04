@@ -16,6 +16,9 @@ class DmService {
 
   private currentAccountPubkey: string | null = null
   private currentEncryptionKeypair: TEncryptionKeypair | null = null
+  // Rotated-out encryption keys still within the grace period, tried as decryption
+  // fallbacks so messages encrypted to an old key aren't lost after a key rotation.
+  private retiredEncryptionKeypairs: TEncryptionKeypair[] = []
   private isInitialized = false
   private isInitializing = false
   private relaySubscription: { close: () => void } | null = null
@@ -54,6 +57,7 @@ class DmService {
     this.emitLoadingChanged()
     this.currentAccountPubkey = accountPubkey
     this.currentEncryptionKeypair = encryptionKeypair
+    this.retiredEncryptionKeypairs = encryptionKeyService.getValidRetiredKeypairs(accountPubkey)
 
     try {
       let since = storage.getDmLastSyncedAt(accountPubkey)
@@ -94,8 +98,22 @@ class DmService {
       this.relaySubscription = null
     }
     this.currentEncryptionKeypair = null
+    this.retiredEncryptionKeypairs = []
     this.isInitialized = false
     this.isInitializing = false
+  }
+
+  /**
+   * Unwraps a gift wrap, trying the current encryption key first and then any
+   * retired keys still within the grace period. This lets us decrypt messages a
+   * contact encrypted to an older key it hasn't yet learned was rotated.
+   */
+  private tryUnwrap(giftWrap: Event) {
+    const privkeys = [
+      ...(this.currentEncryptionKeypair ? [this.currentEncryptionKeypair.privkey] : []),
+      ...this.retiredEncryptionKeypairs.map((k) => k.privkey)
+    ]
+    return nip17GiftWrapService.unwrapGiftWrapWithKeys(giftWrap, privkeys)
   }
 
   destroy(): void {
@@ -533,7 +551,7 @@ class DmService {
     let parseFailCount = 0
 
     for (const giftWrap of events) {
-      const unwrapped = nip17GiftWrapService.unwrapGiftWrap(giftWrap, encryptionKeypair.privkey)
+      const unwrapped = this.tryUnwrap(giftWrap)
       if (!unwrapped) {
         unwrapFailCount++
         continue
@@ -883,7 +901,7 @@ class DmService {
 
           // GIFT_WRAP handling
           const giftWrap = event
-          const unwrapped = nip17GiftWrapService.unwrapGiftWrap(giftWrap, encryptionKeypair.privkey)
+          const unwrapped = this.tryUnwrap(giftWrap)
           if (!unwrapped) return
 
           const verified = await this.determineVerification(
@@ -1061,7 +1079,7 @@ class DmService {
       })
 
       for (const gw of giftWraps) {
-        const unwrapped = nip17GiftWrapService.unwrapGiftWrap(gw, encryptionKeypair.privkey)
+        const unwrapped = this.tryUnwrap(gw)
         if (!unwrapped) continue
 
         const fromMe = this.isFromMe(

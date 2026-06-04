@@ -1,4 +1,8 @@
-import { ExtendedKind } from '@/constants'
+import {
+  ENCRYPTION_KEY_RETENTION_MS,
+  ExtendedKind,
+  MAX_RETIRED_ENCRYPTION_KEYS
+} from '@/constants'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { tagNameEquals } from '@/lib/tag'
 import { ISigner, TEncryptionKeypair } from '@/types'
@@ -27,15 +31,52 @@ class EncryptionKeyService {
 
   getEncryptionKeypair(accountPubkey: string): TEncryptionKeypair | null {
     const privkeyHex = storage.getEncryptionKeyPrivkey(accountPubkey)
-    if (!privkeyHex) return null
-
-    const privkey = hexToBytes(privkeyHex)
-    const pubkey = getPublicKey(privkey)
-    return { privkey, pubkey }
+    return privkeyHex ? this.hexToKeypair(privkeyHex) : null
   }
 
+  private hexToKeypair(privkeyHex: string): TEncryptionKeypair {
+    const privkey = hexToBytes(privkeyHex)
+    return { privkey, pubkey: getPublicKey(privkey) }
+  }
+
+  /**
+   * Retires the current encryption key instead of dropping it outright: the old
+   * private key is moved into a kept-around list (bounded by age and count) so
+   * messages still encrypted to it — by contacts who haven't learned the new key
+   * yet — can keep being decrypted during the grace period. Then it clears the
+   * current key so a fresh one can take its place.
+   */
   removeEncryptionKey(accountPubkey: string): void {
+    const privkeyHex = storage.getEncryptionKeyPrivkey(accountPubkey)
+    if (privkeyHex) {
+      storage.addRetiredEncryptionKeyPrivkey(accountPubkey, privkeyHex, dayjs().valueOf())
+    }
     storage.removeEncryptionKeyPrivkey(accountPubkey)
+    this.pruneRetiredKeys(accountPubkey)
+  }
+
+  /**
+   * Returns the still-valid retired encryption keypairs, pruning (in place) any
+   * that have exceeded the retention age or the count cap. Used as decryption
+   * fallbacks when the current key fails to unwrap a gift wrap.
+   */
+  getValidRetiredKeypairs(accountPubkey: string): TEncryptionKeypair[] {
+    return this.pruneRetiredKeys(accountPubkey).map((k) => this.hexToKeypair(k.privkey))
+  }
+
+  // Storage keeps retired keys newest-first (see addRetiredEncryptionKeyPrivkey),
+  // so dropping expired entries and capping the count needs no re-sort. Only
+  // persists when something was actually pruned.
+  private pruneRetiredKeys(accountPubkey: string): { privkey: string; retiredAt: number }[] {
+    const now = dayjs().valueOf()
+    const stored = storage.getRetiredEncryptionKeyPrivkeys(accountPubkey)
+    const kept = stored
+      .filter((k) => now - k.retiredAt < ENCRYPTION_KEY_RETENTION_MS)
+      .slice(0, MAX_RETIRED_ENCRYPTION_KEYS)
+    if (kept.length !== stored.length) {
+      storage.setRetiredEncryptionKeyPrivkeys(accountPubkey, kept)
+    }
+    return kept
   }
 
   generateEncryptionKey(accountPubkey: string): TEncryptionKeypair {
@@ -52,9 +93,7 @@ class EncryptionKeyService {
       privkeyHex = bytesToHex(privkey)
       storage.setClientKeyPrivkey(accountPubkey, privkeyHex)
     }
-    const privkey = hexToBytes(privkeyHex)
-    const pubkey = getPublicKey(privkey)
-    return { privkey, pubkey }
+    return this.hexToKeypair(privkeyHex)
   }
 
   async queryEncryptionKeyAnnouncement(pubkey: string): Promise<Event | null> {

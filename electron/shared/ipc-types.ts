@@ -32,6 +32,7 @@ export type TSecretsBundle = {
   ncryptsec?: Record<string, string>
   bunkerClientSecretKey?: Record<string, string>
   encryptionKeyPrivkey?: Record<string, string>
+  retiredEncryptionKeyPrivkey?: Record<string, { privkey: string; retiredAt: number }[]>
   clientKeyPrivkey?: Record<string, string>
 }
 

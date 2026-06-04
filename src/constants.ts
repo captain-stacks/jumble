@@ -55,6 +55,7 @@ export const StorageKey = {
   SEARCH_HISTORY: 'searchHistory',
   HIDE_INDIRECT_NOTIFICATIONS: 'hideIndirectNotifications',
   ENCRYPTION_KEY_PRIVKEY_MAP: 'encryptionKeyPrivkeyMap',
+  RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP: 'retiredEncryptionKeyPrivkeyMap',
   CLIENT_KEY_PRIVKEY_MAP: 'clientKeyPrivkeyMap',
   LAST_READ_DM_TIME_MAP: 'lastReadDmTimeMap',
   DM_LAST_SYNCED_AT_MAP: 'dmLastSyncedAtMap',
@@ -211,6 +212,12 @@ export const DEFAULT_DM_RELAYS = [
 ]
 
 export const DM_TIME_RANDOMIZATION_SECONDS = 2 * 24 * 60 * 60 // 2 days in seconds
+
+// When the encryption key is rotated, the old key is kept around so messages
+// still encrypted to it (by contacts who haven't learned the new key yet) can
+// be decrypted. Old keys are pruned once they exceed this age or this count.
+export const ENCRYPTION_KEY_RETENTION_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
+export const MAX_RETIRED_ENCRYPTION_KEYS = 10
 
 export const DEFAULT_FAVICON_URL_TEMPLATE = 'https://{hostname}/favicon.ico'
 

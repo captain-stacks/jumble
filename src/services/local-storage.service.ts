@@ -82,6 +82,9 @@ class LocalStorageService {
   private minTrustScoreMap: Record<string, number> = {}
   private hideIndirectNotifications: boolean = false
   private encryptionKeyPrivkeyMap: Record<string, string> = {}
+  // Rotated-out encryption keys kept around (per account) so messages still
+  // encrypted to them can be decrypted during the grace period. retiredAt is in ms.
+  private retiredEncryptionKeyMap: Record<string, { privkey: string; retiredAt: number }[]> = {}
   private clientKeyPrivkeyMap: Record<string, string> = {}
   // Per-pubkey maps for fields that historically lived inline on TAccount.
   // Always the source of truth at runtime regardless of mode.
@@ -390,6 +393,20 @@ class LocalStorageService {
       }
     }
 
+    const retiredEncryptionKeyMapStr = window.localStorage.getItem(
+      StorageKey.RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP
+    )
+    if (retiredEncryptionKeyMapStr) {
+      try {
+        const map = JSON.parse(retiredEncryptionKeyMapStr)
+        if (typeof map === 'object' && map !== null) {
+          this.retiredEncryptionKeyMap = map
+        }
+      } catch {
+        // Invalid JSON, use default
+      }
+    }
+
     const clientKeyPrivkeyMapStr = window.localStorage.getItem(StorageKey.CLIENT_KEY_PRIVKEY_MAP)
     if (clientKeyPrivkeyMapStr) {
       try {
@@ -588,6 +605,7 @@ class LocalStorageService {
     this.ncryptsecByPubkey = {}
     this.bunkerClientSecretByPubkey = {}
     this.encryptionKeyPrivkeyMap = {}
+    this.retiredEncryptionKeyMap = {}
     this.clientKeyPrivkeyMap = {}
 
     if (available) {
@@ -598,6 +616,7 @@ class LocalStorageService {
         Object.assign(this.ncryptsecByPubkey, bundle.ncryptsec ?? {})
         Object.assign(this.bunkerClientSecretByPubkey, bundle.bunkerClientSecretKey ?? {})
         Object.assign(this.encryptionKeyPrivkeyMap, bundle.encryptionKeyPrivkey ?? {})
+        Object.assign(this.retiredEncryptionKeyMap, bundle.retiredEncryptionKeyPrivkey ?? {})
         Object.assign(this.clientKeyPrivkeyMap, bundle.clientKeyPrivkey ?? {})
       } catch (err) {
         console.error('[storage] failed to load encrypted secrets:', err)
@@ -610,6 +629,7 @@ class LocalStorageService {
 
     // Defensive cleanup: scrub any plaintext that lingered in localStorage.
     window.localStorage.removeItem(StorageKey.ENCRYPTION_KEY_PRIVKEY_MAP)
+    window.localStorage.removeItem(StorageKey.RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP)
     window.localStorage.removeItem(StorageKey.CLIENT_KEY_PRIVKEY_MAP)
     window.localStorage.setItem(StorageKey.ACCOUNTS, JSON.stringify(this.serializeAccounts()))
     if (this.currentAccount) {
@@ -699,6 +719,17 @@ class LocalStorageService {
     }
   }
 
+  private persistRetiredEncryptionKeyMap() {
+    if (this.secretsViaIpc) {
+      this.queueSecretsSave()
+    } else {
+      window.localStorage.setItem(
+        StorageKey.RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP,
+        JSON.stringify(this.retiredEncryptionKeyMap)
+      )
+    }
+  }
+
   private persistClientKeyMap() {
     if (this.secretsViaIpc) {
       this.queueSecretsSave()
@@ -718,6 +749,7 @@ class LocalStorageService {
       ncryptsec: { ...this.ncryptsecByPubkey },
       bunkerClientSecretKey: { ...this.bunkerClientSecretByPubkey },
       encryptionKeyPrivkey: { ...this.encryptionKeyPrivkeyMap },
+      retiredEncryptionKeyPrivkey: { ...this.retiredEncryptionKeyMap },
       clientKeyPrivkey: { ...this.clientKeyPrivkeyMap }
     }
     this.secretsWriteChain = this.secretsWriteChain
@@ -1194,6 +1226,31 @@ class LocalStorageService {
   removeEncryptionKeyPrivkey(accountPubkey: string) {
     delete this.encryptionKeyPrivkeyMap[accountPubkey]
     this.persistEncryptionKeyMap()
+  }
+
+  getRetiredEncryptionKeyPrivkeys(accountPubkey: string): { privkey: string; retiredAt: number }[] {
+    return this.retiredEncryptionKeyMap[accountPubkey] ?? []
+  }
+
+  addRetiredEncryptionKeyPrivkey(accountPubkey: string, privkey: string, retiredAt: number) {
+    const list = this.retiredEncryptionKeyMap[accountPubkey] ?? []
+    if (list.some((k) => k.privkey === privkey)) return
+    // Newest first; age/count pruning is owned by encryptionKeyService.
+    list.unshift({ privkey, retiredAt })
+    this.retiredEncryptionKeyMap[accountPubkey] = list
+    this.persistRetiredEncryptionKeyMap()
+  }
+
+  setRetiredEncryptionKeyPrivkeys(
+    accountPubkey: string,
+    list: { privkey: string; retiredAt: number }[]
+  ) {
+    if (list.length === 0) {
+      delete this.retiredEncryptionKeyMap[accountPubkey]
+    } else {
+      this.retiredEncryptionKeyMap[accountPubkey] = list
+    }
+    this.persistRetiredEncryptionKeyMap()
   }
 
   getClientKeyPrivkey(accountPubkey: string): string | null {

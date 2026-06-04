@@ -189,6 +189,29 @@ class Nip17GiftWrapService {
     ) as unknown as Event
   }
 
+  /**
+   * Tries to unwrap a gift wrap with each candidate private key in turn (current
+   * key first, then retired keys kept during the rotation grace period), returning
+   * the first success. Lets a recipient still decrypt messages a contact encrypted
+   * to an older encryption key it hasn't learned was rotated.
+   */
+  unwrapGiftWrapWithKeys(
+    giftWrap: Event,
+    recipientPrivkeys: Uint8Array[]
+  ): TUnwrappedMessage | null {
+    for (const privkey of recipientPrivkeys) {
+      const unwrapped = this.unwrapGiftWrap(giftWrap, privkey)
+      if (unwrapped) return unwrapped
+    }
+    return null
+  }
+
+  /**
+   * Unwraps a gift wrap with a single private key. Returns null on any failure
+   * (wrong key, malformed payload, bad signature) — failure is expected and
+   * silent because callers try multiple keys and most gift wraps in a batch are
+   * not addressed to this key.
+   */
   unwrapGiftWrap(giftWrap: Event, recipientPrivkey: Uint8Array): TUnwrappedMessage | null {
     try {
       const giftWrapConvKey = nip44.v2.utils.getConversationKey(recipientPrivkey, giftWrap.pubkey)
@@ -232,8 +255,7 @@ class Nip17GiftWrapService {
         giftWrapCreatedAt: giftWrap.created_at,
         sealSignedByIdentity
       }
-    } catch (error) {
-      console.error('Failed to unwrap gift wrap:', error)
+    } catch {
       return null
     }
   }

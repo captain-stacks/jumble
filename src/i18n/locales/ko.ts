@@ -891,11 +891,11 @@ export default {
     Shuffle: '셔플',
     'Login with Google': 'Google로 로그인',
     'Continue with Google': 'Google로 계속하기',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Google로 로그인하면 Nostr 키가 자동으로 생성됩니다.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Google로 로그인하여 계정에 접속하세요. 아직 계정이 없다면 Nostr 계정이 자동으로 생성됩니다.',
     'How it works': '작동 방식',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      '개인 키는 별도의 운영자가 보관하는 샤드로 분할되므로 한 곳에 저장되지 않습니다. Jumble은 안전한 원격 서명자를 통해 서명합니다. 언제든지 계정 설정에서 키를 내보낼 수 있습니다.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      '개인 키는 별도의 독립적인 운영자가 보관하는 샤드로 분할되므로 한 곳에 저장되지 않습니다. Google은 운영자에게 신원을 증명하는 데만 사용되며 키를 저장하는 데는 절대 사용되지 않습니다.',
     'Waiting for Google sign-in...': 'Google 로그인 대기 중...',
     'Checking your account...': '계정 확인 중...',
     'Setting up your secure account...': '보안 계정 설정 중...',
@@ -1018,6 +1018,29 @@ export default {
     'Blossom cache server description':
       'Blossom 캐시 서버를 통해 미디어를 불러옵니다. 서버에 연결할 수 있는지 확인한 후에만 활성화하세요.',
     'Server URL': '서버 URL',
-    'Cannot reach the Blossom cache server': 'Blossom 캐시 서버에 연결할 수 없습니다'
+    'Cannot reach the Blossom cache server': 'Blossom 캐시 서버에 연결할 수 없습니다',
+    'Link Google account': 'Google 계정 연결',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Google로 이 계정에 로그인할 수 있도록 Google 계정을 연결하세요. 개인 키는 Google과 절대 공유되지 않습니다.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Google로 이 계정에 로그인할 수 있도록 Google 계정을 연결하세요.',
+    'Linking your account...': '계정 연결 중...',
+    'Switching to remote signer...': '원격 서명자로 전환 중...',
+    'Google account already linked': 'Google 계정이 이미 연결됨',
+    'This Google account is already linked to another account':
+      '이 Google 계정은 이미 다른 계정에 연결되어 있습니다',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      '현재 {{email}}에 연결되어 있습니다. 대신 이 계정에 연결하려면 이전 연결이 제거됩니다. 이전 계정은 여전히 존재하며 개인 키로 계속 사용할 수 있습니다.',
+    'Unlink the previous account and link this one': '이전 계정 연결을 해제하고 이 계정을 연결',
+    'Switch to remote signer login?': '원격 서명자 로그인으로 전환하시겠습니까?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      '계정이 연결되었습니다. 원격 서명자를 통한 서명으로 전환하거나 개인 키로 로컬 서명을 계속할 수 있습니다.',
+    'Switch to remote signer': '원격 서명자로 전환',
+    'Keep signing locally': '로컬 서명 유지',
+    'Google account linked': 'Google 계정 연결됨',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      '이제 이 계정은 안전한 원격 서명자를 통해 서명하며 언제든지 Google로 로그인할 수 있습니다. 개인 키는 Google과 절대 공유되지 않습니다.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      '이제 Google로 이 계정에 로그인할 수 있습니다. 여전히 개인 키로 로컬 서명을 하고 있으며, 개인 키는 Google과 절대 공유되지 않습니다.'
   }
 }

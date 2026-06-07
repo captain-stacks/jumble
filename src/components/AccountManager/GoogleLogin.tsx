@@ -5,7 +5,7 @@ import pomegranateService from '@/services/pomegranate.service'
 import { Loader } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import InfoCard from '../InfoCard'
+import PomegranateHowItWorks from '../PomegranateHowItWorks'
 
 type Status = 'idle' | 'authenticating' | 'checking' | 'creating' | 'loggingIn' | 'error'
 
@@ -53,25 +53,22 @@ export default function GoogleLogin({
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="mb-2 text-lg font-semibold">{t('Login with Google')}</h3>
-        <p className="text-sm text-muted-foreground">
-          {t('Sign in with Google and a Nostr key will be created for you automatically.')}
+        <p className="text-muted-foreground text-sm">
+          {t(
+            "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically."
+          )}
         </p>
       </div>
 
-      <InfoCard
-        title={t('How it works')}
-        content={t(
-          'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.'
-        )}
-      />
+      <PomegranateHowItWorks />
 
       {busy ? (
-        <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center justify-center gap-2 py-4 text-sm">
           <Loader className="size-4 animate-spin" />
           {statusText[status as Exclude<Status, 'idle' | 'error'>]}
         </div>
       ) : (
-        status === 'error' && <p className="text-center text-sm text-destructive">{errorMsg}</p>
+        status === 'error' && <p className="text-destructive text-center text-sm">{errorMsg}</p>
       )}
 
       <div className="flex gap-2">

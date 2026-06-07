@@ -871,11 +871,11 @@ export default {
     Shuffle: '换一批',
     'Login with Google': '使用 Google 登录',
     'Continue with Google': '使用 Google 继续',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      '使用 Google 登录，系统会自动为你创建 Nostr 密钥。',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      '使用 Google 登录以访问你的账号。若你还没有账号，系统会自动为你创建一个 Nostr 账号。',
     'How it works': '工作原理',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      '你的私钥会被拆分成多个分片，由不同的运营方分别保管，不会集中存放在任何一处。Jumble 通过安全的远程签名器进行签名。你可以随时在账号设置中导出私钥。',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      '你的私钥会被拆分为多个分片，分别由相互独立的运营方保管，不会集中存放于任何一处。Google 仅用于向运营方证明你的身份，绝不保管你的密钥。',
     'Waiting for Google sign-in...': '等待 Google 登录…',
     'Checking your account...': '正在检查你的账号…',
     'Setting up your secure account...': '正在创建你的安全账号…',
@@ -994,6 +994,28 @@ export default {
     'Blossom cache server description':
       '通过 Blossom 缓存服务器加载媒体资源。仅在确认服务器可访问后再开启。',
     'Server URL': '服务器地址',
-    'Cannot reach the Blossom cache server': '无法访问该 Blossom 缓存服务器'
+    'Cannot reach the Blossom cache server': '无法访问该 Blossom 缓存服务器',
+    'Link Google account': '绑定 Google 账号',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      '绑定 Google 账号后，即可用 Google 登录此账号。你的私钥绝不会交给 Google。',
+    'Link a Google account so you can sign in to this account with Google.':
+      '绑定 Google 账号后，即可用 Google 登录此账号。',
+    'Linking your account...': '正在绑定账号…',
+    'Switching to remote signer...': '正在切换为远程签名器…',
+    'Google account already linked': '该 Google 账号已被绑定',
+    'This Google account is already linked to another account': '该 Google 账号已绑定了另一个账号',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      '它当前绑定的是 {{email}}。若要改绑到当前账号，将先解除之前的绑定。之前的账号仍然存在，并可继续用其私钥登录。',
+    'Unlink the previous account and link this one': '解绑之前的账号并绑定当前账号',
+    'Switch to remote signer login?': '是否切换为远程签名器登录？',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      '已完成绑定。你可以切换为通过远程签名器签名，或继续在本地用私钥签名。',
+    'Switch to remote signer': '切换为远程签名器',
+    'Keep signing locally': '继续本地签名',
+    'Google account linked': '已绑定 Google 账号',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      '此账号现在通过安全的远程签名器签名，你可以随时用 Google 登录。你的私钥绝不会交给 Google。',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      '现在你可以用 Google 登录此账号。你仍在本地用私钥签名，私钥绝不会交给 Google。'
   }
 }

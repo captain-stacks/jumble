@@ -904,11 +904,11 @@ export default {
     Shuffle: 'Mescola',
     'Login with Google': 'Accedi con Google',
     'Continue with Google': 'Continua con Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Accedi con Google e una chiave Nostr verrà creata automaticamente per te.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Accedi con Google per accedere al tuo account. Se non ne hai ancora uno, un account Nostr verrà creato automaticamente per te.',
     'How it works': 'Come funziona',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      "La tua chiave privata è divisa in frammenti detenuti da operatori separati, quindi non viene mai archiviata in un unico posto. Jumble firma tramite un firmatario remoto sicuro. Puoi esportare la tua chiave in qualsiasi momento dalle impostazioni dell'account.",
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'La tua chiave privata è divisa in frammenti detenuti da operatori separati e indipendenti, quindi non viene mai archiviata in un unico posto. Google viene utilizzato solo per provare la tua identità agli operatori, mai per archiviare la tua chiave.',
     'Waiting for Google sign-in...': 'In attesa del login Google...',
     'Checking your account...': 'Verifica del tuo account...',
     'Setting up your secure account...': 'Configurazione del tuo account sicuro...',
@@ -1034,6 +1034,30 @@ export default {
     'Blossom cache server description':
       'Carica i media tramite un server cache Blossom. Abilitalo solo dopo aver verificato che il server sia raggiungibile.',
     'Server URL': 'URL del server',
-    'Cannot reach the Blossom cache server': 'Impossibile raggiungere il server cache Blossom'
+    'Cannot reach the Blossom cache server': 'Impossibile raggiungere il server cache Blossom',
+    'Link Google account': 'Collega account Google',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Collega un account Google così potrai accedere a questo account con Google. La tua chiave privata non viene mai condivisa con Google.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Collega un account Google così potrai accedere a questo account con Google.',
+    'Linking your account...': 'Collegamento del tuo account...',
+    'Switching to remote signer...': 'Passaggio al firmatario remoto...',
+    'Google account already linked': 'Account Google già collegato',
+    'This Google account is already linked to another account':
+      'Questo account Google è già collegato a un altro account',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      "Attualmente è collegato a {{email}}. Per collegarlo invece a questo account, il collegamento precedente verrà rimosso. L'account precedente esiste ancora e rimane utilizzabile con la sua chiave privata.",
+    'Unlink the previous account and link this one':
+      "Scollega l'account precedente e collega questo",
+    'Switch to remote signer login?': 'Passare al login con firmatario remoto?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'Il tuo account è ora collegato. Puoi passare a firmare tramite il firmatario remoto oppure continuare a firmare localmente con la tua chiave privata.',
+    'Switch to remote signer': 'Passa al firmatario remoto',
+    'Keep signing locally': 'Continua a firmare localmente',
+    'Google account linked': 'Account Google collegato',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'Questo account ora firma tramite un firmatario remoto sicuro e puoi accedere con Google in qualsiasi momento. La tua chiave privata non viene mai condivisa con Google.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'Ora puoi accedere a questo account con Google. Continui a firmare localmente con la tua chiave privata, che non viene mai condivisa con Google.'
   }
 }

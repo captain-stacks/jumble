@@ -900,11 +900,11 @@ export default {
     Shuffle: 'फेरबदल',
     'Login with Google': 'Google से लॉगिन करें',
     'Continue with Google': 'Google से जारी रखें',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Google से साइन इन करें और आपके लिए स्वचालित रूप से एक Nostr कुंजी बनाई जाएगी।',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'अपने खाते तक पहुँचने के लिए Google से साइन इन करें। यदि आपके पास अभी तक कोई खाता नहीं है, तो आपके लिए स्वचालित रूप से एक Nostr खाता बना दिया जाता है।',
     'How it works': 'यह कैसे काम करता है',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'आपकी निजी कुंजी अलग-अलग ऑपरेटरों के पास रखे गए टुकड़ों में विभाजित है, इसलिए इसे कभी भी एक जगह संग्रहीत नहीं किया जाता। Jumble एक सुरक्षित रिमोट साइनर के माध्यम से हस्ताक्षर करता है। आप खाता सेटिंग से कभी भी अपनी कुंजी निर्यात कर सकते हैं।',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'आपकी निजी कुंजी अलग-अलग, स्वतंत्र ऑपरेटरों के पास रखे गए टुकड़ों में विभाजित है, इसलिए इसे कभी भी एक जगह संग्रहीत नहीं किया जाता। Google का उपयोग केवल ऑपरेटरों के सामने आपकी पहचान साबित करने के लिए किया जाता है, आपकी कुंजी संग्रहीत करने के लिए कभी नहीं।',
     'Waiting for Google sign-in...': 'Google साइन-इन की प्रतीक्षा...',
     'Checking your account...': 'आपका खाता जांचा जा रहा है...',
     'Setting up your secure account...': 'आपका सुरक्षित खाता सेट किया जा रहा है...',
@@ -1028,6 +1028,29 @@ export default {
     'Blossom cache server description':
       'Blossom कैश सर्वर के माध्यम से मीडिया लोड करें। सर्वर तक पहुँच की पुष्टि होने के बाद ही इसे सक्षम करें।',
     'Server URL': 'सर्वर URL',
-    'Cannot reach the Blossom cache server': 'Blossom कैश सर्वर तक नहीं पहुँचा जा सका'
+    'Cannot reach the Blossom cache server': 'Blossom कैश सर्वर तक नहीं पहुँचा जा सका',
+    'Link Google account': 'Google खाता लिंक करें',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'एक Google खाता लिंक करें ताकि आप Google से इस खाते में साइन इन कर सकें। आपकी निजी कुंजी कभी भी Google के साथ साझा नहीं की जाती।',
+    'Link a Google account so you can sign in to this account with Google.':
+      'एक Google खाता लिंक करें ताकि आप Google से इस खाते में साइन इन कर सकें।',
+    'Linking your account...': 'आपका खाता लिंक हो रहा है...',
+    'Switching to remote signer...': 'रिमोट साइनर पर स्विच हो रहा है...',
+    'Google account already linked': 'Google खाता पहले से लिंक है',
+    'This Google account is already linked to another account':
+      'यह Google खाता पहले से किसी अन्य खाते से लिंक है',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'यह वर्तमान में {{email}} से लिंक है। इसके बजाय इसे इस खाते से लिंक करने पर, पिछला लिंक हटा दिया जाएगा। पिछला खाता अभी भी मौजूद है और अपनी निजी कुंजी के साथ उपयोग योग्य रहता है।',
+    'Unlink the previous account and link this one': 'पिछला खाता अनलिंक करें और इसे लिंक करें',
+    'Switch to remote signer login?': 'रिमोट साइनर लॉगिन पर स्विच करें?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'आपका खाता अब लिंक हो गया है। आप रिमोट साइनर के माध्यम से हस्ताक्षर करने पर स्विच कर सकते हैं, या अपनी निजी कुंजी से स्थानीय रूप से हस्ताक्षर करना जारी रख सकते हैं।',
+    'Switch to remote signer': 'रिमोट साइनर पर स्विच करें',
+    'Keep signing locally': 'स्थानीय रूप से हस्ताक्षर करना जारी रखें',
+    'Google account linked': 'Google खाता लिंक हो गया',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'यह खाता अब एक सुरक्षित रिमोट साइनर के माध्यम से हस्ताक्षर करता है, और आप कभी भी Google से साइन इन कर सकते हैं। आपकी निजी कुंजी कभी भी Google के साथ साझा नहीं की जाती।',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'अब आप Google से इस खाते में साइन इन कर सकते हैं। आप अभी भी अपनी निजी कुंजी से स्थानीय रूप से हस्ताक्षर कर रहे हैं, जो कभी भी Google के साथ साझा नहीं की जाती।'
   }
 }

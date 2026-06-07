@@ -900,11 +900,11 @@ export default {
     Shuffle: 'بُر زدن',
     'Login with Google': 'ورود با Google',
     'Continue with Google': 'ادامه با Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'با Google وارد شوید و یک کلید Nostr به طور خودکار برای شما ایجاد می‌شود.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'برای دسترسی به حساب خود با Google وارد شوید. اگر هنوز حسابی ندارید، یک حساب Nostr به‌طور خودکار برای شما ایجاد می‌شود.',
     'How it works': 'نحوه کار',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'کلید خصوصی شما به قطعاتی تقسیم می‌شود که هر کدام نزد اپراتورهای جداگانه نگهداری می‌شوند، پس هرگز در یک جا ذخیره نمی‌شود. Jumble از طریق یک امضاکننده از راه دور امن امضا می‌کند. می‌توانید کلیدتان را هر زمان از تنظیمات حساب صادر کنید.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'کلید خصوصی شما به قطعاتی تقسیم می‌شود که هر کدام نزد اپراتورهای جداگانه و مستقل نگهداری می‌شوند، پس هرگز در یک جا ذخیره نمی‌شود. Google تنها برای اثبات هویت شما به اپراتورها استفاده می‌شود و هرگز برای ذخیره کلیدتان به کار نمی‌رود.',
     'Waiting for Google sign-in...': 'در انتظار ورود با Google...',
     'Checking your account...': 'در حال بررسی حساب شما...',
     'Setting up your secure account...': 'در حال راه‌اندازی حساب امن شما...',
@@ -1030,6 +1030,29 @@ export default {
     'Blossom cache server description':
       'بارگذاری رسانه از طریق سرور کش Blossom. فقط پس از تأیید در دسترس بودن سرور آن را فعال کنید.',
     'Server URL': 'آدرس سرور',
-    'Cannot reach the Blossom cache server': 'دسترسی به سرور کش Blossom ممکن نیست'
+    'Cannot reach the Blossom cache server': 'دسترسی به سرور کش Blossom ممکن نیست',
+    'Link Google account': 'پیوند حساب Google',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'یک حساب Google را پیوند دهید تا بتوانید با Google به این حساب وارد شوید. کلید خصوصی شما هرگز با Google به اشتراک گذاشته نمی‌شود.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'یک حساب Google را پیوند دهید تا بتوانید با Google به این حساب وارد شوید.',
+    'Linking your account...': 'در حال پیوند دادن حساب شما...',
+    'Switching to remote signer...': 'در حال تغییر به امضاکننده‌ی راه‌دور...',
+    'Google account already linked': 'حساب Google از قبل پیوند داده شده است',
+    'This Google account is already linked to another account':
+      'این حساب Google از قبل به حساب دیگری پیوند داده شده است',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'این حساب در حال حاضر به {{email}} پیوند داده شده است. برای پیوند دادن آن به این حساب، پیوند قبلی حذف خواهد شد. حساب قبلی همچنان وجود دارد و با کلید خصوصی خود قابل استفاده باقی می‌ماند.',
+    'Unlink the previous account and link this one': 'لغو پیوند حساب قبلی و پیوند دادن این حساب',
+    'Switch to remote signer login?': 'تغییر به ورود با امضاکننده‌ی راه‌دور؟',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'حساب شما اکنون پیوند داده شد. می‌توانید به امضا کردن از طریق امضاکننده‌ی راه‌دور تغییر دهید، یا امضا کردن محلی با کلید خصوصی خود را ادامه دهید.',
+    'Switch to remote signer': 'تغییر به امضاکننده‌ی راه‌دور',
+    'Keep signing locally': 'ادامه‌ی امضا کردن محلی',
+    'Google account linked': 'حساب Google پیوند داده شد',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'این حساب اکنون از طریق یک امضاکننده‌ی راه‌دور امن امضا می‌کند و می‌توانید هر زمان با Google وارد شوید. کلید خصوصی شما هرگز با Google به اشتراک گذاشته نمی‌شود.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'اکنون می‌توانید با Google به این حساب وارد شوید. شما همچنان به‌صورت محلی با کلید خصوصی خود امضا می‌کنید که هرگز با Google به اشتراک گذاشته نمی‌شود.'
   }
 }

@@ -864,11 +864,11 @@ export default {
     Shuffle: '換一批',
     'Login with Google': '使用 Google 登入',
     'Continue with Google': '使用 Google 繼續',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      '使用 Google 登入，系統會自動為你建立 Nostr 金鑰。',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      '使用 Google 登入即可存取你的帳號。若你還沒有帳號，系統會自動為你建立一個 Nostr 帳號。',
     'How it works': '運作原理',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      '你的私鑰會被拆分成多個分片，由不同的營運方分別保管，不會集中存放在任何一處。Jumble 透過安全的遠端簽署器進行簽署。你可以隨時在帳號設定中匯出私鑰。',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      '你的私鑰會被拆分成多個分片，由各自獨立的營運方分別保管，不會集中存放在任何一處。Google 僅用於向各營運方驗證你的身分，絕不會用來保管你的金鑰。',
     'Waiting for Google sign-in...': '等待 Google 登入…',
     'Checking your account...': '正在檢查你的帳號…',
     'Setting up your secure account...': '正在建立你的安全帳號…',
@@ -987,6 +987,28 @@ export default {
     'Blossom cache server description':
       '透過 Blossom 快取伺服器載入媒體資源。僅在確認伺服器可存取後再啟用。',
     'Server URL': '伺服器網址',
-    'Cannot reach the Blossom cache server': '無法存取該 Blossom 快取伺服器'
+    'Cannot reach the Blossom cache server': '無法存取該 Blossom 快取伺服器',
+    'Link Google account': '連結 Google 帳號',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      '連結一個 Google 帳號，讓你可以用 Google 登入此帳號。你的私鑰絕不會分享給 Google。',
+    'Link a Google account so you can sign in to this account with Google.':
+      '連結一個 Google 帳號，讓你可以用 Google 登入此帳號。',
+    'Linking your account...': '正在連結你的帳號…',
+    'Switching to remote signer...': '正在切換至遠端簽署器…',
+    'Google account already linked': 'Google 帳號已連結',
+    'This Google account is already linked to another account': '此 Google 帳號已連結至另一個帳號',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      '此 Google 帳號目前已連結至 {{email}}。若要改為連結至此帳號，先前的連結將會被移除。先前的帳號仍然存在，並可繼續使用其私鑰登入。',
+    'Unlink the previous account and link this one': '解除先前帳號的連結並改連結此帳號',
+    'Switch to remote signer login?': '要切換為遠端簽署器登入嗎？',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      '你的帳號已連結。你可以切換為透過遠端簽署器簽署，或繼續使用私鑰在本機簽署。',
+    'Switch to remote signer': '切換至遠端簽署器',
+    'Keep signing locally': '繼續在本機簽署',
+    'Google account linked': 'Google 帳號已連結',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      '此帳號現在會透過安全的遠端簽署器進行簽署，你可以隨時用 Google 登入。你的私鑰絕不會分享給 Google。',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      '你現在可以用 Google 登入此帳號。你仍會使用私鑰在本機簽署，私鑰絕不會分享給 Google。'
   }
 }

@@ -914,11 +914,11 @@ export default {
     Shuffle: 'Mischen',
     'Login with Google': 'Mit Google anmelden',
     'Continue with Google': 'Mit Google fortfahren',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Melde dich mit Google an und ein Nostr-Schlüssel wird automatisch für dich erstellt.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Melde dich mit Google an, um auf dein Konto zuzugreifen. Falls du noch keines hast, wird automatisch ein Nostr-Konto für dich erstellt.',
     'How it works': 'So funktioniert es',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'Dein privater Schlüssel wird in Fragmente aufgeteilt, die von separaten Betreibern gehalten werden, sodass er nie an einem Ort gespeichert ist. Jumble signiert über einen sicheren Remote-Signer. Du kannst deinen Schlüssel jederzeit aus den Kontoeinstellungen exportieren.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'Dein privater Schlüssel wird in Fragmente aufgeteilt, die von separaten, unabhängigen Betreibern gehalten werden, sodass er nie an einem Ort gespeichert ist. Google wird nur verwendet, um deine Identität gegenüber den Betreibern zu bestätigen, niemals um deinen Schlüssel zu speichern.',
     'Waiting for Google sign-in...': 'Warte auf Google-Anmeldung...',
     'Checking your account...': 'Konto wird überprüft...',
     'Setting up your secure account...': 'Sicheres Konto wird eingerichtet...',
@@ -1045,6 +1045,30 @@ export default {
     'Blossom cache server description':
       'Medien über einen Blossom-Cache-Server laden. Aktiviere ihn erst, nachdem die Erreichbarkeit des Servers überprüft wurde.',
     'Server URL': 'Server-URL',
-    'Cannot reach the Blossom cache server': 'Blossom-Cache-Server ist nicht erreichbar'
+    'Cannot reach the Blossom cache server': 'Blossom-Cache-Server ist nicht erreichbar',
+    'Link Google account': 'Google-Konto verknüpfen',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Verknüpfe ein Google-Konto, damit du dich mit Google bei diesem Konto anmelden kannst. Dein privater Schlüssel wird niemals an Google weitergegeben.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Verknüpfe ein Google-Konto, damit du dich mit Google bei diesem Konto anmelden kannst.',
+    'Linking your account...': 'Konto wird verknüpft...',
+    'Switching to remote signer...': 'Wechsel zum Remote-Signer...',
+    'Google account already linked': 'Google-Konto bereits verknüpft',
+    'This Google account is already linked to another account':
+      'Dieses Google-Konto ist bereits mit einem anderen Konto verknüpft',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'Es ist derzeit mit {{email}} verknüpft. Um es stattdessen mit diesem Konto zu verknüpfen, wird die vorherige Verknüpfung entfernt. Das vorherige Konto existiert weiterhin und bleibt mit seinem privaten Schlüssel nutzbar.',
+    'Unlink the previous account and link this one':
+      'Vorheriges Konto entkoppeln und dieses verknüpfen',
+    'Switch to remote signer login?': 'Zur Anmeldung über den Remote-Signer wechseln?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'Dein Konto ist jetzt verknüpft. Du kannst zum Signieren über den Remote-Signer wechseln oder weiterhin lokal mit deinem privaten Schlüssel signieren.',
+    'Switch to remote signer': 'Zum Remote-Signer wechseln',
+    'Keep signing locally': 'Weiterhin lokal signieren',
+    'Google account linked': 'Google-Konto verknüpft',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'Dieses Konto signiert jetzt über einen sicheren Remote-Signer und du kannst dich jederzeit mit Google anmelden. Dein privater Schlüssel wird niemals an Google weitergegeben.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'Du kannst dich jetzt mit Google bei diesem Konto anmelden. Du signierst weiterhin lokal mit deinem privaten Schlüssel, der niemals an Google weitergegeben wird.'
   }
 }

@@ -900,11 +900,11 @@ export default {
     Shuffle: 'Keverés',
     'Login with Google': 'Bejelentkezés Google-lel',
     'Continue with Google': 'Folytatás Google-lel',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Jelentkezz be Google-lel, és automatikusan létrejön egy Nostr kulcsod.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Jelentkezz be Google-lel a fiókod eléréséhez. Ha még nincs fiókod, automatikusan létrejön egy Nostr fiók a számodra.',
     'How it works': 'Hogyan működik',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'A privát kulcsod külön operátoroknál tárolt töredékekre van osztva, így soha nem tárolják egy helyen. A Jumble egy biztonságos távoli aláírón keresztül ír alá. A kulcsodat bármikor exportálhatod a fiókbeállításokból.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'A privát kulcsod külön, független operátoroknál tárolt töredékekre van osztva, így soha nem tárolják egy helyen. A Google-t csak arra használjuk, hogy igazolja a személyazonosságodat az operátorok felé, a kulcsod tárolására soha.',
     'Waiting for Google sign-in...': 'Várakozás a Google bejelentkezésre...',
     'Checking your account...': 'Fiók ellenőrzése...',
     'Setting up your secure account...': 'Biztonságos fiók beállítása...',
@@ -1029,6 +1029,30 @@ export default {
     'Blossom cache server description':
       'Média betöltése Blossom gyorsítótár-kiszolgálón keresztül. Csak akkor engedélyezd, ha a kiszolgáló elérhetősége ellenőrizve lett.',
     'Server URL': 'Kiszolgáló URL-címe',
-    'Cannot reach the Blossom cache server': 'A Blossom gyorsítótár-kiszolgáló nem érhető el'
+    'Cannot reach the Blossom cache server': 'A Blossom gyorsítótár-kiszolgáló nem érhető el',
+    'Link Google account': 'Google-fiók összekapcsolása',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Kapcsolj össze egy Google-fiókot, hogy ezzel be tudj jelentkezni ebbe a fiókba. A privát kulcsodat soha nem osztjuk meg a Google-lel.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Kapcsolj össze egy Google-fiókot, hogy ezzel be tudj jelentkezni ebbe a fiókba.',
+    'Linking your account...': 'Fiók összekapcsolása...',
+    'Switching to remote signer...': 'Átváltás távoli aláíróra...',
+    'Google account already linked': 'A Google-fiók már össze van kapcsolva',
+    'This Google account is already linked to another account':
+      'Ez a Google-fiók már egy másik fiókhoz van kapcsolva',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'Jelenleg ehhez van kapcsolva: {{email}}. Ha ehelyett ehhez a fiókhoz szeretnéd kapcsolni, a korábbi kapcsolat megszűnik. A korábbi fiók továbbra is létezik, és használható marad a privát kulcsával.',
+    'Unlink the previous account and link this one':
+      'A korábbi fiók leválasztása és ennek összekapcsolása',
+    'Switch to remote signer login?': 'Átváltasz a távoli aláíróval való bejelentkezésre?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'A fiókod mostantól össze van kapcsolva. Átválthatsz a távoli aláírón keresztüli aláírásra, vagy folytathatod a helyi aláírást a privát kulcsoddal.',
+    'Switch to remote signer': 'Átváltás távoli aláíróra',
+    'Keep signing locally': 'Helyi aláírás megtartása',
+    'Google account linked': 'Google-fiók összekapcsolva',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'Ez a fiók mostantól egy biztonságos távoli aláírón keresztül ír alá, és bármikor bejelentkezhetsz Google-lel. A privát kulcsodat soha nem osztjuk meg a Google-lel.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'Mostantól bejelentkezhetsz ebbe a fiókba Google-lel. Továbbra is helyben írsz alá a privát kulcsoddal, amelyet soha nem osztunk meg a Google-lel.'
   }
 }

@@ -884,11 +884,11 @@ export default {
     Shuffle: 'สุ่ม',
     'Login with Google': 'เข้าสู่ระบบด้วย Google',
     'Continue with Google': 'ดำเนินการต่อด้วย Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'ลงชื่อเข้าใช้ด้วย Google แล้วระบบจะสร้างคีย์ Nostr ให้คุณโดยอัตโนมัติ',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'ลงชื่อเข้าใช้ด้วย Google เพื่อเข้าถึงบัญชีของคุณ หากคุณยังไม่มีบัญชี ระบบจะสร้างบัญชี Nostr ให้คุณโดยอัตโนมัติ',
     'How it works': 'วิธีการทำงาน',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'คีย์ส่วนตัวของคุณถูกแบ่งเป็นส่วนย่อยที่เก็บโดยผู้ดำเนินการแยกกัน จึงไม่เคยถูกเก็บในที่เดียว Jumble เซ็นชื่อผ่านผู้เซ็นระยะไกลที่ปลอดภัย คุณสามารถส่งออกคีย์ได้ทุกเมื่อจากการตั้งค่าบัญชี',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'คีย์ส่วนตัวของคุณถูกแบ่งเป็นส่วนย่อยที่เก็บโดยผู้ดำเนินการที่แยกกันและเป็นอิสระต่อกัน จึงไม่เคยถูกเก็บในที่เดียว Google ถูกใช้เพียงเพื่อยืนยันตัวตนของคุณต่อผู้ดำเนินการเท่านั้น ไม่เคยใช้เก็บคีย์ของคุณ',
     'Waiting for Google sign-in...': 'กำลังรอการเข้าสู่ระบบด้วย Google...',
     'Checking your account...': 'กำลังตรวจสอบบัญชีของคุณ...',
     'Setting up your secure account...': 'กำลังตั้งค่าบัญชีที่ปลอดภัยของคุณ...',
@@ -1012,6 +1012,30 @@ export default {
     'Blossom cache server description':
       'โหลดสื่อผ่านเซิร์ฟเวอร์แคช Blossom เปิดใช้งานหลังจากตรวจสอบแล้วว่าเข้าถึงเซิร์ฟเวอร์ได้เท่านั้น',
     'Server URL': 'URL ของเซิร์ฟเวอร์',
-    'Cannot reach the Blossom cache server': 'ไม่สามารถเข้าถึงเซิร์ฟเวอร์แคช Blossom ได้'
+    'Cannot reach the Blossom cache server': 'ไม่สามารถเข้าถึงเซิร์ฟเวอร์แคช Blossom ได้',
+    'Link Google account': 'เชื่อมโยงบัญชี Google',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'เชื่อมโยงบัญชี Google เพื่อให้คุณสามารถเข้าสู่ระบบบัญชีนี้ด้วย Google ได้ คีย์ส่วนตัวของคุณจะไม่ถูกแชร์กับ Google',
+    'Link a Google account so you can sign in to this account with Google.':
+      'เชื่อมโยงบัญชี Google เพื่อให้คุณสามารถเข้าสู่ระบบบัญชีนี้ด้วย Google ได้',
+    'Linking your account...': 'กำลังเชื่อมโยงบัญชีของคุณ...',
+    'Switching to remote signer...': 'กำลังเปลี่ยนไปใช้ผู้เซ็นระยะไกล...',
+    'Google account already linked': 'บัญชี Google เชื่อมโยงไว้แล้ว',
+    'This Google account is already linked to another account':
+      'บัญชี Google นี้เชื่อมโยงกับบัญชีอื่นไว้แล้ว',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'ขณะนี้เชื่อมโยงอยู่กับ {{email}} หากต้องการเชื่อมโยงกับบัญชีนี้แทน การเชื่อมโยงก่อนหน้าจะถูกลบออก บัญชีก่อนหน้ายังคงมีอยู่และยังใช้งานได้ด้วยคีย์ส่วนตัวของบัญชีนั้น',
+    'Unlink the previous account and link this one':
+      'ยกเลิกการเชื่อมโยงบัญชีก่อนหน้าและเชื่อมโยงบัญชีนี้',
+    'Switch to remote signer login?': 'เปลี่ยนไปใช้การเข้าสู่ระบบด้วยผู้เซ็นระยะไกลหรือไม่?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'บัญชีของคุณเชื่อมโยงเรียบร้อยแล้ว คุณสามารถเปลี่ยนไปเซ็นชื่อผ่านผู้เซ็นระยะไกล หรือเซ็นชื่อในเครื่องด้วยคีย์ส่วนตัวของคุณต่อไปได้',
+    'Switch to remote signer': 'เปลี่ยนไปใช้ผู้เซ็นระยะไกล',
+    'Keep signing locally': 'เซ็นชื่อในเครื่องต่อไป',
+    'Google account linked': 'เชื่อมโยงบัญชี Google แล้ว',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'ตอนนี้บัญชีนี้เซ็นชื่อผ่านผู้เซ็นระยะไกลที่ปลอดภัย และคุณสามารถเข้าสู่ระบบด้วย Google ได้ทุกเมื่อ คีย์ส่วนตัวของคุณจะไม่ถูกแชร์กับ Google',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'ตอนนี้คุณสามารถเข้าสู่ระบบบัญชีนี้ด้วย Google ได้แล้ว คุณยังคงเซ็นชื่อในเครื่องด้วยคีย์ส่วนตัวของคุณ ซึ่งจะไม่ถูกแชร์กับ Google'
   }
 }

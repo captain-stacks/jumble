@@ -900,11 +900,11 @@ export default {
     Shuffle: 'シャッフル',
     'Login with Google': 'Googleでログイン',
     'Continue with Google': 'Googleで続ける',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Googleでサインインすると、Nostrキーが自動的に作成されます。',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Googleでサインインしてアカウントにアクセスします。まだお持ちでない場合は、Nostrアカウントが自動的に作成されます。',
     'How it works': '仕組み',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'あなたの秘密鍵は複数のオペレーターが保持するシャードに分割されるため、一箇所に保存されることはありません。Jumbleはセキュアなリモート署名者を通じて署名します。アカウント設定からいつでも鍵をエクスポートできます。',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'あなたの秘密鍵は、独立した別々のオペレーターが保持するシャードに分割されるため、一箇所に保存されることはありません。Googleはオペレーターに対してあなたの本人確認を行うためにのみ使用され、鍵の保存に使われることは決してありません。',
     'Waiting for Google sign-in...': 'Googleサインインを待っています...',
     'Checking your account...': 'アカウントを確認しています...',
     'Setting up your secure account...': 'セキュアなアカウントを設定しています...',
@@ -1029,6 +1029,30 @@ export default {
     'Blossom cache server description':
       'Blossom キャッシュサーバー経由でメディアを読み込みます。サーバーに到達できることを確認してから有効にしてください。',
     'Server URL': 'サーバー URL',
-    'Cannot reach the Blossom cache server': 'Blossom キャッシュサーバーに接続できません'
+    'Cannot reach the Blossom cache server': 'Blossom キャッシュサーバーに接続できません',
+    'Link Google account': 'Googleアカウントを連携',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Googleアカウントを連携すると、Googleでこのアカウントにサインインできます。秘密鍵がGoogleと共有されることは決してありません。',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Googleアカウントを連携すると、Googleでこのアカウントにサインインできます。',
+    'Linking your account...': 'アカウントを連携しています...',
+    'Switching to remote signer...': 'リモート署名者に切り替えています...',
+    'Google account already linked': 'Googleアカウントは既に連携されています',
+    'This Google account is already linked to another account':
+      'このGoogleアカウントは既に別のアカウントに連携されています',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      '現在 {{email}} に連携されています。代わりにこのアカウントに連携すると、以前の連携は解除されます。以前のアカウントは引き続き存在し、その秘密鍵で利用できます。',
+    'Unlink the previous account and link this one':
+      '以前のアカウントの連携を解除してこのアカウントを連携',
+    'Switch to remote signer login?': 'リモート署名者ログインに切り替えますか？',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'アカウントが連携されました。リモート署名者を通じた署名に切り替えることも、秘密鍵を使ってローカルで署名を続けることもできます。',
+    'Switch to remote signer': 'リモート署名者に切り替え',
+    'Keep signing locally': 'ローカルでの署名を続ける',
+    'Google account linked': 'Googleアカウントを連携しました',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'このアカウントはセキュアなリモート署名者を通じて署名するようになり、いつでもGoogleでサインインできます。秘密鍵がGoogleと共有されることは決してありません。',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'これでGoogleでこのアカウントにサインインできます。署名は引き続き秘密鍵を使ってローカルで行われ、秘密鍵がGoogleと共有されることは決してありません。'
   }
 }

@@ -119,6 +119,59 @@ class PomegranateService {
   }
 
   /**
+   * First half of the bind flow: authenticates with Google and reports whether
+   * this Google account is already linked to a pomegranate account. Must be
+   * called from a user gesture so the sign-in popup is not blocked. The
+   * returned token stays valid for 24h, so the caller can show a conflict
+   * dialog and then finish the bind via `completeBinding` without re-prompting.
+   */
+  async authenticateForBinding(
+    central: string
+  ): Promise<{ token: TGoogleToken; existing: TPomegranateAccount | null }> {
+    const centralURL = this.massageURL(central)
+    const token = await this.authenticateWithGoogle(centralURL)
+    const existing = await this.getAccount(centralURL, token)
+    return { token, existing }
+  }
+
+  /**
+   * Second half of the bind flow: registers the existing account's key with
+   * the central server and operators, then ensures a signing profile exists
+   * and returns the bunker URL to (optionally) log in with. Uses plain fetches
+   * with the token from `authenticateForBinding`, so it opens no popup.
+   *
+   * - When the Google account is already linked to a different pubkey, pass
+   *   `rebind: true` to unlink it first.
+   * - When it is already linked to `expectedPubkey`, registration is skipped
+   *   (idempotent) and only the profile is ensured.
+   */
+  async completeBinding(
+    central: string,
+    token: TGoogleToken,
+    secretKey: Uint8Array,
+    expectedPubkey: string,
+    opts: { rebind: boolean } = { rebind: false }
+  ): Promise<{ bunkerUrl: string; central: string }> {
+    const centralURL = this.massageURL(central)
+
+    if (opts.rebind) {
+      await this.deleteAccount(centralURL, token)
+    }
+
+    const existing = await this.getAccount(centralURL, token)
+    if (!existing || existing.pubkey !== expectedPubkey) {
+      await this.createAccount(centralURL, token, secretKey)
+    }
+
+    let profiles = await this.listProfiles(centralURL, token)
+    if (profiles.length === 0) {
+      profiles = [await this.createProfile(centralURL, token, 'default')]
+    }
+
+    return { bunkerUrl: this.getBunkerUrl(centralURL, profiles[0]), central: centralURL }
+  }
+
+  /**
    * Removes the account from the central server. This only severs the link
    * between the account and the central signer; the underlying key still
    * exists and the account remains usable via its nsec. Must be called from a
@@ -196,12 +249,17 @@ class PomegranateService {
   }
 
   /**
-   * Creates a new account: generates a key, splits it into shards via a
-   * trusted dealer, registers with the central server and every operator.
-   * The generated key is used only to sign the registration events and is
-   * never persisted.
+   * Creates an account: splits a key into shards via a trusted dealer and
+   * registers with the central server and every operator. When `secretKey` is
+   * omitted a fresh key is generated (sign-up flow); when provided, an existing
+   * account's key is registered (bind flow). The key is used only to sign the
+   * registration events and is never persisted.
    */
-  private async createAccount(central: string, token: TGoogleToken): Promise<void> {
+  private async createAccount(
+    central: string,
+    token: TGoogleToken,
+    secretKey: Uint8Array = generateSecretKey()
+  ): Promise<void> {
     // The operator's identity (central tag + token hash) is its origin; only
     // the HTTP endpoints below carry the `/po` path prefix.
     const operators = POMEGRANATE_OPERATOR_URLS.map((url) => this.massageURL(url))
@@ -211,7 +269,6 @@ class PomegranateService {
     const threshold = Math.ceil((operators.length * 7) / 12)
     const session = randomId()
 
-    const secretKey = generateSecretKey()
     const masterSk = BigInt('0x' + bytesToHex(secretKey))
     const { shards } = trustedKeyDeal(masterSk, threshold, operators.length)
 

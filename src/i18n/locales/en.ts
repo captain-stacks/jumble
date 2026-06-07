@@ -918,11 +918,11 @@ export default {
     Shuffle: 'Shuffle',
     'Login with Google': 'Login with Google',
     'Continue with Google': 'Continue with Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Sign in with Google and a Nostr key will be created for you automatically.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.",
     'How it works': 'How it works',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.',
     'Waiting for Google sign-in...': 'Waiting for Google sign-in...',
     'Checking your account...': 'Checking your account...',
     'Setting up your secure account...': 'Setting up your secure account...',
@@ -1047,6 +1047,30 @@ export default {
     'Blossom cache server description':
       'Load media through a Blossom cache server. Enable it only after the server has been verified to be reachable.',
     'Server URL': 'Server URL',
-    'Cannot reach the Blossom cache server': 'Cannot reach the Blossom cache server'
+    'Cannot reach the Blossom cache server': 'Cannot reach the Blossom cache server',
+    'Link Google account': 'Link Google account',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Link a Google account so you can sign in to this account with Google.',
+    'Linking your account...': 'Linking your account...',
+    'Switching to remote signer...': 'Switching to remote signer...',
+    'Google account already linked': 'Google account already linked',
+    'This Google account is already linked to another account':
+      'This Google account is already linked to another account',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.',
+    'Unlink the previous account and link this one':
+      'Unlink the previous account and link this one',
+    'Switch to remote signer login?': 'Switch to remote signer login?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.',
+    'Switch to remote signer': 'Switch to remote signer',
+    'Keep signing locally': 'Keep signing locally',
+    'Google account linked': 'Google account linked',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.'
   }
 }

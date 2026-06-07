@@ -75,6 +75,12 @@ type TNostrContext = {
    * account can't sign (e.g. npub read-only) or its identity can't be verified.
    */
   getSignerForAccount: (account: TAccountPointer) => Promise<ISigner | null>
+  /**
+   * The active account's private key when it signs locally (nsec/ncryptsec),
+   * already decrypted in memory; null for remote/read-only signers. Used by the
+   * "Bind Google account" flow to register the existing key's shards.
+   */
+  getActivePrivkey: () => Uint8Array | null
   nsecLogin: (nsec: string, password?: string, needSetup?: boolean) => Promise<string>
   ncryptsecLogin: (ncryptsec: string) => Promise<string>
   nip07Login: () => Promise<string>
@@ -507,6 +513,10 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       setAccount(null)
       setSigner(null)
     }
+  }
+
+  const getActivePrivkey = () => {
+    return signer instanceof NsecSigner ? signer.getPrivkey() : null
   }
 
   const switchAccount = async (act: TAccountPointer | null) => {
@@ -971,6 +981,7 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         ncryptsec,
         switchAccount,
         getSignerForAccount,
+        getActivePrivkey,
         nsecLogin,
         ncryptsecLogin,
         nip07Login,

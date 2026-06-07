@@ -906,11 +906,11 @@ export default {
     Shuffle: 'Karıştır',
     'Login with Google': 'Google ile giriş yap',
     'Continue with Google': 'Google ile devam et',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Google ile giriş yap, senin için otomatik olarak bir Nostr anahtarı oluşturulsun.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Hesabına erişmek için Google ile giriş yap. Henüz bir hesabın yoksa, senin için otomatik olarak bir Nostr hesabı oluşturulur.',
     'How it works': 'Nasıl çalışır',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'Özel anahtarın, ayrı operatörler tarafından tutulan parçalara bölünür, bu sayede hiçbir zaman tek bir yerde saklanmaz. Jumble, güvenli bir uzak imzalayıcı aracılığıyla imzalar. Anahtarını istediğin zaman hesap ayarlarından dışa aktarabilirsin.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'Özel anahtarın, ayrı ve bağımsız operatörler tarafından tutulan parçalara bölünür, bu sayede hiçbir zaman tek bir yerde saklanmaz. Google yalnızca kimliğini operatörlere kanıtlamak için kullanılır, anahtarını saklamak için asla kullanılmaz.',
     'Waiting for Google sign-in...': 'Google girişi bekleniyor...',
     'Checking your account...': 'Hesabın kontrol ediliyor...',
     'Setting up your secure account...': 'Güvenli hesabın ayarlanıyor...',
@@ -1034,6 +1034,30 @@ export default {
     'Blossom cache server description':
       'Medyayı bir Blossom önbellek sunucusu üzerinden yükle. Yalnızca sunucuya erişilebildiği doğrulandıktan sonra etkinleştir.',
     'Server URL': 'Sunucu adresi',
-    'Cannot reach the Blossom cache server': 'Blossom önbellek sunucusuna ulaşılamıyor'
+    'Cannot reach the Blossom cache server': 'Blossom önbellek sunucusuna ulaşılamıyor',
+    'Link Google account': 'Google hesabı bağla',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Bu hesaba Google ile giriş yapabilmen için bir Google hesabı bağla. Özel anahtarın asla Google ile paylaşılmaz.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Bu hesaba Google ile giriş yapabilmen için bir Google hesabı bağla.',
+    'Linking your account...': 'Hesabın bağlanıyor...',
+    'Switching to remote signer...': 'Uzak imzalayıcıya geçiliyor...',
+    'Google account already linked': 'Google hesabı zaten bağlı',
+    'This Google account is already linked to another account':
+      'Bu Google hesabı zaten başka bir hesaba bağlı',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'Şu anda {{email}} hesabına bağlı. Bunun yerine bu hesaba bağlamak için önceki bağlantı kaldırılır. Önceki hesap varlığını sürdürür ve özel anahtarıyla kullanılabilir kalır.',
+    'Unlink the previous account and link this one':
+      'Önceki hesabın bağlantısını kaldır ve bunu bağla',
+    'Switch to remote signer login?': 'Uzak imzalayıcı girişine geçilsin mi?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'Hesabın artık bağlı. Uzak imzalayıcı aracılığıyla imzalamaya geçebilir ya da özel anahtarınla yerel olarak imzalamaya devam edebilirsin.',
+    'Switch to remote signer': 'Uzak imzalayıcıya geç',
+    'Keep signing locally': 'Yerel olarak imzalamaya devam et',
+    'Google account linked': 'Google hesabı bağlandı',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'Bu hesap artık güvenli bir uzak imzalayıcı aracılığıyla imzalıyor ve istediğin zaman Google ile giriş yapabilirsin. Özel anahtarın asla Google ile paylaşılmaz.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'Bu hesaba artık Google ile giriş yapabilirsin. Hâlâ asla Google ile paylaşılmayan özel anahtarınla yerel olarak imzalıyorsun.'
   }
 }

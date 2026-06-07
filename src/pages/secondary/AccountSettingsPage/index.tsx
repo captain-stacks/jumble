@@ -1,11 +1,15 @@
+import PomegranateBindDialog from '@/components/PomegranateBindDialog'
 import PomegranateDisconnectDialog from '@/components/PomegranateDisconnectDialog'
 import PomegranateExportDialog from '@/components/PomegranateExportDialog'
 import { SettingsGroup, SettingsPageContainer, SettingsRow } from '@/components/ui/settings'
+import { POMEGRANATE_CENTRAL_URL, POMEGRANATE_ENABLED } from '@/constants'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
+import { isElectron } from '@/lib/platform'
 import { isPomegranateAccount } from '@/lib/pomegranate'
 import { useNostr } from '@/providers/NostrProvider'
 import storage from '@/services/local-storage.service'
-import { Check, Copy, KeyRound, Unplug } from 'lucide-react'
+import { TSignerType } from '@/types'
+import { Check, Copy, KeyRound, LogIn, Unplug } from 'lucide-react'
 import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -16,9 +20,23 @@ const AccountSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [copiedNcryptsec, setCopiedNcryptsec] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false)
+  const [bindDialogOpen, setBindDialogOpen] = useState(false)
+  // Snapshot the account being bound so the dialog stays mounted through the
+  // "switch to remote signer" swap, which briefly nulls the active account.
+  const [bindTarget, setBindTarget] = useState<{ pubkey: string; signerType: TSignerType } | null>(
+    null
+  )
 
   const fullAccount = account ? storage.findAccount(account) : undefined
   const pomegranate = fullAccount ? isPomegranateAccount(fullAccount) : false
+  const canBindGoogle =
+    POMEGRANATE_ENABLED && !isElectron() && !!account && (!!nsec || !!ncryptsec)
+
+  const openBindDialog = () => {
+    if (!account) return
+    setBindTarget({ pubkey: account.pubkey, signerType: account.signerType })
+    setBindDialogOpen(true)
+  }
 
   const copy = async (value: string, setCopied: (v: boolean) => void) => {
     await navigator.clipboard.writeText(value)
@@ -55,6 +73,32 @@ const AccountSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
               />
             )}
           </SettingsGroup>
+        )}
+
+        {canBindGoogle && (
+          <SettingsGroup
+            title={t('Link Google account')}
+            description={t(
+              'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.'
+            )}
+          >
+            <SettingsRow
+              icon={<LogIn />}
+              title={t('Link Google account')}
+              chevron
+              onClick={openBindDialog}
+            />
+          </SettingsGroup>
+        )}
+
+        {bindTarget && (
+          <PomegranateBindDialog
+            open={bindDialogOpen}
+            onOpenChange={setBindDialogOpen}
+            central={POMEGRANATE_CENTRAL_URL}
+            pubkey={bindTarget.pubkey}
+            signerType={bindTarget.signerType}
+          />
         )}
 
         {pomegranate && account && fullAccount?.pomegranateCentral && (

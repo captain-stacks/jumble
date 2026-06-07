@@ -884,11 +884,11 @@ export default {
     Shuffle: 'تبديل',
     'Login with Google': 'تسجيل الدخول باستخدام Google',
     'Continue with Google': 'المتابعة باستخدام Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'سجّل الدخول باستخدام Google وسيتم إنشاء مفتاح Nostr لك تلقائيًا.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'سجّل الدخول باستخدام Google للوصول إلى حسابك. وإذا لم يكن لديك حساب بعد، فسيتم إنشاء حساب Nostr لك تلقائيًا.',
     'How it works': 'كيف يعمل',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'يتم تقسيم مفتاحك الخاص إلى أجزاء يحتفظ بها مشغّلون منفصلون، لذا لا يُخزَّن في مكان واحد أبدًا. يوقّع Jumble عبر موقّع بعيد آمن. يمكنك تصدير مفتاحك في أي وقت من إعدادات الحساب.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'يتم تقسيم مفتاحك الخاص إلى أجزاء يحتفظ بها مشغّلون منفصلون ومستقلون، لذا لا يُخزَّن في مكان واحد أبدًا. يُستخدم Google فقط لإثبات هويتك لدى المشغّلين، وليس لتخزين مفتاحك أبدًا.',
     'Waiting for Google sign-in...': 'في انتظار تسجيل الدخول عبر Google...',
     'Checking your account...': 'جارٍ التحقق من حسابك...',
     'Setting up your secure account...': 'جارٍ إعداد حسابك الآمن...',
@@ -1012,6 +1012,29 @@ export default {
     'Blossom cache server description':
       'تحميل الوسائط عبر خادم تخزين مؤقت Blossom. لا تُفعّله إلا بعد التحقق من إمكانية الوصول إلى الخادم.',
     'Server URL': 'عنوان الخادم',
-    'Cannot reach the Blossom cache server': 'تعذّر الوصول إلى خادم التخزين المؤقت Blossom'
+    'Cannot reach the Blossom cache server': 'تعذّر الوصول إلى خادم التخزين المؤقت Blossom',
+    'Link Google account': 'ربط حساب Google',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'اربط حساب Google حتى تتمكن من تسجيل الدخول إلى هذا الحساب باستخدام Google. لا تتم مشاركة مفتاحك الخاص مع Google أبدًا.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'اربط حساب Google حتى تتمكن من تسجيل الدخول إلى هذا الحساب باستخدام Google.',
+    'Linking your account...': 'جارٍ ربط حسابك...',
+    'Switching to remote signer...': 'جارٍ التبديل إلى الموقّع البعيد...',
+    'Google account already linked': 'حساب Google مرتبط بالفعل',
+    'This Google account is already linked to another account':
+      'حساب Google هذا مرتبط بالفعل بحساب آخر',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'إنه مرتبط حاليًا بـ {{email}}. لربطه بهذا الحساب بدلاً من ذلك، ستتم إزالة الرابط السابق. لا يزال الحساب السابق موجودًا ويمكن استخدامه بمفتاحه الخاص.',
+    'Unlink the previous account and link this one': 'إلغاء ربط الحساب السابق وربط هذا الحساب',
+    'Switch to remote signer login?': 'التبديل إلى تسجيل الدخول عبر الموقّع البعيد؟',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'تم ربط حسابك الآن. يمكنك التبديل إلى التوقيع عبر الموقّع البعيد، أو الاستمرار في التوقيع محليًا بمفتاحك الخاص.',
+    'Switch to remote signer': 'التبديل إلى الموقّع البعيد',
+    'Keep signing locally': 'الاستمرار في التوقيع محليًا',
+    'Google account linked': 'تم ربط حساب Google',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'يوقّع هذا الحساب الآن عبر موقّع بعيد آمن، ويمكنك تسجيل الدخول باستخدام Google في أي وقت. لا تتم مشاركة مفتاحك الخاص مع Google أبدًا.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'يمكنك الآن تسجيل الدخول إلى هذا الحساب باستخدام Google. لا تزال توقّع محليًا بمفتاحك الخاص، الذي لا تتم مشاركته مع Google أبدًا.'
   }
 }

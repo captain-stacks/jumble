@@ -30,6 +30,10 @@ export class NsecSigner implements ISigner {
     return this.pubkey
   }
 
+  getPrivkey() {
+    return this.privkey
+  }
+
   async signEvent(draftEvent: TDraftEvent) {
     if (!this.privkey) {
       throw new Error('Not logged in')

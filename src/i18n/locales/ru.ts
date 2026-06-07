@@ -906,11 +906,11 @@ export default {
     Shuffle: 'Перемешать',
     'Login with Google': 'Войти через Google',
     'Continue with Google': 'Продолжить через Google',
-    'Sign in with Google and a Nostr key will be created for you automatically.':
-      'Войдите через Google, и ключ Nostr будет создан для вас автоматически.',
+    "Sign in with Google to access your account. If you don't have one yet, a Nostr account is created for you automatically.":
+      'Войдите через Google, чтобы получить доступ к своему аккаунту. Если у вас его ещё нет, аккаунт Nostr будет создан для вас автоматически.',
     'How it works': 'Как это работает',
-    'Your private key is split into shards held by separate operators, so it is never stored in one place. Jumble signs through a secure remote signer. You can export your key anytime from account settings.':
-      'Ваш приватный ключ разделён на фрагменты, хранящиеся у разных операторов, поэтому он никогда не хранится в одном месте. Jumble подписывает через защищённый удалённый подписант. Вы можете экспортировать ключ в любое время в настройках аккаунта.',
+    'Your private key is split into shards held by separate, independent operators, so it is never stored in one place. Google is only used to prove your identity to the operators, never to store your key.':
+      'Ваш приватный ключ разделён на фрагменты, хранящиеся у разных независимых операторов, поэтому он никогда не хранится в одном месте. Google используется только для подтверждения вашей личности перед операторами, но никогда для хранения вашего ключа.',
     'Waiting for Google sign-in...': 'Ожидание входа через Google...',
     'Checking your account...': 'Проверка аккаунта...',
     'Setting up your secure account...': 'Настройка защищённого аккаунта...',
@@ -1034,6 +1034,29 @@ export default {
     'Blossom cache server description':
       'Загружать медиа через сервер кэша Blossom. Включайте его только после проверки доступности сервера.',
     'Server URL': 'URL сервера',
-    'Cannot reach the Blossom cache server': 'Не удаётся подключиться к серверу кэша Blossom'
+    'Cannot reach the Blossom cache server': 'Не удаётся подключиться к серверу кэша Blossom',
+    'Link Google account': 'Привязать аккаунт Google',
+    'Link a Google account so you can sign in to this account with Google. Your private key is never shared with Google.':
+      'Привяжите аккаунт Google, чтобы входить в этот аккаунт через Google. Ваш приватный ключ никогда не передаётся Google.',
+    'Link a Google account so you can sign in to this account with Google.':
+      'Привяжите аккаунт Google, чтобы входить в этот аккаунт через Google.',
+    'Linking your account...': 'Привязка вашего аккаунта...',
+    'Switching to remote signer...': 'Переключение на удалённый подписант...',
+    'Google account already linked': 'Аккаунт Google уже привязан',
+    'This Google account is already linked to another account':
+      'Этот аккаунт Google уже привязан к другому аккаунту',
+    'It is currently linked to {{email}}. To link it to this account instead, the previous link will be removed. The previous account still exists and remains usable with its private key.':
+      'Сейчас он привязан к {{email}}. Чтобы привязать его к этому аккаунту, предыдущая привязка будет удалена. Предыдущий аккаунт продолжает существовать, и им можно пользоваться с его приватным ключом.',
+    'Unlink the previous account and link this one': 'Отвязать предыдущий аккаунт и привязать этот',
+    'Switch to remote signer login?': 'Переключиться на вход через удалённый подписант?',
+    'Your account is now linked. You can switch to signing through the remote signer, or keep signing locally with your private key.':
+      'Ваш аккаунт теперь привязан. Вы можете переключиться на подписание через удалённый подписант или продолжить подписывать локально с приватным ключом.',
+    'Switch to remote signer': 'Переключиться на удалённый подписант',
+    'Keep signing locally': 'Продолжить подписывать локально',
+    'Google account linked': 'Аккаунт Google привязан',
+    'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
+      'Этот аккаунт теперь подписывает через защищённый удалённый подписант, и вы можете входить через Google в любое время. Ваш приватный ключ никогда не передаётся Google.',
+    'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
+      'Теперь вы можете входить в этот аккаунт через Google. Вы по-прежнему подписываете локально с приватным ключом, который никогда не передаётся Google.'
   }
 }

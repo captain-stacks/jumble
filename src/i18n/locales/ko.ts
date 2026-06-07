@@ -114,7 +114,6 @@ export default {
     'Picture note requires images': '사진 노트에는 이미지가 필요합니다',
     Relays: '릴레이',
     Image: '이미지',
-    Normal: '일반',
     'R & W': '읽기/쓰기',
     Read: '읽기 전용',
     Write: '쓰기 전용',
@@ -125,7 +124,6 @@ export default {
     Pull: '가져오기',
     'Select all': '전체 선택',
     'Relay Sets': '릴레이 세트',
-    Mailbox: '메일박스',
     'Read & Write Relays': '읽기/쓰기 릴레이',
     'read relays description':
       '읽기 릴레이는 회원님과 관련된 이벤트를 찾는 데 사용됩니다. 다른 사용자는 회원님이 보길 원하는 이벤트를 회원님의 읽기 릴레이에 게시합니다.',
@@ -145,7 +143,6 @@ export default {
     'Copy private key': '개인 키 복사',
     'Enter the password to decrypt your ncryptsec': 'ncryptsec를 복호화할 비밀번호 입력',
     Back: '뒤로',
-    'password (optional): encrypt nsec': '비밀번호(선택): nsec 암호화',
     'optional: encrypt nsec': '선택: nsec 암호화',
     password: '비밀번호',
     'Sign up': '회원가입',
@@ -1041,6 +1038,37 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       '이제 이 계정은 안전한 원격 서명자를 통해 서명하며 언제든지 Google로 로그인할 수 있습니다. 개인 키는 Google과 절대 공유되지 않습니다.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      '이제 Google로 이 계정에 로그인할 수 있습니다. 여전히 개인 키로 로컬 서명을 하고 있으며, 개인 키는 Google과 절대 공유되지 않습니다.'
+      '이제 Google로 이 계정에 로그인할 수 있습니다. 여전히 개인 키로 로컬 서명을 하고 있으며, 개인 키는 Google과 절대 공유되지 않습니다.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      '원격 서명자에 연결할 수 없습니다. 나중에 다시 시도하거나 네트워크 연결을 확인해 주세요.',
+    'Retrying ({{current}}/{{max}})': '다시 시도 중 ({{current}}/{{max}})',
+    'Automatic updates': '자동 업데이트',
+    'Check for and download updates in the background':
+      '백그라운드에서 업데이트를 확인하고 다운로드',
+    'Check for updates': '업데이트 확인',
+    'Checking for updates…': '업데이트 확인 중…',
+    'Update available: v{{version}}': '업데이트 가능: v{{version}}',
+    'You are on the latest version ({{version}})': '최신 버전을 사용 중입니다 ({{version}})',
+    'Failed to check for updates': '업데이트 확인 실패',
+    Check: '확인',
+    NEW: '신규',
+    'Updates are not available in development mode':
+      '개발 모드에서는 업데이트를 사용할 수 없습니다',
+    'Search emojis': '이모지 검색',
+    'Recently used': '최근 사용',
+    'Smileys & Emotion': '스마일리 및 감정',
+    'People & Body': '사람 및 신체',
+    'Animals & Nature': '동물 및 자연',
+    'Food & Drink': '음식 및 음료',
+    'Travel & Places': '여행 및 장소',
+    Activities: '활동',
+    Objects: '사물',
+    Symbols: '기호',
+    Flags: '깃발',
+    'My emojis': '내 이모지',
+    'No emojis found': '이모지를 찾을 수 없습니다',
+    'Encrypted DM unavailable': '암호화된 DM을 사용할 수 없습니다',
+    'No DM relays': 'DM 릴레이 없음',
+    'n users_other': '{{count}}명의 사용자'
   }
 }

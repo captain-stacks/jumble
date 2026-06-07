@@ -180,7 +180,7 @@ export default {
     'Cannot handle event of kind k': 'Nie można obsłużyć zdarzenia typu {{k}}',
     'Encrypted direct messages not supported':
       'Szyfrowane wiadomości bezpośrednie nie są obsługiwane',
-    'Sorry! The note cannot be found 😔 ': 'Przepraszam! Nie można znaleźć wpisu 😔',
+    'Sorry! The note cannot be found 😔': 'Przepraszam! Nie można znaleźć wpisu 😔',
     'This user has been muted': 'Ten użytkownik został przyblokowany',
     Wallet: 'Portfel',
     Sats: 'Satoszy',
@@ -1061,6 +1061,39 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'To konto podpisuje teraz przez bezpieczne zdalne logowanie i możesz logować się przez Google w dowolnym momencie. Twój klucz prywatny nigdy nie jest udostępniany Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Możesz teraz logować się do tego konta przez Google. Nadal podpisujesz lokalnie swoim kluczem prywatnym, który nigdy nie jest udostępniany Google.'
+      'Możesz teraz logować się do tego konta przez Google. Nadal podpisujesz lokalnie swoim kluczem prywatnym, który nigdy nie jest udostępniany Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Nie można połączyć się ze zdalnym logowaniem. Spróbuj ponownie później lub sprawdź połączenie sieciowe.',
+    'Retrying ({{current}}/{{max}})': 'Ponawianie ({{current}}/{{max}})',
+    'Automatic updates': 'Automatyczne aktualizacje',
+    'Check for and download updates in the background': 'Sprawdzaj i pobieraj aktualizacje w tle',
+    'Check for updates': 'Sprawdź aktualizacje',
+    'Checking for updates…': 'Sprawdzanie aktualizacji…',
+    'Update available: v{{version}}': 'Dostępna aktualizacja: v{{version}}',
+    'You are on the latest version ({{version}})': 'Masz najnowszą wersję ({{version}})',
+    'Failed to check for updates': 'Nie udało się sprawdzić aktualizacji',
+    Check: 'Sprawdź',
+    NEW: 'NOWE',
+    'Updates are not available in development mode':
+      'Aktualizacje nie są dostępne w trybie deweloperskim',
+    'Search emojis': 'Szukaj emoji',
+    'Recently used': 'Ostatnio używane',
+    'Smileys & Emotion': 'Buźki i emocje',
+    'People & Body': 'Ludzie i ciało',
+    'Animals & Nature': 'Zwierzęta i natura',
+    'Food & Drink': 'Jedzenie i napoje',
+    'Travel & Places': 'Podróże i miejsca',
+    Activities: 'Aktywności',
+    Objects: 'Obiekty',
+    Symbols: 'Symbole',
+    Flags: 'Flagi',
+    'My emojis': 'Moje emoji',
+    'No emojis found': 'Nie znaleziono emoji',
+    'Encrypted DM unavailable': 'Szyfrowane wiadomości niedostępne',
+    'No DM relays': 'Brak przekaźników wiadomości',
+    'n users_one': '{{count}} użytkownik',
+    'n users_few': '{{count}} użytkowników',
+    'n users_many': '{{count}} użytkowników',
+    'n users_other': '{{count}} użytkownika'
   }
 }

@@ -937,7 +937,7 @@ export default {
     'What happens next': 'Cosa succede dopo',
     'This account is no longer linked to the central server. To keep using it, log in again with your private key (nsec).':
       'Questo account non è più collegato al server centrale. Per continuare a usarlo, accedi di nuovo con la tua chiave privata (nsec).',
-    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Esporta chiave privata" option.':
+    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Export private key" option.':
       'La disconnessione rimuove solo il collegamento tra questo account e il server centrale. Il tuo account esiste ancora e puoi continuare a usarlo accedendo con la tua chiave privata (nsec). Prima di continuare, esporta e salva in modo sicuro il tuo nsec usando l\'opzione "Esporta chiave privata".',
     Done: 'Fatto',
     Recover: 'Recupera',
@@ -1058,6 +1058,39 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Questo account ora firma tramite un firmatario remoto sicuro e puoi accedere con Google in qualsiasi momento. La tua chiave privata non viene mai condivisa con Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Ora puoi accedere a questo account con Google. Continui a firmare localmente con la tua chiave privata, che non viene mai condivisa con Google.'
+      'Ora puoi accedere a questo account con Google. Continui a firmare localmente con la tua chiave privata, che non viene mai condivisa con Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Impossibile raggiungere il firmatario remoto. Riprova più tardi o controlla la tua connessione di rete.',
+    'Retrying ({{current}}/{{max}})': 'Nuovo tentativo ({{current}}/{{max}})',
+    'Automatic updates': 'Aggiornamenti automatici',
+    'Check for and download updates in the background':
+      'Controlla e scarica gli aggiornamenti in background',
+    'Check for updates': 'Controlla aggiornamenti',
+    'Checking for updates…': 'Ricerca aggiornamenti in corso…',
+    'Update available: v{{version}}': 'Aggiornamento disponibile: v{{version}}',
+    'You are on the latest version ({{version}})':
+      'Stai usando la versione più recente ({{version}})',
+    'Failed to check for updates': 'Controllo degli aggiornamenti non riuscito',
+    Check: 'Controlla',
+    NEW: 'NUOVO',
+    'Updates are not available in development mode':
+      'Gli aggiornamenti non sono disponibili in modalità di sviluppo',
+    'Search emojis': 'Cerca emoji',
+    'Recently used': 'Usati di recente',
+    'Smileys & Emotion': 'Faccine ed emozioni',
+    'People & Body': 'Persone e corpo',
+    'Animals & Nature': 'Animali e natura',
+    'Food & Drink': 'Cibo e bevande',
+    'Travel & Places': 'Viaggi e luoghi',
+    Activities: 'Attività',
+    Objects: 'Oggetti',
+    Symbols: 'Simboli',
+    Flags: 'Bandiere',
+    'My emojis': 'Le mie emoji',
+    'No emojis found': 'Nessuna emoji trovata',
+    'Encrypted DM unavailable': 'DM crittografato non disponibile',
+    'No DM relays': 'Nessun relay per DM',
+    'n users_one': '{{count}} utente',
+    'n users_other': '{{count}} utenti'
   }
 }

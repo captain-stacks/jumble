@@ -1053,6 +1053,36 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'このアカウントはセキュアなリモート署名者を通じて署名するようになり、いつでもGoogleでサインインできます。秘密鍵がGoogleと共有されることは決してありません。',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'これでGoogleでこのアカウントにサインインできます。署名は引き続き秘密鍵を使ってローカルで行われ、秘密鍵がGoogleと共有されることは決してありません。'
+      'これでGoogleでこのアカウントにサインインできます。署名は引き続き秘密鍵を使ってローカルで行われ、秘密鍵がGoogleと共有されることは決してありません。',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'リモート署名者に接続できませんでした。しばらくしてからもう一度お試しいただくか、ネットワーク接続をご確認ください。',
+    'Retrying ({{current}}/{{max}})': '再試行中 ({{current}}/{{max}})',
+    'Automatic updates': '自動更新',
+    'Check for and download updates in the background':
+      'バックグラウンドで更新を確認してダウンロードする',
+    'Check for updates': '更新を確認',
+    'Checking for updates…': '更新を確認中…',
+    'Update available: v{{version}}': '更新があります: v{{version}}',
+    'You are on the latest version ({{version}})': '最新バージョンをご利用中です ({{version}})',
+    'Failed to check for updates': '更新の確認に失敗しました',
+    Check: '確認',
+    NEW: '新着',
+    'Updates are not available in development mode': '開発モードでは更新は利用できません',
+    'Search emojis': '絵文字を検索',
+    'Recently used': '最近使用したもの',
+    'Smileys & Emotion': 'スマイリーと感情',
+    'People & Body': '人と体',
+    'Animals & Nature': '動物と自然',
+    'Food & Drink': '食べ物と飲み物',
+    'Travel & Places': '旅行と場所',
+    Activities: 'アクティビティ',
+    Objects: '物',
+    Symbols: '記号',
+    Flags: '旗',
+    'My emojis': 'マイ絵文字',
+    'No emojis found': '絵文字が見つかりません',
+    'Encrypted DM unavailable': '暗号化DMを利用できません',
+    'No DM relays': 'DMリレーがありません',
+    'n users_other': '{{count}}人のユーザー'
   }
 }

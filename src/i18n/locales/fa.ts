@@ -1053,6 +1053,37 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'این حساب اکنون از طریق یک امضاکننده‌ی راه‌دور امن امضا می‌کند و می‌توانید هر زمان با Google وارد شوید. کلید خصوصی شما هرگز با Google به اشتراک گذاشته نمی‌شود.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'اکنون می‌توانید با Google به این حساب وارد شوید. شما همچنان به‌صورت محلی با کلید خصوصی خود امضا می‌کنید که هرگز با Google به اشتراک گذاشته نمی‌شود.'
+      'اکنون می‌توانید با Google به این حساب وارد شوید. شما همچنان به‌صورت محلی با کلید خصوصی خود امضا می‌کنید که هرگز با Google به اشتراک گذاشته نمی‌شود.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'دسترسی به امضاکننده‌ی راه‌دور ممکن نشد. لطفاً بعداً دوباره تلاش کنید یا اتصال شبکه‌ی خود را بررسی کنید.',
+    'Retrying ({{current}}/{{max}})': 'در حال تلاش مجدد ({{current}}/{{max}})',
+    'Automatic updates': 'به‌روزرسانی‌های خودکار',
+    'Check for and download updates in the background': 'بررسی و دانلود به‌روزرسانی‌ها در پس‌زمینه',
+    'Check for updates': 'بررسی به‌روزرسانی‌ها',
+    'Checking for updates…': 'در حال بررسی به‌روزرسانی‌ها…',
+    'Update available: v{{version}}': 'به‌روزرسانی موجود است: v{{version}}',
+    'You are on the latest version ({{version}})':
+      'شما از آخرین نسخه استفاده می‌کنید ({{version}})',
+    'Failed to check for updates': 'بررسی به‌روزرسانی‌ها ناموفق بود',
+    Check: 'بررسی',
+    NEW: 'جدید',
+    'Updates are not available in development mode': 'به‌روزرسانی‌ها در حالت توسعه در دسترس نیستند',
+    'Search emojis': 'جستجوی ایموجی‌ها',
+    'Recently used': 'اخیراً استفاده‌شده',
+    'Smileys & Emotion': 'شکلک‌ها و احساسات',
+    'People & Body': 'افراد و بدن',
+    'Animals & Nature': 'حیوانات و طبیعت',
+    'Food & Drink': 'غذا و نوشیدنی',
+    'Travel & Places': 'سفر و مکان‌ها',
+    Activities: 'فعالیت‌ها',
+    Objects: 'اشیاء',
+    Symbols: 'نمادها',
+    Flags: 'پرچم‌ها',
+    'My emojis': 'ایموجی‌های من',
+    'No emojis found': 'هیچ ایموجی‌ای یافت نشد',
+    'Encrypted DM unavailable': 'پیام خصوصی رمزگذاری‌شده در دسترس نیست',
+    'No DM relays': 'بدون رله‌ی پیام خصوصی',
+    'n users_one': '{{count}} کاربر',
+    'n users_other': '{{count}} کاربر'
   }
 }

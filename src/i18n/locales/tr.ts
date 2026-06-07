@@ -1058,6 +1058,34 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Bu hesap artık güvenli bir uzak imzalayıcı aracılığıyla imzalıyor ve istediğin zaman Google ile giriş yapabilirsin. Özel anahtarın asla Google ile paylaşılmaz.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Bu hesaba artık Google ile giriş yapabilirsin. Hâlâ asla Google ile paylaşılmayan özel anahtarınla yerel olarak imzalıyorsun.'
+      'Bu hesaba artık Google ile giriş yapabilirsin. Hâlâ asla Google ile paylaşılmayan özel anahtarınla yerel olarak imzalıyorsun.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Uzak imzalayıcıya ulaşılamadı. Lütfen daha sonra tekrar dene veya ağ bağlantını kontrol et.',
+    'Retrying ({{current}}/{{max}})': 'Yeniden deneniyor ({{current}}/{{max}})',
+    'Automatic updates': 'Otomatik güncellemeler',
+    'Check for and download updates in the background':
+      'Güncellemeleri arka planda denetle ve indir',
+    'Check for updates': 'Güncellemeleri denetle',
+    'Checking for updates…': 'Güncellemeler denetleniyor…',
+    'Update available: v{{version}}': 'Güncelleme mevcut: v{{version}}',
+    'You are on the latest version ({{version}})': 'En son sürümü kullanıyorsun ({{version}})',
+    'Failed to check for updates': 'Güncellemeler denetlenemedi',
+    Check: 'Denetle',
+    NEW: 'YENİ',
+    'Updates are not available in development mode':
+      'Geliştirme modunda güncellemeler kullanılamaz',
+    'Search emojis': 'Emoji ara',
+    'Recently used': 'Son kullanılanlar',
+    'Smileys & Emotion': 'Yüz ifadeleri ve duygular',
+    'People & Body': 'İnsanlar ve vücut',
+    'Animals & Nature': 'Hayvanlar ve doğa',
+    'Food & Drink': 'Yiyecek ve içecek',
+    'Travel & Places': 'Seyahat ve mekanlar',
+    Activities: 'Etkinlikler',
+    Objects: 'Nesneler',
+    Symbols: 'Semboller',
+    Flags: 'Bayraklar',
+    'My emojis': 'Emojilerim',
+    'No emojis found': 'Emoji bulunamadı'
   }
 }

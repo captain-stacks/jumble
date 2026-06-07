@@ -156,7 +156,6 @@ export default {
     Mute: 'Заглушить',
     Muted: 'Заглушено',
     Unmute: 'Отменить заглушку',
-    'Mute user': 'Заглушить пользователя',
     'Unmute user': 'Снять заглушку с пользователя',
     'Append n relays': 'Добавить {{n}} ретрансляторов',
     Append: 'Добавить',
@@ -1057,6 +1056,40 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Этот аккаунт теперь подписывает через защищённый удалённый подписант, и вы можете входить через Google в любое время. Ваш приватный ключ никогда не передаётся Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Теперь вы можете входить в этот аккаунт через Google. Вы по-прежнему подписываете локально с приватным ключом, который никогда не передаётся Google.'
+      'Теперь вы можете входить в этот аккаунт через Google. Вы по-прежнему подписываете локально с приватным ключом, который никогда не передаётся Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Не удалось связаться с удалённым подписантом. Пожалуйста, попробуйте позже или проверьте подключение к сети.',
+    'Retrying ({{current}}/{{max}})': 'Повторная попытка ({{current}}/{{max}})',
+    'Automatic updates': 'Автоматические обновления',
+    'Check for and download updates in the background':
+      'Проверять и загружать обновления в фоновом режиме',
+    'Check for updates': 'Проверить обновления',
+    'Checking for updates…': 'Проверка обновлений…',
+    'Update available: v{{version}}': 'Доступно обновление: v{{version}}',
+    'You are on the latest version ({{version}})':
+      'У вас установлена последняя версия ({{version}})',
+    'Failed to check for updates': 'Не удалось проверить обновления',
+    Check: 'Проверить',
+    NEW: 'НОВОЕ',
+    'Updates are not available in development mode': 'Обновления недоступны в режиме разработки',
+    'Search emojis': 'Поиск эмодзи',
+    'Recently used': 'Недавно использованные',
+    'Smileys & Emotion': 'Смайлики и эмоции',
+    'People & Body': 'Люди и тело',
+    'Animals & Nature': 'Животные и природа',
+    'Food & Drink': 'Еда и напитки',
+    'Travel & Places': 'Путешествия и места',
+    Activities: 'Занятия',
+    Objects: 'Объекты',
+    Symbols: 'Символы',
+    Flags: 'Флаги',
+    'My emojis': 'Мои эмодзи',
+    'No emojis found': 'Эмодзи не найдены',
+    'Encrypted DM unavailable': 'Зашифрованные ЛС недоступны',
+    'No DM relays': 'Нет релеев для ЛС',
+    'n users_one': '{{count}} пользователь',
+    'n users_few': '{{count}} пользователя',
+    'n users_many': '{{count}} пользователей',
+    'n users_other': '{{count}} пользователя'
   }
 }

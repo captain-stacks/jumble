@@ -1035,6 +1035,40 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'يوقّع هذا الحساب الآن عبر موقّع بعيد آمن، ويمكنك تسجيل الدخول باستخدام Google في أي وقت. لا تتم مشاركة مفتاحك الخاص مع Google أبدًا.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'يمكنك الآن تسجيل الدخول إلى هذا الحساب باستخدام Google. لا تزال توقّع محليًا بمفتاحك الخاص، الذي لا تتم مشاركته مع Google أبدًا.'
+      'يمكنك الآن تسجيل الدخول إلى هذا الحساب باستخدام Google. لا تزال توقّع محليًا بمفتاحك الخاص، الذي لا تتم مشاركته مع Google أبدًا.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'تعذّر الوصول إلى الموقّع البعيد. يُرجى المحاولة لاحقًا أو التحقق من اتصالك بالشبكة.',
+    'Retrying ({{current}}/{{max}})': 'إعادة المحاولة ({{current}}/{{max}})',
+    'Automatic updates': 'التحديثات التلقائية',
+    'Check for and download updates in the background': 'البحث عن التحديثات وتنزيلها في الخلفية',
+    'Check for updates': 'التحقق من وجود تحديثات',
+    'Checking for updates…': 'جارٍ التحقق من وجود تحديثات…',
+    'Update available: v{{version}}': 'يتوفر تحديث: v{{version}}',
+    'You are on the latest version ({{version}})': 'أنت تستخدم أحدث إصدار ({{version}})',
+    'Failed to check for updates': 'فشل التحقق من وجود تحديثات',
+    Check: 'تحقق',
+    NEW: 'جديد',
+    'Updates are not available in development mode': 'التحديثات غير متاحة في وضع التطوير',
+    'Search emojis': 'البحث عن الرموز التعبيرية',
+    'Recently used': 'المستخدمة مؤخرًا',
+    'Smileys & Emotion': 'الوجوه والمشاعر',
+    'People & Body': 'الأشخاص والجسم',
+    'Animals & Nature': 'الحيوانات والطبيعة',
+    'Food & Drink': 'الطعام والشراب',
+    'Travel & Places': 'السفر والأماكن',
+    Activities: 'الأنشطة',
+    Objects: 'الأشياء',
+    Symbols: 'الرموز',
+    Flags: 'الأعلام',
+    'My emojis': 'رموزي التعبيرية',
+    'No emojis found': 'لم يتم العثور على رموز تعبيرية',
+    'Encrypted DM unavailable': 'الرسائل المباشرة المشفّرة غير متاحة',
+    'No DM relays': 'لا توجد مرحّلات للرسائل الخاصة',
+    'n users_zero': 'لا مستخدمين',
+    'n users_one': 'مستخدم واحد',
+    'n users_two': 'مستخدمان',
+    'n users_few': '{{count}} مستخدمين',
+    'n users_many': '{{count}} مستخدمًا',
+    'n users_other': '{{count}} مستخدم'
   }
 }

@@ -1057,6 +1057,38 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Esta conta agora assina por meio de um assinador remoto seguro, e você pode entrar com o Google a qualquer momento. Sua chave privada nunca é compartilhada com o Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Agora você pode entrar nesta conta com o Google. Você ainda está assinando localmente com sua chave privada, que nunca é compartilhada com o Google.'
+      'Agora você pode entrar nesta conta com o Google. Você ainda está assinando localmente com sua chave privada, que nunca é compartilhada com o Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Não foi possível conectar ao assinador remoto. Tente novamente mais tarde ou verifique sua conexão de rede.',
+    'Retrying ({{current}}/{{max}})': 'Tentando novamente ({{current}}/{{max}})',
+    'Automatic updates': 'Atualizações automáticas',
+    'Check for and download updates in the background':
+      'Verificar e baixar atualizações em segundo plano',
+    'Check for updates': 'Verificar atualizações',
+    'Checking for updates…': 'Verificando atualizações…',
+    'Update available: v{{version}}': 'Atualização disponível: v{{version}}',
+    'You are on the latest version ({{version}})': 'Você está na versão mais recente ({{version}})',
+    'Failed to check for updates': 'Falha ao verificar atualizações',
+    Check: 'Verificar',
+    NEW: 'NOVO',
+    'Updates are not available in development mode':
+      'As atualizações não estão disponíveis no modo de desenvolvimento',
+    'Search emojis': 'Buscar emojis',
+    'Recently used': 'Usados recentemente',
+    'Smileys & Emotion': 'Carinhas e emoções',
+    'People & Body': 'Pessoas e corpo',
+    'Animals & Nature': 'Animais e natureza',
+    'Food & Drink': 'Comidas e bebidas',
+    'Travel & Places': 'Viagens e lugares',
+    Activities: 'Atividades',
+    Objects: 'Objetos',
+    Symbols: 'Símbolos',
+    Flags: 'Bandeiras',
+    'My emojis': 'Meus emojis',
+    'No emojis found': 'Nenhum emoji encontrado',
+    'Encrypted DM unavailable': 'Mensagem direta criptografada indisponível',
+    'No DM relays': 'Sem relays de mensagens diretas',
+    'n users_one': '{{count}} usuário',
+    'n users_other': '{{count}} usuários'
   }
 }

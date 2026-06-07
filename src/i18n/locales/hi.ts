@@ -933,7 +933,7 @@ export default {
     'What happens next': 'आगे क्या होता है',
     'This account is no longer linked to the central server. To keep using it, log in again with your private key (nsec).':
       'यह खाता अब केंद्रीय सर्वर से जुड़ा नहीं है। इसका उपयोग जारी रखने के लिए, अपनी निजी कुंजी (nsec) से फिर से लॉगिन करें।',
-    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "निजी कुंजी निर्यात करें" option.':
+    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Export private key" option.':
       'डिस्कनेक्ट करने से केवल इस खाते और केंद्रीय सर्वर के बीच का लिंक हटता है। आपका खाता अभी भी मौजूद है और आप अपनी निजी कुंजी (nsec) से लॉगिन करके इसका उपयोग जारी रख सकते हैं। जारी रखने से पहले, "निजी कुंजी निर्यात करें" विकल्प का उपयोग करके अपना nsec निर्यात करें और सुरक्षित रूप से सहेजें।',
     Done: 'हो गया',
     Recover: 'पुनर्प्राप्त करें',
@@ -1051,6 +1051,37 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'यह खाता अब एक सुरक्षित रिमोट साइनर के माध्यम से हस्ताक्षर करता है, और आप कभी भी Google से साइन इन कर सकते हैं। आपकी निजी कुंजी कभी भी Google के साथ साझा नहीं की जाती।',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'अब आप Google से इस खाते में साइन इन कर सकते हैं। आप अभी भी अपनी निजी कुंजी से स्थानीय रूप से हस्ताक्षर कर रहे हैं, जो कभी भी Google के साथ साझा नहीं की जाती।'
+      'अब आप Google से इस खाते में साइन इन कर सकते हैं। आप अभी भी अपनी निजी कुंजी से स्थानीय रूप से हस्ताक्षर कर रहे हैं, जो कभी भी Google के साथ साझा नहीं की जाती।',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'रिमोट साइनर तक नहीं पहुँचा जा सका। कृपया बाद में फिर से प्रयास करें या अपना नेटवर्क कनेक्शन जाँचें।',
+    'Retrying ({{current}}/{{max}})': 'पुनः प्रयास ({{current}}/{{max}})',
+    'Automatic updates': 'स्वचालित अपडेट',
+    'Check for and download updates in the background':
+      'पृष्ठभूमि में अपडेट जाँचें और डाउनलोड करें',
+    'Check for updates': 'अपडेट जाँचें',
+    'Checking for updates…': 'अपडेट जाँच रहे हैं…',
+    'Update available: v{{version}}': 'अपडेट उपलब्ध: v{{version}}',
+    'You are on the latest version ({{version}})': 'आप नवीनतम संस्करण पर हैं ({{version}})',
+    'Failed to check for updates': 'अपडेट जाँचने में विफल',
+    Check: 'जाँचें',
+    NEW: 'नया',
+    'Updates are not available in development mode': 'डेवलपमेंट मोड में अपडेट उपलब्ध नहीं हैं',
+    'Search emojis': 'इमोजी खोजें',
+    'Recently used': 'हाल में उपयोग किए गए',
+    'Smileys & Emotion': 'स्माइली और भावनाएँ',
+    'People & Body': 'लोग और शरीर',
+    'Animals & Nature': 'जानवर और प्रकृति',
+    'Food & Drink': 'खाना और पेय',
+    'Travel & Places': 'यात्रा और स्थान',
+    Activities: 'गतिविधियाँ',
+    Objects: 'वस्तुएँ',
+    Symbols: 'प्रतीक',
+    Flags: 'झंडे',
+    'My emojis': 'मेरी इमोजी',
+    'No emojis found': 'कोई इमोजी नहीं मिली',
+    'Encrypted DM unavailable': 'एन्क्रिप्टेड DM अनुपलब्ध',
+    'No DM relays': 'कोई DM रिले नहीं',
+    'n users_one': '{{count}} उपयोगकर्ता',
+    'n users_other': '{{count}} उपयोगकर्ता'
   }
 }

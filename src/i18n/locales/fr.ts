@@ -947,7 +947,7 @@ export default {
     'What happens next': 'Ce qui se passe ensuite',
     'This account is no longer linked to the central server. To keep using it, log in again with your private key (nsec).':
       "Ce compte n'est plus lié au serveur central. Pour continuer à l'utiliser, connectez-vous à nouveau avec votre clé privée (nsec).",
-    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Exporter la clé privée" option.':
+    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Export private key" option.':
       'La déconnexion supprime uniquement le lien entre ce compte et le serveur central. Votre compte existe toujours et vous pouvez continuer à l\'utiliser en vous connectant avec votre clé privée (nsec). Avant de continuer, exportez et sauvegardez votre nsec en toute sécurité via l\'option "Exporter la clé privée".',
     Done: 'Terminé',
     Recover: 'Récupérer',
@@ -1068,6 +1068,39 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       "Ce compte signe désormais via un signataire distant sécurisé, et vous pouvez vous connecter avec Google à tout moment. Votre clé privée n'est jamais partagée avec Google.",
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      "Vous pouvez désormais vous connecter à ce compte avec Google. Vous signez toujours localement avec votre clé privée, qui n'est jamais partagée avec Google."
+      "Vous pouvez désormais vous connecter à ce compte avec Google. Vous signez toujours localement avec votre clé privée, qui n'est jamais partagée avec Google.",
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Impossible de joindre le signataire distant. Veuillez réessayer plus tard ou vérifier votre connexion réseau.',
+    'Retrying ({{current}}/{{max}})': 'Nouvelle tentative ({{current}}/{{max}})',
+    'Automatic updates': 'Mises à jour automatiques',
+    'Check for and download updates in the background':
+      'Rechercher et télécharger les mises à jour en arrière-plan',
+    'Check for updates': 'Rechercher des mises à jour',
+    'Checking for updates…': 'Recherche de mises à jour…',
+    'Update available: v{{version}}': 'Mise à jour disponible : v{{version}}',
+    'You are on the latest version ({{version}})':
+      'Vous utilisez la dernière version ({{version}})',
+    'Failed to check for updates': 'Échec de la recherche de mises à jour',
+    Check: 'Vérifier',
+    NEW: 'NOUVEAU',
+    'Updates are not available in development mode':
+      'Les mises à jour ne sont pas disponibles en mode développement',
+    'Search emojis': 'Rechercher des émojis',
+    'Recently used': 'Récemment utilisés',
+    'Smileys & Emotion': 'Émoticônes et émotions',
+    'People & Body': 'Personnes et corps',
+    'Animals & Nature': 'Animaux et nature',
+    'Food & Drink': 'Nourriture et boissons',
+    'Travel & Places': 'Voyage et lieux',
+    Activities: 'Activités',
+    Objects: 'Objets',
+    Symbols: 'Symboles',
+    Flags: 'Drapeaux',
+    'My emojis': 'Mes émojis',
+    'No emojis found': 'Aucun émoji trouvé',
+    'Encrypted DM unavailable': 'Message chiffré indisponible',
+    'No DM relays': 'Aucun relais de messagerie',
+    'n users_one': '{{count}} utilisateur',
+    'n users_other': '{{count}} utilisateurs'
   }
 }

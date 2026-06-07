@@ -933,7 +933,7 @@ export default {
     'What happens next': 'Mi történik ezután',
     'This account is no longer linked to the central server. To keep using it, log in again with your private key (nsec).':
       'Ez a fiók már nincs kapcsolva a központi szerverhez. A használat folytatásához jelentkezz be újra a privát kulcsoddal (nsec).',
-    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Privát kulcs exportálása" option.':
+    'Disconnecting only removes the link between this account and the central server. Your account still exists, and you can keep using it by logging in with your private key (nsec). Before continuing, export and safely save your nsec using the "Export private key" option.':
       'A leválasztás csak a fiókod és a központi szerver közötti kapcsolatot szünteti meg. A fiókod továbbra is létezik, és folytathatod a használatát a privát kulcsoddal (nsec) való bejelentkezéssel. A folytatás előtt exportáld és mentsd biztonságos helyre az nsec-edet a "Privát kulcs exportálása" lehetőséggel.',
     Done: 'Kész',
     Recover: 'Visszaállítás',
@@ -1053,6 +1053,40 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Ez a fiók mostantól egy biztonságos távoli aláírón keresztül ír alá, és bármikor bejelentkezhetsz Google-lel. A privát kulcsodat soha nem osztjuk meg a Google-lel.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Mostantól bejelentkezhetsz ebbe a fiókba Google-lel. Továbbra is helyben írsz alá a privát kulcsoddal, amelyet soha nem osztunk meg a Google-lel.'
+      'Mostantól bejelentkezhetsz ebbe a fiókba Google-lel. Továbbra is helyben írsz alá a privát kulcsoddal, amelyet soha nem osztunk meg a Google-lel.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Nem sikerült elérni a távoli aláírót. Kérlek, próbáld újra később, vagy ellenőrizd a hálózati kapcsolatodat.',
+    'Retrying ({{current}}/{{max}})': 'Újrapróbálkozás ({{current}}/{{max}})',
+    selfZapWarning:
+      'A Jumble nem felelős azért, ami akkor történik, ha saját magadat zappolod. A saját felelősségedre folytasd. 😉⚡',
+    'Automatic updates': 'Automatikus frissítések',
+    'Check for and download updates in the background':
+      'Frissítések keresése és letöltése a háttérben',
+    'Check for updates': 'Frissítések keresése',
+    'Checking for updates…': 'Frissítések keresése…',
+    'Update available: v{{version}}': 'Elérhető frissítés: v{{version}}',
+    'You are on the latest version ({{version}})': 'A legújabb verziót használod ({{version}})',
+    'Failed to check for updates': 'Nem sikerült ellenőrizni a frissítéseket',
+    Check: 'Ellenőrzés',
+    NEW: 'ÚJ',
+    'Updates are not available in development mode':
+      'A frissítések nem érhetők el fejlesztői módban',
+    'Search emojis': 'Emojik keresése',
+    'Recently used': 'Nemrég használt',
+    'Smileys & Emotion': 'Mosolyok és érzelmek',
+    'People & Body': 'Emberek és test',
+    'Animals & Nature': 'Állatok és természet',
+    'Food & Drink': 'Étel és ital',
+    'Travel & Places': 'Utazás és helyek',
+    Activities: 'Tevékenységek',
+    Objects: 'Tárgyak',
+    Symbols: 'Szimbólumok',
+    Flags: 'Zászlók',
+    'My emojis': 'Saját emojik',
+    'No emojis found': 'Nem található emoji',
+    'Encrypted DM unavailable': 'A titkosított DM nem érhető el',
+    'No DM relays': 'Nincsenek DM relék',
+    'n users_one': '{{count}} felhasználó',
+    'n users_other': '{{count}} felhasználó'
   }
 }

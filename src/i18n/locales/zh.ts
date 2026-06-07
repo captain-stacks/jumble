@@ -113,7 +113,6 @@ export default {
     'Picture note requires images': '图片笔记需要有图片',
     Relays: '服务器',
     Image: '图片',
-    Normal: '普通',
     'R & W': '读写',
     Read: '只读',
     Write: '只写',
@@ -124,7 +123,6 @@ export default {
     Pull: '拉取',
     'Select all': '全选',
     'Relay Sets': '服务器组',
-    Mailbox: '邮箱',
     'Read & Write Relays': '读写服务器',
     'read relays description':
       '读服务器用于寻找与您有关的事件。其他用户会将想要您看到的事件发布到您的读服务器，比如回复、点赞转发……',
@@ -144,7 +142,6 @@ export default {
     'Copy private key': '复制私钥',
     'Enter the password to decrypt your ncryptsec': '输入密码以解密您的 ncryptsec',
     Back: '返回',
-    'password (optional): encrypt nsec': '密码 (可选): 加密 nsec',
     'optional: encrypt nsec': '可选: 加密 nsec',
     password: '密码',
     'Sign up': '注册',
@@ -1016,6 +1013,33 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       '此账号现在通过安全的远程签名器签名，你可以随时用 Google 登录。你的私钥绝不会交给 Google。',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      '现在你可以用 Google 登录此账号。你仍在本地用私钥签名，私钥绝不会交给 Google。'
+      '现在你可以用 Google 登录此账号。你仍在本地用私钥签名，私钥绝不会交给 Google。',
+    'Retrying ({{current}}/{{max}})': '重试 ({{current}}/{{max}})',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      '无法连接到远程签名器。请稍后重试或检查你的网络连接。',
+    'Automatic updates': '自动更新',
+    'Check for and download updates in the background': '在后台检查并下载更新',
+    'Check for updates': '检查更新',
+    'Checking for updates…': '正在检查更新…',
+    'Update available: v{{version}}': '有可用更新：v{{version}}',
+    'You are on the latest version ({{version}})': '你已是最新版本（{{version}}）',
+    'Failed to check for updates': '检查更新失败',
+    Check: '检查',
+    NEW: '新',
+    'Updates are not available in development mode': '开发模式下不支持更新',
+    'Search emojis': '搜索表情',
+    'Recently used': '最近使用',
+    'Smileys & Emotion': '笑脸与情感',
+    'People & Body': '人物与身体',
+    'Animals & Nature': '动物与自然',
+    'Food & Drink': '食物与饮料',
+    'Travel & Places': '旅行与地点',
+    Activities: '活动',
+    Objects: '物品',
+    Symbols: '符号',
+    Flags: '旗帜',
+    'My emojis': '我的表情',
+    'No emojis found': '未找到表情',
+    'n users_other': '{{count}} 位用户'
   }
 }

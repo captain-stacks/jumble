@@ -1036,6 +1036,35 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'ตอนนี้บัญชีนี้เซ็นชื่อผ่านผู้เซ็นระยะไกลที่ปลอดภัย และคุณสามารถเข้าสู่ระบบด้วย Google ได้ทุกเมื่อ คีย์ส่วนตัวของคุณจะไม่ถูกแชร์กับ Google',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'ตอนนี้คุณสามารถเข้าสู่ระบบบัญชีนี้ด้วย Google ได้แล้ว คุณยังคงเซ็นชื่อในเครื่องด้วยคีย์ส่วนตัวของคุณ ซึ่งจะไม่ถูกแชร์กับ Google'
+      'ตอนนี้คุณสามารถเข้าสู่ระบบบัญชีนี้ด้วย Google ได้แล้ว คุณยังคงเซ็นชื่อในเครื่องด้วยคีย์ส่วนตัวของคุณ ซึ่งจะไม่ถูกแชร์กับ Google',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'ไม่สามารถเชื่อมต่อผู้เซ็นระยะไกลได้ กรุณาลองใหม่ภายหลังหรือตรวจสอบการเชื่อมต่อเครือข่ายของคุณ',
+    'Retrying ({{current}}/{{max}})': 'กำลังลองใหม่ ({{current}}/{{max}})',
+    'Automatic updates': 'อัปเดตอัตโนมัติ',
+    'Check for and download updates in the background': 'ตรวจสอบและดาวน์โหลดอัปเดตในเบื้องหลัง',
+    'Check for updates': 'ตรวจหาอัปเดต',
+    'Checking for updates…': 'กำลังตรวจหาอัปเดต…',
+    'Update available: v{{version}}': 'มีอัปเดตใหม่: v{{version}}',
+    'You are on the latest version ({{version}})': 'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ({{version}})',
+    'Failed to check for updates': 'ตรวจหาอัปเดตไม่สำเร็จ',
+    Check: 'ตรวจสอบ',
+    NEW: 'ใหม่',
+    'Updates are not available in development mode': 'ไม่สามารถอัปเดตได้ในโหมดพัฒนา',
+    'Search emojis': 'ค้นหาอีโมจิ',
+    'Recently used': 'ใช้ล่าสุด',
+    'Smileys & Emotion': 'หน้ายิ้มและอารมณ์',
+    'People & Body': 'ผู้คนและร่างกาย',
+    'Animals & Nature': 'สัตว์และธรรมชาติ',
+    'Food & Drink': 'อาหารและเครื่องดื่ม',
+    'Travel & Places': 'การเดินทางและสถานที่',
+    Activities: 'กิจกรรม',
+    Objects: 'สิ่งของ',
+    Symbols: 'สัญลักษณ์',
+    Flags: 'ธง',
+    'My emojis': 'อีโมจิของฉัน',
+    'No emojis found': 'ไม่พบอีโมจิ',
+    'Encrypted DM unavailable': 'ไม่สามารถใช้ข้อความส่วนตัวที่เข้ารหัสได้',
+    'No DM relays': 'ไม่มีรีเลย์สำหรับข้อความส่วนตัว',
+    'n users_other': '{{count}} ผู้ใช้'
   }
 }

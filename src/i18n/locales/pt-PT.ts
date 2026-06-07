@@ -86,7 +86,7 @@ export default {
     Replies: 'Respostas',
     Notifications: 'Notificações',
     'no more notifications': 'não há mais notificações',
-    'Using private key login is insecure. It is recommended to use a browser extension for login, such as alby, nostr-keyx or nos2x. If you must use a private key, please set a password for encryption at minimum.Using private key login is insecure. It is recommended to use a browser extension for login, such as alby, nostr-keyx or nos2x.':
+    'Using private key login is insecure. It is recommended to use a browser extension for login, such as alby, nostr-keyx or nos2x. If you must use a private key, please set a password for encryption at minimum.':
       'O uso de login com chave privada é inseguro. Recomenda-se usar uma extensão de navegador para login, como alby, nostr-keyx ou nos2x. Se você precisar usar uma chave privada, defina uma senha para criptografia pelo menos.',
     'Login with Browser Extension': 'Entrar com Extensão do Navegador',
     'Login with Bunker': 'Entrar com Bunker',
@@ -1060,6 +1060,39 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Esta conta assina agora através de um signatário remoto seguro e pode iniciar sessão com o Google a qualquer momento. A sua chave privada nunca é partilhada com o Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Pode agora iniciar sessão nesta conta com o Google. Continua a assinar localmente com a sua chave privada, que nunca é partilhada com o Google.'
+      'Pode agora iniciar sessão nesta conta com o Google. Continua a assinar localmente com a sua chave privada, que nunca é partilhada com o Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'Não foi possível contactar o signatário remoto. Tente novamente mais tarde ou verifique a sua ligação de rede.',
+    'Retrying ({{current}}/{{max}})': 'A tentar novamente ({{current}}/{{max}})',
+    'Automatic updates': 'Atualizações automáticas',
+    'Check for and download updates in the background':
+      'Procurar e transferir atualizações em segundo plano',
+    'Check for updates': 'Procurar atualizações',
+    'Checking for updates…': 'A procurar atualizações…',
+    'Update available: v{{version}}': 'Atualização disponível: v{{version}}',
+    'You are on the latest version ({{version}})':
+      'Está a utilizar a versão mais recente ({{version}})',
+    'Failed to check for updates': 'Falha ao procurar atualizações',
+    Check: 'Procurar',
+    NEW: 'NOVO',
+    'Updates are not available in development mode':
+      'As atualizações não estão disponíveis no modo de desenvolvimento',
+    'Search emojis': 'Procurar emojis',
+    'Recently used': 'Utilizados recentemente',
+    'Smileys & Emotion': 'Sorrisos e emoções',
+    'People & Body': 'Pessoas e corpo',
+    'Animals & Nature': 'Animais e natureza',
+    'Food & Drink': 'Comida e bebida',
+    'Travel & Places': 'Viagens e lugares',
+    Activities: 'Atividades',
+    Objects: 'Objetos',
+    Symbols: 'Símbolos',
+    Flags: 'Bandeiras',
+    'My emojis': 'Os meus emojis',
+    'No emojis found': 'Nenhum emoji encontrado',
+    'Encrypted DM unavailable': 'Mensagem privada encriptada indisponível',
+    'No DM relays': 'Sem relays de mensagens privadas',
+    'n users_one': '{{count}} utilizador',
+    'n users_other': '{{count}} utilizadores'
   }
 }

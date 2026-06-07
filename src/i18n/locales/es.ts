@@ -1058,6 +1058,38 @@ export default {
     'This account now signs through a secure remote signer, and you can sign in with Google anytime. Your private key is never shared with Google.':
       'Esta cuenta ahora firma a través de un firmante remoto seguro y puedes iniciar sesión con Google en cualquier momento. Tu clave privada nunca se comparte con Google.',
     'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.':
-      'Ahora puedes iniciar sesión en esta cuenta con Google. Sigues firmando localmente con tu clave privada, que nunca se comparte con Google.'
+      'Ahora puedes iniciar sesión en esta cuenta con Google. Sigues firmando localmente con tu clave privada, que nunca se comparte con Google.',
+    'Could not reach the remote signer. Please try again later or check your network connection.':
+      'No se pudo conectar con el firmante remoto. Inténtalo de nuevo más tarde o comprueba tu conexión de red.',
+    'Retrying ({{current}}/{{max}})': 'Reintentando ({{current}}/{{max}})',
+    'Automatic updates': 'Actualizaciones automáticas',
+    'Check for and download updates in the background':
+      'Buscar y descargar actualizaciones en segundo plano',
+    'Check for updates': 'Buscar actualizaciones',
+    'Checking for updates…': 'Buscando actualizaciones…',
+    'Update available: v{{version}}': 'Actualización disponible: v{{version}}',
+    'You are on the latest version ({{version}})': 'Tienes la última versión ({{version}})',
+    'Failed to check for updates': 'Error al buscar actualizaciones',
+    Check: 'Buscar',
+    NEW: 'NUEVO',
+    'Updates are not available in development mode':
+      'Las actualizaciones no están disponibles en modo de desarrollo',
+    'Search emojis': 'Buscar emojis',
+    'Recently used': 'Usados recientemente',
+    'Smileys & Emotion': 'Caritas y emociones',
+    'People & Body': 'Personas y cuerpo',
+    'Animals & Nature': 'Animales y naturaleza',
+    'Food & Drink': 'Comida y bebida',
+    'Travel & Places': 'Viajes y lugares',
+    Activities: 'Actividades',
+    Objects: 'Objetos',
+    Symbols: 'Símbolos',
+    Flags: 'Banderas',
+    'My emojis': 'Mis emojis',
+    'No emojis found': 'No se encontraron emojis',
+    'Encrypted DM unavailable': 'Mensaje directo cifrado no disponible',
+    'No DM relays': 'Sin relés de mensajes directos',
+    'n users_one': '{{count}} usuario',
+    'n users_other': '{{count}} usuarios'
   }
 }

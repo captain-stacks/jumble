@@ -3,6 +3,10 @@ import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
 import { generateSecretKey } from 'nostr-tools'
 import { BunkerSigner as NBunkerSigner, parseBunkerInput } from 'nostr-tools/nip46'
 
+// How long to wait for the initial NIP-46 connection before giving up, so a
+// silent (unreachable relay / signer) connection does not hang forever.
+const CONNECT_TIMEOUT_MS = 10_000
+
 export class BunkerSigner implements ISigner {
   signer: NBunkerSigner | null = null
   private clientSecretKey: Uint8Array
@@ -12,7 +16,11 @@ export class BunkerSigner implements ISigner {
     this.clientSecretKey = clientSecretKey ? hexToBytes(clientSecretKey) : generateSecretKey()
   }
 
-  async login(bunker: string, isInitialConnection = true): Promise<string> {
+  async login(
+    bunker: string,
+    isInitialConnection = true,
+    connectTimeout = CONNECT_TIMEOUT_MS
+  ): Promise<string> {
     const bunkerPointer = await parseBunkerInput(bunker)
     if (!bunkerPointer) {
       throw new Error('Invalid bunker')
@@ -24,7 +32,12 @@ export class BunkerSigner implements ISigner {
       }
     })
     if (isInitialConnection) {
-      await this.signer.connect()
+      await Promise.race([
+        this.signer.connect(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Bunker connect timeout')), connectTimeout)
+        )
+      ])
       return await this.getPublicKey()
     }
     // For reconnection, skip getPublicKey - the caller already knows the pubkey
@@ -85,5 +98,4 @@ export class BunkerSigner implements ISigner {
   getClientSecretKey() {
     return bytesToHex(this.clientSecretKey)
   }
-
 }

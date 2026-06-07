@@ -1,20 +1,41 @@
+import { deleteDraftEventCache } from '@/lib/draft-event'
 import { formatError } from '@/lib/error'
+import { minePow } from '@/lib/event'
 import client from '@/services/client.service'
 import indexedDb from '@/services/indexed-db.service'
 import threadService from '@/services/thread.service'
+import { ISigner, TDraftEvent, TPublishOptions } from '@/types'
 import {
   TPostDraft,
   TPostDraftSigned,
   TPostDraftStatus,
   TPostDraftUnsigned
 } from '@/types/post-draft'
-import type { Event as NostrEvent } from 'nostr-tools'
+import type { Event as NostrEvent, VerifiedEvent } from 'nostr-tools'
 import { useEffect, useState } from 'react'
 
 export type TSignedDraftInput = Omit<
   TPostDraftSigned,
   'status' | 'error' | 'failedAt' | 'updatedAt'
 >
+
+/**
+ * Everything needed to take an unsigned, already-persisted draft through the
+ * relay-lookup → sign → pending → publish pipeline. The signer is built by the
+ * renderer (it may require NIP-07/bunker interaction) and handed in.
+ */
+export type TSendInput = {
+  id: string
+  pubkey: string
+  createdAt: number
+  signer: ISigner
+  draftEvent: TDraftEvent
+  minPow?: number
+  publishOptions?: TPublishOptions
+  parentEvent?: NostrEvent
+  parentEventCoordinate?: string
+  highlightedText?: string
+}
 
 class PostDraftService extends EventTarget {
   static instance: PostDraftService
@@ -127,14 +148,69 @@ class PostDraftService extends EventTarget {
   }
 
   /**
-   * Persist a freshly-signed event as `pending` (the hidden outbox), then kick
-   * off the publish. Awaiting this only awaits the IDB write, so the caller can
-   * close the editor immediately — the broadcast runs in the background. If the
-   * app is closed mid-send, the pending record survives and init() resumes it.
+   * Send an already-persisted draft: resolve its relays, sign it, move it into
+   * the immutable `pending` outbox, then broadcast — all in the background. The
+   * "Sending..." toast is surfaced immediately (via `publish-start`) and tracks
+   * the whole chain, so a failure in relay lookup or signing reports too. The
+   * caller persists the draft first (`saveDraft`) and closes the editor right
+   * after calling this; nothing here needs to be awaited.
+   *
+   * Relays are resolved BEFORE signing on purpose: signing is the last fallible
+   * step before the event becomes immutable, so the moment we have a signature
+   * we persist it as `pending` and never lose it (the signed-event-immutable
+   * rule). If signing/relay lookup fails, the record stays an editable `draft`.
    */
-  async enqueue(input: TSignedDraftInput): Promise<void> {
-    const pending = await this.persistPending(input)
-    this.startPublish(pending)
+  async send(input: TSendInput): Promise<void> {
+    const promise = this.runSend(input)
+    // Surface the "Sending..." toast right away, covering relay lookup + signing
+    // + publish. Swallow the rejection on the returned handle so the fire-and-
+    // forget caller can't trigger an unhandled rejection; the toast owns the UI.
+    this.dispatchEvent(new CustomEvent('publish-start', { detail: { id: input.id, promise } }))
+    return promise.catch(() => {})
+  }
+
+  private async runSend(input: TSendInput): Promise<void> {
+    const {
+      id,
+      pubkey,
+      createdAt,
+      signer,
+      draftEvent,
+      minPow,
+      publishOptions,
+      parentEvent,
+      parentEventCoordinate,
+      highlightedText
+    } = input
+
+    // Resolve the concrete relay set first (needs the user's relay context but
+    // not a signature), so once signing succeeds we go straight to pending.
+    const targetRelays = await client.determineTargetRelays(
+      { ...draftEvent, pubkey } as NostrEvent,
+      publishOptions
+    )
+
+    let signed: VerifiedEvent
+    if (minPow && minPow > 0) {
+      const mined = await minePow({ ...draftEvent, pubkey }, minPow)
+      signed = await signer.signEvent(mined)
+    } else {
+      signed = await signer.signEvent(draftEvent)
+    }
+    deleteDraftEventCache(draftEvent)
+
+    // Signed → persist as immutable pending, then broadcast.
+    const pending = await this.persistPending({
+      id,
+      pubkey,
+      createdAt,
+      signedEvent: signed,
+      targetRelays,
+      parentEvent,
+      parentEventCoordinate,
+      highlightedText
+    })
+    await this.publishPending(pending)
   }
 
   async retry(id: string): Promise<void> {
@@ -162,35 +238,51 @@ class PostDraftService extends EventTarget {
     return pending
   }
 
-  private startPublish(pending: TPostDraftSigned, { silent = false } = {}): Promise<void> {
-    // Don't double-publish the same id (e.g. a foreground enqueue racing a
+  /**
+   * Broadcast a pending record and settle its outbox state: on success delete
+   * it and surface the note in open threads; on failure mark it `failed`. The
+   * failure is rethrown so a caller tracking the promise (the "Sending..."
+   * toast) reports it. No-op if the same id is already being published.
+   */
+  private async publishPending(pending: TPostDraftSigned): Promise<void> {
+    // Don't double-publish the same id (e.g. a foreground send racing a
     // resume), and never hand an empty relay set to publishEvent — its success
     // threshold loop would never settle, wedging the record in `inflight`.
-    if (this.inflight.has(pending.id)) return Promise.resolve()
+    if (this.inflight.has(pending.id)) return
     if (!pending.targetRelays.length) {
-      return this.markFailed(pending, 'No relays to publish to')
+      await this.markFailed(pending, 'No relays to publish to')
+      throw new Error('No relays to publish to')
     }
     this.inflight.add(pending.id)
-    const promise = client.publishEvent(pending.targetRelays, pending.signedEvent)
-    if (!silent) {
-      this.dispatchEvent(
-        new CustomEvent('publish-start', { detail: { id: pending.id, promise } })
-      )
+    try {
+      await client.publishEvent(pending.targetRelays, pending.signedEvent)
+      await indexedDb.deletePostDraft(pending.id)
+      this.map.delete(pending.id)
+      this.emitChange()
+      // Optimistically surface the published note in any open thread, matching
+      // the pre-drafts-box behavior where post() inserted the reply directly.
+      threadService.addRepliesToThread([pending.signedEvent])
+    } catch (err) {
+      await this.markFailed(pending, formatError(err).join('; '))
+      throw err
+    } finally {
+      this.inflight.delete(pending.id)
     }
-    return promise
-      .then(async () => {
-        this.inflight.delete(pending.id)
-        await indexedDb.deletePostDraft(pending.id)
-        this.map.delete(pending.id)
-        this.emitChange()
-        // Optimistically surface the published note in any open thread, matching
-        // the pre-drafts-box behavior where post() inserted the reply directly.
-        threadService.addRepliesToThread([pending.signedEvent])
-      })
-      .catch(async (err) => {
-        this.inflight.delete(pending.id)
-        await this.markFailed(pending, formatError(err).join('; '))
-      })
+  }
+
+  /**
+   * Fire-and-forget publish used by retry and resume. The foreground send path
+   * uses runSend → publishPending directly so its toast spans the full chain
+   * (relay lookup + signing + publish). Swallows the rejection so a background
+   * failure isn't an unhandled rejection — publishPending already marked it
+   * `failed`.
+   */
+  private async startPublish(pending: TPostDraftSigned, { silent = false } = {}): Promise<void> {
+    const promise = this.publishPending(pending)
+    if (!silent) {
+      this.dispatchEvent(new CustomEvent('publish-start', { detail: { id: pending.id, promise } }))
+    }
+    return promise.catch(() => {})
   }
 
   private async markFailed(pending: TPostDraftSigned, error: string): Promise<void> {
@@ -223,9 +315,7 @@ const instance = PostDraftService.getInstance()
 export default instance
 
 export function useDrafts(pubkey: string | undefined): TPostDraft[] {
-  const [drafts, setDrafts] = useState<TPostDraft[]>(() =>
-    pubkey ? instance.list(pubkey) : []
-  )
+  const [drafts, setDrafts] = useState<TPostDraft[]>(() => (pubkey ? instance.list(pubkey) : []))
   useEffect(() => {
     if (!pubkey) {
       setDrafts([])
@@ -239,9 +329,7 @@ export function useDrafts(pubkey: string | undefined): TPostDraft[] {
   return drafts
 }
 
-export function useDraftCounts(
-  pubkey: string | undefined
-): Record<TPostDraftStatus, number> {
+export function useDraftCounts(pubkey: string | undefined): Record<TPostDraftStatus, number> {
   const [counts, setCounts] = useState<Record<TPostDraftStatus, number>>(() =>
     pubkey ? instance.countByStatus(pubkey) : { draft: 0, pending: 0, failed: 0 }
   )

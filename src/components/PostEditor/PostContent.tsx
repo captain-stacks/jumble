@@ -11,21 +11,18 @@ import {
   createCommentDraftEvent,
   createHighlightDraftEvent,
   createPollDraftEvent,
-  createShortTextNoteDraftEvent,
-  deleteDraftEventCache
+  createShortTextNoteDraftEvent
 } from '@/lib/draft-event'
-import { minePow } from '@/lib/event'
 import { randomId } from '@/lib/utils'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { useNostr } from '@/providers/NostrProvider'
 import mediaUpload from '@/services/media-upload.service'
-import client from '@/services/client.service'
 import postDraftService from '@/services/post-draft.service'
 import { TAccountPointer, TPollCreateData, TPostTargetItem } from '@/types'
 import { TPostDraftUnsigned } from '@/types/post-draft'
 import { Content } from '@tiptap/react'
 import { CircleHelp, ImageUp, ListTodo, Lock, Settings, Smile, X } from 'lucide-react'
-import { Event, kinds, VerifiedEvent } from 'nostr-tools'
+import { Event, kinds } from 'nostr-tools'
 import {
   forwardRef,
   useCallback,
@@ -326,6 +323,10 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
       if (postingRef.current) return
       postingRef.current = true
       try {
+        // Persist the content as a draft immediately, before the fallible relay
+        // lookup and signing run, so an interrupted or failed send never loses it.
+        await saveDraft()
+
         // Obtain the signer for the chosen account. When it's the active account
         // this returns the live signer; otherwise it builds a temporary one
         // without changing the logged-in account.
@@ -359,27 +360,17 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
           minPow
         }
 
-        let signed: VerifiedEvent
-        if (minPow > 0) {
-          const mined = await minePow({ ...draftEvent, pubkey: targetPubkey }, minPow)
-          signed = await signer.signEvent(mined)
-        } else {
-          signed = await signer.signEvent(draftEvent)
-        }
-
-        deleteDraftEventCache(draftEvent)
-
-        // Resolve the concrete relay set now (needs the user's relay context) and
-        // persist it with the draft, so a background/interrupted resend can target
-        // the exact same relays without re-resolving.
-        const targetRelays = await client.determineTargetRelays(signed, publishOptions)
-
-        await postDraftService.enqueue({
+        // Hand off to the outbox: it surfaces the "Sending..." toast right away,
+        // then resolves relays → signs → moves the draft into the immutable
+        // pending queue → publishes, all in the background.
+        postDraftService.send({
           id: draftIdRef.current,
           pubkey: targetPubkey,
           createdAt: draftCreatedAtRef.current,
-          signedEvent: signed,
-          targetRelays,
+          signer,
+          draftEvent,
+          minPow,
+          publishOptions,
           parentEvent,
           parentEventCoordinate:
             typeof initialParentStuff === 'string' ? initialParentStuff : undefined,

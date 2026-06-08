@@ -1,8 +1,5 @@
-import {
-  ENCRYPTION_KEY_RETENTION_MS,
-  ExtendedKind,
-  MAX_RETIRED_ENCRYPTION_KEYS
-} from '@/constants'
+import { ENCRYPTION_KEY_RETENTION_MS, ExtendedKind, MAX_RETIRED_ENCRYPTION_KEYS } from '@/constants'
+import { getConversationKey } from '@/lib/crypto'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { tagNameEquals } from '@/lib/tag'
 import { ISigner, TEncryptionKeypair } from '@/types'
@@ -292,12 +289,12 @@ class EncryptionKeyService {
   }
 
   encryptWithNip44(privkey: Uint8Array, pubkey: string, plainText: string): string {
-    const conversationKey = nip44.v2.utils.getConversationKey(privkey, pubkey)
+    const conversationKey = getConversationKey(privkey, pubkey)
     return nip44.v2.encrypt(plainText, conversationKey)
   }
 
   decryptWithNip44(privkey: Uint8Array, pubkey: string, cipherText: string): string {
-    const conversationKey = nip44.v2.utils.getConversationKey(privkey, pubkey)
+    const conversationKey = getConversationKey(privkey, pubkey)
     return nip44.v2.decrypt(cipherText, conversationKey)
   }
 

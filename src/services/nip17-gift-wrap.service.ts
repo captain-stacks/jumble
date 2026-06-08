@@ -1,3 +1,4 @@
+import { getConversationKey } from '@/lib/crypto'
 import { ISigner } from '@/types'
 import dayjs from 'dayjs'
 import { Event, generateSecretKey, kinds, UnsignedEvent } from 'nostr-tools'
@@ -91,12 +92,7 @@ class Nip17GiftWrapService {
       ['p', senderEncryptionPubkey],
       ['p', accountPubkey]
     ]
-    const selfSeal = await this.createSeal(
-      rumor,
-      signer,
-      encryptionPrivkey,
-      senderEncryptionPubkey
-    )
+    const selfSeal = await this.createSeal(rumor, signer, encryptionPrivkey, senderEncryptionPubkey)
     const selfLegacySeal = this.createLegacySeal(rumor, encryptionPrivkey, senderEncryptionPubkey)
 
     return {
@@ -126,10 +122,7 @@ class Nip17GiftWrapService {
     encryptionPrivkey: Uint8Array,
     recipientEncryptionPubkey: string
   ): Promise<Event> {
-    const conversationKey = nip44.v2.utils.getConversationKey(
-      encryptionPrivkey,
-      recipientEncryptionPubkey
-    )
+    const conversationKey = getConversationKey(encryptionPrivkey, recipientEncryptionPubkey)
     const encrypted = nip44.v2.encrypt(JSON.stringify(rumor), conversationKey)
 
     return (await signer.signEvent({
@@ -150,10 +143,7 @@ class Nip17GiftWrapService {
     encryptionPrivkey: Uint8Array,
     recipientEncryptionPubkey: string
   ): Event {
-    const conversationKey = nip44.v2.utils.getConversationKey(
-      encryptionPrivkey,
-      recipientEncryptionPubkey
-    )
+    const conversationKey = getConversationKey(encryptionPrivkey, recipientEncryptionPubkey)
     const encrypted = nip44.v2.encrypt(JSON.stringify(rumor), conversationKey)
 
     return finalizeEvent(
@@ -228,10 +218,7 @@ class Nip17GiftWrapService {
       const sealSignedByIdentity = !!nTag
       const senderEncryptionPubkey = nTag ?? seal.pubkey
 
-      const sealConvKey = nip44.v2.utils.getConversationKey(
-        recipientPrivkey,
-        senderEncryptionPubkey
-      )
+      const sealConvKey = getConversationKey(recipientPrivkey, senderEncryptionPubkey)
       const rumorJson = nip44.v2.decrypt(seal.content, sealConvKey)
       const rumor = JSON.parse(rumorJson)
 

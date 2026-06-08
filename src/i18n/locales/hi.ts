@@ -1082,6 +1082,10 @@ export default {
     'Encrypted DM unavailable': 'एन्क्रिप्टेड DM अनुपलब्ध',
     'No DM relays': 'कोई DM रिले नहीं',
     'n users_one': '{{count}} उपयोगकर्ता',
-    'n users_other': '{{count}} उपयोगकर्ता'
+    'n users_other': '{{count}} उपयोगकर्ता',
+    'Add this emoji': 'यह इमोजी जोड़ें',
+    'Added to my emojis': 'मेरे इमोजी में जोड़ा गया',
+    'Add whole set': 'पूरा सेट जोड़ें',
+    'Emoji set': 'इमोजी सेट'
   }
 }

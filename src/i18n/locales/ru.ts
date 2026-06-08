@@ -1090,6 +1090,10 @@ export default {
     'n users_one': '{{count}} пользователь',
     'n users_few': '{{count}} пользователя',
     'n users_many': '{{count}} пользователей',
-    'n users_other': '{{count}} пользователя'
+    'n users_other': '{{count}} пользователя',
+    'Add this emoji': 'Добавить этот эмодзи',
+    'Added to my emojis': 'Добавлено в мои эмодзи',
+    'Add whole set': 'Добавить весь набор',
+    'Emoji set': 'Набор эмодзи'
   }
 }

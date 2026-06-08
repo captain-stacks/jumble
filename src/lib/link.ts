@@ -78,6 +78,7 @@ export const toEmojiSetEditor = (eventOrId?: Event | string) => {
   if (typeof eventOrId === 'string') return `/emoji-set-editor/${eventOrId}`
   return `/emoji-set-editor/${getNoteBech32Id(eventOrId)}`
 }
+export const toStandaloneEmojiEditor = () => '/standalone-emoji-editor'
 export const toSystemSettings = () => '/settings/system'
 export const toAccountSettings = () => '/settings/account'
 export const toProfileEditor = () => '/profile-editor'

@@ -22,6 +22,7 @@ import RelaySettingsPage from '@/pages/secondary/RelaySettingsPage'
 import RizfulPage from '@/pages/secondary/RizfulPage'
 import SearchPage from '@/pages/secondary/SearchPage'
 import SettingsPage from '@/pages/secondary/SettingsPage'
+import StandaloneEmojiEditorPage from '@/pages/secondary/StandaloneEmojiEditorPage'
 import SystemSettingsPage from '@/pages/secondary/SystemSettingsPage'
 import TranslationPage from '@/pages/secondary/TranslationPage'
 import UserAggregationDetailPage from '@/pages/secondary/UserAggregationDetailPage'
@@ -55,6 +56,7 @@ const SECONDARY_ROUTE_CONFIGS: {
   { path: '/settings/emoji-packs', element: <EmojiPackSettingsPage /> },
   { path: '/emoji-set-editor', element: <EmojiSetEditorPage /> },
   { path: '/emoji-set-editor/:id', element: <EmojiSetEditorPage /> },
+  { path: '/standalone-emoji-editor', element: <StandaloneEmojiEditorPage /> },
   { path: '/settings/system', element: <SystemSettingsPage /> },
   { path: '/settings/account', element: <AccountSettingsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },

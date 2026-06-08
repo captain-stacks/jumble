@@ -1069,6 +1069,10 @@ export default {
     'No emojis found': '이모지를 찾을 수 없습니다',
     'Encrypted DM unavailable': '암호화된 DM을 사용할 수 없습니다',
     'No DM relays': 'DM 릴레이 없음',
-    'n users_other': '{{count}}명의 사용자'
+    'n users_other': '{{count}}명의 사용자',
+    'Add this emoji': '이 이모지 추가',
+    'Added to my emojis': '내 이모지에 추가됨',
+    'Add whole set': '세트 전체 추가',
+    'Emoji set': '이모지 세트'
   }
 }

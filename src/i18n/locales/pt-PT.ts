@@ -1093,6 +1093,10 @@ export default {
     'Encrypted DM unavailable': 'Mensagem privada encriptada indisponível',
     'No DM relays': 'Sem relays de mensagens privadas',
     'n users_one': '{{count}} utilizador',
-    'n users_other': '{{count}} utilizadores'
+    'n users_other': '{{count}} utilizadores',
+    'Add this emoji': 'Adicionar este emoji',
+    'Added to my emojis': 'Adicionado aos meus emojis',
+    'Add whole set': 'Adicionar todo o conjunto',
+    'Emoji set': 'Conjunto de emojis'
   }
 }

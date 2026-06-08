@@ -1074,6 +1074,10 @@ export default {
       'You can now sign in to this account with Google. You are still signing locally with your private key, which is never shared with Google.',
     'Retrying ({{current}}/{{max}})': 'Retrying ({{current}}/{{max}})',
     'Could not reach the remote signer. Please try again later or check your network connection.':
-      'Could not reach the remote signer. Please try again later or check your network connection.'
+      'Could not reach the remote signer. Please try again later or check your network connection.',
+    'Add this emoji': 'Add this emoji',
+    'Added to my emojis': 'Added to my emojis',
+    'Add whole set': 'Add whole set',
+    'Emoji set': 'Emoji set'
   }
 }

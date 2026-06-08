@@ -1084,6 +1084,10 @@ export default {
     'Encrypted DM unavailable': 'پیام خصوصی رمزگذاری‌شده در دسترس نیست',
     'No DM relays': 'بدون رله‌ی پیام خصوصی',
     'n users_one': '{{count}} کاربر',
-    'n users_other': '{{count}} کاربر'
+    'n users_other': '{{count}} کاربر',
+    'Add this emoji': 'افزودن این ایموجی',
+    'Added to my emojis': 'به ایموجی‌های من افزوده شد',
+    'Add whole set': 'افزودن کل مجموعه',
+    'Emoji set': 'مجموعه ایموجی'
   }
 }

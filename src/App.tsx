@@ -1,6 +1,7 @@
 import 'yet-another-react-lightbox/styles.css'
 import './index.css'
 
+import EmojiDetailDialog from '@/components/EmojiDetailDialog'
 import KeySyncRequestHandler from '@/components/KeySyncRequestDialog'
 import { Toaster } from '@/components/ui/sonner'
 import { BookmarksProvider } from '@/providers/BookmarksProvider'
@@ -36,51 +37,52 @@ function RadixDirectionProvider({ children }: { children: React.ReactNode }) {
 export default function App(): JSX.Element {
   return (
     <RadixDirectionProvider>
-    <ScreenSizeProvider>
-      <UpdaterProvider>
-      <UserPreferencesProvider>
-        <ThemeProvider>
-          <ContentPolicyProvider>
-            <DeletedEventProvider>
-              <NostrProvider>
-                <DraftBoxProvider>
-                <ZapProvider>
-                  <TranslationServiceProvider>
-                    <FavoriteRelaysProvider>
-                      <FollowListProvider>
-                        <MuteListProvider>
-                          <UserTrustProvider>
-                            <BookmarksProvider>
-                              <EmojiPackProvider>
-                                <PinListProvider>
-                                  <PinnedUsersProvider>
-                                    <FeedProvider>
-                                      <MediaUploadServiceProvider>
-                                        <KindFilterProvider>
-                                          <PageManager />
-                                          <KeySyncRequestHandler />
-                                          <Toaster />
-                                        </KindFilterProvider>
-                                      </MediaUploadServiceProvider>
-                                    </FeedProvider>
-                                  </PinnedUsersProvider>
-                                </PinListProvider>
-                              </EmojiPackProvider>
-                            </BookmarksProvider>
-                          </UserTrustProvider>
-                        </MuteListProvider>
-                      </FollowListProvider>
-                    </FavoriteRelaysProvider>
-                  </TranslationServiceProvider>
-                </ZapProvider>
-                </DraftBoxProvider>
-              </NostrProvider>
-            </DeletedEventProvider>
-          </ContentPolicyProvider>
-        </ThemeProvider>
-      </UserPreferencesProvider>
-      </UpdaterProvider>
-    </ScreenSizeProvider>
+      <ScreenSizeProvider>
+        <UpdaterProvider>
+          <UserPreferencesProvider>
+            <ThemeProvider>
+              <ContentPolicyProvider>
+                <DeletedEventProvider>
+                  <NostrProvider>
+                    <DraftBoxProvider>
+                      <ZapProvider>
+                        <TranslationServiceProvider>
+                          <FavoriteRelaysProvider>
+                            <FollowListProvider>
+                              <MuteListProvider>
+                                <UserTrustProvider>
+                                  <BookmarksProvider>
+                                    <EmojiPackProvider>
+                                      <PinListProvider>
+                                        <PinnedUsersProvider>
+                                          <FeedProvider>
+                                            <MediaUploadServiceProvider>
+                                              <KindFilterProvider>
+                                                <PageManager />
+                                                <KeySyncRequestHandler />
+                                                <EmojiDetailDialog />
+                                                <Toaster />
+                                              </KindFilterProvider>
+                                            </MediaUploadServiceProvider>
+                                          </FeedProvider>
+                                        </PinnedUsersProvider>
+                                      </PinListProvider>
+                                    </EmojiPackProvider>
+                                  </BookmarksProvider>
+                                </UserTrustProvider>
+                              </MuteListProvider>
+                            </FollowListProvider>
+                          </FavoriteRelaysProvider>
+                        </TranslationServiceProvider>
+                      </ZapProvider>
+                    </DraftBoxProvider>
+                  </NostrProvider>
+                </DeletedEventProvider>
+              </ContentPolicyProvider>
+            </ThemeProvider>
+          </UserPreferencesProvider>
+        </UpdaterProvider>
+      </ScreenSizeProvider>
     </RadixDirectionProvider>
   )
 }

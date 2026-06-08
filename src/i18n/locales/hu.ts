@@ -1087,6 +1087,10 @@ export default {
     'Encrypted DM unavailable': 'A titkosított DM nem érhető el',
     'No DM relays': 'Nincsenek DM relék',
     'n users_one': '{{count}} felhasználó',
-    'n users_other': '{{count}} felhasználó'
+    'n users_other': '{{count}} felhasználó',
+    'Add this emoji': 'Emoji hozzáadása',
+    'Added to my emojis': 'Hozzáadva az emojikhoz',
+    'Add whole set': 'Teljes készlet hozzáadása',
+    'Emoji set': 'Emoji-készlet'
   }
 }

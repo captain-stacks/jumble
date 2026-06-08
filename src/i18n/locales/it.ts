@@ -1091,6 +1091,10 @@ export default {
     'Encrypted DM unavailable': 'DM crittografato non disponibile',
     'No DM relays': 'Nessun relay per DM',
     'n users_one': '{{count}} utente',
-    'n users_other': '{{count}} utenti'
+    'n users_other': '{{count}} utenti',
+    'Add this emoji': 'Aggiungi questo emoji',
+    'Added to my emojis': 'Aggiunto ai miei emoji',
+    'Add whole set': 'Aggiungi tutto il set',
+    'Emoji set': 'Set di emoji'
   }
 }

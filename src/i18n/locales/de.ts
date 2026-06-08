@@ -1102,6 +1102,10 @@ export default {
     'Encrypted DM unavailable': 'Verschlüsselte DM nicht verfügbar',
     'No DM relays': 'Keine DM-Relays',
     'n users_one': '{{count}} Benutzer',
-    'n users_other': '{{count}} Benutzer'
+    'n users_other': '{{count}} Benutzer',
+    'Add this emoji': 'Dieses Emoji hinzufügen',
+    'Added to my emojis': 'Zu meinen Emojis hinzugefügt',
+    'Add whole set': 'Ganzes Set hinzufügen',
+    'Emoji set': 'Emoji-Set'
   }
 }

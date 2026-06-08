@@ -1086,6 +1086,10 @@ export default {
     Symbols: 'Semboller',
     Flags: 'Bayraklar',
     'My emojis': 'Emojilerim',
-    'No emojis found': 'Emoji bulunamadı'
+    'No emojis found': 'Emoji bulunamadı',
+    'Add this emoji': 'Bu emojiyi ekle',
+    'Added to my emojis': 'Emojilerime eklendi',
+    'Add whole set': 'Tüm seti ekle',
+    'Emoji set': 'Emoji seti'
   }
 }

@@ -1065,6 +1065,10 @@ export default {
     'No emojis found': 'ไม่พบอีโมจิ',
     'Encrypted DM unavailable': 'ไม่สามารถใช้ข้อความส่วนตัวที่เข้ารหัสได้',
     'No DM relays': 'ไม่มีรีเลย์สำหรับข้อความส่วนตัว',
-    'n users_other': '{{count}} ผู้ใช้'
+    'n users_other': '{{count}} ผู้ใช้',
+    'Add this emoji': 'เพิ่มอิโมจินี้',
+    'Added to my emojis': 'เพิ่มในอิโมจิของฉันแล้ว',
+    'Add whole set': 'เพิ่มทั้งชุด',
+    'Emoji set': 'ชุดอิโมจิ'
   }
 }

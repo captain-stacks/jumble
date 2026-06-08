@@ -814,7 +814,7 @@ function MessageBubble({
               onClick={() => onScrollToMessage?.(message.replyTo!.id)}
               className="bg-secondary/50 hover:bg-secondary text-muted-foreground mb-0.5 inline-block max-w-full rounded-lg px-2 py-1 align-bottom text-[11px] transition-colors"
             >
-              <div className="relative line-clamp-2 ps-2 text-start before:absolute before:inset-y-0.5 before:start-0 before:w-0.5 before:rounded-full before:bg-primary">
+              <div className="before:bg-primary relative line-clamp-2 ps-2 text-start before:absolute before:inset-y-0.5 before:start-0 before:w-0.5 before:rounded-full">
                 {message.replyTo.senderPubkey && (
                   <SimpleUsername
                     userId={message.replyTo.senderPubkey}
@@ -1103,7 +1103,9 @@ function DmContent({
                     const shortcode = node.data.split(':')[1]
                     const emoji = emojiInfos.find((e) => e.shortcode === shortcode)
                     if (!emoji) return node.data
-                    return <Emoji classNames={{ img: 'size-20' }} emoji={emoji} key={ni} />
+                    return (
+                      <Emoji classNames={{ img: 'size-20' }} emoji={emoji} clickable key={ni} />
+                    )
                   }
                   return null
                 })}
@@ -1134,7 +1136,7 @@ function DmContent({
                   const shortcode = node.data.split(':')[1]
                   const emoji = emojiInfos.find((e) => e.shortcode === shortcode)
                   if (!emoji) return node.data
-                  return <Emoji classNames={{ img: 'mb-1' }} emoji={emoji} key={ni} />
+                  return <Emoji classNames={{ img: 'mb-1' }} emoji={emoji} clickable key={ni} />
                 }
                 return null
               })}

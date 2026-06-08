@@ -1094,6 +1094,10 @@ export default {
     'n users_one': '{{count}} użytkownik',
     'n users_few': '{{count}} użytkowników',
     'n users_many': '{{count}} użytkowników',
-    'n users_other': '{{count}} użytkownika'
+    'n users_other': '{{count}} użytkownika',
+    'Add this emoji': 'Dodaj to emoji',
+    'Added to my emojis': 'Dodano do moich emoji',
+    'Add whole set': 'Dodaj cały zestaw',
+    'Emoji set': 'Zestaw emoji'
   }
 }

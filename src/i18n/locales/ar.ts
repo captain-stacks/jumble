@@ -1069,6 +1069,10 @@ export default {
     'n users_two': 'مستخدمان',
     'n users_few': '{{count}} مستخدمين',
     'n users_many': '{{count}} مستخدمًا',
-    'n users_other': '{{count}} مستخدم'
+    'n users_other': '{{count}} مستخدم',
+    'Add this emoji': 'إضافة هذا الإيموجي',
+    'Added to my emojis': 'تمت الإضافة إلى الإيموجي الخاص بي',
+    'Add whole set': 'إضافة المجموعة كاملة',
+    'Emoji set': 'مجموعة إيموجي'
   }
 }

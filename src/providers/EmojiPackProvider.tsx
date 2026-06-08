@@ -23,6 +23,7 @@ type TEmojiPackContext = {
   addStandaloneEmoji: (emoji: TStandaloneEmoji) => Promise<void>
   removeStandaloneEmoji: (emoji: TStandaloneEmoji) => Promise<void>
   editStandaloneEmoji: (target: TStandaloneEmoji, newShortcode: string) => Promise<void>
+  setStandaloneEmojis: (emojis: TStandaloneEmoji[]) => Promise<boolean>
   createEmojiSet: (title: string, emojis: TStandaloneEmoji[]) => Promise<Event | null>
   editEmojiSet: (
     setEvent: Event,
@@ -157,6 +158,23 @@ export function EmojiPackProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Replace the whole standalone emoji list (the `emoji` tags) while keeping pack `a` tags.
+  // Returns true if the list was published.
+  const setStandaloneEmojis = async (emojis: TStandaloneEmoji[]) => {
+    if (!accountPubkey) return false
+    try {
+      return await updateUserEmojiList((tags) => {
+        const others = tags.filter((tag) => tag[0] !== 'emoji')
+        return [...others, ...emojis.map((emoji) => buildEmojiTag(emoji))]
+      })
+    } catch (error) {
+      formatError(error).forEach((err) => {
+        toast.error(`Failed to save emojis: ${err}`, { duration: 10_000 })
+      })
+      return false
+    }
+  }
+
   const createEmojiSet = async (title: string, emojis: TStandaloneEmoji[]) => {
     if (!accountPubkey) return null
     try {
@@ -204,6 +222,7 @@ export function EmojiPackProvider({ children }: { children: React.ReactNode }) {
         addStandaloneEmoji,
         removeStandaloneEmoji,
         editStandaloneEmoji,
+        setStandaloneEmojis,
         createEmojiSet,
         editEmojiSet,
         refreshCustomEmojis

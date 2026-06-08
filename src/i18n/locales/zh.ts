@@ -1040,6 +1040,10 @@ export default {
     Flags: '旗帜',
     'My emojis': '我的表情',
     'No emojis found': '未找到表情',
-    'n users_other': '{{count}} 位用户'
+    'n users_other': '{{count}} 位用户',
+    'Add this emoji': '添加此表情',
+    'Added to my emojis': '已添加到我的表情',
+    'Add whole set': '添加整套',
+    'Emoji set': '表情套装'
   }
 }

@@ -1041,6 +1041,10 @@ export default {
     'No emojis found': '找不到表情符號',
     'Encrypted DM unavailable': '無法使用加密私訊',
     'No DM relays': '沒有私訊中繼',
-    'n users_other': '{{count}} 位使用者'
+    'n users_other': '{{count}} 位使用者',
+    'Add this emoji': '新增此表情',
+    'Added to my emojis': '已新增到我的表情',
+    'Add whole set': '新增整套',
+    'Emoji set': '表情套裝'
   }
 }

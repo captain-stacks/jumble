@@ -1,28 +1,26 @@
-import { Button } from '@/components/ui/button'
 import { getFollowPackInfoFromEvent } from '@/lib/event-metadata'
-import { toFollowPack } from '@/lib/link'
-import { useSecondaryPage } from '@/PageManager'
-import { Event } from 'nostr-tools'
+import { ExtendedKind } from '@/constants'
+import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Image from '../Image'
 
+function kindLabel(kind: number): string {
+  if (kind === ExtendedKind.FOLLOW_PACK) return 'Follow Pack'
+  if (kind === kinds.Mutelist) return 'Mute Pack'
+  return 'List'
+}
+
 export default function FollowPack({ event, className }: { event: Event; className?: string }) {
   const { t } = useTranslation()
-  const { push } = useSecondaryPage()
   const { title, description, image, pubkeys } = useMemo(
     () => getFollowPackInfoFromEvent(event),
     [event]
   )
 
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    push(toFollowPack(event))
-  }
-
   return (
     <div className={className}>
-      <div className="mb-2 flex items-start gap-2">
+      <div className="flex items-start gap-2">
         {image && (
           <Image
             image={{ url: image, pubkey: event.pubkey }}
@@ -37,6 +35,9 @@ export default function FollowPack({ event, className }: { event: Event; classNa
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="mb-1 truncate text-xl font-semibold">{title}</h3>
+            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              {kindLabel(event.kind)}
+            </span>
             <span className="shrink-0 text-xs text-muted-foreground">
               {t('n users', { count: pubkeys.length })}
             </span>
@@ -46,10 +47,6 @@ export default function FollowPack({ event, className }: { event: Event; classNa
           )}
         </div>
       </div>
-
-      <Button onClick={handleViewDetails} variant="outline" className="w-full">
-        {t('View Details')}
-      </Button>
     </div>
   )
 }

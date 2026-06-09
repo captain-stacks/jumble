@@ -113,7 +113,8 @@ export default function ContentPreview({
     event.kind === ExtendedKind.FOLLOW_PACK ||
     event.kind === ExtendedKind.FOLLOW_SET ||
     event.kind === kinds.Followsets ||
-    event.kind === kinds.Mutelist
+    event.kind === kinds.Mutelist ||
+    event.kind === kinds.Genericlists
   ) {
     return <FollowPackPreview event={event} className={className} />
   }

@@ -12,14 +12,16 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchEvent } from '@/hooks/useFetchEvent'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import { getEventKey } from '@/lib/event'
+import { getEventKey, getReplaceableCoordinateFromEvent } from '@/lib/event'
 import { getFollowPackInfoFromEvent } from '@/lib/event-metadata'
 import { cn } from '@/lib/utils'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import { TFeedSubRequest } from '@/types'
-import { Loader, ShieldBan } from 'lucide-react'
+import { Loader, ShieldBan, ThumbsDown, VolumeX } from 'lucide-react'
+import { kinds } from 'nostr-tools'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -31,7 +33,10 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
 
   const { event, isFetching } = useFetchEvent(id)
   const { pubkey: accountPubkey, publish, checkLogin } = useNostr()
-  const { getMutePubkeys } = useMuteList()
+  const { getMutePubkeys, mutePubkeySet, unmuteAll, changing } = useMuteList()
+  const { getTrustScore, getMuteRatio, muteVersion, downvotedFollowPacks, reloadWot } = useUserTrust()
+  const [unmutingUnknown, setUnmutingUnknown] = useState(false)
+  const [downvoting, setDownvoting] = useState(false)
 
   const { title, description, image, pubkeys: eventPubkeys } = useMemo(() => {
     if (!event) return { title: '', description: '', image: '', pubkeys: [] }
@@ -40,10 +45,58 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
 
   const isOwnMuteList = event?.kind === 10000 && event?.pubkey === accountPubkey
   const isOwnPack = event?.pubkey === accountPubkey && !isOwnMuteList
-  const pubkeys = useMemo(
-    () => (isOwnMuteList ? getMutePubkeys() : eventPubkeys),
-    [isOwnMuteList, getMutePubkeys, eventPubkeys]
-  )
+  const pubkeys = useMemo(() => {
+    const raw = isOwnMuteList ? getMutePubkeys() : eventPubkeys
+    return [...raw].sort((a, b) => getTrustScore(a) - getTrustScore(b))
+  }, [isOwnMuteList, getMutePubkeys, eventPubkeys, getTrustScore, muteVersion])
+
+  const unknownMutedPubkeys = useMemo(() => {
+    if (!accountPubkey) return []
+    return pubkeys.filter((pk) => {
+      if (!mutePubkeySet.has(pk)) return false
+      const { follows, mutes } = getMuteRatio(pk)
+      return follows === 0 && mutes === 0
+    })
+  }, [pubkeys, mutePubkeySet, getMuteRatio, accountPubkey, muteVersion])
+
+  const handleUnmuteUnknown = async () => {
+    setUnmutingUnknown(true)
+    try {
+      await unmuteAll(unknownMutedPubkeys)
+    } finally {
+      setUnmutingUnknown(false)
+    }
+  }
+
+  const isDownvoted = useMemo(() => {
+    if (!event) return false
+    const addr = getReplaceableCoordinateFromEvent(event)
+    return downvotedFollowPacks.some((p) => p.addr === addr)
+  }, [event, downvotedFollowPacks])
+
+  const handleDownvote = () => {
+    if (!event) return
+    checkLogin(async () => {
+      setDownvoting(true)
+      try {
+        await publish({
+          kind: kinds.Reaction,
+          content: '👎',
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [
+            ['k', String(event.kind)],
+            ['t', '👎'],
+            ['a', getReplaceableCoordinateFromEvent(event)]
+          ]
+        })
+        reloadWot()
+      } catch (err) {
+        toast.error(`Failed to dislike: ${(err as Error).message}`)
+      } finally {
+        setDownvoting(false)
+      }
+    })
+  }
 
   const handleRemovePubkey = (pubkey: string) => {
     if (!event) return
@@ -133,6 +186,32 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
               </button>
             </div>
 
+            {accountPubkey && unknownMutedPubkeys.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={unmutingUnknown || changing}
+                onClick={handleUnmuteUnknown}
+              >
+                {unmutingUnknown ? <Loader className="h-4 w-4 animate-spin" /> : <VolumeX className="h-4 w-4" />}
+                Unmute Unknown ({unknownMutedPubkeys.length})
+              </Button>
+            )}
+
+            {accountPubkey && !isOwnPack && (
+              <Button
+                variant={isDownvoted ? 'default' : 'outline'}
+                size="sm"
+                className="gap-2"
+                disabled={downvoting || isDownvoted}
+                onClick={handleDownvote}
+              >
+                {downvoting ? <Loader className="h-4 w-4 animate-spin" /> : <ThumbsDown className="h-4 w-4" />}
+                {isDownvoted ? 'Disliked' : 'Dislike'}
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
@@ -146,7 +225,7 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
         </div>
 
         {/* Content */}
-        {tab === 'users' && <ProfileList pubkeys={pubkeys} showBulkActions showMuteButton onRemove={isOwnPack ? handleRemovePubkey : undefined} />}
+        {tab === 'users' && <ProfileList pubkeys={pubkeys} showBulkActions showMuteButton showScores onRemove={isOwnPack ? handleRemovePubkey : undefined} />}
         {tab === 'feed' && pubkeys.length > 0 && (
           <Feed trustScoreFilterId={`follow-pack-${getEventKey(event)}`} pubkeys={pubkeys} />
         )}

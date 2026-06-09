@@ -428,7 +428,10 @@ export function getFollowPackInfoFromEvent(event: Event) {
 
   if (!title) {
     const dTag = event.tags.find(tagNameEquals('d'))?.[1]
-    const fallback = event.kind === 10000 ? 'Mute List' : 'Untitled Follow Pack'
+    let fallback: string
+    if (event.kind === 10000) fallback = 'Untitled Mute Pack'
+    else if (event.kind === 39089) fallback = 'Untitled Follow Pack'
+    else fallback = 'Untitled List'
     title = dTag ?? fallback
   }
 

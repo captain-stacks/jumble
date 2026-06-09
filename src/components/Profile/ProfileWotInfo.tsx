@@ -9,7 +9,7 @@ export default function ProfileWotInfo({ pubkey }: { pubkey: string }) {
   const [tab, setTab] = useState<'followers' | 'muters' | 'inlists'>('followers')
 
   useEffect(() => {
-    fetchScoreForPubkey(pubkey)
+    fetchScoreForPubkey(pubkey, true)
   }, [pubkey, fetchScoreForPubkey])
 
   // muteVersion and demandFetchCount subscriptions keep this component in sync
@@ -50,12 +50,12 @@ export default function ProfileWotInfo({ pubkey }: { pubkey: string }) {
         {tab === 'followers' && (
           followers.length === 0
             ? <div className="px-3 py-4 text-xs text-muted-foreground italic text-center">None found</div>
-            : followers.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton />)
+            : followers.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)
         )}
         {tab === 'muters' && (
           muters.length === 0
             ? <div className="px-3 py-4 text-xs text-muted-foreground italic text-center">None found</div>
-            : muters.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton />)
+            : muters.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)
         )}
         {tab === 'inlists' && (
           inListEvents.length === 0

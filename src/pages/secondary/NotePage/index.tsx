@@ -4,6 +4,7 @@ import NoteCard, { NoteCardLoadingSkeleton } from '@/components/NoteCard'
 import NoteInteractions from '@/components/NoteInteractions'
 import PostEditor from '@/components/PostEditor'
 import StuffStats from '@/components/StuffStats'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,7 +13,7 @@ import { useFetchEvent } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { getParentBech32Id } from '@/lib/event'
 import { createShortTextNoteDraftEvent } from '@/lib/draft-event'
-import { toExternalContent } from '@/lib/link'
+import { toExternalContent, toFollowPack } from '@/lib/link'
 import { tagNameEquals } from '@/lib/tag'
 import { StorageKey } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
@@ -21,7 +22,7 @@ import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
 import openaiService from '@/services/openai.service'
 import { Send } from 'lucide-react'
-import { Event } from 'nostr-tools'
+import { Event, kinds } from 'nostr-tools'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotFound from './NotFound'
@@ -29,7 +30,7 @@ import NotFound from './NotFound'
 
 const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
-  const { pop } = useSecondaryPage()
+  const { pop, push } = useSecondaryPage()
   const { event, isFetching } = useFetchEvent(id)
   const rootITag = useMemo(
     () => (event?.kind === ExtendedKind.COMMENT ? event.tags.find(tagNameEquals('I')) : undefined),
@@ -218,6 +219,21 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
           showMutedContent
         />
         <StuffStats className="mt-3" stuff={event} fetchIfNotExisting displayTopZapsAndLikes />
+        {[
+          ExtendedKind.FOLLOW_PACK,
+          ExtendedKind.FOLLOW_SET,
+          kinds.Followsets,
+          kinds.Mutelist,
+          kinds.Genericlists
+        ].includes(event.kind) && (
+          <Button
+            variant="outline"
+            className="mt-3 w-full"
+            onClick={() => push(toFollowPack(event))}
+          >
+            {t('View Details')}
+          </Button>
+        )}
       </div>
       <Separator className="mt-4" />
       <NoteInteractions key={`note-interactions-${event.id}`} event={event} />

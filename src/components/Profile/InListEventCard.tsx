@@ -1,5 +1,5 @@
 import { ExtendedKind } from '@/constants'
-import { toFollowPack, toNote } from '@/lib/link'
+import { toNote } from '@/lib/link'
 import { useSecondaryPage } from '@/PageManager'
 import { kinds, Event } from 'nostr-tools'
 import UserAvatar from '@/components/UserAvatar'
@@ -25,11 +25,7 @@ export default function InListEventCard({ event }: { event: Event }) {
     kindLabel(event.kind)
 
   const handleClick = () => {
-    if (event.kind === ExtendedKind.FOLLOW_PACK) {
-      push(toFollowPack(event))
-    } else {
-      push(toNote(event))
-    }
+    push(toNote(event))
   }
 
   return (

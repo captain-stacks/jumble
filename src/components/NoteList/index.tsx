@@ -253,11 +253,15 @@ const NoteList = forwardRef<
                 const key = keys[i]
                 return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
               }
-              if (!isScoreFetched(evt.pubkey)) {
-                await fetchScoreForPubkey(evt.pubkey)
-              }
+              // Cached WoT score is an optimistic upper bound — fetch only adds mutes (lowers score)
               if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
                 return null
+              }
+              if (!isScoreFetched(evt.pubkey)) {
+                await fetchScoreForPubkey(evt.pubkey)
+                if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
+                  return null
+                }
               }
               const key = keys[i]
               return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
@@ -321,11 +325,15 @@ const NoteList = forwardRef<
           await Promise.all(
             filteredEvents.map(async (evt) => {
               if (!followingSet.has(evt.pubkey) && evt.pubkey !== currentPubkey) {
-                if (!isScoreFetched(evt.pubkey)) {
-                  await fetchScoreForPubkey(evt.pubkey)
-                }
+                // Cached WoT score is an optimistic upper bound — fetch only adds mutes (lowers score)
                 if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
                   return null
+                }
+                if (!isScoreFetched(evt.pubkey)) {
+                  await fetchScoreForPubkey(evt.pubkey)
+                  if (getTrustScore(evt.pubkey) < _trustScoreThreshold) {
+                    return null
+                  }
                 }
               }
               return evt

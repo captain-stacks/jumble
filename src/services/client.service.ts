@@ -815,19 +815,10 @@ class ClientService extends EventTarget {
   }
 
   async fetchInListsEvents(pubkey: string) {
-    const relayList = await this.fetchRelayList(pubkey)
-    const relays = relayList.write.concat(getDefaultRelayUrls()).slice(0, 8)
-    return this.fetchEvents(relays, [
-      { kinds: [kinds.Mutelist], '#p': [pubkey] },
-      {
-        kinds: [
-          kinds.Followsets,
-          kinds.Genericlists,
-          ExtendedKind.FOLLOW_PACK
-        ],
-        '#p': [pubkey]
-      }
-    ])
+    const relays = getDefaultRelayUrls()
+    const muteEvents = await this.fetchEvents(relays, { kinds: [kinds.Mutelist], '#p': [pubkey] })
+    const listEvents = await this.fetchEvents(relays, { kinds: [kinds.Followsets, kinds.Genericlists, ExtendedKind.FOLLOW_PACK], '#p': [pubkey] })
+    return { events: [...muteEvents, ...listEvents], relays }
   }
 
   async fetchEvents(

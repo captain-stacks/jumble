@@ -1,5 +1,6 @@
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
+import { NoScoreFetch } from '@/components/TrustScoreBadge'
 import Tabs from '@/components/Tabs'
 import { ExtendedKind, MAX_PINNED_NOTES, YOUTUBE_URL_REGEX } from '@/constants'
 import { getDefaultRelayUrls, getSearchRelayUrls } from '@/lib/relay'
@@ -182,7 +183,7 @@ export default function ProfileFeed({
   }
 
   return (
-    <>
+    <NoScoreFetch>
       <Tabs
         value={listMode}
         tabs={tabs}
@@ -223,6 +224,6 @@ export default function ProfileFeed({
         }
         fetchLimit={listMode === 'images' || listMode === 'youtube' ? 1000 : undefined}
       />
-    </>
+    </NoScoreFetch>
   )
 }

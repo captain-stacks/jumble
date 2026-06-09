@@ -21,6 +21,7 @@ type TMuteListContext = {
   mutePubkeyPublicly: (pubkey: string) => Promise<void>
   mutePubkeyPrivately: (pubkey: string) => Promise<void>
   muteAllPublicly: (pubkeys: string[]) => Promise<void>
+  unmuteAll: (pubkeys: string[]) => Promise<void>
   unmutePubkey: (pubkey: string) => Promise<void>
   switchToPublicMute: (pubkey: string) => Promise<void>
   switchToPrivateMute: (pubkey: string) => Promise<void>
@@ -255,6 +256,39 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     })()
   }
 
+  const unmuteAll = async (pubkeys: string[]) => {
+    if (!accountPubkey || pubkeys.length === 0) return
+
+    const pubkeySet = new Set(pubkeys)
+    const currentTags = pendingTagsRef.current
+    const currentPrivateTags = pendingPrivateTagsRef.current
+    const newTags = currentTags.filter((tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1]))
+    const newPrivateTags = currentPrivateTags.filter((tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1]))
+    if (newTags.length === currentTags.length && newPrivateTags.length === currentPrivateTags.length) return
+
+    pendingTagsRef.current = newTags
+    setTags(newTags)
+
+    incrementChanging()
+    try {
+      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+      if (!muteListEvent) return
+      let cipherText = muteListEvent.content
+      if (newPrivateTags.length !== currentPrivateTags.length) {
+        cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+      }
+      const newMuteListEvent = await publishNewMuteListEvent(newTags, cipherText)
+      await updateMuteListEvent(newMuteListEvent, newPrivateTags)
+    } catch (error) {
+      const errors = formatError(error)
+      errors.forEach((err) => {
+        toast.error(t('Failed to unmute') + ': ' + err, { duration: 10_000 })
+      })
+    } finally {
+      decrementChanging()
+    }
+  }
+
   const unmutePubkey = async (pubkey: string) => {
     if (!accountPubkey || changing) return
 
@@ -429,6 +463,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         mutePubkeyPublicly,
         mutePubkeyPrivately,
         muteAllPublicly,
+        unmuteAll,
         unmutePubkey,
         switchToPublicMute,
         switchToPrivateMute,

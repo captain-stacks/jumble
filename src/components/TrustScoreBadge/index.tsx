@@ -1,7 +1,12 @@
 import { cn } from '@/lib/utils'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { ShieldAlert } from 'lucide-react'
-import { useEffect } from 'react'
+import { createContext, useContext, useEffect } from 'react'
+
+const ScoreFetchContext = createContext(true)
+export function NoScoreFetch({ children }: { children: React.ReactNode }) {
+  return <ScoreFetchContext.Provider value={false}>{children}</ScoreFetchContext.Provider>
+}
 
 export default function TrustScoreBadge({
   pubkey,
@@ -16,13 +21,19 @@ export default function TrustScoreBadge({
   }
   numeric?: boolean
 }) {
-  const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey } = useUserTrust()
+  const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey, isScoreFetched, demandFetchCount } = useUserTrust()
+  const fetchEnabled = useContext(ScoreFetchContext)
 
   useEffect(() => {
-    fetchScoreForPubkey(pubkey)
-  }, [pubkey, fetchScoreForPubkey])
+    if (fetchEnabled) fetchScoreForPubkey(pubkey)
+  }, [pubkey, fetchScoreForPubkey, fetchEnabled])
+
+  // subscribe to demandFetchCount so we re-render when the fetch completes
+  void demandFetchCount
 
   const inWoT = isUserTrusted(pubkey)
+
+  if (numeric && !isScoreFetched(pubkey)) return null
 
   if (!numeric && inWoT) return null
 

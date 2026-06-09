@@ -1,4 +1,11 @@
 import PostEditor from '@/components/PostEditor'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
 import { useNostr } from '@/providers/NostrProvider'
 import mediaUpload from '@/services/media-upload.service'
@@ -49,7 +56,8 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<{ reference: string; text: string }[]>([])
   const [searching, setSearching] = useState(false)
-  const [searchError, setSearchError] = useState<string | null>(null)
+  const [searchError, setSearchError] = useState<{ message: string; raw?: string } | null>(null)
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -57,12 +65,16 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
     if (!searchQuery.trim() || searching) return
     setSearching(true)
     setSearchError(null)
+    setErrorDialogOpen(false)
     setSearchResults([])
     try {
       const results = await openaiService.searchBibleVerses(searchQuery.trim())
       setSearchResults(results)
     } catch (err) {
-      setSearchError(err instanceof Error ? err.message : 'Search failed')
+      const message = err instanceof Error ? err.message : 'Search failed'
+      const raw = (err as any)?.raw as string | undefined
+      setSearchError({ message, raw })
+      setErrorDialogOpen(true)
     } finally {
       setSearching(false)
     }
@@ -84,6 +96,7 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
     setSearchResults([])
     setSearchError(null)
     searchInputRef.current?.focus()
+
   }
 
   const handleNewVerse = () => {
@@ -118,7 +131,7 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
     setError(null)
     try {
       const hint = hints.trim() ? ` ${hints.trim()}.` : ''
-      const prompt = `A beautiful, reverent, painterly illustration inspired by the Bible verse: "${verse.text}".${hint} Epic, cinematic lighting, oil painting style, spiritual and uplifting atmosphere. No text, no words, no letters, no writing of any kind in the image.`
+      const prompt = `A beautiful, reverent illustration inspired by the Bible verse: "${verse.text}".${hint} Epic, cinematic lighting, spiritual and uplifting atmosphere. No text, no words, no letters, no writing of any kind in the image.`
       const { url, blob } = await openaiService.generateImage(prompt)
       setImageUrl(url)
       setImageBlob(blob)
@@ -162,7 +175,29 @@ const BiblePage = forwardRef<TPageRef>((_, ref) => {
           </button>
         </form>
 
-        {searchError && <p className="text-sm text-destructive">{searchError}</p>}
+        {searchError && (
+          <button
+            className="text-left text-sm text-destructive underline-offset-2 hover:underline"
+            onClick={() => setErrorDialogOpen(true)}
+          >
+            {searchError.message}
+          </button>
+        )}
+
+        <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-destructive">Search Error</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm">{searchError?.message}</p>
+            {searchError?.raw && (
+              <pre className="max-h-64 overflow-auto rounded bg-muted p-3 text-xs whitespace-pre-wrap break-all">
+                {searchError.raw}
+              </pre>
+            )}
+            <Button variant="outline" onClick={() => setErrorDialogOpen(false)}>Close</Button>
+          </DialogContent>
+        </Dialog>
 
         {searchResults.length > 0 && (
           <div className="flex flex-col gap-2">

@@ -30,7 +30,7 @@ const KIND_FILTER_OPTIONS = [
     ],
     label: 'Video Posts'
   },
-  { kindGroup: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, kinds.Mutelist], label: 'Follow Lists' },
+  { kindGroup: [ExtendedKind.FOLLOW_SET, ExtendedKind.FOLLOW_PACK, kinds.Mutelist, kinds.Genericlists], label: 'Lists' },
   { kindGroup: [kinds.Emojisets], label: 'Emoji Packs' },
   { kindGroup: [ExtendedKind.RELAY_REVIEW], label: 'Relay Reviews' },
   { kindGroup: [kinds.LiveEvent], label: 'Live Events' },

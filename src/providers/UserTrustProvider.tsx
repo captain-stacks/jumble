@@ -4,14 +4,32 @@ import storage from '@/services/local-storage.service'
 import bootstrapCache from '@/services/bootstrap-cache.service'
 import { getDefaultRelayUrls } from '@/lib/relay'
 import { getPubkeysFromPTags } from '@/lib/tag'
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useFollowList } from './FollowListProvider'
 import { useNostr } from './NostrProvider'
 import { Event, kinds, SimplePool } from 'nostr-tools'
 
 const FOLLOW_SOURCE_PUBKEY = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 const BATCH_SIZE = 20
-const BATCH_DELAY_MS = 200
+const BATCH_DELAY_MS = 500
+const DEMAND_CONCURRENCY = 3
+
+let demandActive = 0
+const demandQueue: Array<() => void> = []
+function acquireDemandSlot(priority = false): Promise<void> {
+  if (demandActive < DEMAND_CONCURRENCY) { demandActive++; return Promise.resolve() }
+  return new Promise((resolve) => {
+    if (priority) {
+      demandQueue.unshift(resolve)
+    } else {
+      demandQueue.push(resolve)
+    }
+  })
+}
+function releaseDemandSlot() {
+  const next = demandQueue.shift()
+  if (next) { next() } else { demandActive-- }
+}
 
 type TMuteRatio = {
   follows: number
@@ -23,6 +41,15 @@ export type TDownvotedFollowPack = {
   addr: string
   title: string
   pubkeys: string[]
+}
+
+export type TQueryLogEntry = {
+  pubkey: string
+  source: 'wot' | 'demand'
+  eventCount: number
+  error?: string
+  relays?: string[]
+  filter?: object
 }
 
 type TUserTrustContext = {
@@ -41,7 +68,8 @@ type TUserTrustContext = {
   wotStep: number
   muteVersion: number
   demandFetchCount: number
-  fetchScoreForPubkey: (pubkey: string) => Promise<void>
+  fetchScoreForPubkey: (pubkey: string, priority?: boolean) => Promise<void>
+  refetchScoreForPubkey: (pubkey: string, priority?: boolean) => Promise<void>
   isScoreFetched: (pubkey: string) => boolean
   getWotFollowers: (pubkey: string) => string[]
   getWotMuters: (pubkey: string) => string[]
@@ -50,6 +78,9 @@ type TUserTrustContext = {
   inspectedPubkey: string | null
   setInspectedPubkey: (pubkey: string | null) => void
   downvotedFollowPacks: TDownvotedFollowPack[]
+  reloadWot: () => void
+  queryLog: TQueryLogEntry[]
+  queryLogVersion: number
 }
 
 export const useUserTrustReady = () => {
@@ -123,6 +154,16 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const [demandFetchCount, setDemandFetchCount] = useState(0)
   const [inspectedPubkey, setInspectedPubkey] = useState<string | null>(null)
   const [downvotedFollowPacks, setDownvotedFollowPacks] = useState<TDownvotedFollowPack[]>([])
+  const [reloadKey, setReloadKey] = useState(0)
+  const queryLogRef = useRef<TQueryLogEntry[]>([])
+  const [queryLogVersion, setQueryLogVersion] = useState(0)
+
+  const reloadWot = useCallback(() => setReloadKey((k) => k + 1), [])
+
+  const appendQueryLog = useCallback((entry: TQueryLogEntry) => {
+    queryLogRef.current = [entry, ...queryLogRef.current].slice(0, 500)
+    setQueryLogVersion((v) => v + 1)
+  }, [])
 
   const updateMuteWeight = (weight: number) => {
     if (weight < 1 || weight > 10) return
@@ -158,6 +199,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         scorePromiseMap.clear()
         scoreDoneSet.clear()
         myFollowSetSize = 0
+        queryLogRef.current = []
         
         // Wait for followingSet to be populated before building WoT
         if (followingSet.size === 0) {
@@ -187,42 +229,25 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
             if (cancelled) return
             const batch = directFollows.slice(i, i + BATCH_SIZE)
             const results = await Promise.all(
-              batch.map((pubkey) =>
-                pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist, ExtendedKind.FOLLOW_PACK], limit: 100 })
-              )
+              batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts] }))
             )
             if (cancelled) return
-            results.forEach((events) => {
-              events.forEach((event) => {
-                if (event.kind === kinds.Contacts || event.kind === ExtendedKind.FOLLOW_PACK) {
-                  getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                    wotSet.add(pubkey)
-                    const followKey = `${event.pubkey}:${pubkey}`
-                    if (!countedFollowSet.has(followKey)) {
-                      countedFollowSet.add(followKey)
-                      followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                      const followers = followersMap.get(pubkey)
-                      if (followers) {
-                        followers.add(event.pubkey)
-                      } else {
-                        followersMap.set(pubkey, new Set([event.pubkey]))
-                      }
-                    }
-                  })
-                } else if (event.kind === kinds.Mutelist) {
-                  getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                    const key = `${event.pubkey}:${pubkey}`
-                    if (!countedMuteSet.has(key)) {
-                      countedMuteSet.add(key)
-                      muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
-                      const muters = mutersMap.get(pubkey)
-                      if (muters) {
-                        muters.add(event.pubkey)
-                      } else {
-                        mutersMap.set(pubkey, new Set([event.pubkey]))
-                      }
-                    }
-                  })
+            appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: results.filter(Boolean).length, relays, filter: { authors: batch, kinds: [kinds.Contacts] } })
+            results.forEach((event) => {
+              if (!event) return
+              getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                wotSet.add(pubkey)
+                if (pubkey === event.pubkey) return
+                const followKey = `${event.pubkey}:${pubkey}`
+                if (!countedFollowSet.has(followKey)) {
+                  countedFollowSet.add(followKey)
+                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                  const followers = followersMap.get(pubkey)
+                  if (followers) {
+                    followers.add(event.pubkey)
+                  } else {
+                    followersMap.set(pubkey, new Set([event.pubkey]))
+                  }
                 }
               })
             })
@@ -360,47 +385,30 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
         followings.forEach((pubkey) => wotSet.add(pubkey))
 
-        // Step 3: Fetch follows-of-follows and mute lists in batches to build score maps
+        // Step 3: Fetch follows-of-follows in parallel batches (contacts only)
         setWotStep(3)
         myFollowSetSize = followings.length
         for (let i = 0; i < followings.length; i += BATCH_SIZE) {
           const batch = followings.slice(i, i + BATCH_SIZE)
           const results = await Promise.all(
-            batch.map((pubkey) =>
-              pool.querySync(relays, { authors: [pubkey], kinds: [kinds.Contacts, kinds.Mutelist, ExtendedKind.FOLLOW_PACK], limit: 100 })
-            )
+            batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts] }))
           )
-          results.forEach((events) => {
-            events.forEach((event) => {
-              if (event.kind === kinds.Contacts || event.kind === ExtendedKind.FOLLOW_PACK) {
-                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                  wotSet.add(pubkey)
-                  const followKey = `${event.pubkey}:${pubkey}`
-                  if (!countedFollowSet.has(followKey)) {
-                    countedFollowSet.add(followKey)
-                    followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                    const followers = followersMap.get(pubkey)
-                    if (followers) {
-                      followers.add(event.pubkey)
-                    } else {
-                      followersMap.set(pubkey, new Set([event.pubkey]))
-                    }
-                  }
-                })
-              } else if (event.kind === kinds.Mutelist) {
-                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                  const key = `${event.pubkey}:${pubkey}`
-                  if (!countedMuteSet.has(key)) {
-                    countedMuteSet.add(key)
-                    muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
-                    const muters = mutersMap.get(pubkey)
-                    if (muters) {
-                      muters.add(event.pubkey)
-                    } else {
-                      mutersMap.set(pubkey, new Set([event.pubkey]))
-                    }
-                  }
-                })
+          appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: results.filter(Boolean).length, relays, filter: { authors: batch, kinds: [kinds.Contacts] } })
+          results.forEach((event) => {
+            if (!event) return
+            getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+              wotSet.add(pubkey)
+              if (pubkey === event.pubkey) return
+              const followKey = `${event.pubkey}:${pubkey}`
+              if (!countedFollowSet.has(followKey)) {
+                countedFollowSet.add(followKey)
+                followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                const followers = followersMap.get(pubkey)
+                if (followers) {
+                  followers.add(event.pubkey)
+                } else {
+                  followersMap.set(pubkey, new Set([event.pubkey]))
+                }
               }
             })
           })
@@ -431,7 +439,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     }
     initWoT()
     return () => { cancelled = true }
-  }, [currentPubkey, followingSet, isInitialized])
+  }, [currentPubkey, followingSet, isInitialized, reloadKey])
 
   const isUserTrusted = useCallback(
     (pubkey: string) => {
@@ -498,7 +506,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return Array.from(inListsEventsMap.get(pubkey)?.values() ?? [])
   }, [])
 
-  const fetchScoreForPubkey = useCallback((pubkey: string): Promise<void> => {
+  const fetchScoreForPubkey = useCallback((pubkey: string, priority = false): Promise<void> => {
     if (!currentPubkey || !isWotReady) return Promise.resolve()
 
     const cached = scorePromiseMap.get(pubkey)
@@ -506,13 +514,36 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
     const promise = (async () => {
       let succeeded = false
+      await acquireDemandSlot(priority)
       try {
         let added = 0
-        const events = await client.fetchInListsEvents(pubkey)
+        const { events, relays: demandRelays } = await client.fetchInListsEvents(pubkey)
+        const muteCount = events.filter((e) => e.kind === kinds.Mutelist).length
+        const listCount = events.length - muteCount
+        appendQueryLog({ pubkey, source: 'demand', eventCount: muteCount, relays: demandRelays, filter: { kinds: [kinds.Mutelist], '#p': [pubkey] } })
+        appendQueryLog({ pubkey, source: 'demand', eventCount: listCount, relays: demandRelays, filter: { kinds: [kinds.Followsets, kinds.Genericlists, ExtendedKind.FOLLOW_PACK], '#p': [pubkey] } })
         for (const event of events) {
-          if (!wotSet.has(event.pubkey)) continue
+          if (event.pubkey === pubkey) continue
+          if (event.kind === kinds.Mutelist && !wotSet.has(event.pubkey)) continue
           const key = `${event.pubkey}:${pubkey}`
-          if (!countedMuteSet.has(key)) {
+          if (event.kind === ExtendedKind.FOLLOW_PACK) {
+            // Already counted as a follow during WoT build; only add to display map
+            const evts = inListsEventsMap.get(pubkey)
+            if (!evts?.has(event.id)) {
+              const inLists = inListsMap.get(pubkey)
+              if (inLists) {
+                inLists.add(event.pubkey)
+              } else {
+                inListsMap.set(pubkey, new Set([event.pubkey]))
+              }
+              if (evts) {
+                evts.set(event.id, event)
+              } else {
+                inListsEventsMap.set(pubkey, new Map([[event.id, event]]))
+              }
+              added++
+            }
+          } else if (!countedMuteSet.has(key)) {
             countedMuteSet.add(key)
             muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
             const targetMap = event.kind === kinds.Mutelist ? mutersMap : inListsMap
@@ -535,10 +566,11 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         }
         if (added > 0) setMuteVersion((v) => v + 1)
         succeeded = true
-      } catch {
-        // Allow retry by removing from promise map
+      } catch (e) {
+        appendQueryLog({ pubkey, source: 'demand', eventCount: 0, error: String(e) })
         scorePromiseMap.delete(pubkey)
       } finally {
+        releaseDemandSlot()
         if (succeeded) scoreDoneSet.add(pubkey)
         setDemandFetchCount((v) => v + 1)
       }
@@ -557,6 +589,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     },
     [currentPubkey]
   )
+
+  const refetchScoreForPubkey = useCallback((pubkey: string, priority = false): Promise<void> => {
+    scorePromiseMap.delete(pubkey)
+    scoreDoneSet.delete(pubkey)
+    return fetchScoreForPubkey(pubkey, priority)
+  }, [fetchScoreForPubkey])
 
   const isScoreFetched = useCallback((pubkey: string) => scoreDoneSet.has(pubkey), [])
 
@@ -579,6 +617,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         muteVersion,
         demandFetchCount,
         fetchScoreForPubkey,
+        refetchScoreForPubkey,
         isScoreFetched,
         getWotFollowers,
         getWotMuters,
@@ -586,7 +625,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         getWotInListEvents,
         inspectedPubkey,
         setInspectedPubkey,
-        downvotedFollowPacks
+        downvotedFollowPacks,
+        reloadWot,
+        queryLog: queryLogRef.current,
+        queryLogVersion
       }}
     >
       {children}

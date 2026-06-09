@@ -358,20 +358,23 @@ class OpenAIService {
         {
           role: 'system',
           content:
-            'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 8 relevant Bible verses from the NIV translation. Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
+            'You are a Bible reference assistant. Given a search query — either a topic/keyword or a book/chapter/verse reference — return up to 3 relevant Bible verses from the NIV translation. Respond with JSON: {"verses": [{"reference": "<Book Chapter:Verse>", "text": "<verse text>"}]}'
         },
         { role: 'user', content: query }
-      ],
+      ]
     })
 
-    const raw = response.choices[0].message.content
-    if (!raw) throw new Error('No response from OpenAI')
+    const choice = response.choices[0]
+    const raw = choice.message.content
+    if (!raw) {
+      const detail = choice.message.refusal ?? choice.finish_reason ?? 'unknown'
+      throw new Error(`No response from OpenAI (${detail})`)
+    }
     let parsed: { verses?: { reference: string; text: string }[] }
     try {
       parsed = parseJson(raw) as typeof parsed
-    } catch (e) {
-      console.error('searchBibleVerses parse error, raw:', raw, e)
-      throw new Error('Could not parse search results — please try again')
+    } catch {
+      throw Object.assign(new Error('Could not parse search results — please try again'), { raw })
     }
     return parsed.verses ?? []
   }
@@ -387,20 +390,23 @@ class OpenAIService {
         {
           role: 'system',
           content:
-            'You are a Quran reference assistant. Given a search query — either a topic/keyword or a surah/ayah reference — return up to 8 relevant Quran verses in English. Use "God" instead of "Allah" in all translations. Format references as "<Surah Name> <Verse>" (e.g. "Al-Baqarah 286") — surah name only, no chapter number. Respond with JSON: {"verses": [{"reference": "<Surah Name>:<Verse>", "text": "<verse text in English>"}]}'
+            'You are a Quran reference assistant. Given a search query — either a topic/keyword or a surah/ayah reference — return up to 3 relevant Quran verses in English. Use "God" instead of "Allah" in all translations. Format references as "<Surah Name> <Verse>" (e.g. "Al-Baqarah 286") — surah name only, no chapter number. Respond with JSON: {"verses": [{"reference": "<Surah Name>:<Verse>", "text": "<verse text in English>"}]}'
         },
         { role: 'user', content: query }
-      ],
+      ]
     })
 
-    const raw = response.choices[0].message.content
-    if (!raw) throw new Error('No response from OpenAI')
+    const choice = response.choices[0]
+    const raw = choice.message.content
+    if (!raw) {
+      const detail = choice.message.refusal ?? choice.finish_reason ?? 'unknown'
+      throw new Error(`No response from OpenAI (${detail})`)
+    }
     let parsed: { verses?: { reference: string; text: string }[] }
     try {
       parsed = parseJson(raw) as typeof parsed
-    } catch (e) {
-      console.error('searchQuranVerses parse error, raw:', raw, e)
-      throw new Error('Could not parse search results — please try again')
+    } catch {
+      throw Object.assign(new Error('Could not parse search results — please try again'), { raw })
     }
     return parsed.verses ?? []
   }
@@ -411,7 +417,7 @@ class OpenAIService {
     }
 
     const response = await this.client.images.generate({
-      model: 'gpt-image-1',
+      model: 'gpt-image-1-mini',
       prompt,
       n: 1,
       size: '1024x1024',

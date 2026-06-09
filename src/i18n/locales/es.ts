@@ -1094,6 +1094,8 @@ export default {
     'Add this emoji': 'Añadir este emoji',
     'Added to my emojis': 'Añadido a mis emojis',
     'Add whole set': 'Añadir todo el conjunto',
-    'Emoji set': 'Conjunto de emojis'
+    'Emoji set': 'Conjunto de emojis',
+    'Waiting for signer approval...': 'Esperando la aprobación del firmante...',
+    'Signer did not respond in time': 'El firmante no respondió a tiempo'
   }
 }

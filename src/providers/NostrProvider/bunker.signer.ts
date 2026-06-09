@@ -1,3 +1,4 @@
+import { withSignerApproval } from '@/lib/signer-approval'
 import { ISigner, TDraftEvent } from '@/types'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
 import { generateSecretKey } from 'nostr-tools'
@@ -64,7 +65,7 @@ export class BunkerSigner implements ISigner {
     if (!this.signer) {
       throw new Error('Not logged in')
     }
-    return this.signer.signEvent(draftEvent)
+    return withSignerApproval(this.signer.signEvent(draftEvent))
   }
 
   async nip04Encrypt(pubkey: string, plainText: string) {

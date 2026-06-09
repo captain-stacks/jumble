@@ -1094,6 +1094,8 @@ export default {
     'Add this emoji': 'Добавить этот эмодзи',
     'Added to my emojis': 'Добавлено в мои эмодзи',
     'Add whole set': 'Добавить весь набор',
-    'Emoji set': 'Набор эмодзи'
+    'Emoji set': 'Набор эмодзи',
+    'Waiting for signer approval...': 'Ожидание подтверждения от подписывающего...',
+    'Signer did not respond in time': 'Подписывающий не ответил вовремя'
   }
 }

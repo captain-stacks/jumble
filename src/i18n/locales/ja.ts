@@ -1087,6 +1087,8 @@ export default {
     'Add this emoji': 'この絵文字を追加',
     'Added to my emojis': 'マイ絵文字に追加済み',
     'Add whole set': 'セット全体を追加',
-    'Emoji set': '絵文字セット'
+    'Emoji set': '絵文字セット',
+    'Waiting for signer approval...': '署名者の承認を待っています…',
+    'Signer did not respond in time': '署名者が時間内に応答しませんでした'
   }
 }

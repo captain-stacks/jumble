@@ -1088,6 +1088,8 @@ export default {
     'Add this emoji': 'افزودن این ایموجی',
     'Added to my emojis': 'به ایموجی‌های من افزوده شد',
     'Add whole set': 'افزودن کل مجموعه',
-    'Emoji set': 'مجموعه ایموجی'
+    'Emoji set': 'مجموعه ایموجی',
+    'Waiting for signer approval...': 'در انتظار تأیید امضاکننده...',
+    'Signer did not respond in time': 'امضاکننده به‌موقع پاسخ نداد'
   }
 }

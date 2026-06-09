@@ -1073,6 +1073,8 @@ export default {
     'Add this emoji': 'إضافة هذا الإيموجي',
     'Added to my emojis': 'تمت الإضافة إلى الإيموجي الخاص بي',
     'Add whole set': 'إضافة المجموعة كاملة',
-    'Emoji set': 'مجموعة إيموجي'
+    'Emoji set': 'مجموعة إيموجي',
+    'Waiting for signer approval...': 'بانتظار موافقة الموقّع...',
+    'Signer did not respond in time': 'لم يستجب الموقّع في الوقت المناسب'
   }
 }

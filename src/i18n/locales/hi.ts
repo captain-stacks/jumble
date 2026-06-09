@@ -1086,6 +1086,8 @@ export default {
     'Add this emoji': 'यह इमोजी जोड़ें',
     'Added to my emojis': 'मेरे इमोजी में जोड़ा गया',
     'Add whole set': 'पूरा सेट जोड़ें',
-    'Emoji set': 'इमोजी सेट'
+    'Emoji set': 'इमोजी सेट',
+    'Waiting for signer approval...': 'हस्ताक्षरकर्ता की स्वीकृति की प्रतीक्षा है...',
+    'Signer did not respond in time': 'हस्ताक्षरकर्ता ने समय पर प्रतिक्रिया नहीं दी'
   }
 }

@@ -1098,6 +1098,8 @@ export default {
     'Add this emoji': 'Dodaj to emoji',
     'Added to my emojis': 'Dodano do moich emoji',
     'Add whole set': 'Dodaj cały zestaw',
-    'Emoji set': 'Zestaw emoji'
+    'Emoji set': 'Zestaw emoji',
+    'Waiting for signer approval...': 'Oczekiwanie na zatwierdzenie przez podpisującego...',
+    'Signer did not respond in time': 'Podpisujący nie odpowiedział na czas'
   }
 }

@@ -1044,6 +1044,8 @@ export default {
     'Add this emoji': '添加此表情',
     'Added to my emojis': '已添加到我的表情',
     'Add whole set': '添加整套',
-    'Emoji set': '表情套装'
+    'Emoji set': '表情套装',
+    'Waiting for signer approval...': '等待签名器批准…',
+    'Signer did not respond in time': '签名器未在规定时间内响应'
   }
 }

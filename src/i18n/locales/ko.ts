@@ -1073,6 +1073,8 @@ export default {
     'Add this emoji': '이 이모지 추가',
     'Added to my emojis': '내 이모지에 추가됨',
     'Add whole set': '세트 전체 추가',
-    'Emoji set': '이모지 세트'
+    'Emoji set': '이모지 세트',
+    'Waiting for signer approval...': '서명자 승인을 기다리는 중…',
+    'Signer did not respond in time': '서명자가 제때 응답하지 않았습니다'
   }
 }

@@ -1069,6 +1069,8 @@ export default {
     'Add this emoji': 'เพิ่มอิโมจินี้',
     'Added to my emojis': 'เพิ่มในอิโมจิของฉันแล้ว',
     'Add whole set': 'เพิ่มทั้งชุด',
-    'Emoji set': 'ชุดอิโมจิ'
+    'Emoji set': 'ชุดอิโมจิ',
+    'Waiting for signer approval...': 'กำลังรอการอนุมัติจากผู้ลงนาม...',
+    'Signer did not respond in time': 'ผู้ลงนามไม่ตอบกลับในเวลาที่กำหนด'
   }
 }

@@ -1090,6 +1090,8 @@ export default {
     'Add this emoji': 'Bu emojiyi ekle',
     'Added to my emojis': 'Emojilerime eklendi',
     'Add whole set': 'Tüm seti ekle',
-    'Emoji set': 'Emoji seti'
+    'Emoji set': 'Emoji seti',
+    'Waiting for signer approval...': 'İmzalayanın onayı bekleniyor...',
+    'Signer did not respond in time': 'İmzalayan zamanında yanıt vermedi'
   }
 }

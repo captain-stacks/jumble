@@ -1091,6 +1091,8 @@ export default {
     'Add this emoji': 'Emoji hozzáadása',
     'Added to my emojis': 'Hozzáadva az emojikhoz',
     'Add whole set': 'Teljes készlet hozzáadása',
-    'Emoji set': 'Emoji-készlet'
+    'Emoji set': 'Emoji-készlet',
+    'Waiting for signer approval...': 'Várakozás az aláíró jóváhagyására...',
+    'Signer did not respond in time': 'Az aláíró nem válaszolt időben'
   }
 }

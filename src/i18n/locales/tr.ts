@@ -1092,6 +1092,13 @@ export default {
     'Add whole set': 'Tüm seti ekle',
     'Emoji set': 'Emoji seti',
     'Waiting for signer approval...': 'İmzalayanın onayı bekleniyor...',
-    'Signer did not respond in time': 'İmzalayan zamanında yanıt vermedi'
+    'Signer did not respond in time': 'İmzalayan zamanında yanıt vermedi',
+    'Media servers': 'Medya sunucuları',
+    'Blossom servers': 'Blossom sunucuları',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'Medya, tercih edilen sunucuya yüklenir ve diğerlerine yansıtılır.',
+    'Add Blossom server': 'Blossom sunucusu ekle',
+    'You need to add at least one media server in order to upload media files.':
+      'Medya dosyalarını yüklemek için en az bir medya sunucusu eklemelisiniz.'
   }
 }

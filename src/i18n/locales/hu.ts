@@ -1093,6 +1093,13 @@ export default {
     'Add whole set': 'Teljes készlet hozzáadása',
     'Emoji set': 'Emoji-készlet',
     'Waiting for signer approval...': 'Várakozás az aláíró jóváhagyására...',
-    'Signer did not respond in time': 'Az aláíró nem válaszolt időben'
+    'Signer did not respond in time': 'Az aláíró nem válaszolt időben',
+    'Media servers': 'Médiakiszolgálók',
+    'Blossom servers': 'Blossom szerverek',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'A médiafájlok az előnyben részesített kiszolgálóra töltődnek fel, és a többire tükröződnek.',
+    'Add Blossom server': 'Blossom szerver hozzáadása',
+    'You need to add at least one media server in order to upload media files.':
+      'Legalább egy médiakiszolgálót hozzá kell adnod a médiafájlok feltöltéséhez.'
   }
 }

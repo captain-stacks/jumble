@@ -1075,6 +1075,13 @@ export default {
     'Add whole set': 'إضافة المجموعة كاملة',
     'Emoji set': 'مجموعة إيموجي',
     'Waiting for signer approval...': 'بانتظار موافقة الموقّع...',
-    'Signer did not respond in time': 'لم يستجب الموقّع في الوقت المناسب'
+    'Signer did not respond in time': 'لم يستجب الموقّع في الوقت المناسب',
+    'Media servers': 'خوادم الوسائط',
+    'Blossom servers': 'خوادم Blossom',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'تُرفع الوسائط إلى الخادم المفضّل وتُنسخ إلى الخوادم الأخرى.',
+    'Add Blossom server': 'إضافة خادم Blossom',
+    'You need to add at least one media server in order to upload media files.':
+      'تحتاج إلى إضافة خادم وسائط واحد على الأقل لرفع ملفات الوسائط.'
   }
 }

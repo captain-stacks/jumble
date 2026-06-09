@@ -1089,6 +1089,13 @@ export default {
     'Add whole set': 'セット全体を追加',
     'Emoji set': '絵文字セット',
     'Waiting for signer approval...': '署名者の承認を待っています…',
-    'Signer did not respond in time': '署名者が時間内に応答しませんでした'
+    'Signer did not respond in time': '署名者が時間内に応答しませんでした',
+    'Media servers': 'メディアサーバー',
+    'Blossom servers': 'Blossomサーバー',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'メディアは優先サーバーにアップロードされ、他のサーバーにミラーリングされます。',
+    'Add Blossom server': 'Blossomサーバーを追加',
+    'You need to add at least one media server in order to upload media files.':
+      'メディアファイルをアップロードするには、メディアサーバーを少なくとも1つ追加する必要があります。'
   }
 }

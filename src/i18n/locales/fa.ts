@@ -1090,6 +1090,13 @@ export default {
     'Add whole set': 'افزودن کل مجموعه',
     'Emoji set': 'مجموعه ایموجی',
     'Waiting for signer approval...': 'در انتظار تأیید امضاکننده...',
-    'Signer did not respond in time': 'امضاکننده به‌موقع پاسخ نداد'
+    'Signer did not respond in time': 'امضاکننده به‌موقع پاسخ نداد',
+    'Media servers': 'سرورهای رسانه',
+    'Blossom servers': 'سرورهای Blossom',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'رسانه‌ها در سرور ترجیحی بارگذاری و روی سایر سرورها بازتاب داده می‌شوند.',
+    'Add Blossom server': 'افزودن سرور Blossom',
+    'You need to add at least one media server in order to upload media files.':
+      'برای بارگذاری فایل‌های رسانه‌ای باید حداقل یک سرور رسانه اضافه کنید.'
   }
 }

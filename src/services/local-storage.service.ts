@@ -4,7 +4,6 @@ import {
   DEFAULT_BLOSSOM_CACHE_SERVER_URL,
   DEFAULT_FAVICON_URL_TEMPLATE,
   DEFAULT_FEED_TABS,
-  DEFAULT_NIP_96_SERVICE,
   ExtendedKind,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
@@ -48,7 +47,6 @@ class LocalStorageService {
   private defaultZapComment: string = 'Zap!'
   private quickZap: boolean = false
   private accountFeedInfoMap: Record<string, TFeedInfo | undefined> = {}
-  private mediaUploadService: string = DEFAULT_NIP_96_SERVICE
   private autoplay: boolean = true
   private videoLoop: boolean = false
   private translationServiceConfigMap: Record<string, TTranslationServiceConfig> = {}
@@ -184,10 +182,6 @@ class LocalStorageService {
     const accountFeedInfoMapStr =
       window.localStorage.getItem(StorageKey.ACCOUNT_FEED_INFO_MAP) ?? '{}'
     this.accountFeedInfoMap = JSON.parse(accountFeedInfoMapStr)
-
-    // deprecated
-    this.mediaUploadService =
-      window.localStorage.getItem(StorageKey.MEDIA_UPLOAD_SERVICE) ?? DEFAULT_NIP_96_SERVICE
 
     this.autoplay = window.localStorage.getItem(StorageKey.AUTOPLAY) !== 'false'
     this.videoLoop = window.localStorage.getItem(StorageKey.VIDEO_LOOP) === 'true'
@@ -920,7 +914,7 @@ class LocalStorageService {
   }
 
   getMediaUploadServiceConfig(pubkey?: string | null): TMediaUploadServiceConfig {
-    const defaultConfig = { type: 'nip96', service: this.mediaUploadService } as const
+    const defaultConfig = { type: 'blossom' } as const
     if (!pubkey) {
       return defaultConfig
     }

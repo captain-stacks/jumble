@@ -1088,6 +1088,13 @@ export default {
     'Add whole set': 'पूरा सेट जोड़ें',
     'Emoji set': 'इमोजी सेट',
     'Waiting for signer approval...': 'हस्ताक्षरकर्ता की स्वीकृति की प्रतीक्षा है...',
-    'Signer did not respond in time': 'हस्ताक्षरकर्ता ने समय पर प्रतिक्रिया नहीं दी'
+    'Signer did not respond in time': 'हस्ताक्षरकर्ता ने समय पर प्रतिक्रिया नहीं दी',
+    'Media servers': 'मीडिया सर्वर',
+    'Blossom servers': 'Blossom सर्वर',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'मीडिया पसंदीदा सर्वर पर अपलोड होता है और बाकी सर्वरों पर मिरर किया जाता है।',
+    'Add Blossom server': 'Blossom सर्वर जोड़ें',
+    'You need to add at least one media server in order to upload media files.':
+      'मीडिया फ़ाइलें अपलोड करने के लिए आपको कम से कम एक मीडिया सर्वर जोड़ना होगा।'
   }
 }

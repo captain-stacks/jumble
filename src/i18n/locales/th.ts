@@ -1071,6 +1071,13 @@ export default {
     'Add whole set': 'เพิ่มทั้งชุด',
     'Emoji set': 'ชุดอิโมจิ',
     'Waiting for signer approval...': 'กำลังรอการอนุมัติจากผู้ลงนาม...',
-    'Signer did not respond in time': 'ผู้ลงนามไม่ตอบกลับในเวลาที่กำหนด'
+    'Signer did not respond in time': 'ผู้ลงนามไม่ตอบกลับในเวลาที่กำหนด',
+    'Media servers': 'เซิร์ฟเวอร์สื่อ',
+    'Blossom servers': 'เซิร์ฟเวอร์ Blossom',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'สื่อจะถูกอัปโหลดไปยังเซิร์ฟเวอร์ที่ต้องการและทำมิเรอร์ไปยังเซิร์ฟเวอร์อื่น',
+    'Add Blossom server': 'เพิ่มเซิร์ฟเวอร์ Blossom',
+    'You need to add at least one media server in order to upload media files.':
+      'คุณต้องเพิ่มเซิร์ฟเวอร์สื่ออย่างน้อยหนึ่งรายการเพื่ออัปโหลดไฟล์สื่อ'
   }
 }

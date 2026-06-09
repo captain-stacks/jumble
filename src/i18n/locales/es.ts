@@ -1096,6 +1096,13 @@ export default {
     'Add whole set': 'Añadir todo el conjunto',
     'Emoji set': 'Conjunto de emojis',
     'Waiting for signer approval...': 'Esperando la aprobación del firmante...',
-    'Signer did not respond in time': 'El firmante no respondió a tiempo'
+    'Signer did not respond in time': 'El firmante no respondió a tiempo',
+    'Media servers': 'Servidores multimedia',
+    'Blossom servers': 'Servidores Blossom',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'Los archivos multimedia se suben al servidor preferido y se replican en los demás.',
+    'Add Blossom server': 'Añadir servidor Blossom',
+    'You need to add at least one media server in order to upload media files.':
+      'Necesitas añadir al menos un servidor multimedia para poder subir archivos.'
   }
 }

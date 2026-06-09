@@ -1047,6 +1047,13 @@ export default {
     'Add whole set': '新增整套',
     'Emoji set': '表情套裝',
     'Waiting for signer approval...': '等待簽名器批准…',
-    'Signer did not respond in time': '簽名器未在規定時間內回應'
+    'Signer did not respond in time': '簽名器未在規定時間內回應',
+    'Media servers': '媒體伺服器',
+    'Blossom servers': 'Blossom 伺服器',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      '媒體會上傳到首選伺服器，並鏡像到其他伺服器。',
+    'Add Blossom server': '新增 Blossom 伺服器',
+    'You need to add at least one media server in order to upload media files.':
+      '您需要至少新增一個媒體伺服器才能上傳媒體檔案。'
   }
 }

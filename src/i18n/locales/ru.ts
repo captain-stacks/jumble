@@ -1096,6 +1096,13 @@ export default {
     'Add whole set': 'Добавить весь набор',
     'Emoji set': 'Набор эмодзи',
     'Waiting for signer approval...': 'Ожидание подтверждения от подписывающего...',
-    'Signer did not respond in time': 'Подписывающий не ответил вовремя'
+    'Signer did not respond in time': 'Подписывающий не ответил вовремя',
+    'Media servers': 'Медиасерверы',
+    'Blossom servers': 'Серверы Blossom',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      'Медиафайлы загружаются на предпочитаемый сервер и зеркалируются на остальные.',
+    'Add Blossom server': 'Добавить сервер Blossom',
+    'You need to add at least one media server in order to upload media files.':
+      'Чтобы загружать медиафайлы, нужно добавить хотя бы один медиасервер.'
   }
 }

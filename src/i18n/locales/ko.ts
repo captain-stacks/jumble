@@ -1075,6 +1075,13 @@ export default {
     'Add whole set': '세트 전체 추가',
     'Emoji set': '이모지 세트',
     'Waiting for signer approval...': '서명자 승인을 기다리는 중…',
-    'Signer did not respond in time': '서명자가 제때 응답하지 않았습니다'
+    'Signer did not respond in time': '서명자가 제때 응답하지 않았습니다',
+    'Media servers': '미디어 서버',
+    'Blossom servers': 'Blossom 서버',
+    'Media is uploaded to the preferred server and mirrored to the others.':
+      '미디어는 기본 서버에 업로드되고 다른 서버에 미러링됩니다.',
+    'Add Blossom server': 'Blossom 서버 추가',
+    'You need to add at least one media server in order to upload media files.':
+      '미디어 파일을 업로드하려면 미디어 서버를 하나 이상 추가해야 합니다.'
   }
 }

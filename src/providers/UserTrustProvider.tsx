@@ -131,7 +131,7 @@ function computeTrustScore(pubkey: string): number {
   if (wotSize === 0 || myFollowSetSize === 0) return 0
   const follows = followCountMap.get(pubkey) ?? 0
   const mutes = muteCountMap.get(pubkey) ?? 0
-  if (follows === 0 && mutes === 0) return 1
+  if (follows === 0 && mutes === 0 && !inListsMap.has(pubkey)) return 1
   const followRate = follows / myFollowSetSize
   const muteRate = mutes / wotSize
   const priorRate = 1 / TRUST_PRIOR_SCALE
@@ -260,10 +260,11 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
         // Treat follow packs the current user 👎'd as personal mute lists
         try {
+          const listKinds = [ExtendedKind.FOLLOW_PACK, kinds.Followsets, kinds.Genericlists]
           const reactionEvents = await pool.querySync(relays, {
             authors: [currentPubkey],
             kinds: [kinds.Reaction],
-            '#k': [`${ExtendedKind.FOLLOW_PACK}`],
+            '#k': listKinds.map(String),
             '#t': ['👎'],
             limit: 500
           })
@@ -271,17 +272,17 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
             const downvotedAddrs = reactionEvents
               .flatMap((e) =>
                 e.tags
-                  .filter(([t, v]) => t === 'a' && v?.startsWith(`${ExtendedKind.FOLLOW_PACK}:`))
+                  .filter(([t, v]) => t === 'a' && listKinds.some((k) => v?.startsWith(`${k}:`)))
                   .map(([, v]) => v)
               )
 
             if (downvotedAddrs.length > 0) {
               const packEvents = await Promise.all(
                 downvotedAddrs.map((addr) => {
-                  const [, author, dTag] = addr.split(':')
+                  const [kindStr, author, dTag] = addr.split(':')
                   return pool.get(relays, {
                     authors: [author],
-                    kinds: [ExtendedKind.FOLLOW_PACK],
+                    kinds: [Number(kindStr)],
                     '#d': [dTag]
                   })
                 })
@@ -320,18 +321,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                         evts.set(packEvent.id, packEvent)
                       } else {
                         inListsEventsMap.set(pubkey, new Map([[packEvent.id, packEvent]]))
-                      }
-                    }
-                    // Also count the current user as a muter
-                    const muteKeySelf = `${currentPubkey}:${pubkey}`
-                    if (!countedMuteSet.has(muteKeySelf)) {
-                      countedMuteSet.add(muteKeySelf)
-                      muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
-                      const inLists = inListsMap.get(pubkey)
-                      if (inLists) {
-                        inLists.add(currentPubkey)
-                      } else {
-                        inListsMap.set(pubkey, new Set([currentPubkey]))
                       }
                     }
                   })
@@ -543,25 +532,36 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
               }
               added++
             }
-          } else if (!countedMuteSet.has(key)) {
-            countedMuteSet.add(key)
-            muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
-            const targetMap = event.kind === kinds.Mutelist ? mutersMap : inListsMap
-            const existing = targetMap.get(pubkey)
-            if (existing) {
-              existing.add(event.pubkey)
-            } else {
-              targetMap.set(pubkey, new Set([event.pubkey]))
+          } else if (event.kind === kinds.Mutelist) {
+            if (!countedMuteSet.has(key)) {
+              countedMuteSet.add(key)
+              muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+              const existing = mutersMap.get(pubkey)
+              if (existing) {
+                existing.add(event.pubkey)
+              } else {
+                mutersMap.set(pubkey, new Set([event.pubkey]))
+              }
+              added++
             }
-            if (event.kind !== kinds.Mutelist) {
-              const evts = inListsEventsMap.get(pubkey)
+          } else {
+            // Non-mute list (Followsets, Genericlists, etc.) — list membership knocks
+            // the user out of "unknown" status without contributing to follow or mute counts
+            const evts = inListsEventsMap.get(pubkey)
+            if (!evts?.has(event.id)) {
+              const inLists = inListsMap.get(pubkey)
+              if (inLists) {
+                inLists.add(event.pubkey)
+              } else {
+                inListsMap.set(pubkey, new Set([event.pubkey]))
+              }
               if (evts) {
                 evts.set(event.id, event)
               } else {
                 inListsEventsMap.set(pubkey, new Map([[event.id, event]]))
               }
+              added++
             }
-            added++
           }
         }
         if (added > 0) setMuteVersion((v) => v + 1)

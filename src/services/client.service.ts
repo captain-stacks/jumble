@@ -153,14 +153,22 @@ class ClientService extends EventTarget {
         ![kinds.Contacts, kinds.Mutelist, ExtendedKind.PINNED_USERS].includes(event.kind)
       ) {
         const mentions: string[] = []
-        event.tags.forEach(([tagName, tagValue]) => {
-          if (
-            ['p', 'P'].includes(tagName) &&
-            !!tagValue &&
-            isValidPubkey(tagValue) &&
-            !mentions.includes(tagValue)
-          ) {
-            mentions.push(tagValue)
+        const addMention = (pubkey?: string) => {
+          if (pubkey && isValidPubkey(pubkey) && !mentions.includes(pubkey)) {
+            mentions.push(pubkey)
+          }
+        }
+        event.tags.forEach((tag) => {
+          const [tagName, tagValue] = tag
+          if (['p', 'P'].includes(tagName)) {
+            addMention(tagValue)
+          } else if (tagName === 'e' && tag[3] === 'root') {
+            // The thread root author may not be p-tagged (e.g. replying in one's
+            // own thread), but their read relays must still receive the reply
+            // since thread queries go through them
+            addMention(tag[4])
+          } else if (tagName === 'a' && tag[3] === 'root') {
+            addMention(tagValue?.split(':')[1])
           }
         })
         if (mentions.length > 0) {

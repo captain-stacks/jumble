@@ -10,7 +10,7 @@ The code in this feature is largely self-contained inside `src/services/dm.servi
 
 - **NIP-17**: Private Direct Messages (kinds 14 chat rumor, 15 file rumor)
 - **NIP-44**: Versioned Encryption (v2, used for seal and gift wrap payloads)
-- **NIP-59**: Gift Wrap (kinds 13 seal, 1059 gift wrap, randomized timestamps)
+- **NIP-59**: Gift Wrap (kinds 13 seal, 1059 gift wrap, randomized gift-wrap timestamp)
 - **NIP-51 / NIP-65 adjacent**: Kind 10050 DM relay list
 
 ## Event Kinds
@@ -50,7 +50,7 @@ The app uses **manual** gift wrap construction (see `src/services/nip17-gift-wra
 - `['p', recipientEncryptionPubkey]` — for NIP-17 subscribers indexing by encryption key
 - `['p', recipientMainPubkey]` — so clients subscribing with `#p: [myMainPubkey]` still see their messages
 
-Gift wrap and seal `created_at` are both randomized up to 2 days in the past via `randomTimeUpTo2DaysInThePast()` (`nip17-gift-wrap.service.ts:158`) — this is a NIP-59 requirement to defeat timing-based deanonymization.
+Only the **gift wrap** `created_at` is randomized up to 2 days in the past via `randomTimeUpTo2DaysInThePast()` (`nip17-gift-wrap.service.ts`) — the gift wrap timestamp is the one relays see, so it must be obfuscated to defeat timing-based deanonymization. The **seal** `created_at` carries the real send time (`dayjs().unix()`): the seal is encrypted inside the gift wrap and never exposed to relays, so randomizing it buys no privacy (only the recipient, who already knows the sender, can read it), while a truthful timestamp avoids misleading clients that inspect the seal.
 
 ### Self-copies
 
@@ -355,7 +355,7 @@ onEncryptionKeyChanged(fn): unsubscribe  // remote Kind 10044 rotation observed
 
 1. **Always use `participantsKey` for message indexing, `conversationKey` for conversation indexing.** Mixing them is the exact bug v20 fixed.
 2. **Gift wraps must carry two `p` tags.** `nostr-tools`' `nip59.wrapEvent` only writes one — use the custom `createGiftWrap` in `nip17-gift-wrap.service.ts`.
-3. **Always randomize `created_at` for seal *and* gift wrap.** Using `dayjs().unix()` for either leaks timing.
+3. **Only the gift wrap `created_at` must be randomized — not the seal.** The gift wrap timestamp is what relays see, so it is randomized up to 2 days in the past; using `dayjs().unix()` there would leak timing. The seal's `created_at` is encrypted inside the gift wrap and only ever read by the recipient (who already knows the sender), so it carries the real send time — randomizing it would buy no privacy.
 4. **Self gift wraps are not optional.** Without them, the sender's other devices never see their own outgoing messages. During the dual-send migration each send emits a `[identity-signed, legacy]` pair for the recipient AND for self; both copies share one `rumor.id` so the receiver dedupes to a single message.
 5. **The identity key signs, the encryption key encrypts — keep them separate.** Seals (kind 13) and the announcement/transfer events (10044, 4454, 4455) are signed by the **identity** key; gift wraps (1059) are signed by an ephemeral key. The **encryption** privkey is used only for NIP-44 encrypt/decrypt and the seal's `n` tag — never for signing. The recipient learns the sender's encryption pubkey from the seal's `n` tag (current format) or `seal.pubkey` (legacy format).
 6. **Soft-delete is per account, but messages are shared.** Filtering happens at read time using `conversation.deletedAt`. Never use `deleteDmMessagesByParticipantsKey` unless you are certain no other account on the device uses the same rows.

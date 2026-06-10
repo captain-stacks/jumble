@@ -128,7 +128,7 @@ class Nip17GiftWrapService {
     return (await signer.signEvent({
       kind: kinds.Seal,
       content: encrypted,
-      created_at: randomTimeUpTo2DaysInThePast(),
+      created_at: dayjs().unix(),
       tags: [['n', getPublicKey(encryptionPrivkey)]]
     })) as Event
   }
@@ -150,7 +150,7 @@ class Nip17GiftWrapService {
       {
         kind: kinds.Seal,
         content: encrypted,
-        created_at: randomTimeUpTo2DaysInThePast(),
+        created_at: dayjs().unix(),
         tags: []
       },
       encryptionPrivkey

@@ -860,26 +860,44 @@ class DmService {
     const fiveMinutesAgo = dayjs().subtract(5, 'minute').unix()
     const now = dayjs().unix()
 
+    // Before we agree to answer other devices' key-sync requests, make sure the
+    // encryption key this device holds is the one currently announced. A newer
+    // key may have been announced while this device was offline, and the live
+    // ENCRYPTION_KEY_ANNOUNCEMENT filter below only catches announcements
+    // published from now on, so we query the existing one once here. If our
+    // local key is stale, answering a sync request would hand the requesting
+    // device an outdated key, so we skip sync-request handling entirely and
+    // surface the change so this device re-syncs first.
+    const announcement = await encryptionKeyService.queryEncryptionKeyAnnouncement(accountPubkey)
+    const announcedPubkey = announcement
+      ? encryptionKeyService.getEncryptionPubkeyFromEvent(announcement)
+      : null
+    const isEncryptionKeyUpToDate = !announcedPubkey || announcedPubkey === encryptionKeypair.pubkey
+
+    const filters: Filter[] = [
+      {
+        kinds: [ExtendedKind.GIFT_WRAP],
+        '#p': [accountPubkey],
+        limit: 0
+      },
+      {
+        kinds: [ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT],
+        authors: [accountPubkey],
+        limit: 0
+      }
+    ]
+    if (isEncryptionKeyUpToDate) {
+      filters.push({
+        kinds: [ExtendedKind.CLIENT_KEY_ANNOUNCEMENT],
+        authors: [accountPubkey],
+        since: fiveMinutesAgo,
+        limit: 1
+      })
+    }
+
     const sub = client.subscribe(
       myDmRelays,
-      [
-        {
-          kinds: [ExtendedKind.GIFT_WRAP],
-          '#p': [accountPubkey],
-          limit: 0
-        },
-        {
-          kinds: [ExtendedKind.CLIENT_KEY_ANNOUNCEMENT],
-          authors: [accountPubkey],
-          since: fiveMinutesAgo,
-          limit: 1
-        },
-        {
-          kinds: [ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT],
-          authors: [accountPubkey],
-          limit: 0
-        }
-      ],
+      filters,
       {
         onevent: async (event) => {
           if (event.kind === ExtendedKind.CLIENT_KEY_ANNOUNCEMENT) {
@@ -956,6 +974,12 @@ class DmService {
     )
 
     this.relaySubscription = { close: () => sub.close() }
+
+    // Emit after the subscription is in place so that, if a listener tears the
+    // encryption down to re-sync, it closes the subscription we just created.
+    if (!isEncryptionKeyUpToDate && announcedPubkey) {
+      this.emitEncryptionKeyChanged(announcedPubkey)
+    }
   }
 
   async deleteConversation(accountPubkey: string, otherPubkey: string): Promise<void> {

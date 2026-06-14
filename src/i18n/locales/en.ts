@@ -1087,6 +1087,39 @@ export default {
       'Media is uploaded to the preferred server and mirrored to the others.',
     'Add Blossom server': 'Add Blossom server',
     'You need to add at least one media server in order to upload media files.':
-      'You need to add at least one media server in order to upload media files.'
+      'You need to add at least one media server in order to upload media files.',
+    'Add operator URL': 'Add operator URL',
+    'All set': 'All set',
+    'Connect Google account': 'Connect Google account',
+    'Connected to Google': 'Connected to Google',
+    'Create account': 'Create account',
+    'Create your account': 'Create your account',
+    'Invalid URL': 'Invalid URL',
+    'Invalid private key': 'Invalid private key',
+    'Link this account to Google so you can sign in and recover it with Google on other devices.':
+      'Link this account to Google so you can sign in and recover it with Google on other devices.',
+    'Link this account to Google so you can sign in and recover it with Google.':
+      'Link this account to Google so you can sign in and recover it with Google.',
+    'New account': 'New account',
+    'No account exists for this Google login yet. A new Nostr key has been created for you.':
+      'No account exists for this Google login yet. A new Nostr key has been created for you.',
+    Operators: 'Operators',
+    'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.':
+      'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.',
+    'Signing threshold': 'Signing threshold',
+    'This account is linked to Google.': 'This account is linked to Google.',
+    'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.':
+      'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.',
+    'This operator is already added': 'This operator is already added',
+    'Try again': 'Try again',
+    'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.':
+      'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.',
+    'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.':
+      'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.',
+    'The coordinator that verifies your Google sign-in and relays signing requests to the operators.':
+      'The coordinator that verifies your Google sign-in and relays signing requests to the operators.',
+    'of {{total}} operators are enough to sign': 'of {{total}} operators are enough to sign',
+    'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
+      'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.'
   }
 }

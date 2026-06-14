@@ -1099,6 +1099,40 @@ export default {
       'Medya, tercih edilen sunucuya yüklenir ve diğerlerine yansıtılır.',
     'Add Blossom server': 'Blossom sunucusu ekle',
     'You need to add at least one media server in order to upload media files.':
-      'Medya dosyalarını yüklemek için en az bir medya sunucusu eklemelisiniz.'
+      'Medya dosyalarını yüklemek için en az bir medya sunucusu eklemelisiniz.',
+    'Add operator URL': "Operatör URL'si ekle",
+    'All set': 'Her şey hazır',
+    'Connect Google account': 'Google hesabını bağla',
+    'Connected to Google': "Google'a bağlandı",
+    'Create account': 'Hesap oluştur',
+    'Create your account': 'Hesabını oluştur',
+    'Invalid URL': 'Geçersiz URL',
+    'Invalid private key': 'Geçersiz özel anahtar',
+    'Link this account to Google so you can sign in and recover it with Google on other devices.':
+      "Diğer cihazlarda Google ile oturum açıp hesabı kurtarabilmen için bu hesabı Google'a bağla.",
+    'Link this account to Google so you can sign in and recover it with Google.':
+      "Google ile oturum açıp hesabı kurtarabilmen için bu hesabı Google'a bağla.",
+    'New account': 'Yeni hesap',
+    'No account exists for this Google login yet. A new Nostr key has been created for you.':
+      'Bu Google girişi için henüz bir hesap yok. Senin için yeni bir Nostr anahtarı oluşturuldu.',
+    Operators: 'Operatörler',
+    'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.':
+      'Oturum açmak için Google ile giriş yap; henüz bir Nostr anahtarın yoksa otomatik olarak yeni bir tane oluşturulur.',
+    'Signing threshold': 'İmzalama eşiği',
+    'This account is linked to Google.': "Bu hesap Google'a bağlı.",
+    'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.':
+      'Bu anahtar sana ait ve sende kalmalı. Google ile kurtarabilsen de, hesabına erişimini asla kaybetmemek için şimdi bir yedek kaydet.',
+    'This operator is already added': 'Bu operatör zaten eklenmiş',
+    'Try again': 'Tekrar dene',
+    'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.':
+      "Hesabın artık Google'a bağlı. Diğer cihazlarda Google ile oturum açabilir veya anahtarını kurtarabilirsin.",
+    'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.':
+      'Özel anahtarın, ayrı operatörlerde tutulan parçalara bölünür; böylece hiçbir zaman tek bir yerde saklanmaz. Bu cihazda imzalamaya kendi özel anahtarınla devam edersin.',
+    'The coordinator that verifies your Google sign-in and relays signing requests to the operators.':
+      'Google girişini doğrulayan ve imzalama isteklerini operatörlere ileten koordinatör.',
+    'of {{total}} operators are enough to sign':
+      'operatör imzalamaya yeter ({{total}} operatörden)',
+    'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
+      'Her biri özel anahtarının bir parçasını tutan bağımsız sunuculardır; böylece tek bir operatör tek başına imzalayamaz.'
   }
 }

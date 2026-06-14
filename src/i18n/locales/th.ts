@@ -1078,6 +1078,40 @@ export default {
       'สื่อจะถูกอัปโหลดไปยังเซิร์ฟเวอร์ที่ต้องการและทำมิเรอร์ไปยังเซิร์ฟเวอร์อื่น',
     'Add Blossom server': 'เพิ่มเซิร์ฟเวอร์ Blossom',
     'You need to add at least one media server in order to upload media files.':
-      'คุณต้องเพิ่มเซิร์ฟเวอร์สื่ออย่างน้อยหนึ่งรายการเพื่ออัปโหลดไฟล์สื่อ'
+      'คุณต้องเพิ่มเซิร์ฟเวอร์สื่ออย่างน้อยหนึ่งรายการเพื่ออัปโหลดไฟล์สื่อ',
+    'Add operator URL': 'เพิ่ม URL ของ operator',
+    'All set': 'เรียบร้อยแล้ว',
+    'Connect Google account': 'เชื่อมต่อบัญชี Google',
+    'Connected to Google': 'เชื่อมต่อกับ Google แล้ว',
+    'Create account': 'สร้างบัญชี',
+    'Create your account': 'สร้างบัญชีของคุณ',
+    'Invalid URL': 'URL ไม่ถูกต้อง',
+    'Invalid private key': 'คีย์ส่วนตัวไม่ถูกต้อง',
+    'Link this account to Google so you can sign in and recover it with Google on other devices.':
+      'เชื่อมโยงบัญชีนี้กับ Google เพื่อให้คุณสามารถลงชื่อเข้าใช้และกู้คืนบัญชีด้วย Google บนอุปกรณ์อื่นได้',
+    'Link this account to Google so you can sign in and recover it with Google.':
+      'เชื่อมโยงบัญชีนี้กับ Google เพื่อให้คุณสามารถลงชื่อเข้าใช้และกู้คืนบัญชีด้วย Google ได้',
+    'New account': 'บัญชีใหม่',
+    'No account exists for this Google login yet. A new Nostr key has been created for you.':
+      'ยังไม่มีบัญชีสำหรับการล็อกอิน Google นี้ ระบบได้สร้างคีย์ Nostr ใหม่ให้คุณแล้ว',
+    Operators: 'Operator',
+    'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.':
+      'ลงชื่อเข้าใช้ด้วย Google เพื่อเข้าสู่ระบบ หรือสร้างคีย์ Nostr ใหม่โดยอัตโนมัติหากคุณยังไม่มี',
+    'Signing threshold': 'เกณฑ์การลงนาม',
+    'This account is linked to Google.': 'บัญชีนี้เชื่อมโยงกับ Google แล้ว',
+    'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.':
+      'คีย์นี้เป็นของคุณที่ต้องเก็บรักษาไว้ แม้ว่าคุณจะกู้คืนได้ด้วย Google แต่ควรบันทึกสำรองไว้ตอนนี้ เพื่อไม่ให้สูญเสียการเข้าถึงบัญชีของคุณ',
+    'This operator is already added': 'เพิ่ม operator นี้ไว้แล้ว',
+    'Try again': 'ลองอีกครั้ง',
+    'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.':
+      'ขณะนี้บัญชีของคุณเชื่อมโยงกับ Google แล้ว คุณสามารถลงชื่อเข้าใช้หรือกู้คืนคีย์ด้วย Google บนอุปกรณ์อื่นได้',
+    'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.':
+      'คีย์ส่วนตัวของคุณถูกแบ่งออกเป็นชาร์ดที่เก็บไว้กับ operator แต่ละราย จึงไม่เคยถูกจัดเก็บไว้ในที่เดียว คุณยังคงลงนามด้วยคีย์ส่วนตัวของคุณบนอุปกรณ์นี้',
+    'The coordinator that verifies your Google sign-in and relays signing requests to the operators.':
+      'ตัวประสานงานที่ยืนยันการลงชื่อเข้าใช้ Google ของคุณและส่งต่อคำขอลงนามไปยัง operator',
+    'of {{total}} operators are enough to sign':
+      'operator ก็เพียงพอสำหรับการลงนาม (จากทั้งหมด {{total}} ราย)',
+    'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
+      'เซิร์ฟเวอร์อิสระที่แต่ละแห่งเก็บชาร์ดของคีย์ส่วนตัวของคุณ ดังนั้น operator รายเดียวจึงไม่สามารถลงนามได้ด้วยตัวเอง'
   }
 }

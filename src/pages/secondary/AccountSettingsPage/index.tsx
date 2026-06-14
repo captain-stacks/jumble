@@ -2,7 +2,7 @@ import PomegranateBindDialog from '@/components/PomegranateBindDialog'
 import PomegranateDisconnectDialog from '@/components/PomegranateDisconnectDialog'
 import PomegranateExportDialog from '@/components/PomegranateExportDialog'
 import { SettingsGroup, SettingsPageContainer, SettingsRow } from '@/components/ui/settings'
-import { POMEGRANATE_CENTRAL_URL, POMEGRANATE_ENABLED } from '@/constants'
+import { POMEGRANATE_ENABLED } from '@/constants'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { isElectron } from '@/lib/platform'
 import { isPomegranateAccount } from '@/lib/pomegranate'
@@ -29,8 +29,10 @@ const AccountSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
 
   const fullAccount = account ? storage.findAccount(account) : undefined
   const pomegranate = fullAccount ? isPomegranateAccount(fullAccount) : false
+  // A local-key account (nsec or ncryptsec) can be linked to Google. Pomegranate
+  // (bunker) accounts are already managed by the central server.
   const canBindGoogle =
-    POMEGRANATE_ENABLED && !isElectron() && !!account && (!!nsec || !!ncryptsec)
+    POMEGRANATE_ENABLED && !isElectron() && !!account && (!!nsec || !!ncryptsec) && !pomegranate
 
   const openBindDialog = () => {
     if (!account) return
@@ -95,7 +97,6 @@ const AccountSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
           <PomegranateBindDialog
             open={bindDialogOpen}
             onOpenChange={setBindDialogOpen}
-            central={POMEGRANATE_CENTRAL_URL}
             pubkey={bindTarget.pubkey}
             signerType={bindTarget.signerType}
           />

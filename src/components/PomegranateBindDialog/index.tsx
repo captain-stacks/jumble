@@ -1,18 +1,26 @@
 import ResponsiveDialog from '@/components/ResponsiveDialog'
 import { Button } from '@/components/ui/button'
-import { describePomegranateError } from '@/lib/pomegranate'
+import {
+  DEFAULT_POMEGRANATE_OPERATORS,
+  defaultPomegranateThreshold,
+  describePomegranateError
+} from '@/lib/pomegranate'
 import { useNostr } from '@/providers/NostrProvider'
 import pomegranateService, {
   TGoogleToken,
   TPomegranateAccount
 } from '@/services/pomegranate.service'
+import { POMEGRANATE_CENTRAL_URL } from '@/constants'
 import { TSignerType } from '@/types'
 import { Loader } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import AdvancedOptions from '../AdvancedOptions'
 import InfoCard from '../InfoCard'
+import PomegranateCentralServerField from '../PomegranateCentralServerField'
 import PomegranateHowItWorks from '../PomegranateHowItWorks'
+import PomegranateOperatorConfig from '../PomegranateOperatorConfig'
 
 type Phase = 'intro' | 'conflict' | 'replace' | 'done'
 type Status = 'idle' | 'authenticating' | 'binding' | 'loggingIn' | 'error'
@@ -20,13 +28,11 @@ type Status = 'idle' | 'authenticating' | 'binding' | 'loggingIn' | 'error'
 export default function PomegranateBindDialog({
   open,
   onOpenChange,
-  central,
   pubkey,
   signerType
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  central: string
   pubkey: string
   signerType: TSignerType
 }) {
@@ -34,7 +40,6 @@ export default function PomegranateBindDialog({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <PomegranateBindContent
         open={open}
-        central={central}
         pubkey={pubkey}
         signerType={signerType}
         onClose={() => onOpenChange(false)}
@@ -45,13 +50,11 @@ export default function PomegranateBindDialog({
 
 function PomegranateBindContent({
   open,
-  central,
   pubkey,
   signerType,
   onClose
 }: {
   open: boolean
-  central: string
   pubkey: string
   signerType: TSignerType
   onClose: () => void
@@ -65,6 +68,11 @@ function PomegranateBindContent({
   const [existing, setExisting] = useState<TPomegranateAccount | null>(null)
   const [bindResult, setBindResult] = useState<{ bunkerUrl: string; central: string } | null>(null)
   const [replaced, setReplaced] = useState(false)
+  const [central, setCentral] = useState(POMEGRANATE_CENTRAL_URL)
+  const [operators, setOperators] = useState<string[]>(DEFAULT_POMEGRANATE_OPERATORS)
+  const [threshold, setThreshold] = useState(() =>
+    defaultPomegranateThreshold(DEFAULT_POMEGRANATE_OPERATORS.length)
+  )
 
   useEffect(() => {
     if (open) {
@@ -75,6 +83,9 @@ function PomegranateBindContent({
       setExisting(null)
       setBindResult(null)
       setReplaced(false)
+      setCentral(POMEGRANATE_CENTRAL_URL)
+      setOperators(DEFAULT_POMEGRANATE_OPERATORS)
+      setThreshold(defaultPomegranateThreshold(DEFAULT_POMEGRANATE_OPERATORS.length))
     }
   }, [open])
 
@@ -95,7 +106,6 @@ function PomegranateBindContent({
       setToken(result.token)
       setExisting(result.existing)
       if (result.existing && result.existing.pubkey !== pubkey) {
-        // This Google account is already linked to a different key.
         setStatus('idle')
         setPhase('conflict')
         return
@@ -121,6 +131,7 @@ function PomegranateBindContent({
         googleToken,
         privkey,
         pubkey,
+        { operators, threshold },
         { rebind }
       )
       setBindResult(result)
@@ -137,8 +148,8 @@ function PomegranateBindContent({
 
   // Step 3 (optional): swap the local key login for the bunker (remote signer).
   // Remove the old local account FIRST so bunkerLogin writes the bunker client
-  // secret last (both accounts share the pubkey, and removeAccount clears
-  // per-pubkey secrets). Keep the nsec to restore login if bunkerLogin fails.
+  // secret last (both accounts share the pubkey). Keep the nsec to restore
+  // login if bunkerLogin fails.
   const handleReplace = async () => {
     if (!bindResult) return
     setErrorMsg('')
@@ -173,7 +184,6 @@ function PomegranateBindContent({
   const handleError = (err: unknown) => {
     const msg = describePomegranateError(err, t)
     if (!msg) {
-      // The user simply closed the popup; reset quietly.
       setStatus('idle')
       return
     }
@@ -281,6 +291,20 @@ function PomegranateBindContent({
         </p>
       </div>
       <PomegranateHowItWorks />
+      <AdvancedOptions>
+        <PomegranateCentralServerField
+          central={central}
+          onCentralChange={setCentral}
+          disabled={busy}
+        />
+        <PomegranateOperatorConfig
+          operators={operators}
+          onOperatorsChange={setOperators}
+          threshold={threshold}
+          onThresholdChange={setThreshold}
+          disabled={busy}
+        />
+      </AdvancedOptions>
       {errorMsg && <p className="text-destructive text-center text-sm">{errorMsg}</p>}
       {busy ? (
         <div className="text-muted-foreground flex items-center justify-center gap-2 py-4 text-sm">
@@ -288,7 +312,7 @@ function PomegranateBindContent({
           {statusText[status === 'binding' ? 'binding' : 'authenticating']}
         </div>
       ) : (
-        <Button onClick={handleStart} className="w-full">
+        <Button onClick={handleStart} className="w-full" disabled={!central.trim()}>
           {status === 'error' ? t('Try again') : t('Continue with Google')}
         </Button>
       )}

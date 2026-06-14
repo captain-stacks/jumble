@@ -1095,6 +1095,40 @@ export default {
       'मीडिया पसंदीदा सर्वर पर अपलोड होता है और बाकी सर्वरों पर मिरर किया जाता है।',
     'Add Blossom server': 'Blossom सर्वर जोड़ें',
     'You need to add at least one media server in order to upload media files.':
-      'मीडिया फ़ाइलें अपलोड करने के लिए आपको कम से कम एक मीडिया सर्वर जोड़ना होगा।'
+      'मीडिया फ़ाइलें अपलोड करने के लिए आपको कम से कम एक मीडिया सर्वर जोड़ना होगा।',
+    'Add operator URL': 'ऑपरेटर URL जोड़ें',
+    'All set': 'सब तैयार है',
+    'Connect Google account': 'Google खाता कनेक्ट करें',
+    'Connected to Google': 'Google से कनेक्ट है',
+    'Create account': 'खाता बनाएं',
+    'Create your account': 'अपना खाता बनाएं',
+    'Invalid URL': 'अमान्य URL',
+    'Invalid private key': 'अमान्य निजी कुंजी',
+    'Link this account to Google so you can sign in and recover it with Google on other devices.':
+      'इस खाते को Google से लिंक करें ताकि आप दूसरे डिवाइस पर Google से साइन इन कर सकें और इसे पुनर्प्राप्त कर सकें।',
+    'Link this account to Google so you can sign in and recover it with Google.':
+      'इस खाते को Google से लिंक करें ताकि आप Google से साइन इन कर सकें और इसे पुनर्प्राप्त कर सकें।',
+    'New account': 'नया खाता',
+    'No account exists for this Google login yet. A new Nostr key has been created for you.':
+      'इस Google लॉगिन के लिए अभी तक कोई खाता मौजूद नहीं है। आपके लिए एक नई Nostr कुंजी बनाई गई है।',
+    Operators: 'ऑपरेटर',
+    'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.':
+      'लॉग इन करने के लिए Google से साइन इन करें, या यदि आपके पास अभी तक कोई Nostr कुंजी नहीं है तो स्वचालित रूप से एक नई कुंजी बनाएं।',
+    'Signing threshold': 'हस्ताक्षर सीमा',
+    'This account is linked to Google.': 'यह खाता Google से लिंक है।',
+    'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.':
+      'यह कुंजी आपकी अपनी है। हालांकि आप इसे Google से पुनर्प्राप्त कर सकते हैं, अभी एक बैकअप सहेजें ताकि आप अपने खाते तक पहुंच कभी न खोएं।',
+    'This operator is already added': 'यह ऑपरेटर पहले से जोड़ा गया है',
+    'Try again': 'फिर से कोशिश करें',
+    'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.':
+      'अब आपका खाता Google से लिंक हो गया है। आप दूसरे डिवाइस पर Google से साइन इन कर सकते हैं या अपनी कुंजी पुनर्प्राप्त कर सकते हैं।',
+    'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.':
+      'आपकी निजी कुंजी अलग-अलग ऑपरेटरों के पास रखे गए शार्ड में विभाजित होती है, इसलिए यह कभी एक ही जगह संग्रहीत नहीं होती। आप इस डिवाइस पर अपनी निजी कुंजी से हस्ताक्षर करते रहते हैं।',
+    'The coordinator that verifies your Google sign-in and relays signing requests to the operators.':
+      'वह समन्वयक जो आपके Google साइन-इन को सत्यापित करता है और हस्ताक्षर अनुरोधों को ऑपरेटरों तक भेजता है।',
+    'of {{total}} operators are enough to sign':
+      'ऑपरेटर हस्ताक्षर के लिए पर्याप्त हैं ({{total}} में से)',
+    'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
+      'स्वतंत्र सर्वर जिनमें से प्रत्येक आपकी निजी कुंजी का एक शार्ड रखता है, ताकि कोई भी अकेला ऑपरेटर स्वयं हस्ताक्षर न कर सके।'
   }
 }

@@ -1114,6 +1114,39 @@ export default {
       'Les médias sont téléversés sur le serveur préféré et répliqués sur les autres.',
     'Add Blossom server': 'Ajouter un serveur Blossom',
     'You need to add at least one media server in order to upload media files.':
-      'Vous devez ajouter au moins un serveur multimédia pour téléverser des fichiers.'
+      'Vous devez ajouter au moins un serveur multimédia pour téléverser des fichiers.',
+    'Add operator URL': "Ajouter une URL d'opérateur",
+    'All set': 'Tout est prêt',
+    'Connect Google account': 'Connecter le compte Google',
+    'Connected to Google': 'Connecté à Google',
+    'Create account': 'Créer un compte',
+    'Create your account': 'Créez votre compte',
+    'Invalid URL': 'URL invalide',
+    'Invalid private key': 'Clé privée invalide',
+    'Link this account to Google so you can sign in and recover it with Google on other devices.':
+      "Liez ce compte à Google afin de pouvoir vous connecter et le récupérer avec Google sur d'autres appareils.",
+    'Link this account to Google so you can sign in and recover it with Google.':
+      'Liez ce compte à Google afin de pouvoir vous connecter et le récupérer avec Google.',
+    'New account': 'Nouveau compte',
+    'No account exists for this Google login yet. A new Nostr key has been created for you.':
+      "Aucun compte n'existe encore pour cette connexion Google. Une nouvelle clé Nostr a été créée pour vous.",
+    Operators: 'Opérateurs',
+    'Sign in with Google to log in, or to create a new Nostr key automatically if you do not have one yet.':
+      "Connectez-vous avec Google pour vous identifier, ou pour créer automatiquement une nouvelle clé Nostr si vous n'en avez pas encore.",
+    'Signing threshold': 'Seuil de signature',
+    'This account is linked to Google.': 'Ce compte est lié à Google.',
+    'This key is yours to keep. Although you can recover it with Google, save a backup now so you never lose access to your account.':
+      "Cette clé vous appartient. Bien que vous puissiez la récupérer avec Google, enregistrez une sauvegarde dès maintenant afin de ne jamais perdre l'accès à votre compte.",
+    'This operator is already added': 'Cet opérateur est déjà ajouté',
+    'Try again': 'Réessayer',
+    'Your account is now linked to Google. You can sign in or recover your key with Google on other devices.':
+      "Votre compte est désormais lié à Google. Vous pouvez vous connecter ou récupérer votre clé avec Google sur d'autres appareils.",
+    'Your private key is split into shards held by separate operators, so it is never stored in one place. You keep signing with your private key on this device.':
+      "Votre clé privée est divisée en fragments détenus par des opérateurs distincts, elle n'est donc jamais stockée au même endroit. Vous continuez à signer avec votre clé privée sur cet appareil.",
+    'The coordinator that verifies your Google sign-in and relays signing requests to the operators.':
+      'Le coordinateur qui vérifie votre connexion Google et relaie les demandes de signature aux opérateurs.',
+    'of {{total}} operators are enough to sign': 'opérateurs sur {{total}} suffisent pour signer',
+    'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
+      "Des serveurs indépendants qui détiennent chacun un fragment de votre clé privée, de sorte qu'aucun opérateur ne peut signer à lui seul."
   }
 }

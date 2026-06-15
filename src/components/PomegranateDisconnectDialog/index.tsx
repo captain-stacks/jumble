@@ -65,7 +65,7 @@ function PomegranateDisconnectContent({
     setErrorMsg('')
     setLoading(true)
     try {
-      await pomegranateService.disconnectAccount(central)
+      await pomegranateService.disconnectAccount(central, account.pubkey)
       setPhase('done')
     } catch (err) {
       const msg = describePomegranateError(err, t)

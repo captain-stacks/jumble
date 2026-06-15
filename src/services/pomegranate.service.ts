@@ -184,16 +184,23 @@ class PomegranateService {
 
   /**
    * Authenticates with Google, fetches the pomegranate account so the caller
-   * knows the operators and threshold. Used by the export-nsec flow.
+   * knows the operators and threshold. Used by the export-nsec flow. Verifies
+   * the central server's account matches the locally active account, so signing
+   * in with the wrong Google account fails up front instead of recovering a
+   * different key.
    */
   async startRecovery(
-    central: string
+    central: string,
+    expectedPubkey: string
   ): Promise<{ token: TGoogleToken; account: TPomegranateAccount }> {
     const centralURL = this.massageURL(central)
     const token = await this.authenticateWithGoogle(centralURL)
     const account = await this.getAccount(centralURL, token)
     if (!account) {
       throw new Error('No pomegranate account found for this Google login')
+    }
+    if (account.pubkey !== expectedPubkey) {
+      throw new Error('This Google account is linked to a different Nostr account')
     }
     return { token, account }
   }
@@ -203,10 +210,18 @@ class PomegranateService {
    * between the account and the central signer; the underlying key still
    * exists and the account remains usable via its nsec. Must be called from a
    * user gesture so the Google sign-in popup is not blocked.
+   *
+   * Verifies the central server's account matches the locally active account
+   * before deleting, so signing in with the wrong Google account cannot
+   * disconnect a different pubkey's registration.
    */
-  async disconnectAccount(central: string): Promise<void> {
+  async disconnectAccount(central: string, expectedPubkey: string): Promise<void> {
     const centralURL = this.massageURL(central)
     const token = await this.authenticateWithGoogle(centralURL)
+    const account = await this.getAccount(centralURL, token)
+    if (!account || account.pubkey !== expectedPubkey) {
+      throw new Error('This Google account is linked to a different Nostr account')
+    }
     await this.deleteAccount(centralURL, token)
   }
 

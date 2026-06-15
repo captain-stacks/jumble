@@ -77,7 +77,7 @@ function PomegranateExportContent({
     setErrorMsg('')
     setLoading(true)
     try {
-      const result = await pomegranateService.startRecovery(central)
+      const result = await pomegranateService.startRecovery(central, pubkey)
       setAccount(result.account)
       setPhase('recovering')
     } catch (err) {

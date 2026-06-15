@@ -1147,6 +1147,8 @@ export default {
       'Le coordinateur qui vérifie votre connexion Google et relaie les demandes de signature aux opérateurs.',
     'of {{total}} operators are enough to sign': 'opérateurs sur {{total}} suffisent pour signer',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      "Des serveurs indépendants qui détiennent chacun un fragment de votre clé privée, de sorte qu'aucun opérateur ne peut signer à lui seul."
+      "Des serveurs indépendants qui détiennent chacun un fragment de votre clé privée, de sorte qu'aucun opérateur ne peut signer à lui seul.",
+    'This Google account is linked to a different Nostr account':
+      'Ce compte Google est lié à un autre compte Nostr'
   }
 }

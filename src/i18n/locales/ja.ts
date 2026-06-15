@@ -1130,6 +1130,8 @@ export default {
     'of {{total}} operators are enough to sign':
       '人のオペレーターで署名できます（全{{total}}件中）',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'それぞれがあなたの秘密鍵のシャードを保持する独立したサーバーです。そのため、単独のオペレーターだけでは署名できません。'
+      'それぞれがあなたの秘密鍵のシャードを保持する独立したサーバーです。そのため、単独のオペレーターだけでは署名できません。',
+    'This Google account is linked to a different Nostr account':
+      'この Google アカウントは別の Nostr アカウントに紐付けられています'
   }
 }

@@ -1136,6 +1136,8 @@ export default {
       'El coordinador que verifica tu inicio de sesión de Google y reenvía las solicitudes de firma a los operadores.',
     'of {{total}} operators are enough to sign': 'de {{total}} operadores bastan para firmar',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Servidores independientes que guardan cada uno un fragmento de tu clave privada, de modo que ningún operador puede firmar por sí solo.'
+      'Servidores independientes que guardan cada uno un fragmento de tu clave privada, de modo que ningún operador puede firmar por sí solo.',
+    'This Google account is linked to a different Nostr account':
+      'Esta cuenta de Google está vinculada a otra cuenta de Nostr'
   }
 }

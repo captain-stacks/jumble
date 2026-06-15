@@ -1136,6 +1136,8 @@ export default {
       'Координатор, который проверяет ваш вход через Google и передаёт запросы на подпись операторам.',
     'of {{total}} operators are enough to sign': 'из {{total}} операторов достаточно для подписи',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Независимые серверы, каждый из которых хранит фрагмент вашего приватного ключа, поэтому ни один оператор не может подписать в одиночку.'
+      'Независимые серверы, каждый из которых хранит фрагмент вашего приватного ключа, поэтому ни один оператор не может подписать в одиночку.',
+    'This Google account is linked to a different Nostr account':
+      'Этот аккаунт Google связан с другим аккаунтом Nostr'
   }
 }

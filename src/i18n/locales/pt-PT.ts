@@ -1139,6 +1139,8 @@ export default {
       'O coordenador que verifica o seu início de sessão com o Google e encaminha os pedidos de assinatura para os operadores.',
     'of {{total}} operators are enough to sign': 'de {{total}} operadores bastam para assinar',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Servidores independentes que guardam cada um um fragmento da sua chave privada, de modo que nenhum operador sozinho pode assinar.'
+      'Servidores independentes que guardam cada um um fragmento da sua chave privada, de modo que nenhum operador sozinho pode assinar.',
+    'This Google account is linked to a different Nostr account':
+      'Esta conta Google está associada a outra conta Nostr'
   }
 }

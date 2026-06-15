@@ -1130,6 +1130,8 @@ export default {
       'هماهنگ‌کننده‌ای که ورود شما با Google را تأیید می‌کند و درخواست‌های امضا را به اپراتورها می‌رساند.',
     'of {{total}} operators are enough to sign': 'اپراتور از {{total}} برای امضا کافی است',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'سرورهای مستقلی که هرکدام یک قطعه از کلید خصوصی شما را نگه می‌دارند، به‌طوری‌که هیچ اپراتوری به‌تنهایی نمی‌تواند امضا کند.'
+      'سرورهای مستقلی که هرکدام یک قطعه از کلید خصوصی شما را نگه می‌دارند، به‌طوری‌که هیچ اپراتوری به‌تنهایی نمی‌تواند امضا کند.',
+    'This Google account is linked to a different Nostr account':
+      'این حساب Google به یک حساب Nostr دیگر متصل است'
   }
 }

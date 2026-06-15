@@ -74,6 +74,17 @@ export class PomegranatePopupClosedError extends Error {
   }
 }
 
+/**
+ * The Google account that signed in is linked to a different pubkey than the
+ * locally active account — raised when disconnecting or recovering a key.
+ */
+export class PomegranatePubkeyMismatchError extends Error {
+  constructor() {
+    super('This Google account is linked to a different Nostr account')
+    this.name = 'PomegranatePubkeyMismatchError'
+  }
+}
+
 class PomegranateService {
   static instance: PomegranateService
 
@@ -200,7 +211,7 @@ class PomegranateService {
       throw new Error('No pomegranate account found for this Google login')
     }
     if (account.pubkey !== expectedPubkey) {
-      throw new Error('This Google account is linked to a different Nostr account')
+      throw new PomegranatePubkeyMismatchError()
     }
     return { token, account }
   }
@@ -220,7 +231,7 @@ class PomegranateService {
     const token = await this.authenticateWithGoogle(centralURL)
     const account = await this.getAccount(centralURL, token)
     if (!account || account.pubkey !== expectedPubkey) {
-      throw new Error('This Google account is linked to a different Nostr account')
+      throw new PomegranatePubkeyMismatchError()
     }
     await this.deleteAccount(centralURL, token)
   }

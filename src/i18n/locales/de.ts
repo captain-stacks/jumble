@@ -1148,6 +1148,8 @@ export default {
       'Der Koordinator, der deine Google-Anmeldung überprüft und Signaturanfragen an die Operatoren weiterleitet.',
     'of {{total}} operators are enough to sign': 'von {{total}} Operatoren genügen zum Signieren',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Unabhängige Server, die jeweils ein Fragment deines privaten Schlüssels speichern, sodass kein einzelner Operator allein signieren kann.'
+      'Unabhängige Server, die jeweils ein Fragment deines privaten Schlüssels speichern, sodass kein einzelner Operator allein signieren kann.',
+    'This Google account is linked to a different Nostr account':
+      'Dieses Google-Konto ist mit einem anderen Nostr-Konto verknüpft'
   }
 }

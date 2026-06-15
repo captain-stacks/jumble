@@ -1133,6 +1133,8 @@ export default {
     'of {{total}} operators are enough to sign':
       'operatör imzalamaya yeter ({{total}} operatörden)',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Her biri özel anahtarının bir parçasını tutan bağımsız sunuculardır; böylece tek bir operatör tek başına imzalayamaz.'
+      'Her biri özel anahtarının bir parçasını tutan bağımsız sunuculardır; böylece tek bir operatör tek başına imzalayamaz.',
+    'This Google account is linked to a different Nostr account':
+      'Bu Google hesabı farklı bir Nostr hesabına bağlı'
   }
 }

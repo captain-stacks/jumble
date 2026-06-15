@@ -1115,6 +1115,8 @@ export default {
       'المنسّق الذي يتحقق من تسجيل دخولك عبر Google ويمرّر طلبات التوقيع إلى المشغّلين.',
     'of {{total}} operators are enough to sign': 'من أصل {{total}} مشغّلين يكفون للتوقيع',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'خوادم مستقلة يحتفظ كل منها بشظية من مفتاحك الخاص، بحيث لا يمكن لأي مشغّل التوقيع بمفرده.'
+      'خوادم مستقلة يحتفظ كل منها بشظية من مفتاحك الخاص، بحيث لا يمكن لأي مشغّل التوقيع بمفرده.',
+    'This Google account is linked to a different Nostr account':
+      'حساب Google هذا مرتبط بحساب Nostr آخر'
   }
 }

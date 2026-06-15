@@ -1120,6 +1120,8 @@ export default {
       'The coordinator that verifies your Google sign-in and relays signing requests to the operators.',
     'of {{total}} operators are enough to sign': 'of {{total}} operators are enough to sign',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.'
+      'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.',
+    'This Google account is linked to a different Nostr account':
+      'This Google account is linked to a different Nostr account'
   }
 }

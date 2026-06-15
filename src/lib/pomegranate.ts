@@ -1,7 +1,8 @@
 import { POMEGRANATE_OPERATOR_URLS } from '@/constants'
 import {
   PomegranatePopupBlockedError,
-  PomegranatePopupClosedError
+  PomegranatePopupClosedError,
+  PomegranatePubkeyMismatchError
 } from '@/services/pomegranate.service'
 import storage from '@/services/local-storage.service'
 import { TAccount, TAccountPointer } from '@/types'
@@ -73,6 +74,9 @@ export function describePomegranateError(err: unknown, t: TFunction): string | n
   }
   if (err instanceof PomegranatePopupBlockedError) {
     return t('Popup was blocked. Please allow popups for this site and try again.')
+  }
+  if (err instanceof PomegranatePubkeyMismatchError) {
+    return t('This Google account is linked to a different Nostr account')
   }
   return err instanceof Error ? err.message : t('Something went wrong')
 }

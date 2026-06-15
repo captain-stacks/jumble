@@ -1133,6 +1133,8 @@ export default {
       'A koordinátor, amely ellenőrzi a Google-bejelentkezésedet és továbbítja az aláírási kéréseket az operátoroknak.',
     'of {{total}} operators are enough to sign': '/ {{total}} operátor elég az aláíráshoz',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      'Független szerverek, amelyek mindegyike a privát kulcsod egy töredékét tárolja, így egyetlen operátor sem tud egyedül aláírni.'
+      'Független szerverek, amelyek mindegyike a privát kulcsod egy töredékét tárolja, így egyetlen operátor sem tud egyedül aláírni.',
+    'This Google account is linked to a different Nostr account':
+      'Ez a Google-fiók egy másik Nostr-fiókhoz van kapcsolva'
   }
 }

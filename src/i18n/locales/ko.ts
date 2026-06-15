@@ -1116,6 +1116,8 @@ export default {
     'of {{total}} operators are enough to sign':
       '명의 운영자만 있으면 서명할 수 있습니다 (총 {{total}}명 중)',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      '각자 당신의 개인 키 샤드를 보관하는 독립적인 서버입니다. 따라서 단일 운영자만으로는 서명할 수 없습니다.'
+      '각자 당신의 개인 키 샤드를 보관하는 독립적인 서버입니다. 따라서 단일 운영자만으로는 서명할 수 없습니다.',
+    'This Google account is linked to a different Nostr account':
+      '이 Google 계정은 다른 Nostr 계정에 연결되어 있습니다'
   }
 }

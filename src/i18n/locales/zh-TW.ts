@@ -1087,6 +1087,8 @@ export default {
       '負責驗證你的 Google 登入、並將簽署請求轉發給各營運方的協調伺服器。',
     'of {{total}} operators are enough to sign': '個營運方即可完成簽署（共 {{total}} 個）',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      '各自持有你私鑰一個分片的獨立伺服器，因此單一營運方無法獨自簽署。'
+      '各自持有你私鑰一個分片的獨立伺服器，因此單一營運方無法獨自簽署。',
+    'This Google account is linked to a different Nostr account':
+      '此 Google 帳號已連結到另一個 Nostr 帳號'
   }
 }

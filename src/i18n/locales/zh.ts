@@ -1086,6 +1086,8 @@ export default {
       '负责验证你的 Google 登录、并将签名请求转发给各运营方的协调服务器。',
     'of {{total}} operators are enough to sign': '个运营方即可完成签名（共 {{total}} 个）',
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
-      '各自持有你私钥一个分片的独立服务器，因此单个运营方无法独自签名。'
+      '各自持有你私钥一个分片的独立服务器，因此单个运营方无法独自签名。',
+    'This Google account is linked to a different Nostr account':
+      '此 Google 账号已关联到另一个 Nostr 账号'
   }
 }

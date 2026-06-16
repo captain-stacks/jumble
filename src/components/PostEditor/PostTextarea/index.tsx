@@ -207,13 +207,16 @@ const PostTextarea = forwardRef<
       },
       insertEmoji: (emoji: string | TEmoji) => {
         if (editor) {
+          // focus() restores the editor's cursor (the picker stole DOM focus),
+          // so after inserting the emoji the caret stays in the textarea ready
+          // for continued typing, matching insertText/appendText above.
           if (typeof emoji === 'string') {
-            editor.chain().insertContent(emoji).run()
+            editor.chain().focus().insertContent(emoji).run()
           } else {
             const emojiNode = editor.schema.nodes.emoji.create({
               name: customEmojiService.getEmojiId(emoji)
             })
-            editor.chain().insertContent(emojiNode).run()
+            editor.chain().focus().insertContent(emojiNode).run()
           }
         }
       },

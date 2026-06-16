@@ -90,7 +90,9 @@ export default function PostAccountSelector({
 
   if (isSmallScreen) {
     return (
-      <div className="flex px-5 pt-2">
+      // pb-1 + the trigger's own py-1 (4px) makes the gap below the selector
+      // 16px, matching the editor-to-Protected-row gap underneath the textarea.
+      <div className="flex px-5 pt-2 pb-1">
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
           <DrawerContent title={t('Post as')}>
@@ -125,7 +127,9 @@ export default function PostAccountSelector({
   }
 
   return (
-    <div className="flex px-5 pt-2 sm:px-6">
+    // See the small-screen branch above: pb-1 unifies the gap below the selector
+    // with the editor-to-Protected-row gap underneath the textarea (both 16px).
+    <div className="flex px-5 pt-2 pb-1 sm:px-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72 max-w-[calc(100vw-2rem)]">

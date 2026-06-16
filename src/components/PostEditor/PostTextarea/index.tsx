@@ -11,6 +11,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Text from '@tiptap/extension-text'
 import { TextSelection } from '@tiptap/pm/state'
 import { Content, EditorContent, useEditor } from '@tiptap/react'
+import { ImageUp } from 'lucide-react'
 import {
   Dispatch,
   forwardRef,
@@ -74,6 +75,7 @@ const PostTextarea = forwardRef<
   ) => {
     const { t } = useTranslation()
     const [tabValue, setTabValue] = useState('edit')
+    const [isDraggingFile, setIsDraggingFile] = useState(false)
     // Keep the tabs and the (mobile) action buttons on one row when they fit;
     // when a long translation would crowd them, stack the buttons above the tabs.
     const headerRef = useRef<HTMLDivElement>(null)
@@ -123,7 +125,8 @@ const PostTextarea = forwardRef<
             onUploadStart?.(file, cancel)
           },
           onUploadEnd: (file) => onUploadEnd?.(file),
-          onUploadProgress: (file, p) => onUploadProgress?.(file, p)
+          onUploadProgress: (file, p) => onUploadProgress?.(file, p),
+          onDragStateChange: (dragging) => setIsDraggingFile(dragging)
         })
       ],
       editorProps: {
@@ -255,7 +258,17 @@ const PostTextarea = forwardRef<
           {postAsAccount && onPostAsAccountChange && (
             <PostAccountSelector value={postAsAccount} onChange={onPostAsAccountChange} />
           )}
-          <EditorContent className="tiptap" editor={editor} />
+          <div className="relative">
+            <EditorContent className="tiptap" editor={editor} />
+            {isDraggingFile && (
+              <div className="pointer-events-none absolute inset-0 z-10 px-5 py-2 sm:px-6">
+                <div className="bg-background/80 text-primary flex h-full w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-current backdrop-blur-xs">
+                  <ImageUp className="size-6" />
+                  <span className="text-sm font-medium">{t('Drop files to upload')}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </TabsContent>
         <TabsContent
           value="preview"

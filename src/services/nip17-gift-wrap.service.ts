@@ -1,6 +1,5 @@
 import { getConversationKey } from '@/lib/crypto'
 import { ISigner } from '@/types'
-import dayjs from 'dayjs'
 import { Event, generateSecretKey, kinds, UnsignedEvent } from 'nostr-tools'
 import * as nip44 from 'nostr-tools/nip44'
 
@@ -52,11 +51,12 @@ class Nip17GiftWrapService {
     encryptionPrivkey: Uint8Array,
     recipientPubkey: string,
     recipientEncryptionPubkey: string,
+    createdAt: number,
     extraTags?: string[][],
     kind?: number
   ): Promise<{ rumor: TRumor; recipientGiftWraps: Event[]; selfGiftWraps: Event[] }> {
     const rumorTemplate: UnsignedEvent = {
-      created_at: dayjs().unix(),
+      created_at: createdAt,
       kind: kind ?? kinds.PrivateDirectMessage,
       tags: [['p', recipientPubkey], ...(extraTags ?? [])],
       content,
@@ -128,7 +128,7 @@ class Nip17GiftWrapService {
     return (await signer.signEvent({
       kind: kinds.Seal,
       content: encrypted,
-      created_at: dayjs().unix(),
+      created_at: rumor.created_at,
       tags: [['n', getPublicKey(encryptionPrivkey)]]
     })) as Event
   }
@@ -150,7 +150,7 @@ class Nip17GiftWrapService {
       {
         kind: kinds.Seal,
         content: encrypted,
-        created_at: dayjs().unix(),
+        created_at: rumor.created_at,
         tags: []
       },
       encryptionPrivkey

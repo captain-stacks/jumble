@@ -35,6 +35,15 @@ class DmService {
   private syncRequestListeners = new Set<(event: Event) => void>()
   private encryptionKeyChangedListeners = new Set<(newPubkey: string) => void>()
   private activeConversationKey: string | null = null
+  // Global monotonic clock for outgoing rumor `created_at`. Nostr timestamps
+  // have one-second granularity, so several messages sent within the same second
+  // would otherwise share a `created_at` and fall back to an id-based tiebreak
+  // (ascending rumor id), which does not match send order. Forcing `created_at`
+  // to strictly increase across all outgoing messages keeps the persisted order
+  // (and any client that sorts by `created_at`) in send order. A global clock is
+  // enough: ordering only matters within a conversation, and cross-conversation
+  // timestamp drift during a burst is at most a few seconds and harmless.
+  private lastSentCreatedAt = 0
 
   private constructor() {}
 
@@ -599,6 +608,18 @@ class DmService {
     await this.rebuildConversationsFromMessages(accountPubkey, messages, encryptionPubkeyMap)
   }
 
+  // Allocates the next `created_at` for an outgoing rumor in a conversation,
+  // guaranteeing it is strictly greater than the previous one we sent there.
+  // This is a synchronous read-modify-write, so calling it at the top of each
+  // send method (before any `await`) serializes ordering by call order without
+  // an explicit async queue. Concurrent sends within the same second therefore
+  // get consecutive timestamps in the order they were invoked.
+  private allocateRumorCreatedAt(): number {
+    const createdAt = Math.max(dayjs().unix(), this.lastSentCreatedAt + 1)
+    this.lastSentCreatedAt = createdAt
+    return createdAt
+  }
+
   async sendMessage(
     accountPubkey: string,
     recipientPubkey: string,
@@ -606,6 +627,11 @@ class DmService {
     replyTo?: { id: string; content: string; senderPubkey: string },
     additionalTags?: string[][]
   ): Promise<TDmMessage | null> {
+    // Allocate the rumor timestamp synchronously, before any await, so rapid
+    // consecutive sends keep their order (see allocateRumorCreatedAt).
+    const createdAt = this.allocateRumorCreatedAt()
+    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
+
     const keypair =
       this.currentEncryptionKeypair ?? encryptionKeyService.getEncryptionKeypair(accountPubkey)
     if (!keypair) {
@@ -635,10 +661,10 @@ class DmService {
         keypair.privkey,
         recipientPubkey,
         recipientEncryptionPubkey,
+        createdAt,
         extraTags
       )
 
-    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
       id: rumor.id,
       participantsKey,
@@ -693,6 +719,11 @@ class DmService {
     size?: number,
     thumbHash?: string
   ): Promise<TDmMessage | null> {
+    // Allocate the rumor timestamp synchronously, before any await, so rapid
+    // consecutive sends keep their order (see allocateRumorCreatedAt).
+    const createdAt = this.allocateRumorCreatedAt()
+    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
+
     const keypair =
       this.currentEncryptionKeypair ?? encryptionKeyService.getEncryptionKeypair(accountPubkey)
     if (!keypair) {
@@ -739,11 +770,11 @@ class DmService {
         keypair.privkey,
         recipientPubkey,
         recipientEncryptionPubkey,
+        createdAt,
         fileTags,
         ExtendedKind.RUMOR_FILE
       )
 
-    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
       id: rumor.id,
       participantsKey,
@@ -791,6 +822,11 @@ class DmService {
     emoji: string,
     emojiTag?: string[]
   ): Promise<TDmMessage | null> {
+    // Allocate the rumor timestamp synchronously, before any await, so rapid
+    // consecutive sends keep their order (see allocateRumorCreatedAt).
+    const createdAt = this.allocateRumorCreatedAt()
+    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
+
     const keypair =
       this.currentEncryptionKeypair ?? encryptionKeyService.getEncryptionKeypair(accountPubkey)
     if (!keypair) {
@@ -823,11 +859,11 @@ class DmService {
         keypair.privkey,
         recipientPubkey,
         recipientEncryptionPubkey,
+        createdAt,
         extraTags,
         kinds.Reaction
       )
 
-    const participantsKey = this.getParticipantsKey(accountPubkey, recipientPubkey)
     const message: TDmMessage = {
       id: rumor.id,
       participantsKey,

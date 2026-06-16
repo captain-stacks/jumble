@@ -143,7 +143,10 @@ const PostTextarea = forwardRef<
           return false
         },
         clipboardTextSerializer(content) {
-          return parseEditorJsonToText(content.toJSON())
+          // Keep the copied selection's leading/trailing spaces (don't trim),
+          // but drop the single trailing newline that paragraph serialization
+          // always appends, so copying a span of text gains no phantom newline.
+          return parseEditorJsonToText(content.toJSON(), { trim: false }).replace(/\n$/, '')
         }
       },
       content: initialContent,

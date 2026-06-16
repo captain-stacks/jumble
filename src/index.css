@@ -223,6 +223,13 @@
   pointer-events: none;
 }
 
+/* Inline emoji atoms aren't painted by the native range selection; this
+   decoration (added in the Emoji extension) gives them the OS selection color
+   so they look selected together with the surrounding text. */
+.tiptap .emoji-selected {
+  background-color: Highlight;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */

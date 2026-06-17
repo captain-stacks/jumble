@@ -3,6 +3,7 @@ import FollowingFavoriteRelayList from '@/components/FollowingFavoriteRelayList'
 import MobileMeDrawerButton from '@/components/MobileMeDrawerButton'
 import NoteList from '@/components/NoteList'
 import SearchBar, { TSearchBarRef } from '@/components/SearchBar'
+import SearchHistory from '@/components/SearchHistory'
 import SearchResult from '@/components/SearchResult'
 import Tabs from '@/components/Tabs'
 import TrendingNotes from '@/components/TrendingNotes'
@@ -25,10 +26,10 @@ import {
   useState
 } from 'react'
 
-type TSearchTab = 'trending' | 'explore' | 'reviews' | 'following'
+type TSearchTab = 'discover' | 'explore' | 'reviews' | 'following'
 
 const SEARCH_TABS = [
-  { value: 'trending', label: 'Trending' },
+  { value: 'discover', label: 'Discover' },
   { value: 'explore', label: 'Explore Relays' },
   { value: 'reviews', label: 'Relay Reviews' },
   { value: 'following', label: "Following's Favorites" }
@@ -38,7 +39,8 @@ const SearchPage = forwardRef<TPageRef>((_, ref) => {
   const { current } = usePrimaryPage()
   const [input, setInput] = useState('')
   const [searchParams, setSearchParams] = useState<TSearchParams | null>(null)
-  const [tab, setTab] = useState<TSearchTab>('trending')
+  const [tab, setTab] = useState<TSearchTab>('discover')
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => storage.getSearchHistory())
   const isActive = useMemo(() => current === 'search', [current])
   const searchBarRef = useRef<TSearchBarRef>(null)
   const layoutRef = useRef<TPrimaryPageLayoutRef>(null)
@@ -66,6 +68,28 @@ const SearchPage = forwardRef<TPageRef>((_, ref) => {
     layoutRef.current?.scrollToTop('instant')
   }
 
+  const addSearchHistory = useCallback((text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    storage.addSearchHistory(trimmed)
+    setSearchHistory(storage.getSearchHistory())
+  }, [])
+
+  const removeSearchHistory = useCallback((index: number) => {
+    storage.removeSearchHistory(index)
+    setSearchHistory(storage.getSearchHistory())
+  }, [])
+
+  const clearSearchHistory = useCallback(() => {
+    storage.clearSearchHistory()
+    setSearchHistory([])
+  }, [])
+
+  const handleHistorySelect = useCallback((text: string) => {
+    setInput(text)
+    searchBarRef.current?.focus()
+  }, [])
+
   const relayReviewFilterFn = useCallback((evt: NostrEvent) => {
     const d = getReplaceableEventIdentifier(evt)
     if (!d) return false
@@ -77,8 +101,18 @@ const SearchPage = forwardRef<TPageRef>((_, ref) => {
 
   const tabContent = useMemo(() => {
     switch (tab) {
-      case 'trending':
-        return <TrendingNotes />
+      case 'discover':
+        return (
+          <>
+            <SearchHistory
+              history={searchHistory}
+              onSelect={handleHistorySelect}
+              onRemove={removeSearchHistory}
+              onClear={clearSearchHistory}
+            />
+            <TrendingNotes />
+          </>
+        )
       case 'explore':
         return <Explore />
       case 'reviews':
@@ -94,10 +128,23 @@ const SearchPage = forwardRef<TPageRef>((_, ref) => {
       case 'following':
         return <FollowingFavoriteRelayList />
     }
-  }, [tab, relayReviewFilterFn])
+  }, [
+    tab,
+    relayReviewFilterFn,
+    searchHistory,
+    handleHistorySelect,
+    removeSearchHistory,
+    clearSearchHistory
+  ])
 
   const searchBar = (
-    <SearchBar ref={searchBarRef} onSearch={onSearch} input={input} setInput={setInput} />
+    <SearchBar
+      ref={searchBarRef}
+      onSearch={onSearch}
+      input={input}
+      setInput={setInput}
+      onSaveHistory={addSearchHistory}
+    />
   )
 
   return (

@@ -1135,6 +1135,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'Független szerverek, amelyek mindegyike a privát kulcsod egy töredékét tárolja, így egyetlen operátor sem tud egyedül aláírni.',
     'This Google account is linked to a different Nostr account':
-      'Ez a Google-fiók egy másik Nostr-fiókhoz van kapcsolva'
+      'Ez a Google-fiók egy másik Nostr-fiókhoz van kapcsolva',
+    'Discover': 'Felfedezés'
   }
 }

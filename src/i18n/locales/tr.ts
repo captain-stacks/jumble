@@ -1135,6 +1135,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'Her biri özel anahtarının bir parçasını tutan bağımsız sunuculardır; böylece tek bir operatör tek başına imzalayamaz.',
     'This Google account is linked to a different Nostr account':
-      'Bu Google hesabı farklı bir Nostr hesabına bağlı'
+      'Bu Google hesabı farklı bir Nostr hesabına bağlı',
+    'Discover': 'Keşfet'
   }
 }

@@ -1114,6 +1114,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'เซิร์ฟเวอร์อิสระที่แต่ละแห่งเก็บชาร์ดของคีย์ส่วนตัวของคุณ ดังนั้น operator รายเดียวจึงไม่สามารถลงนามได้ด้วยตัวเอง',
     'This Google account is linked to a different Nostr account':
-      'บัญชี Google นี้เชื่อมโยงกับบัญชี Nostr อื่น'
+      'บัญชี Google นี้เชื่อมโยงกับบัญชี Nostr อื่น',
+    'Discover': 'ค้นพบ'
   }
 }

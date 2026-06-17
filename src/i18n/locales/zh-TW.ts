@@ -1090,6 +1090,7 @@ export default {
       '各自持有你私鑰一個分片的獨立伺服器，因此單一營運方無法獨自簽署。',
     'This Google account is linked to a different Nostr account':
       '此 Google 帳號已連結到另一個 Nostr 帳號',
-    'Drop files to upload': '鬆開以上傳檔案'
+    'Drop files to upload': '鬆開以上傳檔案',
+    'Discover': '發現'
   }
 }

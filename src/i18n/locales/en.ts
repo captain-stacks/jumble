@@ -1123,6 +1123,7 @@ export default {
       'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.',
     'This Google account is linked to a different Nostr account':
       'This Google account is linked to a different Nostr account',
-    'Drop files to upload': 'Drop files to upload'
+    'Drop files to upload': 'Drop files to upload',
+    'Discover': 'Discover'
   }
 }

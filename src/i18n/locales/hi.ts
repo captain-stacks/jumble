@@ -1131,6 +1131,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'स्वतंत्र सर्वर जिनमें से प्रत्येक आपकी निजी कुंजी का एक शार्ड रखता है, ताकि कोई भी अकेला ऑपरेटर स्वयं हस्ताक्षर न कर सके।',
     'This Google account is linked to a different Nostr account':
-      'यह Google खाता किसी अन्य Nostr खाते से जुड़ा है'
+      'यह Google खाता किसी अन्य Nostr खाते से जुड़ा है',
+    'Discover': 'खोजें'
   }
 }

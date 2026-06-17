@@ -1089,6 +1089,7 @@ export default {
       '各自持有你私钥一个分片的独立服务器，因此单个运营方无法独自签名。',
     'This Google account is linked to a different Nostr account':
       '此 Google 账号已关联到另一个 Nostr 账号',
-    'Drop files to upload': '松开以上传文件'
+    'Drop files to upload': '松开以上传文件',
+    'Discover': '发现'
   }
 }

@@ -1139,6 +1139,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'Server indipendenti che custodiscono ciascuno un frammento della tua chiave privata, così nessun singolo operatore può firmare da solo.',
     'This Google account is linked to a different Nostr account':
-      'Questo account Google è collegato a un altro account Nostr'
+      'Questo account Google è collegato a un altro account Nostr',
+    'Discover': 'Scopri'
   }
 }

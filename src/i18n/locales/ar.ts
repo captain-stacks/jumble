@@ -1117,6 +1117,7 @@ export default {
     'Independent servers that each hold a shard of your private key, so no single operator can sign on its own.':
       'خوادم مستقلة يحتفظ كل منها بشظية من مفتاحك الخاص، بحيث لا يمكن لأي مشغّل التوقيع بمفرده.',
     'This Google account is linked to a different Nostr account':
-      'حساب Google هذا مرتبط بحساب Nostr آخر'
+      'حساب Google هذا مرتبط بحساب Nostr آخر',
+    'Discover': 'اكتشف'
   }
 }

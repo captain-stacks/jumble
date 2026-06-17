@@ -1151,6 +1151,7 @@ export default {
       'Unabhängige Server, die jeweils ein Fragment deines privaten Schlüssels speichern, sodass kein einzelner Operator allein signieren kann.',
     'This Google account is linked to a different Nostr account':
       'Dieses Google-Konto ist mit einem anderen Nostr-Konto verknüpft',
-    'Discover': 'Entdecken'
+    'Discover': 'Entdecken',
+    'Failure reason': 'Fehlergrund'
   }
 }

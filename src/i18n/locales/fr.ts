@@ -1150,6 +1150,7 @@ export default {
       "Des serveurs indépendants qui détiennent chacun un fragment de votre clé privée, de sorte qu'aucun opérateur ne peut signer à lui seul.",
     'This Google account is linked to a different Nostr account':
       'Ce compte Google est lié à un autre compte Nostr',
-    'Discover': 'Découvrir'
+    Discover: 'Découvrir',
+    'Failure reason': "Raison de l'échec"
   }
 }

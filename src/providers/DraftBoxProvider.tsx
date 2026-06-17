@@ -1,4 +1,3 @@
-import { formatError } from '@/lib/error'
 import { useNostr } from '@/providers/NostrProvider'
 import postDraftService from '@/services/post-draft.service'
 import { TPostDraft, TPostDraftStatus } from '@/types/post-draft'
@@ -117,8 +116,10 @@ export function DraftBoxProvider({ children }: { children: React.ReactNode }) {
       toast.promise(promise, {
         loading: t('Sending...'),
         success: t('Post successful'),
-        error: (err) => ({
-          message: `${t('Failed to post')}: ${formatError(err).join('; ')}`,
+        // Keep the toast short and calm: the per-relay reasons are saved on the
+        // failed draft and shown there, so we only point the user to it.
+        error: () => ({
+          message: t('Failed to post'),
           duration: Infinity,
           action: {
             label: t('Open drafts'),

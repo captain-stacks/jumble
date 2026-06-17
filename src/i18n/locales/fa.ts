@@ -1133,6 +1133,7 @@ export default {
       'سرورهای مستقلی که هرکدام یک قطعه از کلید خصوصی شما را نگه می‌دارند، به‌طوری‌که هیچ اپراتوری به‌تنهایی نمی‌تواند امضا کند.',
     'This Google account is linked to a different Nostr account':
       'این حساب Google به یک حساب Nostr دیگر متصل است',
-    'Discover': 'کشف'
+    'Discover': 'کشف',
+    'Failure reason': 'دلیل خطا'
   }
 }

@@ -1118,6 +1118,7 @@ export default {
       'خوادم مستقلة يحتفظ كل منها بشظية من مفتاحك الخاص، بحيث لا يمكن لأي مشغّل التوقيع بمفرده.',
     'This Google account is linked to a different Nostr account':
       'حساب Google هذا مرتبط بحساب Nostr آخر',
-    'Discover': 'اكتشف'
+    'Discover': 'اكتشف',
+    'Failure reason': 'سبب الفشل'
   }
 }

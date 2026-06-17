@@ -1136,6 +1136,7 @@ export default {
       'Her biri özel anahtarının bir parçasını tutan bağımsız sunuculardır; böylece tek bir operatör tek başına imzalayamaz.',
     'This Google account is linked to a different Nostr account':
       'Bu Google hesabı farklı bir Nostr hesabına bağlı',
-    'Discover': 'Keşfet'
+    'Discover': 'Keşfet',
+    'Failure reason': 'Hata nedeni'
   }
 }

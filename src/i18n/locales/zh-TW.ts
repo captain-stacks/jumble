@@ -1091,6 +1091,7 @@ export default {
     'This Google account is linked to a different Nostr account':
       '此 Google 帳號已連結到另一個 Nostr 帳號',
     'Drop files to upload': '鬆開以上傳檔案',
-    'Discover': '發現'
+    'Discover': '發現',
+    'Failure reason': '失敗原因'
   }
 }

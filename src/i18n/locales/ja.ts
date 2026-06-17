@@ -1133,6 +1133,7 @@ export default {
       'それぞれがあなたの秘密鍵のシャードを保持する独立したサーバーです。そのため、単独のオペレーターだけでは署名できません。',
     'This Google account is linked to a different Nostr account':
       'この Google アカウントは別の Nostr アカウントに紐付けられています',
-    'Discover': '発見'
+    'Discover': '発見',
+    'Failure reason': '失敗の理由'
   }
 }

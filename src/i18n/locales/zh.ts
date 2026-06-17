@@ -1090,6 +1090,7 @@ export default {
     'This Google account is linked to a different Nostr account':
       '此 Google 账号已关联到另一个 Nostr 账号',
     'Drop files to upload': '松开以上传文件',
-    'Discover': '发现'
+    'Discover': '发现',
+    'Failure reason': '失败原因'
   }
 }

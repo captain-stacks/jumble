@@ -1139,6 +1139,7 @@ export default {
       'Servidores independientes que guardan cada uno un fragmento de tu clave privada, de modo que ningún operador puede firmar por sí solo.',
     'This Google account is linked to a different Nostr account':
       'Esta cuenta de Google está vinculada a otra cuenta de Nostr',
-    'Discover': 'Descubrir'
+    'Discover': 'Descubrir',
+    'Failure reason': 'Motivo del fallo'
   }
 }

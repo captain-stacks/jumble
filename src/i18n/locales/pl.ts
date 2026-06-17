@@ -1143,6 +1143,7 @@ export default {
       'Niezależne serwery, z których każdy przechowuje fragment Twojego klucza prywatnego, więc żaden pojedynczy operator nie może podpisać samodzielnie.',
     'This Google account is linked to a different Nostr account':
       'To konto Google jest powiązane z innym kontem Nostr',
-    'Discover': 'Odkrywaj'
+    'Discover': 'Odkrywaj',
+    'Failure reason': 'Powód niepowodzenia'
   }
 }

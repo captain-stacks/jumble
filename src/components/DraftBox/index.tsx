@@ -24,7 +24,7 @@ import {
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Event } from 'nostr-tools'
-import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronRight, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -138,6 +138,7 @@ export default function DraftBox() {
 function DraftItem({ draft, onEdit }: { draft: TPostDraft; onEdit: () => void }) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
+  const [errorExpanded, setErrorExpanded] = useState(false)
 
   const handleDelete = async () => {
     await postDraftService.delete(draft.id)
@@ -163,6 +164,30 @@ function DraftItem({ draft, onEdit }: { draft: TPostDraft; onEdit: () => void })
         <div className="pointer-events-none mt-1">
           <Note event={signed.signedEvent} showFull hideHeader />
         </div>
+        {signed.error && (
+          <div className="mt-2">
+            <button
+              type="button"
+              className="flex items-center gap-0.5 text-sm text-destructive hover:underline"
+              onClick={(e) => {
+                e.stopPropagation()
+                setErrorExpanded((v) => !v)
+              }}
+            >
+              {errorExpanded ? (
+                <ChevronDown className="size-4 shrink-0" />
+              ) : (
+                <ChevronRight className="size-4 shrink-0 rtl:-scale-x-100" />
+              )}
+              {t('Failure reason')}
+            </button>
+            {errorExpanded && (
+              <div className="mt-1 whitespace-pre-line break-words text-sm text-destructive">
+                {signed.error}
+              </div>
+            )}
+          </div>
+        )}
         <div className="mt-2 flex items-center justify-end gap-2">
           <Button
             type="button"

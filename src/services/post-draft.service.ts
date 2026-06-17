@@ -263,7 +263,8 @@ class PostDraftService extends EventTarget {
       // the pre-drafts-box behavior where post() inserted the reply directly.
       threadService.addRepliesToThread([pending.signedEvent])
     } catch (err) {
-      await this.markFailed(pending, formatError(err).join('; '))
+      // One relay reason per line so the failed draft can list them readably.
+      await this.markFailed(pending, formatError(err).join('\n'))
       throw err
     } finally {
       this.inflight.delete(pending.id)

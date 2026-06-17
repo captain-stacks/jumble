@@ -36,6 +36,13 @@ import storage from './local-storage.service'
 
 type TTimelineRef = [string, number]
 
+// Upper bound on how many relay acceptances are required to treat a publish as
+// successful. With many target relays, demanding a full third can leave the
+// publish "failing" (and dumping a wall of relay errors into a toast) even
+// though the event already landed on plenty of relays. Once this many relays
+// accept, the event is discoverable, so we stop waiting for the 1/3 quota.
+const MAX_PUBLISH_SUCCESS_THRESHOLD = 4
+
 class ClientService extends EventTarget {
   static instance: ClientService
 
@@ -230,8 +237,13 @@ class ClientService extends EventTarget {
       let successCount = 0
       let finishedCount = 0
       let resolved = false
-      // If one third of the relays have accepted the event, consider it a success
-      const successThreshold = uniqueRelayUrls.length / 3
+      // Consider the publish a success once a third of the relays accept the
+      // event, but cap the requirement so a large relay set doesn't demand many
+      // acceptances — a handful of accepting relays is enough to propagate it.
+      const successThreshold = Math.min(
+        uniqueRelayUrls.length / 3,
+        MAX_PUBLISH_SUCCESS_THRESHOLD
+      )
       const errors: { url: string; error: any }[] = []
 
       const checkCompletion = (url: string, success: boolean, error?: unknown) => {

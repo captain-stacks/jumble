@@ -5,6 +5,7 @@ import {
   DEFAULT_FAVICON_URL_TEMPLATE,
   DEFAULT_FEED_TABS,
   ExtendedKind,
+  MAX_PROCESSED_SYNC_REQUEST_IDS,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
   NSFW_DISPLAY_POLICY,
@@ -535,6 +536,53 @@ class LocalStorageService {
     window.localStorage.removeItem(StorageKey.ACTIVE_RELAY_SET_ID)
     window.localStorage.removeItem(StorageKey.FEED_TYPE)
     window.localStorage.removeItem(StorageKey.ENABLE_LIVE_FEED)
+
+    // In-memory maps above are loaded once; without this, a write in another tab
+    // of the same browser would never reach this tab's caches (localStorage is
+    // shared on disk, but each tab parses it into its own memory). Keep the
+    // DM-key caches in sync so cross-tab key rotation is observed here too.
+    // (Electron stores secrets via IPC, not localStorage, so this is a no-op there.)
+    window.addEventListener('storage', this.handleCrossTabStorage)
+  }
+
+  private handleCrossTabStorage = (event: StorageEvent) => {
+    // The browser only fires 'storage' for changes made by *other* tabs, so our
+    // own writes never re-enter here. Ignore unrelated storage areas/keys.
+    if (event.storageArea && event.storageArea !== window.localStorage) return
+    switch (event.key) {
+      case StorageKey.ENCRYPTION_KEY_PRIVKEY_MAP:
+        this.encryptionKeyPrivkeyMap = this.parseStoredRecord(event.newValue)
+        break
+      case StorageKey.RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP:
+        this.retiredEncryptionKeyMap = this.parseStoredRecord(event.newValue)
+        break
+      case StorageKey.CLIENT_KEY_PRIVKEY_MAP:
+        this.clientKeyPrivkeyMap = this.parseStoredRecord(event.newValue)
+        break
+      case StorageKey.PROCESSED_SYNC_REQUEST_IDS: {
+        if (!event.newValue) {
+          this.processedSyncRequestIds = []
+          break
+        }
+        try {
+          const parsed = JSON.parse(event.newValue)
+          if (Array.isArray(parsed)) this.processedSyncRequestIds = parsed
+        } catch {
+          // keep current value on malformed input
+        }
+        break
+      }
+    }
+  }
+
+  private parseStoredRecord<T>(raw: string | null): Record<string, T> {
+    if (!raw) return {}
+    try {
+      const parsed = JSON.parse(raw)
+      return typeof parsed === 'object' && parsed !== null ? parsed : {}
+    } catch {
+      return {}
+    }
   }
 
   getRelaySets() {
@@ -1315,6 +1363,13 @@ class LocalStorageService {
   addProcessedSyncRequestId(eventId: string) {
     if (!this.processedSyncRequestIds.includes(eventId)) {
       this.processedSyncRequestIds.push(eventId)
+      // Keep only the most recent ids; this list is an unbounded-growth hazard
+      // otherwise, since entries are never removed on their own.
+      if (this.processedSyncRequestIds.length > MAX_PROCESSED_SYNC_REQUEST_IDS) {
+        this.processedSyncRequestIds = this.processedSyncRequestIds.slice(
+          -MAX_PROCESSED_SYNC_REQUEST_IDS
+        )
+      }
       window.localStorage.setItem(
         StorageKey.PROCESSED_SYNC_REQUEST_IDS,
         JSON.stringify(this.processedSyncRequestIds)

@@ -292,6 +292,13 @@ export type TEncryptionKeypair = {
   pubkey: string
 }
 
+// Outcome of reconciling the local DM encryption key against the account's
+// currently announced one. 'adopted' = this browser already holds the announced
+// key (e.g. another tab rotated it) and it is now in use; 'needs_sync' = a
+// different device rotated the key, the stale local key was retired, and a resync
+// from another device is required.
+export type TEncryptionKeyReconcileResult = 'adopted' | 'needs_sync'
+
 export type TGifRecord = {
   id: string
   url: string

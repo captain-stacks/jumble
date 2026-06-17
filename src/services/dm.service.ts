@@ -1,7 +1,12 @@
 import { DM_TIME_RANDOMIZATION_SECONDS, ExtendedKind } from '@/constants'
 import { isValidPubkey } from '@/lib/pubkey'
 import { tagNameEquals } from '@/lib/tag'
-import { TDmConversation, TDmMessage, TEncryptionKeypair } from '@/types'
+import {
+  TDmConversation,
+  TDmMessage,
+  TEncryptionKeypair,
+  TEncryptionKeyReconcileResult
+} from '@/types'
 import dayjs from 'dayjs'
 import { Event, Filter, kinds } from 'nostr-tools'
 import client from './client.service'
@@ -21,6 +26,13 @@ class DmService {
   private retiredEncryptionKeypairs: TEncryptionKeypair[] = []
   private isInitialized = false
   private isInitializing = false
+  // Whether this device's encryption key has been confirmed to be the one
+  // currently announced for the account. Until confirmed, we don't answer other
+  // devices' sync requests — a stale device must resync itself, not hand out an
+  // outdated key. Set asynchronously by verifyEncryptionKeyFreshness.
+  private encryptionKeyConfirmedCurrent = false
+  // A sync request that arrived before freshness was confirmed; surfaced once it is.
+  private pendingSyncRequestEvent: Event | null = null
   private relaySubscription: { close: () => void } | null = null
   private messageListeners = new Set<(message: TDmMessage) => void>()
   private reactionListeners = new Set<(reaction: TDmMessage) => void>()
@@ -33,7 +45,9 @@ class DmService {
     { recipientGiftWraps: Event[]; selfGiftWraps: Event[]; recipientDmRelays: string[] }
   >()
   private syncRequestListeners = new Set<(event: Event) => void>()
-  private encryptionKeyChangedListeners = new Set<(newPubkey: string) => void>()
+  private encryptionKeyChangedListeners = new Set<
+    (result: TEncryptionKeyReconcileResult) => void
+  >()
   private activeConversationKey: string | null = null
   // Global monotonic clock for outgoing rumor `created_at`. Nostr timestamps
   // have one-second granularity, so several messages sent within the same second
@@ -67,6 +81,9 @@ class DmService {
     this.currentAccountPubkey = accountPubkey
     this.currentEncryptionKeypair = encryptionKeypair
     this.retiredEncryptionKeypairs = encryptionKeyService.getValidRetiredKeypairs(accountPubkey)
+    // Re-confirm freshness for this (re)initialized key before answering requests.
+    this.encryptionKeyConfirmedCurrent = false
+    this.pendingSyncRequestEvent = null
 
     try {
       let since = storage.getDmLastSyncedAt(accountPubkey)
@@ -74,15 +91,26 @@ class DmService {
         storage.clearDmSyncState(accountPubkey)
         since = 0
       }
+      // Bring the live subscription up first so key-sync requests, key
+      // announcements and new messages arrive immediately, instead of waiting
+      // behind the (potentially slow) historical backfill below.
+      await this.startRelaySubscription(accountPubkey, encryptionKeypair)
       await this.initMessages(accountPubkey, encryptionKeypair, since || undefined)
       storage.setDmLastSyncedAt(accountPubkey, Math.floor(Date.now() / 1000))
       this.emitDataChanged()
-      this.startRelaySubscription(accountPubkey, encryptionKeypair)
       this.isInitialized = true
     } finally {
       this.isInitializing = false
       this.emitLoadingChanged()
     }
+
+    // After init settles (isInitializing cleared), verify our key is the one
+    // currently announced and reconcile if a different device rotated it. Kept off
+    // the init stack so reconcile can safely re-init on its 'adopted' branch, and
+    // off the subscription-setup path so it never delays receiving events.
+    this.verifyEncryptionKeyFreshness(accountPubkey, encryptionKeypair).catch((e) =>
+      console.error('[DM] failed to verify encryption key freshness', e)
+    )
   }
 
   async reinit(): Promise<void> {
@@ -110,6 +138,8 @@ class DmService {
     this.retiredEncryptionKeypairs = []
     this.isInitialized = false
     this.isInitializing = false
+    this.encryptionKeyConfirmedCurrent = false
+    this.pendingSyncRequestEvent = null
   }
 
   /**
@@ -280,17 +310,67 @@ class DmService {
     }
   }
 
-  onEncryptionKeyChanged(listener: (newPubkey: string) => void): () => void {
+  onEncryptionKeyChanged(
+    listener: (result: TEncryptionKeyReconcileResult) => void
+  ): () => void {
     this.encryptionKeyChangedListeners.add(listener)
     return () => {
       this.encryptionKeyChangedListeners.delete(listener)
     }
   }
 
-  private emitEncryptionKeyChanged(newPubkey: string): void {
+  private emitEncryptionKeyChanged(result: TEncryptionKeyReconcileResult): void {
     for (const listener of this.encryptionKeyChangedListeners) {
-      listener(newPubkey)
+      listener(result)
     }
+  }
+
+  /**
+   * Single authority for how the local DM encryption key reacts to an account's
+   * currently announced encryption pubkey. Every place that learns of an
+   * announced key — the live relay subscription, the startup staleness check, and
+   * the UI's own setup probe — funnels through here so the key-side handling is
+   * identical no matter who triggered it. Callers are left to decide only how to
+   * present the returned result.
+   *
+   * - 'adopted': this browser already stores the announced key (another tab of the
+   *   same browser rotated it and we share localStorage). The key is re-applied to
+   *   the running service if needed; no resync is necessary.
+   * - 'needs_sync': a different device rotated the key. The now-stale local key is
+   *   retired and the live encryption is torn down so a resync can take over.
+   */
+  async reconcileEncryptionKey(
+    accountPubkey: string,
+    announcedPubkey: string
+  ): Promise<TEncryptionKeyReconcileResult> {
+    const localKeypair = encryptionKeyService.getEncryptionKeypair(accountPubkey)
+
+    if (localKeypair && localKeypair.pubkey === announcedPubkey) {
+      // Re-apply only when this service is running this account but on an older
+      // key; otherwise the stored key is already the one in use (or the service
+      // isn't running this account, in which case its next init picks it up).
+      if (
+        this.currentAccountPubkey === accountPubkey &&
+        this.currentEncryptionKeypair?.pubkey !== announcedPubkey
+      ) {
+        await this.reinitWith(accountPubkey, localKeypair)
+      }
+      return 'adopted'
+    }
+
+    encryptionKeyService.removeEncryptionKey(accountPubkey)
+    if (this.currentAccountPubkey === accountPubkey) {
+      this.resetEncryption()
+    }
+    return 'needs_sync'
+  }
+
+  private async reinitWith(
+    accountPubkey: string,
+    encryptionKeypair: TEncryptionKeypair
+  ): Promise<void> {
+    this.resetEncryption()
+    await this.init(accountPubkey, encryptionKeypair)
   }
 
   markSyncRequestProcessed(eventId: string): void {
@@ -896,20 +976,15 @@ class DmService {
     const fiveMinutesAgo = dayjs().subtract(5, 'minute').unix()
     const now = dayjs().unix()
 
-    // Before we agree to answer other devices' key-sync requests, make sure the
-    // encryption key this device holds is the one currently announced. A newer
-    // key may have been announced while this device was offline, and the live
-    // ENCRYPTION_KEY_ANNOUNCEMENT filter below only catches announcements
-    // published from now on, so we query the existing one once here. If our
-    // local key is stale, answering a sync request would hand the requesting
-    // device an outdated key, so we skip sync-request handling entirely and
-    // surface the change so this device re-syncs first.
-    const announcement = await encryptionKeyService.queryEncryptionKeyAnnouncement(accountPubkey)
-    const announcedPubkey = announcement
-      ? encryptionKeyService.getEncryptionPubkeyFromEvent(announcement)
-      : null
-    const isEncryptionKeyUpToDate = !announcedPubkey || announcedPubkey === encryptionKeypair.pubkey
-
+    // Subscribe right away to every DM event we care about. CLIENT_KEY_ANNOUNCEMENT
+    // (other devices' sync requests) is included unconditionally: it used to be
+    // gated on a network freshness query, but that query blocked subscription
+    // setup behind a multi-relay round trip, so a freshly-reset device could take
+    // a long time to start receiving sync requests. Freshness is instead checked
+    // asynchronously in verifyEncryptionKeyFreshness once the subscription is live
+    // — if this device turns out stale it reconciles and tears this subscription
+    // down, and the requester additionally rejects any stale key via the
+    // expectedPubkey check in importKeyFromTransfer.
     const filters: Filter[] = [
       {
         kinds: [ExtendedKind.GIFT_WRAP],
@@ -920,16 +995,14 @@ class DmService {
         kinds: [ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT],
         authors: [accountPubkey],
         limit: 0
-      }
-    ]
-    if (isEncryptionKeyUpToDate) {
-      filters.push({
+      },
+      {
         kinds: [ExtendedKind.CLIENT_KEY_ANNOUNCEMENT],
         authors: [accountPubkey],
         since: fiveMinutesAgo,
         limit: 1
-      })
-    }
+      }
+    ]
 
     const sub = client.subscribe(
       myDmRelays,
@@ -940,6 +1013,14 @@ class DmService {
             const clientPubkey = encryptionKeyService.getClientPubkeyFromEvent(event)
             if (!clientPubkey || clientPubkey === myClientKeypair.pubkey) return
             if (storage.getProcessedSyncRequestIds().includes(event.id)) return
+            // Only offer to share our key once it's confirmed to be the current
+            // one; a stale device must resync itself, not act as the provider. If
+            // freshness isn't verified yet, stash the request and surface it once
+            // confirmed (or drop it silently if we turn out stale).
+            if (!this.encryptionKeyConfirmedCurrent) {
+              this.pendingSyncRequestEvent = event
+              return
+            }
             this.emitSyncRequest(event)
             return
           }
@@ -949,7 +1030,8 @@ class DmService {
             if (!newPubkey || newPubkey === encryptionKeypair.pubkey || event.created_at < now) {
               return
             }
-            this.emitEncryptionKeyChanged(newPubkey)
+            const result = await this.reconcileEncryptionKey(accountPubkey, newPubkey)
+            this.emitEncryptionKeyChanged(result)
             return
           }
 
@@ -1010,11 +1092,43 @@ class DmService {
     )
 
     this.relaySubscription = { close: () => sub.close() }
+  }
 
-    // Emit after the subscription is in place so that, if a listener tears the
-    // encryption down to re-sync, it closes the subscription we just created.
-    if (!isEncryptionKeyUpToDate && announcedPubkey) {
-      this.emitEncryptionKeyChanged(announcedPubkey)
+  /**
+   * Confirm the key this device holds is the one currently announced for the
+   * account, and reconcile if a different device has rotated it. A newer key may
+   * have been announced while this device was offline, and the live
+   * ENCRYPTION_KEY_ANNOUNCEMENT filter only catches announcements from now on, so
+   * we query the existing one once here. Run after the subscription is live (not
+   * before) so it never delays receiving messages or sync requests.
+   */
+  private async verifyEncryptionKeyFreshness(
+    accountPubkey: string,
+    encryptionKeypair: TEncryptionKeypair
+  ): Promise<void> {
+    const announcement = await encryptionKeyService.queryEncryptionKeyAnnouncement(accountPubkey)
+    const announcedPubkey = announcement
+      ? encryptionKeyService.getEncryptionPubkeyFromEvent(announcement)
+      : null
+    if (!announcedPubkey || announcedPubkey === encryptionKeypair.pubkey) {
+      // Our key is the announced one (or nothing is announced yet): from now on we
+      // may answer sync requests, including any that arrived while unverified.
+      this.confirmEncryptionKeyCurrent(encryptionKeypair)
+      return
+    }
+
+    const result = await this.reconcileEncryptionKey(accountPubkey, announcedPubkey)
+    this.emitEncryptionKeyChanged(result)
+  }
+
+  private confirmEncryptionKeyCurrent(encryptionKeypair: TEncryptionKeypair): void {
+    // Guard against a stale async resolution after the key changed underneath us.
+    if (this.currentEncryptionKeypair?.pubkey !== encryptionKeypair.pubkey) return
+    this.encryptionKeyConfirmedCurrent = true
+    const pending = this.pendingSyncRequestEvent
+    this.pendingSyncRequestEvent = null
+    if (pending && !storage.getProcessedSyncRequestIds().includes(pending.id)) {
+      this.emitSyncRequest(pending)
     }
   }
 

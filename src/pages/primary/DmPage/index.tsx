@@ -53,14 +53,16 @@ const DmPage = forwardRef<TPageRef>((_, ref) => {
     const localKeypair = encryptionKeyService.getEncryptionKeypair(pubkey)
     if (localKeypair) {
       setSetupState('ready')
-      // Background check for key mismatch (e.g. key rotated on another device)
+      // Background check for key mismatch (e.g. key rotated on another device).
+      // Key-side handling is delegated to dmService.reconcileEncryptionKey so it
+      // stays identical to the live-subscription path; we only map its result.
       dmService
         .checkDmSupport(pubkey)
-        .then(({ encryptionPubkey }) => {
-          if (encryptionPubkey && encryptionPubkey !== localKeypair.pubkey) {
+        .then(async ({ encryptionPubkey }) => {
+          if (!encryptionPubkey) return
+          const result = await dmService.reconcileEncryptionKey(pubkey, encryptionPubkey)
+          if (result === 'needs_sync') {
             console.log('[DM setup] key mismatch detected, entering sync flow')
-            encryptionKeyService.removeEncryptionKey(pubkey)
-            dmService.resetEncryption()
             setSetupState('need_sync')
           }
         })
@@ -99,10 +101,10 @@ const DmPage = forwardRef<TPageRef>((_, ref) => {
   useEffect(() => {
     if (!pubkey) return
 
-    const unsub = dmService.onEncryptionKeyChanged(() => {
-      encryptionKeyService.removeEncryptionKey(pubkey)
-      dmService.resetEncryption()
-      setSetupState('need_sync')
+    // Key-side handling lives in dmService.reconcileEncryptionKey; here we only
+    // reflect its outcome in the page state.
+    const unsub = dmService.onEncryptionKeyChanged((result) => {
+      setSetupState(result === 'adopted' ? 'ready' : 'need_sync')
     })
 
     return unsub

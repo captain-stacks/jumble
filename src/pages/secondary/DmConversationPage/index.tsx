@@ -45,9 +45,11 @@ const DmConversationPage = forwardRef(
       }
       setAccountKeyMissing(!encryptionKeyService.hasEncryptionKey(accountPubkey))
 
-      // A new encryption key announcement from another device means a resync is needed.
-      const unsubKeyChanged = dmService.onEncryptionKeyChanged(() => {
-        setAccountKeyMissing(true)
+      // dmService.reconcileEncryptionKey already decided how to handle the key;
+      // 'needs_sync' means this device must resync, 'adopted' means another tab of
+      // this browser rotated it and localStorage already holds it.
+      const unsubKeyChanged = dmService.onEncryptionKeyChanged((result) => {
+        setAccountKeyMissing(result === 'needs_sync')
       })
       // dmService.init() runs once a key is (re)synced; re-check at that point.
       const unsubLoading = dmService.onLoadingChanged(() => {

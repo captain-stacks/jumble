@@ -49,19 +49,11 @@ export default function NewDeviceKeySync({ onComplete }: { onComplete?: () => vo
       setCountdown(RETRY_COOLDOWN)
 
       unsubscribeRef.current?.()
-      unsubscribeRef.current = await encryptionKeyService.subscribeToKeyTransfer(
-        pubkey,
-        (success) => {
-          if (success) {
-            setState('success')
-            toast.success(t('Encryption key synced successfully'))
-            setTimeout(() => onComplete?.(), 1000)
-          } else {
-            setError(t('Failed to import encryption key'))
-            setState('error')
-          }
-        }
-      )
+      unsubscribeRef.current = await encryptionKeyService.subscribeToKeyTransfer(pubkey, () => {
+        setState('success')
+        toast.success(t('Encryption key synced successfully'))
+        setTimeout(() => onComplete?.(), 1000)
+      })
     } catch (err) {
       setError((err as Error).message)
       setState('error')

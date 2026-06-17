@@ -95,12 +95,24 @@ class EncryptionKeyService {
 
   async queryEncryptionKeyAnnouncement(pubkey: string): Promise<Event | null> {
     const { relays } = await this.getRelays(pubkey)
-    const events = await client.fetchEvents(relays, {
-      kinds: [ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT],
-      authors: [pubkey],
-      limit: 1
-    })
-    return events[0] ?? null
+    const [networkEvents, cached] = await Promise.all([
+      client.fetchEvents(relays, {
+        kinds: [ExtendedKind.ENCRYPTION_KEY_ANNOUNCEMENT],
+        authors: [pubkey],
+        limit: 1
+      }),
+      // The local cache reflects what THIS device last published or knew. Right
+      // after a local key reset the freshly published announcement lives here even
+      // before it propagates to the queried relays, so we merge it in and keep the
+      // newest. This stops a lagging network read from making this device look
+      // out-of-date against its own new key (which would wrongly disable answering
+      // sync requests), while a genuinely newer announcement from another device
+      // still wins by created_at.
+      client.fetchEncryptionKeyAnnouncementEvent(pubkey, false).catch(() => null)
+    ])
+    const candidates = [networkEvents[0], cached].filter(Boolean) as Event[]
+    if (candidates.length === 0) return null
+    return candidates.reduce((newest, e) => (e.created_at > newest.created_at ? e : newest))
   }
 
   async publishEncryptionKeyAnnouncement(
@@ -189,7 +201,11 @@ class EncryptionKeyService {
     return event
   }
 
-  async importKeyFromTransfer(accountPubkey: string, transferEvent: Event): Promise<boolean> {
+  async importKeyFromTransfer(
+    accountPubkey: string,
+    transferEvent: Event,
+    expectedPubkey?: string
+  ): Promise<boolean> {
     const clientKeypair = this.getClientKeypair(accountPubkey)
 
     // Get sender's client pubkey from the P tag
@@ -204,6 +220,15 @@ class EncryptionKeyService {
       )
 
       if (!/^[0-9a-fA-F]{64}$/.test(decrypted)) {
+        return false
+      }
+
+      // Defense in depth: only accept a transferred key whose pubkey matches the
+      // account's currently announced encryption pubkey. The client keypair
+      // persists across rotations, so an old-round transfer still decrypts; this
+      // rejects those stale keys as well as garbage a third party may have planted
+      // at our (publicly announced) client pubkey.
+      if (expectedPubkey && getPublicKey(hexToBytes(decrypted)) !== expectedPubkey) {
         return false
       }
 
@@ -251,25 +276,35 @@ class EncryptionKeyService {
     return `${code.slice(0, 4)} ${code.slice(4)}`
   }
 
-  async subscribeToKeyTransfer(
-    accountPubkey: string,
-    onTransfer: (success: boolean) => void
-  ): Promise<() => void> {
+  async subscribeToKeyTransfer(accountPubkey: string, onTransfer: () => void): Promise<() => void> {
     const { relays } = await this.getRelays(accountPubkey)
     const clientKeypair = this.getClientKeypair(accountPubkey)
 
+    // The currently announced encryption pubkey, used to reject stale or planted
+    // transfers (see importKeyFromTransfer). May be null if the announcement can't
+    // be fetched, in which case we fall back to accepting any well-formed key.
+    const announcement = await this.queryEncryptionKeyAnnouncement(accountPubkey)
+    const expectedPubkey = announcement
+      ? (this.getEncryptionPubkeyFromEvent(announcement) ?? undefined)
+      : undefined
+
+    // No `limit: 0` here: also pull already-stored transfers so a key that arrived
+    // while this device was offline or briefly disconnected can still be recovered,
+    // not just ones that stream in live after subscribing.
     const sub = client.subscribe(
       relays,
       {
         kinds: [ExtendedKind.KEY_TRANSFER],
-        '#p': [clientKeypair.pubkey],
-        limit: 0
+        '#p': [clientKeypair.pubkey]
       },
       {
         onevent: async (event) => {
-          const success = await this.importKeyFromTransfer(accountPubkey, event)
-          onTransfer(success)
+          const success = await this.importKeyFromTransfer(accountPubkey, event, expectedPubkey)
+          // Silently skip failures: a third party can plant garbage transfers at
+          // our public client pubkey, and stored old-round transfers won't match
+          // the expected key. Keep waiting for a valid one instead of erroring out.
           if (success) {
+            onTransfer()
             sub.close()
           }
         }

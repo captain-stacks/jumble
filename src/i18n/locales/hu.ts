@@ -1137,6 +1137,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'Ez a Google-fiók egy másik Nostr-fiókhoz van kapcsolva',
     'Discover': 'Felfedezés',
-    'Failure reason': 'Hiba oka'
+    'Failure reason': 'Hiba oka',
+    'Indirect notifications hidden': 'Közvetett értesítések elrejtve',
+    'Indirect notifications shown': 'Közvetett értesítések megjelenítve'
   }
 }

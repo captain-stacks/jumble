@@ -1092,6 +1092,8 @@ export default {
       '此 Google 帳號已連結到另一個 Nostr 帳號',
     'Drop files to upload': '鬆開以上傳檔案',
     'Discover': '發現',
-    'Failure reason': '失敗原因'
+    'Failure reason': '失敗原因',
+    'Indirect notifications hidden': '已隱藏間接通知',
+    'Indirect notifications shown': '已顯示間接通知'
   }
 }

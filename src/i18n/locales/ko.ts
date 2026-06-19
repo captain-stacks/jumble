@@ -1120,6 +1120,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       '이 Google 계정은 다른 Nostr 계정에 연결되어 있습니다',
     'Discover': '발견',
-    'Failure reason': '실패 사유'
+    'Failure reason': '실패 사유',
+    'Indirect notifications hidden': '간접 알림 숨김',
+    'Indirect notifications shown': '간접 알림 표시'
   }
 }

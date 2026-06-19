@@ -1137,6 +1137,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'Bu Google hesabı farklı bir Nostr hesabına bağlı',
     'Discover': 'Keşfet',
-    'Failure reason': 'Hata nedeni'
+    'Failure reason': 'Hata nedeni',
+    'Indirect notifications hidden': 'Dolaylı bildirimler gizlendi',
+    'Indirect notifications shown': 'Dolaylı bildirimler gösteriliyor'
   }
 }

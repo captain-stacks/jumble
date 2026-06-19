@@ -1116,6 +1116,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'บัญชี Google นี้เชื่อมโยงกับบัญชี Nostr อื่น',
     'Discover': 'ค้นพบ',
-    'Failure reason': 'สาเหตุที่ล้มเหลว'
+    'Failure reason': 'สาเหตุที่ล้มเหลว',
+    'Indirect notifications hidden': 'ซ่อนการแจ้งเตือนทางอ้อมแล้ว',
+    'Indirect notifications shown': 'แสดงการแจ้งเตือนทางอ้อม'
   }
 }

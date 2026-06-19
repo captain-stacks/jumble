@@ -1140,6 +1140,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'Этот аккаунт Google связан с другим аккаунтом Nostr',
     'Discover': 'Интересное',
-    'Failure reason': 'Причина ошибки'
+    'Failure reason': 'Причина ошибки',
+    'Indirect notifications hidden': 'Косвенные уведомления скрыты',
+    'Indirect notifications shown': 'Косвенные уведомления показаны'
   }
 }

@@ -1134,6 +1134,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'この Google アカウントは別の Nostr アカウントに紐付けられています',
     'Discover': '発見',
-    'Failure reason': '失敗の理由'
+    'Failure reason': '失敗の理由',
+    'Indirect notifications hidden': '間接通知を非表示中',
+    'Indirect notifications shown': '間接通知を表示中'
   }
 }

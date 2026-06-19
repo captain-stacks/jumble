@@ -1134,6 +1134,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'این حساب Google به یک حساب Nostr دیگر متصل است',
     'Discover': 'کشف',
-    'Failure reason': 'دلیل خطا'
+    'Failure reason': 'دلیل خطا',
+    'Indirect notifications hidden': 'اعلان‌های غیرمستقیم پنهان شدند',
+    'Indirect notifications shown': 'اعلان‌های غیرمستقیم نمایش داده می‌شوند'
   }
 }

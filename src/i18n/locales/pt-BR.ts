@@ -1139,6 +1139,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'Esta conta do Google está vinculada a outra conta Nostr',
     'Discover': 'Descobrir',
-    'Failure reason': 'Motivo da falha'
+    'Failure reason': 'Motivo da falha',
+    'Indirect notifications hidden': 'Notificações indiretas ocultas',
+    'Indirect notifications shown': 'Notificações indiretas visíveis'
   }
 }

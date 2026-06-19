@@ -1133,6 +1133,8 @@ export default {
     'This Google account is linked to a different Nostr account':
       'यह Google खाता किसी अन्य Nostr खाते से जुड़ा है',
     'Discover': 'खोजें',
-    'Failure reason': 'विफलता का कारण'
+    'Failure reason': 'विफलता का कारण',
+    'Indirect notifications hidden': 'अप्रत्यक्ष सूचनाएं छिपी हैं',
+    'Indirect notifications shown': 'अप्रत्यक्ष सूचनाएं दिख रही हैं'
   }
 }

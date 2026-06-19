@@ -1,7 +1,6 @@
 import NotificationList from '@/components/NotificationList'
 import { Button } from '@/components/ui/button'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
-import { cn } from '@/lib/utils'
 import {
   NotificationUserPreferenceContext,
   useNotificationUserPreference
@@ -55,17 +54,11 @@ function HideUnrelatedNotificationsToggle() {
 
   return (
     <Button
-      variant={hideIndirect ? 'secondary' : 'ghost'}
-      role="switch"
-      aria-checked={hideIndirect}
+      variant="toggle"
+      aria-pressed={hideIndirect}
       aria-label={t('Hide indirect')}
       title={hideIndirect ? t('Indirect notifications hidden') : t('Indirect notifications shown')}
-      className={cn(
-        'h-10 shrink-0 rounded-xl px-3 [&_svg]:size-5',
-        hideIndirect
-          ? 'ring-1 ring-inset ring-primary/40 text-foreground'
-          : 'text-muted-foreground'
-      )}
+      className="h-10 shrink-0 rounded-xl px-3 [&_svg]:size-5"
       onClick={() => updateHideIndirect(!hideIndirect)}
     >
       {hideIndirect ? <EyeOff /> : <Eye />}

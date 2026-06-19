@@ -17,6 +17,8 @@ const buttonVariants = cva(
         'secondary-2':
           'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground',
         ghost: 'clickable hover:text-accent-foreground',
+        toggle:
+          'text-foreground [&:not([aria-pressed=true])]:hover:bg-muted/40 aria-pressed:bg-accent aria-pressed:ring-1 aria-pressed:ring-inset aria-pressed:ring-foreground/20',
         'ghost-destructive':
           'cursor-pointer hover:bg-destructive/20 text-destructive hover:text-destructive',
         link: 'text-foreground underline-offset-4 hover:underline'

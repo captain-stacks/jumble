@@ -63,8 +63,9 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
   const showInfoToggle = feedInfo?.feedType === 'relay' && !!feedInfo.id
   const infoToggle = showInfoToggle ? (
     <Button
-      variant="ghost"
+      variant="toggle"
       size="titlebar-icon"
+      aria-pressed={showRelayDetails}
       onClick={(e) => {
         e.stopPropagation()
         setShowRelayDetails((show) => !show)
@@ -72,7 +73,6 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
           layoutRef?.current?.scrollToTop('smooth')
         }
       }}
-      className={showRelayDetails ? 'bg-muted/40' : ''}
     >
       <Info />
     </Button>

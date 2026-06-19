@@ -372,10 +372,10 @@ function DmPageTitlebar({
                     <UserCirclePlusIcon className="h-5 w-5" />
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="toggle"
                     size="titlebar-icon"
+                    aria-pressed={isSettingsActive}
                     onClick={onSettingsClick}
-                    className={isSettingsActive ? 'bg-muted/40' : ''}
                   >
                     <Settings className="h-5 w-5" />
                   </Button>
@@ -468,10 +468,10 @@ function DmPageTitlebar({
                   <UserCirclePlusIcon className="h-5 w-5" />
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="toggle"
                   size="titlebar-icon"
+                  aria-pressed={isSettingsActive}
                   onClick={onSettingsClick}
-                  className={isSettingsActive ? 'bg-muted/40' : ''}
                 >
                   <Settings className="h-5 w-5" />
                 </Button>

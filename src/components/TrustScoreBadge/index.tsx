@@ -21,12 +21,12 @@ export default function TrustScoreBadge({
   }
   numeric?: boolean
 }) {
-  const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey, isScoreFetched, demandFetchCount } = useUserTrust()
+  const { isUserTrusted, getTrustScore, getMuteRatio, fetchScoreForPubkey, isScoreFetched, demandFetchCount, muteVersion } = useUserTrust()
   const fetchEnabled = useContext(ScoreFetchContext)
 
   useEffect(() => {
     if (fetchEnabled) fetchScoreForPubkey(pubkey)
-  }, [pubkey, fetchScoreForPubkey, fetchEnabled])
+  }, [pubkey, fetchScoreForPubkey, fetchEnabled, muteVersion])
 
   // subscribe to demandFetchCount so we re-render when the fetch completes
   void demandFetchCount

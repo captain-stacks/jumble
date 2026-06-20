@@ -10,7 +10,7 @@ import { Event, Filter, kinds } from 'nostr-tools'
 
 export type TStuffStats = {
   likeIdSet: Set<string>
-  likes: { id: string; pubkey: string; created_at: number; emoji: TEmoji | string }[]
+  likes: { id: string; pubkey: string; created_at: number; emoji: TEmoji | string; rawEvent: Event }[]
   repostPubkeySet: Set<string>
   reposts: { id: string; pubkey: string; created_at: number }[]
   zapPrSet: Set<string>
@@ -269,7 +269,7 @@ class StuffStatsService {
     }
 
     likeIdSet.add(evt.id)
-    likes.push({ id: evt.id, pubkey: evt.pubkey, created_at: evt.created_at, emoji })
+    likes.push({ id: evt.id, pubkey: evt.pubkey, created_at: evt.created_at, emoji, rawEvent: evt })
     this.stuffStatsMap.set(targetEventKey, { ...old, likeIdSet, likes })
     return targetEventKey
   }
@@ -298,7 +298,7 @@ class StuffStatsService {
     }
 
     likeIdSet.add(evt.id)
-    likes.push({ id: evt.id, pubkey: evt.pubkey, created_at: evt.created_at, emoji })
+    likes.push({ id: evt.id, pubkey: evt.pubkey, created_at: evt.created_at, emoji, rawEvent: evt })
     this.stuffStatsMap.set(target, { ...old, likeIdSet, likes })
     return target
   }

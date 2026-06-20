@@ -40,6 +40,13 @@ type TMuteRatio = {
 export type TDownvotedFollowPack = {
   addr: string
   title: string
+  packAuthor: string
+  pubkeys: string[]
+}
+
+export type TUpvotedFollowPack = {
+  addr: string
+  title: string
   pubkeys: string[]
 }
 
@@ -72,12 +79,21 @@ type TUserTrustContext = {
   refetchScoreForPubkey: (pubkey: string, priority?: boolean) => Promise<void>
   isScoreFetched: (pubkey: string) => boolean
   getWotFollowers: (pubkey: string) => string[]
+  getWotNonScoringFollowers: (pubkey: string) => string[]
   getWotMuters: (pubkey: string) => string[]
+  getWotNonScoringMuters: (pubkey: string) => string[]
   getWotInLists: (pubkey: string) => string[]
   getWotInListEvents: (pubkey: string) => Event[]
   inspectedPubkey: string | null
   setInspectedPubkey: (pubkey: string | null) => void
+  wotSize: number
+  muteSetSize: number
+  ignoreThumbsdownLists: boolean
+  updateIgnoreThumbsdownLists: (value: boolean) => void
   downvotedFollowPacks: TDownvotedFollowPack[]
+  downvotedReactionEvents: Event[]
+  upvotedFollowPacks: TUpvotedFollowPack[]
+  processDownvotedPack: (event: Event) => void
   reloadWot: () => void
   queryLog: TQueryLogEntry[]
   queryLogVersion: number
@@ -102,38 +118,53 @@ export const useUserTrust = () => {
 }
 
 const wotSet = new Set<string>()
+let myFollowSet = new Set<string>()
 const followCountMap = new Map<string, number>()
 const followersMap = new Map<string, Set<string>>()
-const muteCountMap = new Map<string, number>()
+const muteCountMap = new Map<string, number>() // direct-follow mutes + current user's pack thumbs-downs
 const mutersMap = new Map<string, Set<string>>()
+const wotNonScoringMutersMap = new Map<string, Set<string>>() // WoT members who muted but aren't direct follows
+const wotNonScoringFollowersMap = new Map<string, Set<string>>() // WoT members who follow but aren't direct follows
 const inListsMap = new Map<string, Set<string>>()
 const inListsEventsMap = new Map<string, Map<string, Event>>()
 const countedFollowSet = new Set<string>()
 const countedMuteSet = new Set<string>()
+const countedPackMuteSet = new Set<string>() // "${packAddr}:${pubkey}" — isolated from countedMuteSet so pack 👎s always count
+const packMuteCountMap = new Map<string, number>() // mute counts contributed solely by 👎 packs
+const downvotedPackAddrSet = new Set<string>() // naddrs of all 👎'd lists, used by demand fetch to count mutes from all three list kinds
 const scorePromiseMap = new Map<string, Promise<void>>()
 const scoreDoneSet = new Set<string>()
 let myFollowSetSize = 0
 
 // Bayesian-smoothed exponential decay operating in rate space:
 //   followRate = follows / myFollowSetSize    (fraction of my follow set who follow this person)
-//   muteRate   = mutes / wotSize              (fraction of full WoT who mute this person)
+//   muteRate   = mutes / myFollowSetSize      (fraction of my follow set who mute this person)
 //   priorRate  = 1 / PRIOR_SCALE              (fixed prior, pool-size-independent)
 //   smoothedRatio = (muteRate + priorRate * PRIOR_MUTE_RATE) / (followRate + priorRate)
 //   score = round(100 * exp(-DECAY * smoothedRatio))
-// Examples (myFollowSetSize=200, wotSize=2000):
-//   unknown (0/0) → ~61;  10 follows, 0 mutes → ~87;  0 follows, 10 mutes → ~17
+// Only mutes from direct follows count — pre-fetched during WoT build into distrustSet.
+// PRIOR_SCALE is small (5) because the denominator is myFollowSetSize (~200) not wotSize (~2000),
+// so we need a stronger prior to prevent single-follow mutes from dominating.
+// Examples (myFollowSetSize=200, priorRate=0.2):
+//   unknown (0/0) → ~61;  10 follows, 0 mutes → ~80;  2 mutes, 0 follows → ~47;  10 mutes, 0 follows → ~17
 const TRUST_PRIOR_MUTE_RATE = 0.1
-const TRUST_PRIOR_SCALE = 50   // priorRate = 1/50 = 2%
+const TRUST_PRIOR_SCALE = 5   // priorRate = 1/5 = 20% — strong prior needed when denominator is ~200 not ~2000
 let trustDecay = storage.getMuteWeight()
+const ignoreThumbsdownLists = storage.getIgnoreThumbsdownLists()
 
 function computeTrustScore(pubkey: string): number {
-  const wotSize = wotSet.size
-  if (wotSize === 0 || myFollowSetSize === 0) return 0
+  if (myFollowSetSize === 0) return 0
   const follows = followCountMap.get(pubkey) ?? 0
-  const mutes = muteCountMap.get(pubkey) ?? 0
-  if (follows === 0 && mutes === 0 && !inListsMap.has(pubkey)) return 1
+  const totalMutes = muteCountMap.get(pubkey) ?? 0
+  const mutes = ignoreThumbsdownLists
+    ? totalMutes - (packMuteCountMap.get(pubkey) ?? 0)
+    : totalMutes
+  const inRelevantList = ignoreThumbsdownLists
+    ? Array.from(inListsMap.get(pubkey) ?? []).some((pk) => myFollowSet.has(pk))
+    : inListsMap.has(pubkey)
+  if (follows === 0 && mutes === 0 && !inRelevantList) return 1
   const followRate = follows / myFollowSetSize
-  const muteRate = mutes / wotSize
+  const muteRate = mutes / myFollowSetSize
   const priorRate = 1 / TRUST_PRIOR_SCALE
   const smoothedRatio =
     (muteRate + priorRate * TRUST_PRIOR_MUTE_RATE) / (followRate + priorRate)
@@ -148,12 +179,15 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     storage.getMinTrustScoreMap()
   )
   const [muteWeight, setMuteWeight] = useState(() => storage.getMuteWeight())
+  const [ignoreThumbsdownListsState] = useState(() => storage.getIgnoreThumbsdownLists())
   const [isWotReady, setIsWotReady] = useState(false)
   const [wotStep, setWotStep] = useState(0)
   const [muteVersion, setMuteVersion] = useState(0)
   const [demandFetchCount, setDemandFetchCount] = useState(0)
   const [inspectedPubkey, setInspectedPubkey] = useState<string | null>(null)
   const [downvotedFollowPacks, setDownvotedFollowPacks] = useState<TDownvotedFollowPack[]>([])
+  const [downvotedReactionEvents, setDownvotedReactionEvents] = useState<Event[]>([])
+  const [upvotedFollowPacks, setUpvotedFollowPacks] = useState<TUpvotedFollowPack[]>([])
   const [reloadKey, setReloadKey] = useState(0)
   const queryLogRef = useRef<TQueryLogEntry[]>([])
   const [queryLogVersion, setQueryLogVersion] = useState(0)
@@ -173,6 +207,11 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     setMuteVersion((v) => v + 1)
   }
 
+  const updateIgnoreThumbsdownLists = (value: boolean) => {
+    storage.setIgnoreThumbsdownLists(value)
+    window.location.reload()
+  }
+
   useEffect(() => {
     let cancelled = false
     const initWoT = async () => {
@@ -188,10 +227,16 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         
         // Ensure WoT doesn't persist state from bootstrap
         wotSet.clear()
+        myFollowSet = new Set<string>()
         followCountMap.clear()
+        countedPackMuteSet.clear()
+        packMuteCountMap.clear()
+        downvotedPackAddrSet.clear()
         followersMap.clear()
         muteCountMap.clear()
         mutersMap.clear()
+        wotNonScoringMutersMap.clear()
+        wotNonScoringFollowersMap.clear()
         inListsMap.clear()
         inListsEventsMap.clear()
         countedFollowSet.clear()
@@ -218,9 +263,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         setWotStep(2)
         const directFollows = Array.from(followingSet)
         directFollows.forEach((pubkey) => wotSet.add(pubkey))
+        myFollowSet = new Set(directFollows)
         myFollowSetSize = followingSet.size
-        
-        // Step 3: Fetch follows-of-follows and mute lists in batches
+
+        // Step 3: Fetch follows-of-follows + mute lists from direct follows in batches
         setWotStep(3)
         const relays = getDefaultRelayUrls()
         const pool = new SimplePool()
@@ -228,28 +274,47 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           for (let i = 0; i < directFollows.length; i += BATCH_SIZE) {
             if (cancelled) return
             const batch = directFollows.slice(i, i + BATCH_SIZE)
-            const results = await Promise.all(
-              batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts] }))
-            )
+            const [contactResults, muteResults] = await Promise.all([
+              pool.querySync(relays, { authors: batch, kinds: [kinds.Contacts] }),
+              pool.querySync(relays, { authors: batch, kinds: [kinds.Mutelist] })
+            ])
+            const results = [...contactResults, ...muteResults]
             if (cancelled) return
-            appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: results.filter(Boolean).length, relays, filter: { authors: batch, kinds: [kinds.Contacts] } })
+            const contactCount = contactResults.length
+            appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: contactCount, relays, filter: { authors: batch, kinds: [kinds.Contacts, kinds.Mutelist] } })
             results.forEach((event) => {
-              if (!event) return
-              getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-                wotSet.add(pubkey)
-                if (pubkey === event.pubkey) return
-                const followKey = `${event.pubkey}:${pubkey}`
-                if (!countedFollowSet.has(followKey)) {
-                  countedFollowSet.add(followKey)
-                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                  const followers = followersMap.get(pubkey)
-                  if (followers) {
-                    followers.add(event.pubkey)
-                  } else {
-                    followersMap.set(pubkey, new Set([event.pubkey]))
+              if (event.kind === kinds.Contacts) {
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                  wotSet.add(pubkey)
+                  if (pubkey === event.pubkey) return
+                  const followKey = `${event.pubkey}:${pubkey}`
+                  if (!countedFollowSet.has(followKey)) {
+                    countedFollowSet.add(followKey)
+                    followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                    const followers = followersMap.get(pubkey)
+                    if (followers) {
+                      followers.add(event.pubkey)
+                    } else {
+                      followersMap.set(pubkey, new Set([event.pubkey]))
+                    }
                   }
-                }
-              })
+                })
+              } else if (event.kind === kinds.Mutelist && myFollowSet.has(event.pubkey)) {
+                getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                  if (pubkey === event.pubkey) return
+                  const muteKey = `${event.pubkey}:${pubkey}`
+                  if (!countedMuteSet.has(muteKey)) {
+                    countedMuteSet.add(muteKey)
+                    muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                    const muters = mutersMap.get(pubkey)
+                    if (muters) {
+                      muters.add(event.pubkey)
+                    } else {
+                      mutersMap.set(pubkey, new Set([event.pubkey]))
+                    }
+                  }
+                })
+              }
             })
             setMuteVersion((v) => v + 1)
             await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
@@ -258,8 +323,39 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           // Silently handle errors
         }
 
-        // Treat follow packs the current user 👎'd as personal mute lists
-        try {
+        // Apply cached downvoted pack data immediately so scores are ready when WoT is marked ready
+        const cachedPacks = !ignoreThumbsdownLists ? storage.getDownvotedPackCache() : []
+        if (cachedPacks.length > 0) {
+          cachedPacks.forEach(({ addr, packAuthor, pubkeys }) => {
+            pubkeys.forEach((pubkey) => {
+              const followKey = `${packAuthor}:${pubkey}`
+              if (countedFollowSet.has(followKey)) {
+                const cur = followCountMap.get(pubkey) ?? 0
+                if (cur > 1) followCountMap.set(pubkey, cur - 1)
+                else followCountMap.delete(pubkey)
+                followersMap.get(pubkey)?.delete(packAuthor)
+              }
+              const packMuteKey = `${addr}:${pubkey}`
+              if (!countedPackMuteSet.has(packMuteKey)) {
+                countedPackMuteSet.add(packMuteKey)
+                muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                packMuteCountMap.set(pubkey, (packMuteCountMap.get(pubkey) ?? 0) + 1)
+                const muters = mutersMap.get(pubkey)
+                if (muters) muters.add(packAuthor)
+                else mutersMap.set(pubkey, new Set([packAuthor]))
+              }
+            })
+            downvotedPackAddrSet.add(addr)
+          })
+          setDownvotedFollowPacks(cachedPacks)
+          setMuteVersion((v) => v + 1)
+        }
+
+        setWotStep(4)
+        setIsWotReady(true)
+
+        // Background: refresh downvoted pack data from network and update cache
+        if (!ignoreThumbsdownLists) try {
           const listKinds = [ExtendedKind.FOLLOW_PACK, kinds.Followsets, kinds.Genericlists]
           const reactionEvents = await pool.querySync(relays, {
             authors: [currentPubkey],
@@ -269,6 +365,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
             limit: 500
           })
           if (!cancelled) {
+            setDownvotedReactionEvents(reactionEvents)
             const downvotedAddrs = reactionEvents
               .flatMap((e) =>
                 e.tags
@@ -277,6 +374,14 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
               )
 
             if (downvotedAddrs.length > 0) {
+              // Populate downvotedPackAddrSet immediately from reaction tags so that any
+              // demand fetches running concurrently can already match against this set.
+              // We track whether new addrs were added so we can invalidate stale
+              // demand-fetch cache entries that ran before this point.
+              const prevDownvotedSize = downvotedPackAddrSet.size
+              downvotedAddrs.forEach((addr) => downvotedPackAddrSet.add(addr))
+              const gainedNewAddrs = downvotedPackAddrSet.size > prevDownvotedSize
+
               const packEvents = await Promise.all(
                 downvotedAddrs.map((addr) => {
                   const [kindStr, author, dTag] = addr.split(':')
@@ -306,21 +411,105 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                       followersMap.get(pubkey)?.delete(packAuthor)
                       // Leave followKey in countedFollowSet so it isn't re-added on future passes
                     }
-                    const muteKeyAuthor = `${packAuthor}:${pubkey}`
-                    if (!countedMuteSet.has(muteKeyAuthor)) {
-                      countedMuteSet.add(muteKeyAuthor)
+                    const packMuteKey = `${downvotedAddrs[i]}:${pubkey}`
+                    if (!countedPackMuteSet.has(packMuteKey)) {
+                      countedPackMuteSet.add(packMuteKey)
                       muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
-                      const inLists = inListsMap.get(pubkey)
-                      if (inLists) {
-                        inLists.add(packAuthor)
+                      packMuteCountMap.set(pubkey, (packMuteCountMap.get(pubkey) ?? 0) + 1)
+                      const muters = mutersMap.get(pubkey)
+                      if (muters) muters.add(packAuthor)
+                      else mutersMap.set(pubkey, new Set([packAuthor]))
+                    }
+                    const inLists = inListsMap.get(pubkey)
+                    if (inLists) {
+                      inLists.add(packAuthor)
+                    } else {
+                      inListsMap.set(pubkey, new Set([packAuthor]))
+                    }
+                    const evts = inListsEventsMap.get(pubkey)
+                    if (evts) {
+                      evts.set(packEvent.id, packEvent)
+                    } else {
+                      inListsEventsMap.set(pubkey, new Map([[packEvent.id, packEvent]]))
+                    }
+                  })
+                  const title =
+                    packEvent.tags.find(([t]) => t === 'title')?.[1] ||
+                    packEvent.tags.find(([t]) => t === 'd')?.[1] ||
+                    `Pack ${i + 1}`
+                  downvotedPackAddrSet.add(downvotedAddrs[i])
+                  packsData.push({ addr: downvotedAddrs[i], title, packAuthor, pubkeys })
+                })
+                // Merge in cached packs for addrs not refreshed this run so the
+                // cache never shrinks when pack events are temporarily unreachable
+                const freshAddrSet = new Set(packsData.map((p) => p.addr))
+                for (const cached of cachedPacks) {
+                  if (!freshAddrSet.has(cached.addr)) {
+                    packsData.push(cached)
+                    downvotedPackAddrSet.add(cached.addr)
+                  }
+                }
+                // If we discovered new downvoted packs, demand-fetch results cached before
+                // this point may have missed them. Clear the cache so the next profile
+                // view re-runs with the complete downvotedPackAddrSet.
+                if (gainedNewAddrs) {
+                  scorePromiseMap.clear()
+                  scoreDoneSet.clear()
+                }
+                setDownvotedFollowPacks(packsData)
+                storage.setDownvotedPackCache(packsData)
+                setMuteVersion((v) => v + 1)
+              }
+            }
+          }
+        } catch { /* ignore */ } // end ignoreThumbsdownLists guard
+
+        // Treat follow packs the current user 👍'd as follow boosts
+        try {
+          const listKinds = [ExtendedKind.FOLLOW_PACK, kinds.Followsets, kinds.Genericlists]
+          const upvoteReactionEvents = await pool.querySync(relays, {
+            authors: [currentPubkey],
+            kinds: [kinds.Reaction],
+            '#k': listKinds.map(String),
+            '#t': ['👍'],
+            limit: 500
+          })
+          if (!cancelled) {
+            const upvotedAddrs = upvoteReactionEvents
+              .flatMap((e) =>
+                e.tags
+                  .filter(([t, v]) => t === 'a' && listKinds.some((k) => v?.startsWith(`${k}:`)))
+                  .map(([, v]) => v)
+              )
+
+            if (upvotedAddrs.length > 0) {
+              const packEvents = await Promise.all(
+                upvotedAddrs.map((addr) => {
+                  const [kindStr, author, dTag] = addr.split(':')
+                  return pool.get(relays, {
+                    authors: [author],
+                    kinds: [Number(kindStr)],
+                    '#d': [dTag]
+                  })
+                })
+              )
+              if (!cancelled) {
+                const upvotedPacksData: TUpvotedFollowPack[] = []
+                packEvents.forEach((packEvent, i) => {
+                  if (!packEvent) return
+                  const packAuthor = packEvent.pubkey
+                  const pubkeys = getPubkeysFromPTags(packEvent.tags)
+                  pubkeys.forEach((pubkey) => {
+                    wotSet.add(pubkey)
+                    const followKey = `${packAuthor}:${pubkey}`
+                    if (!countedFollowSet.has(followKey)) {
+                      countedFollowSet.add(followKey)
+                      followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                      const followers = followersMap.get(pubkey)
+                      if (followers) {
+                        followers.add(packAuthor)
                       } else {
-                        inListsMap.set(pubkey, new Set([packAuthor]))
-                      }
-                      const evts = inListsEventsMap.get(pubkey)
-                      if (evts) {
-                        evts.set(packEvent.id, packEvent)
-                      } else {
-                        inListsEventsMap.set(pubkey, new Map([[packEvent.id, packEvent]]))
+                        followersMap.set(pubkey, new Set([packAuthor]))
                       }
                     }
                   })
@@ -328,9 +517,9 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                     packEvent.tags.find(([t]) => t === 'title')?.[1] ||
                     packEvent.tags.find(([t]) => t === 'd')?.[1] ||
                     `Pack ${i + 1}`
-                  packsData.push({ addr: downvotedAddrs[i], title, pubkeys })
+                  upvotedPacksData.push({ addr: upvotedAddrs[i], title, pubkeys })
                 })
-                setDownvotedFollowPacks(packsData)
+                setUpvotedFollowPacks(upvotedPacksData)
                 setMuteVersion((v) => v + 1)
               }
             }
@@ -339,8 +528,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
           // Silently handle errors
         }
 
-        setWotStep(4)
-        setIsWotReady(true)
         return
       }
 
@@ -374,32 +561,52 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
         followings.forEach((pubkey) => wotSet.add(pubkey))
 
-        // Step 3: Fetch follows-of-follows in parallel batches (contacts only)
+        // Step 3: Fetch follows-of-follows + mute lists in parallel batches
         setWotStep(3)
+        myFollowSet = new Set(followings)
         myFollowSetSize = followings.length
         for (let i = 0; i < followings.length; i += BATCH_SIZE) {
           const batch = followings.slice(i, i + BATCH_SIZE)
-          const results = await Promise.all(
-            batch.map((pubkey) => pool.get(relays, { authors: [pubkey], kinds: [kinds.Contacts] }))
-          )
-          appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: results.filter(Boolean).length, relays, filter: { authors: batch, kinds: [kinds.Contacts] } })
+          const [contactResults, muteResults] = await Promise.all([
+            pool.querySync(relays, { authors: batch, kinds: [kinds.Contacts] }),
+            pool.querySync(relays, { authors: batch, kinds: [kinds.Mutelist] })
+          ])
+          const results = [...contactResults, ...muteResults]
+          const contactCount = contactResults.length
+          appendQueryLog({ pubkey: `batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length})`, source: 'wot', eventCount: contactCount, relays, filter: { authors: batch, kinds: [kinds.Contacts, kinds.Mutelist] } })
           results.forEach((event) => {
-            if (!event) return
-            getPubkeysFromPTags(event.tags).forEach((pubkey) => {
-              wotSet.add(pubkey)
-              if (pubkey === event.pubkey) return
-              const followKey = `${event.pubkey}:${pubkey}`
-              if (!countedFollowSet.has(followKey)) {
-                countedFollowSet.add(followKey)
-                followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
-                const followers = followersMap.get(pubkey)
-                if (followers) {
-                  followers.add(event.pubkey)
-                } else {
-                  followersMap.set(pubkey, new Set([event.pubkey]))
+            if (event.kind === kinds.Contacts) {
+              getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                wotSet.add(pubkey)
+                if (pubkey === event.pubkey) return
+                const followKey = `${event.pubkey}:${pubkey}`
+                if (!countedFollowSet.has(followKey)) {
+                  countedFollowSet.add(followKey)
+                  followCountMap.set(pubkey, (followCountMap.get(pubkey) ?? 0) + 1)
+                  const followers = followersMap.get(pubkey)
+                  if (followers) {
+                    followers.add(event.pubkey)
+                  } else {
+                    followersMap.set(pubkey, new Set([event.pubkey]))
+                  }
                 }
-              }
-            })
+              })
+            } else if (event.kind === kinds.Mutelist) {
+              getPubkeysFromPTags(event.tags).forEach((pubkey) => {
+                if (pubkey === event.pubkey) return
+                const muteKey = `${event.pubkey}:${pubkey}`
+                if (!countedMuteSet.has(muteKey)) {
+                  countedMuteSet.add(muteKey)
+                  muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                  const muters = mutersMap.get(pubkey)
+                  if (muters) {
+                    muters.add(event.pubkey)
+                  } else {
+                    mutersMap.set(pubkey, new Set([event.pubkey]))
+                  }
+                }
+              })
+            }
           })
           setMuteVersion((v) => v + 1)
           await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
@@ -483,16 +690,36 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return Array.from(followersMap.get(pubkey) ?? [])
   }, [])
 
+  const getWotNonScoringFollowers = useCallback((pubkey: string): string[] => {
+    return Array.from(wotNonScoringFollowersMap.get(pubkey) ?? [])
+  }, [])
+
   const getWotMuters = useCallback((pubkey: string): string[] => {
-    return Array.from(mutersMap.get(pubkey) ?? [])
+    const muterSet = new Set(mutersMap.get(pubkey) ?? [])
+    if (!ignoreThumbsdownLists) {
+      for (const pack of downvotedFollowPacks) {
+        if (pack.pubkeys.includes(pubkey)) {
+          muterSet.add(pack.packAuthor)
+        }
+      }
+    }
+    return Array.from(muterSet)
+  }, [downvotedFollowPacks])
+
+  const getWotNonScoringMuters = useCallback((pubkey: string): string[] => {
+    return Array.from(wotNonScoringMutersMap.get(pubkey) ?? [])
   }, [])
 
   const getWotInLists = useCallback((pubkey: string): string[] => {
-    return Array.from(inListsMap.get(pubkey) ?? [])
+    const authors = Array.from(inListsMap.get(pubkey) ?? [])
+    if (ignoreThumbsdownLists) return authors.filter((pk) => myFollowSet.has(pk))
+    return authors
   }, [])
 
   const getWotInListEvents = useCallback((pubkey: string): Event[] => {
-    return Array.from(inListsEventsMap.get(pubkey)?.values() ?? [])
+    const events = Array.from(inListsEventsMap.get(pubkey)?.values() ?? [])
+    if (ignoreThumbsdownLists) return events.filter((e) => myFollowSet.has(e.pubkey))
+    return events
   }, [])
 
   const fetchScoreForPubkey = useCallback((pubkey: string, priority = false): Promise<void> => {
@@ -513,26 +740,26 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         appendQueryLog({ pubkey, source: 'demand', eventCount: listCount, relays: demandRelays, filter: { kinds: [kinds.Followsets, kinds.Genericlists, ExtendedKind.FOLLOW_PACK], '#p': [pubkey] } })
         for (const event of events) {
           if (event.pubkey === pubkey) continue
-          if (event.kind === kinds.Mutelist && !wotSet.has(event.pubkey)) continue
-          const key = `${event.pubkey}:${pubkey}`
-          if (event.kind === ExtendedKind.FOLLOW_PACK) {
-            // Already counted as a follow during WoT build; only add to display map
-            const evts = inListsEventsMap.get(pubkey)
-            if (!evts?.has(event.id)) {
-              const inLists = inListsMap.get(pubkey)
-              if (inLists) {
-                inLists.add(event.pubkey)
-              } else {
-                inListsMap.set(pubkey, new Set([event.pubkey]))
-              }
-              if (evts) {
-                evts.set(event.id, event)
-              } else {
-                inListsEventsMap.set(pubkey, new Map([[event.id, event]]))
-              }
+          if (event.kind === kinds.Contacts) {
+            if (!myFollowSet.has(event.pubkey) && wotSet.has(event.pubkey)) {
+              const existing = wotNonScoringFollowersMap.get(pubkey)
+              if (existing) existing.add(event.pubkey)
+              else wotNonScoringFollowersMap.set(pubkey, new Set([event.pubkey]))
               added++
             }
-          } else if (event.kind === kinds.Mutelist) {
+            continue
+          }
+          if (event.kind === kinds.Mutelist && !myFollowSet.has(event.pubkey)) {
+            if (wotSet.has(event.pubkey)) {
+              const existing = wotNonScoringMutersMap.get(pubkey)
+              if (existing) existing.add(event.pubkey)
+              else wotNonScoringMutersMap.set(pubkey, new Set([event.pubkey]))
+              added++
+            }
+            continue
+          }
+          const key = `${event.pubkey}:${pubkey}`
+          if (event.kind === kinds.Mutelist) {
             if (!countedMuteSet.has(key)) {
               countedMuteSet.add(key)
               muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
@@ -545,8 +772,22 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
               added++
             }
           } else {
-            // Non-mute list (Followsets, Genericlists, etc.) — list membership knocks
-            // the user out of "unknown" status without contributing to follow or mute counts
+            // List event (FOLLOW_PACK, Followsets, Genericlists, etc.)
+            // If it's a 👎'd pack, count as mute; always track list membership for display
+            const dTag = event.tags.find(([t]) => t === 'd')?.[1] ?? ''
+            const eventAddr = `${event.kind}:${event.pubkey}:${dTag}`
+            if (downvotedPackAddrSet.has(eventAddr)) {
+              const packMuteKey = `${eventAddr}:${pubkey}`
+              if (!countedPackMuteSet.has(packMuteKey)) {
+                countedPackMuteSet.add(packMuteKey)
+                muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+                packMuteCountMap.set(pubkey, (packMuteCountMap.get(pubkey) ?? 0) + 1)
+                const muters = mutersMap.get(pubkey)
+                if (muters) muters.add(event.pubkey)
+                else mutersMap.set(pubkey, new Set([event.pubkey]))
+                added++
+              }
+            }
             const evts = inListsEventsMap.get(pubkey)
             if (!evts?.has(event.id)) {
               const inLists = inListsMap.get(pubkey)
@@ -598,6 +839,49 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   const isScoreFetched = useCallback((pubkey: string) => scoreDoneSet.has(pubkey), [])
 
+  const processDownvotedPack = useCallback((event: Event) => {
+    const dTag = event.tags.find(([t]) => t === 'd')?.[1] ?? ''
+    const addr = `${event.kind}:${event.pubkey}:${dTag}`
+    if (downvotedPackAddrSet.has(addr)) return
+    const packAuthor = event.pubkey
+    const pubkeys = getPubkeysFromPTags(event.tags)
+    const title = event.tags.find(([t]) => t === 'title')?.[1] || dTag || 'Pack'
+    pubkeys.forEach((pubkey) => {
+      const followKey = `${packAuthor}:${pubkey}`
+      if (countedFollowSet.has(followKey)) {
+        const cur = followCountMap.get(pubkey) ?? 0
+        if (cur > 1) followCountMap.set(pubkey, cur - 1)
+        else followCountMap.delete(pubkey)
+        followersMap.get(pubkey)?.delete(packAuthor)
+      }
+      const packMuteKey = `${addr}:${pubkey}`
+      if (!countedPackMuteSet.has(packMuteKey)) {
+        countedPackMuteSet.add(packMuteKey)
+        muteCountMap.set(pubkey, (muteCountMap.get(pubkey) ?? 0) + 1)
+        packMuteCountMap.set(pubkey, (packMuteCountMap.get(pubkey) ?? 0) + 1)
+        const muters = mutersMap.get(pubkey)
+        if (muters) muters.add(packAuthor)
+        else mutersMap.set(pubkey, new Set([packAuthor]))
+      }
+      const inLists = inListsMap.get(pubkey)
+      if (inLists) inLists.add(packAuthor)
+      else inListsMap.set(pubkey, new Set([packAuthor]))
+      const evts = inListsEventsMap.get(pubkey)
+      if (evts) evts.set(event.id, event)
+      else inListsEventsMap.set(pubkey, new Map([[event.id, event]]))
+    })
+    downvotedPackAddrSet.add(addr)
+    const newPack: TDownvotedFollowPack = { addr, title, packAuthor, pubkeys }
+    const existingCache = storage.getDownvotedPackCache()
+    if (!existingCache.some((p) => p.addr === addr)) {
+      storage.setDownvotedPackCache([...existingCache, newPack])
+    }
+    setDownvotedFollowPacks((prev) => [...prev, newPack])
+    scorePromiseMap.clear()
+    scoreDoneSet.clear()
+    setMuteVersion((v) => v + 1)
+  }, [])
+
   return (
     <UserTrustContext.Provider
       value={{
@@ -620,12 +904,21 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         refetchScoreForPubkey,
         isScoreFetched,
         getWotFollowers,
+        getWotNonScoringFollowers,
         getWotMuters,
+        getWotNonScoringMuters,
         getWotInLists,
         getWotInListEvents,
         inspectedPubkey,
         setInspectedPubkey,
+        wotSize: wotSet.size,
+        muteSetSize: muteCountMap.size,
+        ignoreThumbsdownLists: ignoreThumbsdownListsState,
+        updateIgnoreThumbsdownLists,
         downvotedFollowPacks,
+        downvotedReactionEvents,
+        upvotedFollowPacks,
+        processDownvotedPack,
         reloadWot,
         queryLog: queryLogRef.current,
         queryLogVersion

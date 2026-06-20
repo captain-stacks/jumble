@@ -27,6 +27,19 @@ import { useUserTrust } from '@/providers/UserTrustProvider'
 import MutedWords from './MutedWords'
 import SettingItem from './SettingItem'
 
+function IgnoreThumbsdownListsToggle() {
+  const { ignoreThumbsdownLists, updateIgnoreThumbsdownLists } = useUserTrust()
+  return (
+    <SettingItem>
+      <Label className="text-base font-normal">Ignore 👎 lists in trust scoring</Label>
+      <Switch
+        checked={ignoreThumbsdownLists}
+        onCheckedChange={updateIgnoreThumbsdownLists}
+      />
+    </SettingItem>
+  )
+}
+
 function MuteWeightSlider() {
   const { t } = useTranslation()
   const { muteWeight, updateMuteWeight } = useUserTrust()
@@ -104,6 +117,8 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     updateEnableBiblePage,
     enableQuranPage,
     updateEnableQuranPage,
+    enableLunarCalendarPage,
+    updateEnableLunarCalendarPage,
     disableSpecialFollowFeatures,
     updateDisableSpecialFollowFeatures
   } = useUserPreferences()
@@ -229,6 +244,7 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
         </SettingItem>
         <DefaultTrustScoreFilter />
         <MuteWeightSlider />
+        <IgnoreThumbsdownListsToggle />
         <SettingItem>
           <Label htmlFor="quick-reaction" className="text-base font-normal">
             <div>{t('Quick reaction')}</div>
@@ -354,6 +370,17 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="enable-quran-page"
             checked={enableQuranPage}
             onCheckedChange={updateEnableQuranPage}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="enable-lunar-calendar-page" className="text-base font-normal">
+            <div>Lunar Calendar</div>
+            <div className="text-muted-foreground">Show Lunar Calendar page in the sidebar</div>
+          </Label>
+          <Switch
+            id="enable-lunar-calendar-page"
+            checked={enableLunarCalendarPage}
+            onCheckedChange={updateEnableLunarCalendarPage}
           />
         </SettingItem>
         <SettingItem className="flex-col !h-auto items-start gap-2 py-3">

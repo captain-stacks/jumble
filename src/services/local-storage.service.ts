@@ -81,6 +81,7 @@ class LocalStorageService {
   private enableAiAgent: boolean = false
   private enableBiblePage: boolean = true
   private enableQuranPage: boolean = true
+  private enableLunarCalendarPage: boolean = true
   private disableSpecialFollowFeatures: boolean = true
   private showMuteDebugModal: boolean = false
 
@@ -408,6 +409,9 @@ class LocalStorageService {
 
     const storedEnableQuranPage = window.localStorage.getItem(StorageKey.ENABLE_QURAN_PAGE)
     this.enableQuranPage = storedEnableQuranPage === null ? true : storedEnableQuranPage === 'true'
+
+    const storedEnableLunarCalendarPage = window.localStorage.getItem(StorageKey.ENABLE_LUNAR_CALENDAR_PAGE)
+    this.enableLunarCalendarPage = storedEnableLunarCalendarPage === null ? true : storedEnableLunarCalendarPage === 'true'
 
     const storedDisableSpecialFollowFeatures = window.localStorage.getItem(StorageKey.DISABLE_SPECIAL_FOLLOW_FEATURES)
     this.disableSpecialFollowFeatures = storedDisableSpecialFollowFeatures === null ? true : storedDisableSpecialFollowFeatures === 'true'
@@ -792,6 +796,24 @@ class LocalStorageService {
     }
   }
 
+  getIgnoreThumbsdownLists(): boolean {
+    return window.localStorage.getItem(StorageKey.IGNORE_THUMBSDOWN_LISTS) === 'true'
+  }
+
+  setIgnoreThumbsdownLists(value: boolean) {
+    window.localStorage.setItem(StorageKey.IGNORE_THUMBSDOWN_LISTS, value ? 'true' : 'false')
+  }
+
+  getDownvotedPackCache(): Array<{ addr: string; title: string; packAuthor: string; pubkeys: string[] }> {
+    const str = window.localStorage.getItem(StorageKey.DOWNVOTED_PACK_CACHE)
+    if (!str) return []
+    try { return JSON.parse(str) } catch { return [] }
+  }
+
+  setDownvotedPackCache(data: Array<{ addr: string; title: string; packAuthor: string; pubkeys: string[] }>) {
+    window.localStorage.setItem(StorageKey.DOWNVOTED_PACK_CACHE, JSON.stringify(data))
+  }
+
   getDefaultRelayUrls() {
     return this.defaultRelayUrls
   }
@@ -889,6 +911,15 @@ class LocalStorageService {
   setEnableQuranPage(value: boolean) {
     this.enableQuranPage = value
     window.localStorage.setItem(StorageKey.ENABLE_QURAN_PAGE, value.toString())
+  }
+
+  getEnableLunarCalendarPage() {
+    return this.enableLunarCalendarPage
+  }
+
+  setEnableLunarCalendarPage(value: boolean) {
+    this.enableLunarCalendarPage = value
+    window.localStorage.setItem(StorageKey.ENABLE_LUNAR_CALENDAR_PAGE, value.toString())
   }
 
   getDisableSpecialFollowFeatures() {

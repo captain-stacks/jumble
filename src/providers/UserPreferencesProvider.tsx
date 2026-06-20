@@ -43,6 +43,9 @@ type TUserPreferencesContext = {
   enableQuranPage: boolean
   updateEnableQuranPage: (value: boolean) => void
 
+  enableLunarCalendarPage: boolean
+  updateEnableLunarCalendarPage: (value: boolean) => void
+
   disableSpecialFollowFeatures: boolean
   updateDisableSpecialFollowFeatures: (value: boolean) => void
 }
@@ -76,6 +79,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [enableAiAgent, setEnableAiAgent] = useState(storage.getEnableAiAgent())
   const [enableBiblePage, setEnableBiblePage] = useState(() => storage.getEnableBiblePage())
   const [enableQuranPage, setEnableQuranPage] = useState(() => storage.getEnableQuranPage())
+  const [enableLunarCalendarPage, setEnableLunarCalendarPage] = useState(() => storage.getEnableLunarCalendarPage())
   const [disableSpecialFollowFeatures, setDisableSpecialFollowFeatures] = useState(
     storage.getDisableSpecialFollowFeatures()
   )
@@ -148,6 +152,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setEnableQuranPage(value)
   }
 
+  const updateEnableLunarCalendarPage = (value: boolean) => {
+    setEnableLunarCalendarPage(value)
+    storage.setEnableLunarCalendarPage(value)
+  }
+
   const updateDisableSpecialFollowFeatures = (value: boolean) => {
     setDisableSpecialFollowFeatures(value)
     storage.setDisableSpecialFollowFeatures(value)
@@ -182,6 +191,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         updateEnableBiblePage,
         enableQuranPage,
         updateEnableQuranPage,
+        enableLunarCalendarPage,
+        updateEnableLunarCalendarPage,
         disableSpecialFollowFeatures,
         updateDisableSpecialFollowFeatures
       }}

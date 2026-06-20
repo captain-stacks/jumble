@@ -4,28 +4,27 @@ import { useEffect, useState } from 'react'
 import InListEventCard from './InListEventCard'
 
 export default function ProfileWotInfo({ pubkey }: { pubkey: string }) {
-  const { getWotFollowers, getWotMuters, getWotInLists, getWotInListEvents, fetchScoreForPubkey, muteVersion, demandFetchCount } =
+  const { getWotFollowers, getWotNonScoringFollowers, getWotMuters, getWotNonScoringMuters, getWotInListEvents, fetchScoreForPubkey, muteVersion, demandFetchCount } =
     useUserTrust()
   const [tab, setTab] = useState<'followers' | 'muters' | 'inlists'>('followers')
 
   useEffect(() => {
     fetchScoreForPubkey(pubkey, true)
-  }, [pubkey, fetchScoreForPubkey])
+  }, [pubkey, fetchScoreForPubkey, muteVersion])
 
   // muteVersion and demandFetchCount subscriptions keep this component in sync
   void muteVersion
   void demandFetchCount
 
   const followers = getWotFollowers(pubkey)
+  const nonScoringFollowers = getWotNonScoringFollowers(pubkey)
   const muters = getWotMuters(pubkey)
-  const inLists = getWotInLists(pubkey)
+  const nonScoringMuters = getWotNonScoringMuters(pubkey)
   const inListEvents = getWotInListEvents(pubkey)
 
-  if (followers.length === 0 && muters.length === 0 && inLists.length === 0) return null
-
   const tabs = [
-    { key: 'followers' as const, label: `Followed by (${followers.length})` },
-    { key: 'muters' as const, label: `Muted by (${muters.length})` },
+    { key: 'followers' as const, label: `Followed by (${followers.length}${nonScoringFollowers.length ? `+${nonScoringFollowers.length}` : ''})` },
+    { key: 'muters' as const, label: `Muted by (${muters.length}${nonScoringMuters.length ? `+${nonScoringMuters.length}` : ''})` },
     { key: 'inlists' as const, label: `In Lists (${inListEvents.length})` },
   ]
 
@@ -48,14 +47,38 @@ export default function ProfileWotInfo({ pubkey }: { pubkey: string }) {
       </div>
       <div className="max-h-64 overflow-y-auto">
         {tab === 'followers' && (
-          followers.length === 0
+          followers.length === 0 && nonScoringFollowers.length === 0
             ? <div className="px-3 py-4 text-xs text-muted-foreground italic text-center">None found</div>
-            : followers.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)
+            : <>
+                {followers.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)}
+                {nonScoringFollowers.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs text-muted-foreground italic border-t">
+                      Doesn't count toward score
+                    </div>
+                    {nonScoringFollowers.map((pk) => (
+                      <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />
+                    ))}
+                  </>
+                )}
+              </>
         )}
         {tab === 'muters' && (
-          muters.length === 0
+          muters.length === 0 && nonScoringMuters.length === 0
             ? <div className="px-3 py-4 text-xs text-muted-foreground italic text-center">None found</div>
-            : muters.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)
+            : <>
+                {muters.map((pk) => <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />)}
+                {nonScoringMuters.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs text-muted-foreground italic border-t">
+                      Doesn't count toward score
+                    </div>
+                    {nonScoringMuters.map((pk) => (
+                      <UserItem key={pk} userId={pk} hideFollowButton hideTrustBadge />
+                    ))}
+                  </>
+                )}
+              </>
         )}
         {tab === 'inlists' && (
           inListEvents.length === 0

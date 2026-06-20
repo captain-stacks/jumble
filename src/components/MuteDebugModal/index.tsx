@@ -1,12 +1,14 @@
 import UserItem from '@/components/UserItem'
 import { Button } from '@/components/ui/button'
+import { getDefaultRelayUrls } from '@/lib/relay'
 import { useMuteList } from '@/providers/MuteListProvider'
+import client from '@/services/client.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import bootstrapCache from '@/services/bootstrap-cache.service'
-import { X } from 'lucide-react'
-import { nip19 } from 'nostr-tools'
-import { useEffect, useMemo, useState } from 'react'
+import { Loader, X } from 'lucide-react'
+import { Event, Filter, nip19, SimplePool } from 'nostr-tools'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 function toNpub(s: string): string {
   return /^[0-9a-f]{64}$/.test(s) ? nip19.npubEncode(s) : s
@@ -23,16 +25,22 @@ function transformFilter(filter: object): object {
 export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
   const { mutePubkeySet } = useMuteList()
   const { pubkey: currentPubkey } = useNostr()
-  const { demandFetchCount, muteVersion, isWotReady, wotStep, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers, getWotMuters, getWotInLists, fetchScoreForPubkey, refetchScoreForPubkey, downvotedFollowPacks, queryLog, queryLogVersion } = useUserTrust()
+  const { demandFetchCount, muteVersion, isWotReady, wotStep, wotSize, muteSetSize, inspectedPubkey, getTrustScore, getMuteRatio, isUserTrusted, getWotFollowers, getWotMuters, getWotInLists, fetchScoreForPubkey, refetchScoreForPubkey, downvotedFollowPacks, queryLog, queryLogVersion } = useUserTrust()
   const log = useMemo(() => queryLog, [queryLogVersion])
   const cachedMuteList = bootstrapCache.getMuteList()
   const cachedWoT = bootstrapCache.getWoT()
   const followSourcePubkey = import.meta.env.VITE_EASY_LOGIN_FOLLOW_SOURCE_PUBKEY as string | undefined
 
-  const [tab, setTab] = useState<'debug' | 'progress' | 'packs' | 'log'>('progress')
+  const [tab, setTab] = useState<'debug' | 'progress' | 'packs' | 'log' | 'query'>('progress')
   const [expandedLogIndex, setExpandedLogIndex] = useState<number | null>(null)
   const [expandedPack, setExpandedPack] = useState<string | null>(null)
   const [listTab, setListTab] = useState<'followers' | 'muters' | 'inlists'>('followers')
+  const [queryText, setQueryText] = useState('{\n  "kinds": [1],\n  "limit": 10\n}')
+  const [queryResults, setQueryResults] = useState<Event[] | null>(null)
+  const [queryError, setQueryError] = useState<string | null>(null)
+  const [queryRunning, setQueryRunning] = useState(false)
+  const [expandedResultIndex, setExpandedResultIndex] = useState<number | null>(null)
+  const queryPoolRef = useRef<SimplePool | null>(null)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,7 +52,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (inspectedPubkey) fetchScoreForPubkey(inspectedPubkey, true)
-  }, [inspectedPubkey, fetchScoreForPubkey])
+  }, [inspectedPubkey, fetchScoreForPubkey, muteVersion])
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -57,8 +65,8 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
-          {(['progress', 'packs', 'log', 'debug'] as const).map((t) => (
+        <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700 flex-wrap">
+          {(['progress', 'packs', 'log', 'query', 'debug'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -68,7 +76,7 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
                   : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              {t === 'progress' ? 'WoT Progress' : t === 'packs' ? `👎 Packs (${downvotedFollowPacks.length})` : t === 'log' ? `Query Log (${log.length})` : 'Debug Info'}
+              {t === 'progress' ? 'WoT Progress' : t === 'packs' ? `👎 Packs (${downvotedFollowPacks.length})` : t === 'log' ? `Query Log (${log.length})` : t === 'query' ? 'Query' : 'Debug Info'}
             </button>
           ))}
         </div>
@@ -76,7 +84,10 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
         {tab === 'progress' && (
           <div className="space-y-3 text-sm">
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-              <span>WoT ready: {isWotReady ? '✅' : `⏳ step ${wotStep}`}</span>
+              <div className="flex items-center gap-3">
+                <span>WoT ready: {isWotReady ? '✅' : `⏳ step ${wotStep}`}</span>
+                <span>WoT: {wotSize.toLocaleString()} · Muted: {muteSetSize.toLocaleString()}</span>
+              </div>
               <div className="flex items-center gap-3">
                 <span>On-demand queries: {demandFetchCount} · mute v{muteVersion}</span>
                 {inspectedPubkey && (
@@ -165,8 +176,11 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
                     className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     onClick={() => setExpandedPack(expandedPack === pack.addr ? null : pack.addr)}
                   >
-                    <span className="font-medium text-sm">{pack.title}</span>
-                    <span className="text-xs text-gray-500">{pack.pubkeys.length} members {expandedPack === pack.addr ? '▲' : '▼'}</span>
+                    <span className="min-w-0">
+                      <span className="block font-medium text-sm">{pack.title}</span>
+                      <span className="block font-mono text-[10px] text-gray-400 dark:text-gray-500 truncate">{pack.addr}</span>
+                    </span>
+                    <span className="shrink-0 ml-2 text-xs text-gray-500">{pack.pubkeys.length} members {expandedPack === pack.addr ? '▲' : '▼'}</span>
                   </button>
                   {expandedPack === pack.addr && (
                     <div className="max-h-48 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
@@ -226,6 +240,22 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
               </div>
             )}
           </div>
+        )}
+
+        {tab === 'query' && (
+          <QueryTab
+            queryText={queryText}
+            setQueryText={setQueryText}
+            queryResults={queryResults}
+            setQueryResults={setQueryResults}
+            queryError={queryError}
+            setQueryError={setQueryError}
+            queryRunning={queryRunning}
+            setQueryRunning={setQueryRunning}
+            expandedResultIndex={expandedResultIndex}
+            setExpandedResultIndex={setExpandedResultIndex}
+            queryPoolRef={queryPoolRef}
+          />
         )}
 
         {tab === 'debug' && (
@@ -314,6 +344,155 @@ export default function MuteDebugModal({ onClose }: { onClose: () => void }) {
           Close
         </Button>
       </div>
+    </div>
+  )
+}
+
+function QueryTab({
+  queryText, setQueryText,
+  queryResults, setQueryResults,
+  queryError, setQueryError,
+  queryRunning, setQueryRunning,
+  expandedResultIndex, setExpandedResultIndex,
+  queryPoolRef
+}: {
+  queryText: string
+  setQueryText: (v: string) => void
+  queryResults: Event[] | null
+  setQueryResults: (v: Event[] | null) => void
+  queryError: string | null
+  setQueryError: (v: string | null) => void
+  queryRunning: boolean
+  setQueryRunning: (v: boolean) => void
+  expandedResultIndex: number | null
+  setExpandedResultIndex: (v: number | null) => void
+  queryPoolRef: React.MutableRefObject<SimplePool | null>
+}) {
+  const [authorPubkey, setAuthorPubkey] = useState('')
+  const [resolvedRelays, setResolvedRelays] = useState<string[]>(getDefaultRelayUrls())
+  const [resolvingRelays, setResolvingRelays] = useState(false)
+
+  const resolveRelays = async (raw: string) => {
+    const hex = raw.trim()
+    if (!hex) {
+      setResolvedRelays(getDefaultRelayUrls())
+      return
+    }
+    setResolvingRelays(true)
+    try {
+      const relayList = await client.fetchRelayList(hex)
+      setResolvedRelays(relayList.read.concat(getDefaultRelayUrls()).slice(0, 5))
+    } catch {
+      setResolvedRelays(getDefaultRelayUrls())
+    } finally {
+      setResolvingRelays(false)
+    }
+  }
+
+  const runQuery = async () => {
+    setQueryError(null)
+    setQueryResults(null)
+    setExpandedResultIndex(null)
+    let filter: Filter
+    try {
+      filter = JSON.parse(queryText)
+    } catch (e) {
+      setQueryError(`Invalid JSON: ${(e as Error).message}`)
+      return
+    }
+    setQueryRunning(true)
+    try {
+      if (queryPoolRef.current) queryPoolRef.current.destroy()
+      queryPoolRef.current = new SimplePool()
+      const events = await queryPoolRef.current.querySync(resolvedRelays, filter)
+      events.sort((a, b) => b.created_at - a.created_at)
+      setQueryResults(events)
+    } catch (e) {
+      setQueryError(String(e))
+    } finally {
+      setQueryRunning(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3 text-sm">
+      <div>
+        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+          Author pubkey (hex) — resolves their read relays + defaults, capped at 5
+        </label>
+        <input
+          className="w-full rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="leave empty to use default relays"
+          value={authorPubkey}
+          onChange={(e) => setAuthorPubkey(e.target.value)}
+          onBlur={(e) => resolveRelays(e.target.value)}
+          spellCheck={false}
+        />
+      </div>
+
+      <div className="text-xs text-gray-500 dark:text-gray-400">
+        {resolvingRelays ? 'Resolving relays…' : <>Relays: {resolvedRelays.join(', ')}</>}
+      </div>
+
+      <textarea
+        className="w-full h-32 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+        value={queryText}
+        onChange={(e) => setQueryText(e.target.value)}
+        spellCheck={false}
+      />
+
+      <Button
+        onClick={runQuery}
+        disabled={queryRunning}
+        className="w-full gap-2"
+      >
+        {queryRunning && <Loader className="h-4 w-4 animate-spin" />}
+        {queryRunning ? 'Running…' : 'Run Query'}
+      </Button>
+
+      {queryError && (
+        <div className="rounded bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 text-xs text-red-600 dark:text-red-400 font-mono">
+          {queryError}
+        </div>
+      )}
+
+      {queryResults !== null && (
+        <div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            {queryResults.length} event{queryResults.length !== 1 ? 's' : ''} returned
+          </div>
+          <div className="max-h-[40vh] overflow-y-auto border border-gray-200 dark:border-gray-700 rounded font-mono text-xs">
+            {queryResults.length === 0 ? (
+              <div className="px-3 py-4 text-gray-400 dark:text-gray-500 italic text-center">No events</div>
+            ) : (
+              queryResults.map((evt, i) => (
+                <div key={evt.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0">
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => setExpandedResultIndex(expandedResultIndex === i ? null : i)}
+                  >
+                    <span className="shrink-0 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                      k{evt.kind}
+                    </span>
+                    <span className="truncate text-gray-500 dark:text-gray-400">
+                      {toNpub(evt.pubkey).slice(0, 20)}…
+                    </span>
+                    <span className="shrink-0 text-gray-400 dark:text-gray-500">
+                      {new Date(evt.created_at * 1000).toLocaleString()}
+                    </span>
+                    <span className="ml-auto shrink-0 text-gray-400">{expandedResultIndex === i ? '▲' : '▼'}</span>
+                  </button>
+                  {expandedResultIndex === i && (
+                    <pre className="px-3 pb-3 overflow-x-auto text-[10px] bg-gray-50 dark:bg-gray-900 whitespace-pre-wrap break-all">
+                      {JSON.stringify(evt, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

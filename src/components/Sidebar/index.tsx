@@ -12,6 +12,7 @@ import AccountButton from './AccountButton'
 import AIAgentButton from './AIAgentButton'
 import BibleButton from './BibleButton'
 import QuranButton from './QuranButton'
+import LunarCalendarButton from './LunarCalendarButton'
 import BookmarkButton from './BookmarkButton'
 import RelaysButton from './ExploreButton'
 import FollowingButton from './FollowingButton'
@@ -27,7 +28,7 @@ import SettingsButton from './SettingsButton'
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
   const { theme } = useTheme()
-  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout, hideRelayExplore, enableAiAgent, enableBiblePage, enableQuranPage } = useUserPreferences()
+  const { sidebarCollapse, updateSidebarCollapse, enableSingleColumnLayout, hideRelayExplore, enableAiAgent, enableBiblePage, enableQuranPage, enableLunarCalendarPage } = useUserPreferences()
   const { pubkey } = useNostr()
   const { navigate } = usePrimaryPage()
 
@@ -68,6 +69,7 @@ export default function PrimaryPageSidebar() {
         {pubkey && <BookmarkButton collapse={sidebarCollapse} />}
         {enableBiblePage && <BibleButton collapse={sidebarCollapse} />}
         {enableQuranPage && <QuranButton collapse={sidebarCollapse} />}
+        {enableLunarCalendarPage && <LunarCalendarButton collapse={sidebarCollapse} />}
         {enableAiAgent && <AIAgentButton collapse={sidebarCollapse} />}
         <SettingsButton collapse={sidebarCollapse} />
         <PostButton collapse={sidebarCollapse} />

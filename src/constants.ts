@@ -50,6 +50,8 @@ export const StorageKey = {
   MIN_TRUST_SCORE: 'minTrustScore',
   MIN_TRUST_SCORE_MAP: 'minTrustScoreMap',
   MUTE_WEIGHT: 'muteWeight',
+  IGNORE_THUMBSDOWN_LISTS: 'ignoreThumbsdownLists',
+  DOWNVOTED_PACK_CACHE: 'downvotedPackCache',
   SEARCH_RELAY_URLS: 'searchRelayUrls',
   HIDE_INDIRECT_NOTIFICATIONS: 'hideIndirectNotifications',
   DISABLE_REACTIONS: 'disableReactions',
@@ -59,6 +61,7 @@ export const StorageKey = {
   ENABLE_AI_AGENT: 'enableAiAgent',
   ENABLE_BIBLE_PAGE: 'enableBiblePage',
   ENABLE_QURAN_PAGE: 'enableQuranPage',
+  ENABLE_LUNAR_CALENDAR_PAGE: 'enableLunarCalendarPage',
   DISABLE_SPECIAL_FOLLOW_FEATURES: 'disableSpecialFollowFeatures',
   SHOW_MUTE_DEBUG_MODAL: 'showMuteDebugModal',
   ENABLE_LIVE_FEED: 'enableLiveFeed', // deprecated

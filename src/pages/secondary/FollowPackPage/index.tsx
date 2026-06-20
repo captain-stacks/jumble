@@ -20,7 +20,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import { TFeedSubRequest } from '@/types'
-import { Loader, ShieldBan, ThumbsDown, VolumeX } from 'lucide-react'
+import { Loader, ShieldBan, ThumbsDown, ThumbsUp, VolumeX } from 'lucide-react'
 import { kinds } from 'nostr-tools'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -34,9 +34,10 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
   const { event, isFetching } = useFetchEvent(id)
   const { pubkey: accountPubkey, publish, checkLogin } = useNostr()
   const { getMutePubkeys, mutePubkeySet, unmuteAll, changing } = useMuteList()
-  const { getTrustScore, getMuteRatio, muteVersion, downvotedFollowPacks, reloadWot } = useUserTrust()
+  const { getTrustScore, getMuteRatio, muteVersion, downvotedFollowPacks, upvotedFollowPacks, processDownvotedPack, reloadWot } = useUserTrust()
   const [unmutingUnknown, setUnmutingUnknown] = useState(false)
   const [downvoting, setDownvoting] = useState(false)
+  const [upvoting, setUpvoting] = useState(false)
 
   const { title, description, image, pubkeys: eventPubkeys } = useMemo(() => {
     if (!event) return { title: '', description: '', image: '', pubkeys: [] }
@@ -74,6 +75,36 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
     return downvotedFollowPacks.some((p) => p.addr === addr)
   }, [event, downvotedFollowPacks])
 
+  const isUpvoted = useMemo(() => {
+    if (!event) return false
+    const addr = getReplaceableCoordinateFromEvent(event)
+    return upvotedFollowPacks.some((p) => p.addr === addr)
+  }, [event, upvotedFollowPacks])
+
+  const handleUpvote = () => {
+    if (!event) return
+    checkLogin(async () => {
+      setUpvoting(true)
+      try {
+        await publish({
+          kind: kinds.Reaction,
+          content: '👍',
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [
+            ['k', String(event.kind)],
+            ['t', '👍'],
+            ['a', getReplaceableCoordinateFromEvent(event)]
+          ]
+        })
+        reloadWot()
+      } catch (err) {
+        toast.error(`Failed to like: ${(err as Error).message}`)
+      } finally {
+        setUpvoting(false)
+      }
+    })
+  }
+
   const handleDownvote = () => {
     if (!event) return
     checkLogin(async () => {
@@ -89,7 +120,7 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
             ['a', getReplaceableCoordinateFromEvent(event)]
           ]
         })
-        reloadWot()
+        processDownvotedPack(event)
       } catch (err) {
         toast.error(`Failed to dislike: ${(err as Error).message}`)
       } finally {
@@ -200,16 +231,28 @@ const FollowPackPage = forwardRef(({ id, index }: { id?: string; index?: number 
             )}
 
             {accountPubkey && !isOwnPack && (
-              <Button
-                variant={isDownvoted ? 'default' : 'outline'}
-                size="sm"
-                className="gap-2"
-                disabled={downvoting || isDownvoted}
-                onClick={handleDownvote}
-              >
-                {downvoting ? <Loader className="h-4 w-4 animate-spin" /> : <ThumbsDown className="h-4 w-4" />}
-                {isDownvoted ? 'Disliked' : 'Dislike'}
-              </Button>
+              <>
+                <Button
+                  variant={isUpvoted ? 'default' : 'outline'}
+                  size="sm"
+                  className="gap-2"
+                  disabled={upvoting || isUpvoted}
+                  onClick={handleUpvote}
+                >
+                  {upvoting ? <Loader className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
+                  {isUpvoted ? 'Liked' : 'Like'}
+                </Button>
+                <Button
+                  variant={isDownvoted ? 'default' : 'outline'}
+                  size="sm"
+                  className="gap-2"
+                  disabled={downvoting || isDownvoted}
+                  onClick={handleDownvote}
+                >
+                  {downvoting ? <Loader className="h-4 w-4 animate-spin" /> : <ThumbsDown className="h-4 w-4" />}
+                  {isDownvoted ? 'Disliked' : 'Dislike'}
+                </Button>
+              </>
             )}
 
             <Button

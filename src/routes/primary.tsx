@@ -1,6 +1,7 @@
 import MessagesPage from '@/pages/primary/MessagesPage'
 import BiblePage from '@/pages/primary/BiblePage'
 import QuranPage from '@/pages/primary/QuranPage'
+import LunarCalendarPage from '@/pages/primary/LunarCalendarPage'
 import BookmarkPage from '@/pages/primary/BookmarkPage'
 import ExplorePage from '@/pages/primary/ExplorePage'
 import FollowingPage from '@/pages/primary/FollowingPage'
@@ -27,7 +28,8 @@ const PRIMARY_ROUTE_CONFIGS = [
   { key: 'settings', component: SettingsPage },
   { key: 'messages', component: MessagesPage },
   { key: 'bible', component: BiblePage },
-  { key: 'quran', component: QuranPage }
+  { key: 'quran', component: QuranPage },
+  { key: 'lunarCalendar', component: LunarCalendarPage }
 ] as const
 
 export const PRIMARY_PAGE_REF_MAP = PRIMARY_ROUTE_CONFIGS.reduce(

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import Emoji from '../Emoji'
 import { FormattedTimestamp } from '../FormattedTimestamp'
 import Nip05 from '../Nip05'
+import NoteOptions from '../NoteOptions'
 import UserAvatar from '../UserAvatar'
 import Username from '../Username'
 
@@ -30,6 +31,7 @@ export default function ReactionList({ stuff }: { stuff: Event | string }) {
       pubkey: string
       emoji: string | TEmoji
       created_at: number
+      rawEvent: Event
     }>
   >([])
 
@@ -41,6 +43,7 @@ export default function ReactionList({ stuff }: { stuff: Event | string }) {
         pubkey: string
         created_at: number
         emoji: string | TEmoji
+        rawEvent: Event
       }[] = []
       const threshold = getMinTrustScore(SPECIAL_TRUST_SCORE_FILTER_ID.INTERACTIONS)
       if (threshold) {
@@ -109,6 +112,8 @@ export default function ReactionList({ stuff }: { stuff: Event | string }) {
               />
             </div>
           </div>
+
+          <NoteOptions event={like.rawEvent} />
         </div>
       ))}
 

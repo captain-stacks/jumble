@@ -1,5 +1,6 @@
 import MuteButton from '@/components/MuteButton'
 import Nip05 from '@/components/Nip05'
+import TrustScoreBadge from '@/components/TrustScoreBadge'
 import { Button } from '@/components/ui/button'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -7,6 +8,7 @@ import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 import { Loader, Lock, Unlock } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +18,11 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { profile, pubkey } = useNostr()
   const { getMutePubkeys } = useMuteList()
-  const mutePubkeys = useMemo(() => getMutePubkeys(), [pubkey])
+  const { computeTrustScore, wotReady } = useUserTrust()
+  const mutePubkeys = useMemo(
+    () => [...getMutePubkeys()].sort((a, b) => computeTrustScore(a) - computeTrustScore(b)),
+    [pubkey, wotReady, computeTrustScore]
+  )
   const [visibleMutePubkeys, setVisibleMutePubkeys] = useState<string[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -85,11 +91,14 @@ function UserItem({ pubkey }: { pubkey: string }) {
     <div className="flex items-start gap-2">
       <UserAvatar userId={pubkey} className="shrink-0" />
       <div className="w-full overflow-hidden">
-        <Username
-          userId={pubkey}
-          className="w-fit max-w-full truncate font-semibold"
-          skeletonClassName="h-4"
-        />
+        <div className="flex items-center gap-2">
+          <Username
+            userId={pubkey}
+            className="w-fit max-w-full truncate font-semibold"
+            skeletonClassName="h-4"
+          />
+          <TrustScoreBadge pubkey={pubkey} />
+        </div>
         <Nip05 pubkey={pubkey} />
         <div className="truncate text-sm text-muted-foreground">{profile?.about}</div>
       </div>

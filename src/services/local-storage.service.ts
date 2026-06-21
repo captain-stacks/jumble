@@ -80,6 +80,7 @@ class LocalStorageService {
   private mutedWords: string[] = []
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
+  private trustDecay: number = 7
   private hideIndirectNotifications: boolean = false
   private encryptionKeyPrivkeyMap: Record<string, string> = {}
   // Rotated-out encryption keys kept around (per account) so messages still
@@ -373,6 +374,14 @@ class LocalStorageService {
         }
       } catch {
         // Invalid JSON, use default
+      }
+    }
+
+    const trustDecayStr = window.localStorage.getItem(StorageKey.TRUST_DECAY)
+    if (trustDecayStr) {
+      const decay = parseInt(trustDecayStr, 10)
+      if (!isNaN(decay) && decay >= 1 && decay <= 10) {
+        this.trustDecay = decay
       }
     }
 
@@ -1209,6 +1218,17 @@ class LocalStorageService {
   setMinTrustScoreMap(map: Record<string, number>) {
     this.minTrustScoreMap = map
     window.localStorage.setItem(StorageKey.MIN_TRUST_SCORE_MAP, JSON.stringify(map))
+  }
+
+  getTrustDecay() {
+    return this.trustDecay
+  }
+
+  setTrustDecay(decay: number) {
+    if (decay >= 1 && decay <= 10) {
+      this.trustDecay = decay
+      window.localStorage.setItem(StorageKey.TRUST_DECAY, decay.toString())
+    }
   }
 
   getDefaultRelayUrls() {

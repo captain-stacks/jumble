@@ -1127,6 +1127,15 @@ export default {
     'Discover': 'Discover',
     'Failure reason': 'Failure reason',
     'Indirect notifications hidden': 'Indirect notifications hidden',
-    'Indirect notifications shown': 'Indirect notifications shown'
+    'Indirect notifications shown': 'Indirect notifications shown',
+    'WoT score: {{score}} — green means someone you follow also follows this person':
+      'WoT score: {{score}} — green means someone you follow also follows this person',
+    'WoT score: {{score}} — red means nobody in your network follows this person':
+      'WoT score: {{score}} — red means nobody in your network follows this person',
+    'Network trust score': 'Network trust score',
+    'Not known by any of your {{count}} follows': 'Not known by any of your {{count}} follows',
+    'Followed by {{follows}} of your {{total}} follows':
+      'Followed by {{follows}} of your {{total}} follows',
+    'Muted by {{mutes}} of your {{total}} follows': 'Muted by {{mutes}} of your {{total}} follows'
   }
 }

@@ -28,6 +28,7 @@ import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
 import Relays from './Relays'
 import SpecialFollowButton from './SpecialFollowButton'
+import TrustScorePanel from './TrustScorePanel'
 
 export default function Profile({ id }: { id?: string }) {
   const { t } = useTranslation()
@@ -195,6 +196,7 @@ export default function Profile({ id }: { id?: string }) {
               </div>
               {!isSelf && <FollowedBy pubkey={pubkey} />}
             </div>
+            <TrustScorePanel pubkey={pubkey} />
           </div>
         </div>
         <div className="px-4 pt-3.5 pb-0.5">

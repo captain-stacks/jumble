@@ -16,10 +16,12 @@ import { ZapNotification } from './ZapNotification'
 
 export function NotificationItem({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { pubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
@@ -29,16 +31,21 @@ export function NotificationItem({
 
   useEffect(() => {
     const checkCanShow = async () => {
-      // Check muted users
-      if (mutePubkeySet.has(notification.pubkey)) {
-        setCanShow(false)
-        return
-      }
+      if (!skipMuteCheck) {
+        // Check muted users
+        if (mutePubkeySet.has(notification.pubkey)) {
+          setCanShow(false)
+          return
+        }
 
-      // Check content mentioning muted users
-      if (hideContentMentioningMutedUsers && isMentioningMutedUsers(notification, mutePubkeySet)) {
-        setCanShow(false)
-        return
+        // Check content mentioning muted users
+        if (
+          hideContentMentioningMutedUsers &&
+          isMentioningMutedUsers(notification, mutePubkeySet)
+        ) {
+          setCanShow(false)
+          return
+        }
       }
 
       // Check trust score
@@ -66,6 +73,7 @@ export function NotificationItem({
   }, [
     notification,
     pubkey,
+    skipMuteCheck,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
     getMinTrustScore,

@@ -1,11 +1,14 @@
 import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { useInfiniteScroll } from '@/hooks'
 import { useNotificationFilter } from '@/hooks/useNotificationFilter'
+import { tagNameEquals } from '@/lib/tag'
 import { cn, isTouchDevice } from '@/lib/utils'
 import { usePrimaryPage } from '@/PageManager'
 import { useDeepBrowsing } from '@/providers/DeepBrowsingProvider'
+import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useNotification } from '@/providers/NotificationProvider'
+import localStorage from '@/services/local-storage.service'
 import notificationService from '@/services/notification.service'
 import { TNotificationType } from '@/types'
 import dayjs from 'dayjs'
@@ -28,10 +31,13 @@ export default function NotificationList() {
   const { current } = usePrimaryPage()
   const { pubkey } = useNostr()
   const { getNotificationsSeenAt } = useNotification()
+  const { mutePubkeySet } = useMuteList()
   const filterFn = useNotificationFilter()
   const [notificationType, setNotificationType] = useState<TNotificationType>('all')
   const [lastReadTime, setLastReadTime] = useState(0)
+  const [mutedLastReadTime, setMutedLastReadTime] = useState(0)
   const [filteredEvents, setFilteredEvents] = useState<NostrEvent[]>([])
+  const [mutedFilteredEvents, setMutedFilteredEvents] = useState<NostrEvent[]>([])
   const [initialLoading, setInitialLoading] = useState(notificationService.getInitialLoading())
   const supportTouch = useMemo(() => isTouchDevice(), [])
   const topRef = useRef<HTMLDivElement | null>(null)
@@ -72,6 +78,7 @@ export default function NotificationList() {
     if (wasActiveRef.current) return
     wasActiveRef.current = true
     setLastReadTime(getNotificationsSeenAt())
+    setMutedLastReadTime(localStorage.getLastReadMutedNotificationTime(pubkey))
   }, [current, pubkey, getNotificationsSeenAt])
 
   // Track service loading state.
@@ -119,14 +126,54 @@ export default function NotificationList() {
     }
   }, [pubkey, filterFn])
 
+  // Compute events from muted authors (for the Muted tab).
+  useEffect(() => {
+    if (!pubkey) {
+      setMutedFilteredEvents([])
+      return
+    }
+
+    let cancelled = false
+
+    const recompute = () => {
+      const events = notificationService.getEvents()
+      const seenIds = new Set<string>()
+      const passed: NostrEvent[] = []
+      for (const evt of events) {
+        if (seenIds.has(evt.id)) continue
+        seenIds.add(evt.id)
+        if (!mutePubkeySet.has(evt.pubkey)) continue
+        if (evt.kind === kinds.Reaction) {
+          const targetPubkey = evt.tags.findLast(tagNameEquals('p'))?.[1]
+          if (targetPubkey !== pubkey) continue
+        }
+        passed.push(evt)
+      }
+      if (!cancelled) setMutedFilteredEvents(passed)
+    }
+
+    recompute()
+    const unsub = notificationService.onDataChanged(recompute)
+    return () => {
+      cancelled = true
+      unsub()
+    }
+  }, [pubkey, mutePubkeySet])
+
+  const hasNewMutedNotifications = useMemo(
+    () => mutedFilteredEvents.some((e) => e.created_at > mutedLastReadTime),
+    [mutedFilteredEvents, mutedLastReadTime]
+  )
+
   const handleLoadMore = useCallback(async () => {
     return notificationService.loadMore(LOAD_MORE_LIMIT)
   }, [])
 
   const notifications = useMemo(() => {
+    if (notificationType === 'muted') return mutedFilteredEvents
     if (!filterKinds) return filteredEvents
     return filteredEvents.filter((evt) => filterKinds.has(evt.kind))
-  }, [filteredEvents, filterKinds])
+  }, [filteredEvents, mutedFilteredEvents, filterKinds, notificationType])
 
   const { visibleItems, shouldShowLoadingIndicator, bottomRef, setShowCount } = useInfiniteScroll({
     items: notifications,
@@ -153,7 +200,11 @@ export default function NotificationList() {
             <NotificationItem
               key={notification.id}
               notification={notification}
-              isNew={notification.created_at > lastReadTime}
+              isNew={
+                notification.created_at >
+                (notificationType === 'muted' ? mutedLastReadTime : lastReadTime)
+              }
+              skipMuteCheck={notificationType === 'muted'}
             />
           ))}
         </Fragment>
@@ -177,17 +228,25 @@ export default function NotificationList() {
           { value: 'all', label: 'All' },
           { value: 'mentions', label: 'Mentions' },
           { value: 'reactions', label: 'Reactions' },
-          { value: 'zaps', label: 'Zaps' }
+          { value: 'zaps', label: 'Zaps' },
+          { value: 'muted', label: 'Muted', dot: hasNewMutedNotifications }
         ]}
         onTabChange={(type) => {
           setShowCount(SHOW_COUNT)
           setNotificationType(type as TNotificationType)
           topRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
+          if (type === 'muted' && pubkey) {
+            const now = dayjs().unix()
+            setMutedLastReadTime(now)
+            localStorage.setLastReadMutedNotificationTime(pubkey, now)
+          }
         }}
         options={
           <>
             {!supportTouch ? <RefreshButton onClick={() => refresh()} /> : null}
-            <TrustScoreFilter filterId={SPECIAL_TRUST_SCORE_FILTER_ID.NOTIFICATIONS} />
+            {notificationType !== 'muted' && (
+              <TrustScoreFilter filterId={SPECIAL_TRUST_SCORE_FILTER_ID.NOTIFICATIONS} />
+            )}
           </>
         }
       />

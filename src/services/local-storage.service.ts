@@ -44,6 +44,7 @@ class LocalStorageService {
   private currentAccount: TAccount | null = null
   private feedTabs: TFeedTabConfig[] = DEFAULT_FEED_TABS
   private lastReadNotificationTimeMap: Record<string, number> = {}
+  private lastReadMutedNotificationTimeMap: Record<string, number> = {}
   private defaultZapSats: number = 21
   private defaultZapComment: string = 'Zap!'
   private quickZap: boolean = false
@@ -148,6 +149,10 @@ class LocalStorageService {
     const lastReadNotificationTimeMapStr =
       window.localStorage.getItem(StorageKey.LAST_READ_NOTIFICATION_TIME_MAP) ?? '{}'
     this.lastReadNotificationTimeMap = JSON.parse(lastReadNotificationTimeMapStr)
+
+    const lastReadMutedNotificationTimeMapStr =
+      window.localStorage.getItem(StorageKey.LAST_READ_MUTED_NOTIFICATION_TIME_MAP) ?? '{}'
+    this.lastReadMutedNotificationTimeMap = JSON.parse(lastReadMutedNotificationTimeMapStr)
 
     const relaySetsStr = window.localStorage.getItem(StorageKey.RELAY_SETS)
     if (!relaySetsStr) {
@@ -927,6 +932,18 @@ class LocalStorageService {
     window.localStorage.setItem(
       StorageKey.LAST_READ_NOTIFICATION_TIME_MAP,
       JSON.stringify(this.lastReadNotificationTimeMap)
+    )
+  }
+
+  getLastReadMutedNotificationTime(pubkey: string) {
+    return this.lastReadMutedNotificationTimeMap[pubkey] ?? 0
+  }
+
+  setLastReadMutedNotificationTime(pubkey: string, time: number) {
+    this.lastReadMutedNotificationTimeMap[pubkey] = time
+    window.localStorage.setItem(
+      StorageKey.LAST_READ_MUTED_NOTIFICATION_TIME_MAP,
+      JSON.stringify(this.lastReadMutedNotificationTimeMap)
     )
   }
 

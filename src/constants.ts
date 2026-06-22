@@ -21,6 +21,7 @@ export const StorageKey = {
   DEFAULT_ZAP_COMMENT: 'defaultZapComment',
   QUICK_ZAP: 'quickZap',
   LAST_READ_NOTIFICATION_TIME_MAP: 'lastReadNotificationTimeMap',
+  LAST_READ_MUTED_NOTIFICATION_TIME_MAP: 'lastReadMutedNotificationTimeMap',
   ACCOUNT_FEED_INFO_MAP: 'accountFeedInfoMap',
   AUTOPLAY: 'autoplay',
   VIDEO_LOOP: 'videoLoop',

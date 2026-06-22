@@ -171,7 +171,7 @@ export default function Tabs({
                 </span>
               )}
               {tab.dot && (
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+                <span className="relative -top-1 ms-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
               )}
             </div>
           ))}

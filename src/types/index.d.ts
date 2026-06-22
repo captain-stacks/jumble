@@ -160,7 +160,7 @@ export type TFeedTabConfig = {
   builtin?: TFeedTabBuiltin
 }
 
-export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps'
+export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps' | 'muted'
 
 export type TPageRef = { scrollToTop: (behavior?: ScrollBehavior) => void }
 

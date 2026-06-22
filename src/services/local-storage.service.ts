@@ -72,6 +72,7 @@ class LocalStorageService {
   private blossomCacheServerEnabled: boolean = false
   private quickReaction: boolean = false
   private quickReactionEmoji: string | TEmoji = '+'
+  private addClientTag: boolean = false
   private nsfwDisplayPolicy: TNsfwDisplayPolicy = NSFW_DISPLAY_POLICY.HIDE_CONTENT
   private defaultRelayUrls: string[] = BIG_RELAY_URLS
   private searchRelayUrls: string[] = SEARCHABLE_RELAY_URLS
@@ -332,6 +333,7 @@ class LocalStorageService {
       window.localStorage.getItem(StorageKey.BLOSSOM_CACHE_SERVER_ENABLED) === 'true'
 
     this.quickReaction = window.localStorage.getItem(StorageKey.QUICK_REACTION) === 'true'
+    this.addClientTag = window.localStorage.getItem(StorageKey.ADD_CLIENT_TAG) === 'true'
     const quickReactionEmojiStr =
       window.localStorage.getItem(StorageKey.QUICK_REACTION_EMOJI) ?? '+'
     if (quickReactionEmojiStr.startsWith('{')) {
@@ -1157,6 +1159,15 @@ class LocalStorageService {
   setQuickReaction(quickReaction: boolean) {
     this.quickReaction = quickReaction
     window.localStorage.setItem(StorageKey.QUICK_REACTION, quickReaction.toString())
+  }
+
+  getAddClientTag() {
+    return this.addClientTag
+  }
+
+  setAddClientTag(addClientTag: boolean) {
+    this.addClientTag = addClientTag
+    window.localStorage.setItem(StorageKey.ADD_CLIENT_TAG, addClientTag.toString())
   }
 
   getQuickReactionEmoji() {

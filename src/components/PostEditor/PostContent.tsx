@@ -15,6 +15,7 @@ import {
 } from '@/lib/draft-event'
 import { randomId } from '@/lib/utils'
 import { getDefaultRelayUrls } from '@/lib/relay'
+import storage from '@/services/local-storage.service'
 import { useNostr } from '@/providers/NostrProvider'
 import mediaUpload from '@/services/media-upload.service'
 import postDraftService from '@/services/post-draft.service'
@@ -120,7 +121,9 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
     [initialParentStuff]
   )
   const [showMoreOptions, setShowMoreOptions] = useState(false)
-  const [addClientTag, setAddClientTag] = useState(initialDraft?.addClientTag ?? false)
+  const [addClientTag, setAddClientTag] = useState(
+    initialDraft?.addClientTag ?? storage.getAddClientTag()
+  )
   const [mentions, setMentions] = useState<string[]>(initialDraft?.mentions ?? [])
   const [isNsfw, setIsNsfw] = useState(initialDraft?.isNsfw ?? false)
   const [isPoll, setIsPoll] = useState(initialDraft?.isPoll ?? false)

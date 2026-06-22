@@ -1,7 +1,9 @@
 import { SPECIAL_FEED_ID, SPECIAL_TRUST_SCORE_FILTER_ID, SPAMMER_PERCENTILE_THRESHOLD } from '@/constants'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useFollowList } from './FollowListProvider'
+
 import { useNostr } from './NostrProvider'
 
 type TWotStats = {
@@ -60,11 +62,11 @@ function recomputeDecayBounds(decay: number) {
 recomputeDecayBounds(7)
 
 function computeTrustScore(pubkey: string): number {
-  // No signal at all from the network → treat as untrusted stranger
-  if (!wotScoreMap.has(pubkey) && !wotMuteMap.has(pubkey)) return 5
-
   const follows = wotScoreMap.get(pubkey) ?? 0
   const mutes = wotMuteMap.get(pubkey) ?? 0
+
+  // Nobody in the network follows them → unknown stranger baseline
+  if (follows === 0 && mutes === 0) return 5
   const size = myFollowSetSize > 0 ? myFollowSetSize : 1
   const followRate = follows / size
   const muteRate = mutes / size
@@ -75,8 +77,65 @@ function computeTrustScore(pubkey: string): number {
   return Math.min(100, Math.max(0, Math.round(((raw - _minRaw) / (_maxRaw - _minRaw)) * 100)))
 }
 
+function addFollowerContribution(follower: string, followings: string[]) {
+  followings.forEach((following) => {
+    if (following === follower) return // self-follow: skip
+    wotScoreMap.set(following, (wotScoreMap.get(following) ?? 0) + 1)
+    wotFollowersByTarget.set(following, [...(wotFollowersByTarget.get(following) ?? []), follower])
+  })
+}
+
+function removeFollowerContribution(follower: string) {
+  wotFollowersByTarget.forEach((followers, target) => {
+    if (!followers.includes(follower)) return
+    const updated = followers.filter((f) => f !== follower)
+    if (updated.length > 0) {
+      wotFollowersByTarget.set(target, updated)
+    } else {
+      wotFollowersByTarget.delete(target)
+    }
+    wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
+  })
+}
+
+function addMuterContribution(muter: string, targets: string[]) {
+  targets.forEach((target) => {
+    if (target === muter) return // self-mute: skip
+    wotMuteMap.set(target, (wotMuteMap.get(target) ?? 0) + 1)
+    wotMutersByTarget.set(target, [...(wotMutersByTarget.get(target) ?? []), muter])
+  })
+}
+
+function removeMuterContribution(muter: string) {
+  wotMutersByTarget.forEach((muters, target) => {
+    if (!muters.includes(muter)) return
+    const updated = muters.filter((m) => m !== muter)
+    if (updated.length > 0) {
+      wotMutersByTarget.set(target, updated)
+    } else {
+      wotMutersByTarget.delete(target)
+    }
+    wotMuteMap.set(target, Math.max(0, (wotMuteMap.get(target) ?? 0) - 1))
+  })
+}
+
+// For a given signaler, subtract their follow contributions where they also mute (only mute counts).
+function reconcileFollowMuteOverlap(signaler: string) {
+  const muterTargets = wotMutersByTarget
+  muterTargets.forEach((muters, target) => {
+    if (!muters.includes(signaler)) return
+    const followers = wotFollowersByTarget.get(target)
+    if (!followers?.includes(signaler)) return
+    wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
+  })
+}
+
+
 export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const { pubkey: currentPubkey } = useNostr()
+  const { followingSet } = useFollowList()
+
+
   const [minTrustScore, setMinTrustScore] = useState(() => storage.getMinTrustScore())
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
     storage.getMinTrustScoreMap()
@@ -87,19 +146,34 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     return stored
   })
   const [wotReady, setWotReady] = useState(false)
+  // Incremented after each incremental WoT update so consumers re-read the maps.
+  const [wotVersion, setWotVersion] = useState(0)
 
+  // Snapshot used to diff against on next change. null = WoT not ready yet.
+  const prevFollowingSetRef = useRef<Set<string> | null>(null)
+
+  // Readable ref so the follow effect can see the latest value without re-subscribing.
+  const followingSetRef = useRef(followingSet)
+  followingSetRef.current = followingSet
+
+  // Full rebuild when the account changes.
   useEffect(() => {
     if (!currentPubkey) return
 
     setWotReady(false)
+    prevFollowingSetRef.current = null
     wotScoreMap.clear()
     wotMuteMap.clear()
     wotFollowersByTarget.clear()
     wotMutersByTarget.clear()
     myFollowSetSize = 0
 
+    let cancelled = false
+
     const initWoT = async () => {
       const followings = [...new Set(await client.fetchFollowings(currentPubkey, false))]
+      if (cancelled) return
+
       myFollowSetSize = followings.length
       followings.forEach((pubkey) => {
         if (!wotScoreMap.has(pubkey)) wotScoreMap.set(pubkey, 0)
@@ -109,17 +183,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
       // Phase 1: build WoT follow set
       for (let i = 0; i < followings.length; i += batchSize) {
+        if (cancelled) return
         const batch = followings.slice(i, i + batchSize)
         await Promise.allSettled(
           batch.map(async (pubkey) => {
             const uniqueFollowings = [...new Set(await client.fetchFollowings(pubkey, false))]
-            uniqueFollowings.forEach((following) => {
-              wotScoreMap.set(following, (wotScoreMap.get(following) ?? 0) + 1)
-              wotFollowersByTarget.set(following, [
-                ...(wotFollowersByTarget.get(following) ?? []),
-                pubkey
-              ])
-            })
+            if (!cancelled) addFollowerContribution(pubkey, uniqueFollowings)
           })
         )
         await new Promise((resolve) => setTimeout(resolve, 200))
@@ -127,11 +196,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
       // Phase 2: load mute sets
       for (let i = 0; i < followings.length; i += batchSize) {
+        if (cancelled) return
         const batch = followings.slice(i, i + batchSize)
         await Promise.allSettled(
           batch.map(async (pubkey) => {
             const muteListEvent = await client.fetchMuteListEvent(pubkey)
-            if (!muteListEvent) return
+            if (cancelled || !muteListEvent) return
             const mutedPubkeys = [
               ...new Set(
                 muteListEvent.tags
@@ -139,29 +209,101 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
                   .map((tag) => tag[1])
               )
             ]
-            mutedPubkeys.forEach((target) => {
-              wotMuteMap.set(target, (wotMuteMap.get(target) ?? 0) + 1)
-              wotMutersByTarget.set(target, [
-                ...(wotMutersByTarget.get(target) ?? []),
-                pubkey
-              ])
-            })
+            addMuterContribution(pubkey, mutedPubkeys)
           })
         )
         await new Promise((resolve) => setTimeout(resolve, 200))
       }
 
+      if (cancelled) return
+
+      // If someone both follows and mutes a target, only the mute counts.
+      wotMutersByTarget.forEach((muters, target) => {
+        const followers = wotFollowersByTarget.get(target)
+        if (!followers) return
+        const followerSet = new Set(followers)
+        muters.forEach((muter) => {
+          if (followerSet.has(muter)) {
+            wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
+          }
+        })
+      })
+
       setWotReady(true)
     }
     initWoT()
+
+    return () => {
+      cancelled = true
+    }
   }, [currentPubkey])
+
+  // When WoT finishes loading, snapshot the current follow set as the baseline.
+  useEffect(() => {
+    if (!wotReady) {
+      prevFollowingSetRef.current = null
+      return
+    }
+
+    prevFollowingSetRef.current = new Set(followingSetRef.current)
+    setWotVersion((v) => v + 1)
+  }, [wotReady])
+
+  // Incremental update when the current user follows or unfollows someone.
+  useEffect(() => {
+    const prev = prevFollowingSetRef.current
+    if (prev === null) return // WoT not ready
+
+    const added = [...followingSet].filter((pk) => !prev.has(pk))
+    const removed = [...prev].filter((pk) => !followingSet.has(pk))
+    if (added.length === 0 && removed.length === 0) return
+
+    prevFollowingSetRef.current = new Set(followingSet)
+
+    // Synchronously remove contributions from unfollowed people.
+    removed.forEach((removedPubkey) => {
+      myFollowSetSize = Math.max(0, myFollowSetSize - 1)
+      removeFollowerContribution(removedPubkey)
+      removeMuterContribution(removedPubkey)
+    })
+
+    if (removed.length > 0) setWotVersion((v) => v + 1)
+
+    // Asynchronously add contributions from newly followed people.
+    if (added.length > 0) {
+      ;(async () => {
+        for (const newPubkey of added) {
+          myFollowSetSize++
+
+          const uniqueFollowings = [...new Set(await client.fetchFollowings(newPubkey, false))]
+          addFollowerContribution(newPubkey, uniqueFollowings)
+
+          const muteListEvent = await client.fetchMuteListEvent(newPubkey)
+          if (muteListEvent) {
+            const mutedPubkeys = [
+              ...new Set(
+                muteListEvent.tags
+                  .filter((tag) => tag[0] === 'p' && tag[1])
+                  .map((tag) => tag[1])
+              )
+            ]
+            addMuterContribution(newPubkey, mutedPubkeys)
+          }
+
+          // Reconcile: if newPubkey both follows and mutes a target, only the mute counts.
+          reconcileFollowMuteOverlap(newPubkey)
+        }
+        setWotVersion((v) => v + 1)
+      })()
+    }
+  }, [followingSet])
 
   const isUserTrusted = useCallback(
     (pubkey: string) => {
       if (!currentPubkey || pubkey === currentPubkey) return true
-      return wotScoreMap.has(pubkey)
+      return (wotScoreMap.get(pubkey) ?? 0) > 0
     },
-    [currentPubkey]
+    [currentPubkey, wotVersion]
   )
 
   const isSpammer = useCallback(
@@ -231,7 +373,12 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     setTrustDecayState(decay)
   }, [])
 
-  const computeTrustScoreCallback = useCallback((pubkey: string) => computeTrustScore(pubkey), [])
+  // New function reference on every WoT update so consumers' useMemos re-run.
+  const computeTrustScoreCallback = useCallback(
+    (pubkey: string) => computeTrustScore(pubkey),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [wotVersion]
+  )
 
   const getWotStats = useCallback(
     (pubkey: string): TWotStats => ({
@@ -241,8 +388,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       sampleFollowers: wotFollowersByTarget.get(pubkey) ?? [],
       sampleMuters: wotMutersByTarget.get(pubkey) ?? []
     }),
-    // Re-create when WoT finishes loading so consumers re-read the maps
-    [wotReady]
+    [wotReady, wotVersion]
   )
 
   return (

@@ -8,7 +8,7 @@ import PubkeyCopy from '@/components/PubkeyCopy'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDmSupport, useFetchFollowings, useFetchProfile } from '@/hooks'
-import { toDmConversation, toMuteList, toProfileEditor } from '@/lib/link'
+import { toDmConversation, toMuteList, toProfileEditor, toProfileMuteList } from '@/lib/link'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -46,6 +46,18 @@ export default function Profile({ id }: { id?: string }) {
     )
   }, [followings, profile, accountPubkey])
   const isSelf = accountPubkey === profile?.pubkey
+  const [publicMuteCount, setPublicMuteCount] = useState(0)
+
+  useEffect(() => {
+    if (!profile?.pubkey || isSelf) return
+    client.fetchMuteListEvent(profile.pubkey).then((event) => {
+      if (!event) return
+      const count = new Set(
+        event.tags.filter((tag) => tag[0] === 'p' && tag[1]).map((tag) => tag[1])
+      ).size
+      setPublicMuteCount(count)
+    })
+  }, [profile?.pubkey, isSelf])
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -187,12 +199,20 @@ export default function Profile({ id }: { id?: string }) {
               <div className="flex items-center gap-4">
                 <Followings pubkey={pubkey} />
                 <Relays pubkey={pubkey} />
-                {isSelf && (
+                {isSelf ? (
                   <SecondaryPageLink to={toMuteList()} className="flex w-fit gap-1 hover:underline">
                     {mutePubkeySet.size}
                     <div className="text-muted-foreground">{t('Muted')}</div>
                   </SecondaryPageLink>
-                )}
+                ) : publicMuteCount > 0 ? (
+                  <SecondaryPageLink
+                    to={toProfileMuteList(profile.pubkey)}
+                    className="flex w-fit gap-1 hover:underline"
+                  >
+                    {publicMuteCount}
+                    <div className="text-muted-foreground">{t('Muted')}</div>
+                  </SecondaryPageLink>
+                ) : null}
               </div>
               {!isSelf && <FollowedBy pubkey={pubkey} />}
             </div>

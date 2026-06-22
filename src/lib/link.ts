@@ -85,6 +85,7 @@ export const toProfileEditor = () => '/profile-editor'
 export const toRelay = (url: string) => `/relays/${encodeURIComponent(url)}`
 export const toRelayReviews = (url: string) => `/relays/${encodeURIComponent(url)}/reviews`
 export const toMuteList = () => '/mutes'
+export const toProfileMuteList = (pubkey: string) => `/mutes/${encodeURIComponent(pubkey)}`
 export const toRizful = () => '/rizful'
 export const toBookmarks = () => '/bookmarks'
 export const toFollowPack = (eventOrId: Event | string) => {

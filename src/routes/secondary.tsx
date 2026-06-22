@@ -9,6 +9,7 @@ import FollowingListPage from '@/pages/secondary/FollowingListPage'
 import FollowPackPage from '@/pages/secondary/FollowPackPage'
 import GeneralSettingsPage from '@/pages/secondary/GeneralSettingsPage'
 import MuteListPage from '@/pages/secondary/MuteListPage'
+import ProfileMuteListPage from '@/pages/secondary/ProfileMuteListPage'
 import NoteListPage from '@/pages/secondary/NoteListPage'
 import NotePage from '@/pages/secondary/NotePage'
 import OthersRelaySettingsPage from '@/pages/secondary/OthersRelaySettingsPage'
@@ -61,6 +62,7 @@ const SECONDARY_ROUTE_CONFIGS: {
   { path: '/settings/account', element: <AccountSettingsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },
   { path: '/mutes', element: <MuteListPage /> },
+  { path: '/mutes/:pubkey', element: <ProfileMuteListPage /> },
   { path: '/rizful', element: <RizfulPage /> },
   { path: '/bookmarks', element: <BookmarkPage /> },
   { path: '/follow-packs/:id', element: <FollowPackPage /> },

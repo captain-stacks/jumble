@@ -16,6 +16,7 @@ import FollowingBadge from '../FollowingBadge'
 import ProtectedBadge from '../ProtectedBadge'
 import { FormattedTimestamp } from '../FormattedTimestamp'
 import Nip05 from '../Nip05'
+import MuteBell from '../MuteBell'
 import NoteOptions from '../NoteOptions'
 import ParentNotePreview from '../ParentNotePreview'
 import TranslateButton from '../TranslateButton'
@@ -175,6 +176,7 @@ export default function Note({
             </div>
           </div>
           <div className="flex items-center">
+            <MuteBell stuff={event} />
             <TranslateButton
               event={event}
               showFull={showFull}

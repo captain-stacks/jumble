@@ -36,7 +36,7 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
         </p>
       ) : (
         <>
-          {follows > 0 && (
+          {sampleFollowers.length > 0 && (
             <div className="mt-3">
               <div className="text-muted-foreground mb-2 flex items-center gap-1.5">
                 <Users size={12} className="shrink-0" />
@@ -55,7 +55,7 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
             </div>
           )}
 
-          {mutes > 0 && (
+          {sampleMuters.length > 0 && (
             <div className="mt-3">
               <div className="text-muted-foreground mb-2 flex items-center gap-1.5">
                 <VolumeX size={12} className="shrink-0" />

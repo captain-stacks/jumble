@@ -24,8 +24,8 @@ export default function TrustScoreBadge({
   const trusted = isUserTrusted(pubkey)
   const colorClass = trusted ? 'text-green-500' : 'text-red-500'
   const tooltip = trusted
-    ? t('WoT score: {{score}} — green means someone you follow also follows this person', { score })
-    : t('WoT score: {{score}} — red means nobody in your network follows this person', { score })
+    ? t('WoT score: {{score}} — someone in your network follows this person', { score })
+    : t('WoT score: {{score}} — nobody in your network follows this person', { score })
 
   return (
     <span

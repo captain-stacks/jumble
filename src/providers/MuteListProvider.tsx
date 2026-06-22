@@ -21,6 +21,8 @@ type TMuteListContext = {
   unmutePubkey: (pubkey: string) => Promise<void>
   switchToPublicMute: (pubkey: string) => Promise<void>
   switchToPrivateMute: (pubkey: string) => Promise<void>
+  bulkSwitchToPublicMute: (pubkeys: string[]) => Promise<void>
+  bulkUnmutePubkeys: (pubkeys: string[]) => Promise<void>
 }
 
 const MuteListContext = createContext<TMuteListContext | undefined>(undefined)
@@ -37,6 +39,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()
   const {
     pubkey: accountPubkey,
+    account,
     muteListEvent,
     publish,
     updateMuteListEvent,
@@ -44,6 +47,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     nip44Encrypt,
     nip44Decrypt
   } = useNostr()
+  const isReadOnly = account?.signerType === 'npub'
   const [tags, setTags] = useState<string[][]>([])
   const [privateTags, setPrivateTags] = useState<string[][]>([])
   const publicMutePubkeySet = useMemo(() => new Set(getPubkeysFromPTags(tags)), [tags])
@@ -109,6 +113,12 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
+      if (isReadOnly) {
+        setPrivateTags([])
+        setTags(muteListEvent.tags)
+        return
+      }
+
       const { privateTags, wasNip04 } = await getPrivateTags(muteListEvent).catch(() => ({
         privateTags: [] as string[][],
         wasNip04: false
@@ -121,7 +131,7 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
       }
     }
     updateMuteTags()
-  }, [muteListEvent])
+  }, [muteListEvent, isReadOnly])
 
   const getMutePubkeys = () => {
     return Array.from(mutePubkeySet)
@@ -278,6 +288,72 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const bulkSwitchToPublicMute = async (pubkeys: string[]) => {
+    if (!accountPubkey || changing || pubkeys.length === 0) return
+
+    setChanging(true)
+    try {
+      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+      if (!muteListEvent) return
+
+      const { privateTags } = await getPrivateTags(muteListEvent)
+      const pubkeySet = new Set(pubkeys)
+
+      const newPrivateTags = privateTags.filter(
+        (tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1])
+      )
+      if (newPrivateTags.length === privateTags.length) return
+
+      const cipherText = await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+      const newPublicTags = muteListEvent.tags
+        .filter((tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1]))
+        .concat(pubkeys.map((pk) => ['p', pk]))
+      const newMuteListEvent = await publishNewMuteListEvent(newPublicTags, cipherText)
+      await updateMuteListEvent(newMuteListEvent, newPrivateTags)
+    } catch (error) {
+      const errors = formatError(error)
+      errors.forEach((err) => {
+        toast.error(t('Failed to make mutes public') + ': ' + err, { duration: 10_000 })
+      })
+    } finally {
+      setChanging(false)
+    }
+  }
+
+  const bulkUnmutePubkeys = async (pubkeys: string[]) => {
+    if (!accountPubkey || changing || pubkeys.length === 0) return
+
+    setChanging(true)
+    try {
+      const muteListEvent = await client.fetchMuteListEvent(accountPubkey)
+      if (!muteListEvent) return
+
+      const { privateTags } = await getPrivateTags(muteListEvent)
+      const pubkeySet = new Set(pubkeys)
+
+      const newPrivateTags = privateTags.filter(
+        (tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1])
+      )
+      const newPublicTags = muteListEvent.tags.filter(
+        (tag) => tag[0] !== 'p' || !pubkeySet.has(tag[1])
+      )
+
+      const cipherText =
+        newPrivateTags.length > 0
+          ? await nip44Encrypt(accountPubkey, JSON.stringify(newPrivateTags))
+          : ''
+      const newMuteListEvent = await publishNewMuteListEvent(newPublicTags, cipherText)
+      await updateMuteListEvent(newMuteListEvent, newPrivateTags)
+    } catch (error) {
+      const errors = formatError(error)
+      errors.forEach((err) => {
+        toast.error(t('Failed to unmute users') + ': ' + err, { duration: 10_000 })
+      })
+    } finally {
+      setChanging(false)
+    }
+  }
+
   const switchToPrivateMute = async (pubkey: string) => {
     if (!accountPubkey || changing) return
 
@@ -319,7 +395,9 @@ export function MuteListProvider({ children }: { children: React.ReactNode }) {
         mutePubkeyPrivately,
         unmutePubkey,
         switchToPublicMute,
-        switchToPrivateMute
+        switchToPrivateMute,
+        bulkSwitchToPublicMute,
+        bulkUnmutePubkeys
       }}
     >
       {children}

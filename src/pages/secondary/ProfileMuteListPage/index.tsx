@@ -1,10 +1,12 @@
-import ProfileList from '@/components/ProfileList'
+import FollowButton from '@/components/FollowButton'
+import MuteButton from '@/components/MuteButton'
+import UserItem from '@/components/UserItem'
 import { useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import { Event } from 'nostr-tools'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const ProfileMuteListPage = forwardRef(
@@ -13,6 +15,8 @@ const ProfileMuteListPage = forwardRef(
     const { profile } = useFetchProfile(pubkey)
     const { computeTrustScore, wotReady } = useUserTrust()
     const [rawMutePubkeys, setRawMutePubkeys] = useState<string[]>([])
+    const [visiblePubkeys, setVisiblePubkeys] = useState<string[]>([])
+    const bottomRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
       if (!pubkey) return
@@ -30,6 +34,25 @@ const ProfileMuteListPage = forwardRef(
       [rawMutePubkeys, wotReady, computeTrustScore]
     )
 
+    useEffect(() => {
+      setVisiblePubkeys(mutePubkeys.slice(0, 10))
+    }, [mutePubkeys])
+
+    useEffect(() => {
+      const options = { root: null, rootMargin: '10px', threshold: 1 }
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && mutePubkeys.length > visiblePubkeys.length) {
+          setVisiblePubkeys((prev) => [
+            ...prev,
+            ...mutePubkeys.slice(prev.length, prev.length + 10)
+          ])
+        }
+      }, options)
+      const el = bottomRef.current
+      if (el) observer.observe(el)
+      return () => { if (el) observer.unobserve(el) }
+    }, [visiblePubkeys, mutePubkeys])
+
     return (
       <SecondaryPageLayout
         ref={ref}
@@ -41,7 +64,16 @@ const ProfileMuteListPage = forwardRef(
         }
         displayScrollToTopButton
       >
-        <ProfileList pubkeys={mutePubkeys} />
+        <div className="space-y-0 px-4">
+          {visiblePubkeys.map((pk) => (
+            <div key={pk} className="flex items-center gap-2">
+              <UserItem userId={pk} hideFollowButton className="flex-1 min-w-0" />
+              <MuteButton pubkey={pk} />
+              <FollowButton pubkey={pk} />
+            </div>
+          ))}
+          {mutePubkeys.length > visiblePubkeys.length && <div ref={bottomRef} />}
+        </div>
       </SecondaryPageLayout>
     )
   }

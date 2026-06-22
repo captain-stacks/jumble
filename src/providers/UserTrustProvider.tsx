@@ -376,7 +376,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   // New function reference on every WoT update so consumers' useMemos re-run.
   const computeTrustScoreCallback = useCallback(
     (pubkey: string) => computeTrustScore(pubkey),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [wotVersion]
   )
 

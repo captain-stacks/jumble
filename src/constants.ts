@@ -67,6 +67,7 @@ export const StorageKey = {
   PROCESSED_SYNC_REQUEST_IDS: 'processedSyncRequestIds',
   DISABLE_NOTIFICATION_SYNC: 'disableNotificationSync',
   ALWAYS_SHOW_THREAD_CONTEXT: 'alwaysShowThreadContext',
+  SHOW_REPLIES_TO_UNSUPPORTED_KINDS: 'showRepliesToUnsupportedKinds',
   DISMISSED_DESKTOP_APP_TIP: 'dismissedDesktopAppTip',
   NOTE_LIST_MODE: 'noteListMode', // deprecated
   ENABLE_LIVE_FEED: 'enableLiveFeed', // deprecated

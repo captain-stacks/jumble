@@ -44,7 +44,9 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     quickReactionEmoji,
     updateQuickReactionEmoji,
     alwaysShowThreadContext,
-    updateAlwaysShowThreadContext
+    updateAlwaysShowThreadContext,
+    showRepliesToUnsupportedKinds,
+    updateShowRepliesToUnsupportedKinds
   } = useUserPreferences()
   const [disableNotificationSync, setDisableNotificationSync] = useState(
     localStorage.getDisableNotificationSync()
@@ -169,6 +171,20 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
                 id="always-show-thread-context"
                 checked={alwaysShowThreadContext}
                 onCheckedChange={updateAlwaysShowThreadContext}
+              />
+            }
+          />
+          <SettingsRow
+            htmlFor="show-replies-to-unsupported-kinds"
+            title={t('Show replies to unsupported event types')}
+            description={t(
+              'Show kind 1 and 1111 notes that reply to event types that cannot be displayed'
+            )}
+            control={
+              <Switch
+                id="show-replies-to-unsupported-kinds"
+                checked={showRepliesToUnsupportedKinds}
+                onCheckedChange={updateShowRepliesToUnsupportedKinds}
               />
             }
           />

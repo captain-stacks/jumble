@@ -164,6 +164,24 @@ export function getParentTag(event?: Event): { type: 'e' | 'a' | 'i'; tag: strin
   return parentITag ? { type: 'i', tag: parentITag } : undefined
 }
 
+export function getParentKind(event: Event): number | undefined {
+  // NIP-22: k tag explicitly names the parent event's kind
+  const kTag = event.tags.find(tagNameEquals('k'))?.[1]
+  if (kTag !== undefined) {
+    const k = parseInt(kTag)
+    if (!isNaN(k)) return k
+  }
+
+  // 'a' tag encodes the kind in its value: "kind:pubkey:d-tag"
+  const parentTag = getParentTag(event)
+  if (parentTag?.type === 'a') {
+    const k = parseInt(parentTag.tag[1]?.split(':')[0] ?? '')
+    if (!isNaN(k)) return k
+  }
+
+  return undefined
+}
+
 export function getParentBech32Id(event?: Event) {
   const parentTag = getParentTag(event)
   if (!parentTag) return undefined

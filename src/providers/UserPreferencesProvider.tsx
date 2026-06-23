@@ -31,6 +31,9 @@ type TUserPreferencesContext = {
 
   alwaysShowThreadContext: boolean
   updateAlwaysShowThreadContext: (always: boolean) => void
+
+  showRepliesToUnsupportedKinds: boolean
+  updateShowRepliesToUnsupportedKinds: (show: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -62,6 +65,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [feedTabs, setFeedTabs] = useState<TFeedTabConfig[]>(storage.getFeedTabs())
   const [alwaysShowThreadContext, setAlwaysShowThreadContext] = useState(
     storage.getAlwaysShowThreadContext()
+  )
+  const [showRepliesToUnsupportedKinds, setShowRepliesToUnsupportedKinds] = useState(
+    storage.getShowRepliesToUnsupportedKinds()
   )
 
   useEffect(() => {
@@ -113,6 +119,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.setAlwaysShowThreadContext(always)
   }
 
+  const updateShowRepliesToUnsupportedKinds = (show: boolean) => {
+    setShowRepliesToUnsupportedKinds(show)
+    storage.setShowRepliesToUnsupportedKinds(show)
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -133,7 +144,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         feedTabs,
         updateFeedTabs,
         alwaysShowThreadContext,
-        updateAlwaysShowThreadContext
+        updateAlwaysShowThreadContext,
+        showRepliesToUnsupportedKinds,
+        updateShowRepliesToUnsupportedKinds
       }}
     >
       {children}

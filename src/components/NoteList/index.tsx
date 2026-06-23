@@ -1,8 +1,8 @@
 import NewNotesButton from '@/components/NewNotesButton'
 import { Button } from '@/components/ui/button'
-import { SPAMMER_PERCENTILE_THRESHOLD } from '@/constants'
+import { ALLOWED_FILTER_KINDS, SPAMMER_PERCENTILE_THRESHOLD } from '@/constants'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getEventKey, getKeyFromTag, isMentioningMutedUsers, isReplyNoteEvent } from '@/lib/event'
+import { getEventKey, getKeyFromTag, getParentKind, isMentioningMutedUsers, isReplyNoteEvent } from '@/lib/event'
 import { tagNameEquals } from '@/lib/tag'
 import { mergeTimelines } from '@/lib/timeline'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
@@ -10,6 +10,7 @@ import { useDeletedEvent } from '@/providers/DeletedEventProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePageActive } from '@/providers/PageActiveProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import threadService from '@/services/thread.service'
@@ -83,6 +84,7 @@ const NoteList = forwardRef<
     const active = usePageActive()
     const { startLogin } = useNostr()
     const { isSpammer, meetsMinTrustScore, wotReady } = useUserTrust()
+    const { showRepliesToUnsupportedKinds } = useUserPreferences()
     const { mutePubkeySet } = useMuteList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
     const { isEventDeleted } = useDeletedEvent()
@@ -182,7 +184,11 @@ const NoteList = forwardRef<
           keySet.add(key)
 
           if (shouldHideEvent(evt)) return
-          if (hideReplies && isReplyNoteEvent(evt)) return
+          if (hideReplies && isReplyNoteEvent(evt)) {
+            if (!showRepliesToUnsupportedKinds) return
+            const parentKind = getParentKind(evt)
+            if (parentKind === undefined || ALLOWED_FILTER_KINDS.includes(parentKind)) return
+          }
           if (evt.kind !== kinds.Repost && evt.kind !== kinds.GenericRepost) {
             filteredEvents.push(evt)
             keys.push(key)
@@ -290,7 +296,8 @@ const NoteList = forwardRef<
       hideReplies,
       hideSpam,
       meetsMinTrustScore,
-      trustScoreThreshold
+      trustScoreThreshold,
+      showRepliesToUnsupportedKinds
     ])
 
     useEffect(() => {
@@ -304,7 +311,11 @@ const NoteList = forwardRef<
 
         newEvents.forEach((event) => {
           if (shouldHideEvent(event)) return
-          if (hideReplies && isReplyNoteEvent(event)) return
+          if (hideReplies && isReplyNoteEvent(event)) {
+            if (!showRepliesToUnsupportedKinds) return
+            const parentKind = getParentKind(event)
+            if (parentKind === undefined || ALLOWED_FILTER_KINDS.includes(parentKind)) return
+          }
 
           const key = getEventKey(event)
           if (keySet.has(key)) {
@@ -339,7 +350,7 @@ const NoteList = forwardRef<
         setFilteredNewEvents(_filteredNotes)
       }
       processNewEvents()
-    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold])
+    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold, showRepliesToUnsupportedKinds])
 
     useEffect(() => {
       if (!wotReady) {

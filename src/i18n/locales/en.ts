@@ -1137,6 +1137,9 @@ export default {
     'Followed by {{follows}} of your {{total}} follows':
       'Followed by {{follows}} of your {{total}} follows',
     'Muted by {{mutes}} of your {{total}} follows': 'Muted by {{mutes}} of your {{total}} follows',
-    'Loading web of trust…': 'Loading web of trust…'
+    'Loading web of trust…': 'Loading web of trust…',
+    'Show replies to unsupported event types': 'Show replies to unsupported event types',
+    'Show kind 1 and 1111 notes that reply to event types that cannot be displayed':
+      'Show kind 1 and 1111 notes that reply to event types that cannot be displayed'
   }
 }

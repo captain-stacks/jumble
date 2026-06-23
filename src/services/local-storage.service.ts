@@ -107,6 +107,7 @@ class LocalStorageService {
   private processedSyncRequestIds: string[] = []
   private disableNotificationSync: boolean = false
   private alwaysShowThreadContext: boolean = false
+  private showRepliesToUnsupportedKinds: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -559,6 +560,8 @@ class LocalStorageService {
       window.localStorage.getItem(StorageKey.DISABLE_NOTIFICATION_SYNC) === 'true'
     this.alwaysShowThreadContext =
       window.localStorage.getItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT) === 'true'
+    this.showRepliesToUnsupportedKinds =
+      window.localStorage.getItem(StorageKey.SHOW_REPLIES_TO_UNSUPPORTED_KINDS) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -1486,6 +1489,15 @@ class LocalStorageService {
   setAlwaysShowThreadContext(always: boolean) {
     this.alwaysShowThreadContext = always
     window.localStorage.setItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT, always.toString())
+  }
+
+  getShowRepliesToUnsupportedKinds() {
+    return this.showRepliesToUnsupportedKinds
+  }
+
+  setShowRepliesToUnsupportedKinds(show: boolean) {
+    this.showRepliesToUnsupportedKinds = show
+    window.localStorage.setItem(StorageKey.SHOW_REPLIES_TO_UNSUPPORTED_KINDS, show.toString())
   }
 }
 

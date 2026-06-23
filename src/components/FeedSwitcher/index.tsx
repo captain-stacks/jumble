@@ -7,7 +7,7 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinnedUsers } from '@/providers/PinnedUsersProvider'
-import { Settings2, Star, UsersRound } from 'lucide-react'
+import { Settings2, Star, Globe, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import RelayIcon from '../RelayIcon'
@@ -95,6 +95,21 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 <Star className="size-5" />
               </div>
               <div className="flex-1">{t('Special Follow')}</div>
+            </div>
+          </FeedSwitcherItem>
+
+          <FeedSwitcherItem
+            isActive={feedInfo?.feedType === 'global'}
+            onClick={() => {
+              switchFeed('global')
+              close?.()
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex size-6 shrink-0 items-center justify-center">
+                <Globe className="size-5" />
+              </div>
+              <div className="flex-1">{t('Global')}</div>
             </div>
           </FeedSwitcherItem>
         </div>

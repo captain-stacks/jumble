@@ -97,6 +97,9 @@ const NoteList = forwardRef<
     >([])
     const [filteredNewEvents, setFilteredNewEvents] = useState<Event[]>([])
     const [refreshCount, setRefreshCount] = useState(0)
+    const [wotFilteringDone, setWotFilteringDone] = useState(false)
+    const wotReadyRef = useRef(wotReady)
+    wotReadyRef.current = wotReady
     const topRef = useRef<HTMLDivElement | null>(null)
     const sinceRef = useRef<number | undefined>(undefined)
     sinceRef.current = newEvents.length
@@ -152,6 +155,11 @@ const NoteList = forwardRef<
     )
 
     useEffect(() => {
+      let cancelled = false
+      const _trustScoreThreshold = hideSpam
+        ? SPAMMER_PERCENTILE_THRESHOLD
+        : (trustScoreThreshold ?? 0)
+
       const processEvents = async () => {
         // Store processed event keys to avoid duplicates
         const keySet = new Set<string>()
@@ -226,26 +234,27 @@ const NoteList = forwardRef<
           }
         })
 
-        const _trustScoreThreshold = hideSpam
-          ? SPAMMER_PERCENTILE_THRESHOLD
-          : (trustScoreThreshold ?? 0)
         if (!_trustScoreThreshold || _trustScoreThreshold <= 0) {
-          setFilteredNotes(
-            filteredEvents.map((evt, i) => {
-              const key = keys[i]
-              return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
-            })
-          )
+          if (!cancelled) {
+            setFilteredNotes(
+              filteredEvents.map((evt, i) => {
+                const key = keys[i]
+                return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
+              })
+            )
+          }
           return
         }
 
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt, i) => {
+              if (cancelled) return null
               // Check trust score filter
               if (!(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
                 return null
               }
+              if (cancelled) return null
               const key = keys[i]
               return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
             })
@@ -256,11 +265,24 @@ const NoteList = forwardRef<
           reposters: string[]
         }[]
 
-        setFilteredNotes(_filteredNotes)
+        if (!cancelled) {
+          setFilteredNotes(_filteredNotes)
+        }
       }
 
       setFiltering(true)
-      processEvents().finally(() => setFiltering(false))
+      processEvents().finally(() => {
+        if (!cancelled) {
+          setFiltering(false)
+          if (wotReadyRef.current || !_trustScoreThreshold || _trustScoreThreshold <= 0) {
+            setWotFilteringDone(true)
+          }
+        }
+      })
+
+      return () => {
+        cancelled = true
+      }
     }, [
       events,
       storedEvents,
@@ -318,6 +340,12 @@ const NoteList = forwardRef<
       }
       processNewEvents()
     }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold])
+
+    useEffect(() => {
+      if (!wotReady) {
+        setWotFilteringDone(false)
+      }
+    }, [wotReady])
 
     const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
       setTimeout(() => {
@@ -483,7 +511,8 @@ const NoteList = forwardRef<
     const list = (
       <div className="min-h-screen">
         {pinnedEventIds?.map((id) => <PinnedNoteCard key={id} eventId={id} className="w-full" />)}
-        {visibleItems.map(({ key, event, reposters }) => (
+        {(wotFilteringDone || (trustScoreThreshold ?? 0) <= 0) &&
+          visibleItems.map(({ key, event, reposters }) => (
           <NoteCard
             key={key}
             className="w-full"
@@ -493,7 +522,7 @@ const NoteList = forwardRef<
           />
         ))}
         <div ref={bottomRef} />
-        {!wotReady && (trustScoreThreshold ?? 0) > 0 ? (
+        {(!wotReady || !wotFilteringDone) && (trustScoreThreshold ?? 0) > 0 ? (
           <div className="mt-8 flex flex-col items-center justify-center gap-3 text-muted-foreground">
             <Loader className="animate-spin" size={24} />
             <span className="text-sm">{t('Loading web of trust…')}</span>

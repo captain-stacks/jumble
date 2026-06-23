@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { ChevronDown, FolderClosed, Server, Star, UsersRound } from 'lucide-react'
+import { ChevronDown, FolderClosed, Globe, Server, Star, UsersRound } from 'lucide-react'
 import { forwardRef, HTMLAttributes, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -89,6 +89,9 @@ const FeedSwitcherTrigger = forwardRef<
     if (feedInfo?.feedType === 'pinned') {
       return t('Special Follow')
     }
+    if (feedInfo?.feedType === 'global') {
+      return t('Global')
+    }
     if (relayUrls.length === 0) {
       return t('Choose a feed')
     }
@@ -109,6 +112,7 @@ const FeedSwitcherTrigger = forwardRef<
       if (feedInfo?.feedType === 'following')
         return <UsersRound className={compact ? 'size-3.5!' : ''} />
       if (feedInfo?.feedType === 'pinned') return <Star className={compact ? 'size-3.5!' : ''} />
+      if (feedInfo?.feedType === 'global') return <Globe className={compact ? 'size-3.5!' : ''} />
       if (feedInfo?.feedType === 'relays')
         return <FolderClosed className={compact ? 'size-3.5!' : ''} />
       return <Server className={compact ? 'size-3.5!' : ''} />

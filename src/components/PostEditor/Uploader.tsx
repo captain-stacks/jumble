@@ -1,6 +1,6 @@
-import mediaUpload, { UPLOAD_ABORTED_ERROR_MSG } from '@/services/media-upload.service'
+import { showUploadErrorToast } from '@/lib/upload-error-toast'
+import mediaUpload from '@/services/media-upload.service'
 import { useRef } from 'react'
-import { toast } from 'sonner'
 
 export default function Uploader({
   children,
@@ -43,10 +43,7 @@ export default function Uploader({
         onUploadEnd?.(file)
       } catch (error) {
         console.error('Error uploading file', error)
-        const message = (error as Error).message
-        if (message !== UPLOAD_ABORTED_ERROR_MSG) {
-          toast.error(`Failed to upload file: ${message}`)
-        }
+        showUploadErrorToast(error)
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }

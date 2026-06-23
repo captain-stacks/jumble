@@ -7,6 +7,7 @@ import { SimpleUserAvatar } from '@/components/UserAvatar'
 import { SimpleUsername } from '@/components/Username'
 import { userIdToPubkey } from '@/lib/pubkey'
 import { getEmojiInfosFromEmojiTags } from '@/lib/tag'
+import { showUploadErrorToast } from '@/lib/upload-error-toast'
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
@@ -15,7 +16,7 @@ import customEmojiService from '@/services/custom-emoji.service'
 import recentEmojiService from '@/services/recent-emoji.service'
 import dmService from '@/services/dm.service'
 import { TGif } from '@/services/klipy.service'
-import mediaUpload, { UPLOAD_ABORTED_ERROR_MSG } from '@/services/media-upload.service'
+import mediaUpload from '@/services/media-upload.service'
 import { TEmoji, TProfile } from '@/types'
 import { nip19 } from 'nostr-tools'
 import { base64 } from '@scure/base'
@@ -640,10 +641,7 @@ export default function DmInput({
         )
       } catch (error) {
         console.error('Error uploading file', error)
-        const message = (error as Error).message
-        if (message !== UPLOAD_ABORTED_ERROR_MSG) {
-          toast.error(`Failed to upload file: ${message}`)
-        }
+        showUploadErrorToast(error)
         setMediaItems((prev) => {
           const item = prev.find((i) => i.id === id)
           if (item) URL.revokeObjectURL(item.previewUrl)

@@ -46,8 +46,8 @@ const TRUST_PRIOR_SCALE = 5
 const PRIOR_RATE = 1 / TRUST_PRIOR_SCALE
 const wotScoreMap = new Map<string, number>()
 const wotMuteMap = new Map<string, number>()
-const wotFollowersByTarget = new Map<string, string[]>()
-const wotMutersByTarget = new Map<string, string[]>()
+const wotFollowersByTarget = new Map<string, Set<string>>()
+const wotMutersByTarget = new Map<string, Set<string>>()
 let myFollowSetSize = 0
 
 let _trustDecay = 7
@@ -80,20 +80,22 @@ function computeTrustScore(pubkey: string): number {
 function addFollowerContribution(follower: string, followings: string[]) {
   followings.forEach((following) => {
     if (following === follower) return // self-follow: skip
+    const followers = wotFollowersByTarget.get(following)
+    if (followers) {
+      if (followers.has(follower)) return // already counted
+      followers.add(follower)
+    } else {
+      wotFollowersByTarget.set(following, new Set([follower]))
+    }
     wotScoreMap.set(following, (wotScoreMap.get(following) ?? 0) + 1)
-    wotFollowersByTarget.set(following, [...(wotFollowersByTarget.get(following) ?? []), follower])
   })
 }
 
 function removeFollowerContribution(follower: string) {
   wotFollowersByTarget.forEach((followers, target) => {
-    if (!followers.includes(follower)) return
-    const updated = followers.filter((f) => f !== follower)
-    if (updated.length > 0) {
-      wotFollowersByTarget.set(target, updated)
-    } else {
-      wotFollowersByTarget.delete(target)
-    }
+    if (!followers.has(follower)) return
+    followers.delete(follower)
+    if (followers.size === 0) wotFollowersByTarget.delete(target)
     wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
   })
 }
@@ -101,31 +103,31 @@ function removeFollowerContribution(follower: string) {
 function addMuterContribution(muter: string, targets: string[]) {
   targets.forEach((target) => {
     if (target === muter) return // self-mute: skip
+    const muters = wotMutersByTarget.get(target)
+    if (muters) {
+      if (muters.has(muter)) return // already counted
+      muters.add(muter)
+    } else {
+      wotMutersByTarget.set(target, new Set([muter]))
+    }
     wotMuteMap.set(target, (wotMuteMap.get(target) ?? 0) + 1)
-    wotMutersByTarget.set(target, [...(wotMutersByTarget.get(target) ?? []), muter])
   })
 }
 
 function removeMuterContribution(muter: string) {
   wotMutersByTarget.forEach((muters, target) => {
-    if (!muters.includes(muter)) return
-    const updated = muters.filter((m) => m !== muter)
-    if (updated.length > 0) {
-      wotMutersByTarget.set(target, updated)
-    } else {
-      wotMutersByTarget.delete(target)
-    }
+    if (!muters.has(muter)) return
+    muters.delete(muter)
+    if (muters.size === 0) wotMutersByTarget.delete(target)
     wotMuteMap.set(target, Math.max(0, (wotMuteMap.get(target) ?? 0) - 1))
   })
 }
 
 // For a given signaler, subtract their follow contributions where they also mute (only mute counts).
 function reconcileFollowMuteOverlap(signaler: string) {
-  const muterTargets = wotMutersByTarget
-  muterTargets.forEach((muters, target) => {
-    if (!muters.includes(signaler)) return
-    const followers = wotFollowersByTarget.get(target)
-    if (!followers?.includes(signaler)) return
+  wotMutersByTarget.forEach((muters, target) => {
+    if (!muters.has(signaler)) return
+    if (!wotFollowersByTarget.get(target)?.has(signaler)) return
     wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
   })
 }
@@ -384,8 +386,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       follows: wotScoreMap.get(pubkey) ?? 0,
       mutes: wotMuteMap.get(pubkey) ?? 0,
       myFollowSetSize,
-      sampleFollowers: wotFollowersByTarget.get(pubkey) ?? [],
-      sampleMuters: wotMutersByTarget.get(pubkey) ?? []
+      sampleFollowers: [...(wotFollowersByTarget.get(pubkey) ?? [])],
+      sampleMuters: [...(wotMutersByTarget.get(pubkey) ?? [])]
     }),
     [wotReady, wotVersion]
   )

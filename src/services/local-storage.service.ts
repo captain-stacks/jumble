@@ -106,6 +106,7 @@ class LocalStorageService {
   private dmBackwardCursorMap: Record<string, number> = {}
   private processedSyncRequestIds: string[] = []
   private disableNotificationSync: boolean = false
+  private alwaysShowThreadContext: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -556,6 +557,8 @@ class LocalStorageService {
 
     this.disableNotificationSync =
       window.localStorage.getItem(StorageKey.DISABLE_NOTIFICATION_SYNC) === 'true'
+    this.alwaysShowThreadContext =
+      window.localStorage.getItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -1474,6 +1477,15 @@ class LocalStorageService {
   setDisableNotificationSync(disable: boolean) {
     this.disableNotificationSync = disable
     window.localStorage.setItem(StorageKey.DISABLE_NOTIFICATION_SYNC, disable.toString())
+  }
+
+  getAlwaysShowThreadContext() {
+    return this.alwaysShowThreadContext
+  }
+
+  setAlwaysShowThreadContext(always: boolean) {
+    this.alwaysShowThreadContext = always
+    window.localStorage.setItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT, always.toString())
   }
 }
 

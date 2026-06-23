@@ -38,8 +38,14 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     mediaAutoLoadPolicy,
     setMediaAutoLoadPolicy
   } = useContentPolicy()
-  const { quickReaction, updateQuickReaction, quickReactionEmoji, updateQuickReactionEmoji } =
-    useUserPreferences()
+  const {
+    quickReaction,
+    updateQuickReaction,
+    quickReactionEmoji,
+    updateQuickReactionEmoji,
+    alwaysShowThreadContext,
+    updateAlwaysShowThreadContext
+  } = useUserPreferences()
   const [disableNotificationSync, setDisableNotificationSync] = useState(
     localStorage.getDisableNotificationSync()
   )
@@ -151,6 +157,21 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
           />
           <DefaultTrustScoreFilter />
           <MutedWords />
+        </SettingsGroup>
+
+        <SettingsGroup title={t('Notes')}>
+          <SettingsRow
+            htmlFor="always-show-thread-context"
+            title={t('Always show thread context')}
+            description={t('Always expand the full thread when viewing a note')}
+            control={
+              <Switch
+                id="always-show-thread-context"
+                checked={alwaysShowThreadContext}
+                onCheckedChange={updateAlwaysShowThreadContext}
+              />
+            }
+          />
         </SettingsGroup>
 
         <SettingsGroup title={t('Reactions')}>

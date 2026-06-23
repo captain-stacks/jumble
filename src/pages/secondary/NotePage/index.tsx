@@ -35,6 +35,7 @@ import { tagNameEquals } from '@/lib/tag'
 import { cn } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import threadService from '@/services/thread.service'
 import { TPageRef } from '@/types'
 import { Ellipsis, FoldVertical, UnfoldVertical } from 'lucide-react'
@@ -55,6 +56,7 @@ import NotFound from './NotFound'
 const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, index }, ref) => {
   const { t } = useTranslation()
   const { autoLoadProfilePicture } = useContentPolicy()
+  const { alwaysShowThreadContext } = useUserPreferences()
   const { event: fetchedEvent, isFetching } = useFetchEvent(id)
   const isRepost = isRepostEvent(fetchedEvent)
   const { targetEvent: repostTarget, isResolving: isResolvingRepostTarget } = useRepostTarget(
@@ -119,8 +121,12 @@ const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, in
   }, [expanded, event])
 
   useEffect(() => {
-    if (!canExpand) setExpanded(false)
-  }, [canExpand])
+    if (!canExpand) {
+      setExpanded(false)
+    } else if (alwaysShowThreadContext) {
+      setExpanded(true)
+    }
+  }, [canExpand, alwaysShowThreadContext])
 
   if (!event && (isFetching || isResolvingRepostTarget)) {
     return (
@@ -192,7 +198,9 @@ const NotePage = forwardRef<TPageRef, { id?: string; index?: number }>(({ id, in
                 {autoLoadProfilePicture && <div className="bg-border ms-4.75 h-1.5 w-0.5" />}
               </div>
             )}
-        {canExpand && <ExpandThreadButton expanded={expanded} onToggle={handleToggleExpand} />}
+        {canExpand && !alwaysShowThreadContext && (
+          <ExpandThreadButton expanded={expanded} onToggle={handleToggleExpand} />
+        )}
         <div className={cn('relative px-4 pt-3', canExpand && 'pt-1')}>
           {reposters && <RepostDescription reposters={reposters} />}
           <Note

@@ -2,6 +2,7 @@ import { useFilteredAllReplies } from '@/hooks'
 import { useStuff } from '@/hooks/useStuff'
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
+import { usePostFrom } from '@/providers/PostFromProvider'
 import { MessageCircle } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { useState } from 'react'
@@ -12,6 +13,7 @@ import { formatCount } from './utils'
 export default function ReplyButton({ stuff }: { stuff: Event | string }) {
   const { t } = useTranslation()
   const { checkLogin } = useNostr()
+  const openFrom = usePostFrom()
   const { stuffKey } = useStuff(stuff)
   const { replies, hasReplied } = useFilteredAllReplies(stuffKey)
   const [open, setOpen] = useState(false)
@@ -34,7 +36,7 @@ export default function ReplyButton({ stuff }: { stuff: Event | string }) {
         <MessageCircle />
         {!!replies.length && <div className="text-sm">{formatCount(replies.length)}</div>}
       </button>
-      <PostEditor parentStuff={stuff} open={open} setOpen={setOpen} />
+      <PostEditor parentStuff={stuff} open={open} setOpen={setOpen} openFrom={openFrom} />
     </>
   )
 }

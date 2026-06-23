@@ -1,4 +1,4 @@
-import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS, DEFAULT_RELAY_URL } from '@/constants'
 import { toRelaySettings } from '@/lib/link'
 import { simplifyUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
@@ -118,11 +118,11 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
       </div>
 
       {/* Relay Feeds Section */}
-      {hasRelays && (
-        <div className="space-y-2">
-          <SectionHeader
-            title={t('Relay Feeds')}
-            action={
+      <div className="space-y-2">
+        <SectionHeader
+          title={t('Relay Feeds')}
+          action={
+            hasRelays ? (
               <SecondaryPageLink
                 to={toRelaySettings()}
                 className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
@@ -131,9 +131,26 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 <Settings2 className="size-3" />
                 {t('edit')}
               </SecondaryPageLink>
-            }
-          />
-          <div className="space-y-1.5">
+            ) : undefined
+          }
+        />
+        <div className="space-y-1.5">
+          {pubkey && (
+            <FeedSwitcherItem
+              isActive={feedInfo?.feedType === 'relay' && feedInfo.id === DEFAULT_RELAY_URL}
+              onClick={() => {
+                switchFeed('relay', { relay: DEFAULT_RELAY_URL })
+                close?.()
+              }}
+            >
+              <div className="flex w-full items-center gap-3">
+                <RelayIcon url={DEFAULT_RELAY_URL} className="shrink-0" />
+                <div className="w-0 flex-1 truncate">{simplifyUrl(DEFAULT_RELAY_URL)}</div>
+              </div>
+            </FeedSwitcherItem>
+          )}
+          {hasRelays && (
+            <>
             {filteredRelaySets.map((set) => (
               <RelaySetCard
                 key={set.id}
@@ -161,9 +178,10 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 </div>
               </FeedSwitcherItem>
             ))}
-          </div>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

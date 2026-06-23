@@ -162,6 +162,8 @@ export const SUPPORTED_KINDS = [
   ExtendedKind.EXTERNAL_CONTENT_REACTION
 ]
 
+export const DEFAULT_RELAY_URL = 'wss://chat.virginiafreedom.tech/'
+
 export const DEFAULT_FEED_TABS: TFeedTabConfig[] = [
   { id: 'posts', builtin: 'posts', label: 'Notes', hideReplies: true },
   { id: 'postsAndReplies', builtin: 'postsAndReplies', label: 'Replies' },

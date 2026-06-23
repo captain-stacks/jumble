@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DEFAULT_RELAY_URL } from '@/constants'
 import { formatError } from '@/lib/error'
 import DraftsButton from './DraftsButton'
 import {
@@ -57,6 +58,7 @@ type Props = {
   requestClose?: () => void
   onOpenDrafts?: () => void
   onParentClick?: (parentEvent: Event) => void
+  onRelayChoice?: () => Promise<'relay' | 'network' | null>
   openFrom?: string[]
   highlightedText?: string
   initialDraft?: TPostDraftUnsigned
@@ -70,6 +72,7 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
     requestClose,
     onOpenDrafts,
     onParentClick,
+    onRelayChoice,
     openFrom,
     highlightedText,
     initialDraft
@@ -143,6 +146,8 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
     }
   )
   const [minPow, setMinPow] = useState(initialDraft?.minPow ?? 0)
+  const isDefaultRelayShouldAsk = openFrom?.includes(DEFAULT_RELAY_URL) ?? false
+
   const userDismissedProtected = useRef(false)
   const handleProtectedSuggestionChange = useCallback((suggested: boolean) => {
     if (suggested && !userDismissedProtected.current) {
@@ -318,13 +323,27 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
 
   const postingRef = useRef(false)
 
-  const post = async (e?: React.MouseEvent) => {
+  const post = async (e?: React.MouseEvent, postMode?: 'relay' | 'network') => {
     e?.stopPropagation()
+
+    let effectiveMode = postMode
+    if (isDefaultRelayShouldAsk && postMode === undefined && onRelayChoice) {
+      const choice = await onRelayChoice()
+      if (choice === null) return
+      effectiveMode = choice
+    }
+
     checkLogin(async () => {
       const targetAccount = postAsAccount ?? account
       if (!canPost || !pubkey || !targetAccount || targetAccount.signerType === 'npub') return
       if (postingRef.current) return
       postingRef.current = true
+
+      const effectiveIsProtected =
+        effectiveMode === 'relay' ? true : effectiveMode === 'network' ? false : isProtectedEvent
+      const effectiveAdditionalRelayUrls =
+        effectiveMode === 'relay' ? [DEFAULT_RELAY_URL] : effectiveMode === 'network' ? [] : additionalRelayUrls
+
       try {
         // Persist the content as a draft immediately, before the fallible relay
         // lookup and signing run, so an interrupted or failed send never loses it.
@@ -348,17 +367,17 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
           pollCreateData,
           pubkey: targetPubkey,
           addClientTag,
-          isProtectedEvent,
+          isProtectedEvent: effectiveIsProtected,
           isNsfw
         })
 
-        const _additionalRelayUrls = [...additionalRelayUrls]
+        const _additionalRelayUrls = [...effectiveAdditionalRelayUrls]
         if (initialParentStuff && typeof initialParentStuff === 'string') {
           _additionalRelayUrls.push(...getDefaultRelayUrls())
         }
 
         const publishOptions = {
-          specifiedRelayUrls: isProtectedEvent ? additionalRelayUrls : undefined,
+          specifiedRelayUrls: effectiveIsProtected ? effectiveAdditionalRelayUrls : undefined,
           additionalRelayUrls: isPoll ? pollCreateData.relays : _additionalRelayUrls,
           minPow
         }
@@ -663,6 +682,7 @@ const PostContent = forwardRef<TPostContentHandle, Props>(function PostContent(
           </div>
         </>
       )}
+
     </div>
   )
 })

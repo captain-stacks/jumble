@@ -20,7 +20,8 @@ export default function NormalFeed({
   showRelayCloseReason = false,
   disable24hMode = false,
   onRefresh,
-  isPubkeyFeed = false
+  isPubkeyFeed = false,
+  defaultTabId
 }: {
   feedId: string
   subRequests: TFeedSubRequest[]
@@ -29,6 +30,7 @@ export default function NormalFeed({
   disable24hMode?: boolean
   onRefresh?: () => void
   isPubkeyFeed?: boolean
+  defaultTabId?: string
 }) {
   const { getShowKinds } = useKindFilter()
   const { getMinTrustScore } = useUserTrust()
@@ -41,7 +43,7 @@ export default function NormalFeed({
     [feedTabs, disable24hMode]
   )
 
-  const [selectedTabId, setSelectedTabId] = useState<string | undefined>()
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(defaultTabId)
   const selectedTab: TFeedTabConfig = selectedTabId
     ? (visibleTabs.find((tab) => tab.id === selectedTabId) ?? visibleTabs[0])
     : visibleTabs[0]

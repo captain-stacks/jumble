@@ -1,7 +1,8 @@
 import NormalFeed from '@/components/NormalFeed'
-import { SPECIAL_FEED_ID } from '@/constants'
+import { DEFAULT_RELAY_URL, SPECIAL_FEED_ID } from '@/constants'
 import { checkAlgoRelay } from '@/lib/relay'
 import { useFeed } from '@/providers/FeedProvider'
+import { PostFromProvider } from '@/providers/PostFromProvider'
 import relayInfoService from '@/services/relay-info.service'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -34,12 +35,20 @@ export default function RelaysFeed() {
     return null
   }
 
+  const postFrom =
+    feedInfo?.feedType === 'relay' && feedInfo.id === DEFAULT_RELAY_URL
+      ? [DEFAULT_RELAY_URL]
+      : undefined
+
   return (
-    <NormalFeed
-      feedId={feedId}
-      subRequests={[{ urls: relayUrls, filter: {} }]}
-      areAlgoRelays={areAlgoRelays}
-      showRelayCloseReason
-    />
+    <PostFromProvider value={postFrom}>
+      <NormalFeed
+        feedId={feedId}
+        subRequests={[{ urls: relayUrls, filter: {} }]}
+        areAlgoRelays={areAlgoRelays}
+        showRelayCloseReason
+        defaultTabId="postsAndReplies"
+      />
+    </PostFromProvider>
   )
 }

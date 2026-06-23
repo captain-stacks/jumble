@@ -1,4 +1,4 @@
-import { ExtendedKind } from '@/constants'
+import { DEFAULT_RELAY_URL, ExtendedKind } from '@/constants'
 import { ElectronPool } from '@/lib/electron-pool'
 import {
   compareEvents,
@@ -209,6 +209,8 @@ class ClientService extends EventTarget {
           defaultRelays.forEach((url) => relaySet.add(url))
         }
       }
+
+      relaySet.delete(DEFAULT_RELAY_URL)
     }
 
     if (!relaySet.size) {

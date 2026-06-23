@@ -18,7 +18,9 @@ import {
 } from '@/components/ui/dialog'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { DEFAULT_RELAY_URL } from '@/constants'
 import { toNote } from '@/lib/link'
+import { simplifyUrl } from '@/lib/url'
 import { useSecondaryPage } from '@/PageManager'
 import { useDraftBox } from '@/providers/DraftBoxProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -27,7 +29,7 @@ import postDraftService from '@/services/post-draft.service'
 import postEditor from '@/services/post-editor.service'
 import { TPostDraftUnsigned } from '@/types/post-draft'
 import { Event } from 'nostr-tools'
-import { Dispatch, useMemo, useRef, useState } from 'react'
+import { Dispatch, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DraftsButton from './DraftsButton'
 import PostContent, { TPostContentHandle } from './PostContent'
@@ -57,6 +59,17 @@ export default function PostEditor({
   const { push } = useSecondaryPage()
   const contentRef = useRef<TPostContentHandle>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [relayChoiceOpen, setRelayChoiceOpen] = useState(false)
+  const relayChoiceResolveRef = useRef<((v: 'relay' | 'network' | null) => void) | null>(null)
+
+  const relayName = simplifyUrl(DEFAULT_RELAY_URL)
+
+  const onRelayChoice = useCallback((): Promise<'relay' | 'network' | null> => {
+    return new Promise((resolve) => {
+      relayChoiceResolveRef.current = resolve
+      setRelayChoiceOpen(true)
+    })
+  }, [])
   // When this editor is opened straight from the drafts box, the drafts drawer's
   // closing transition can fire a spurious outside-dismiss on the freshly-mounted
   // editor. Ignore close events in the first moments after mount.
@@ -182,12 +195,13 @@ export default function PostEditor({
         requestClose={() => setOpen(false)}
         onOpenDrafts={openDraftsFromEditor}
         onParentClick={navigateToParent}
+        onRelayChoice={onRelayChoice}
         openFrom={openFrom}
         highlightedText={highlightedText}
         initialDraft={resolvedInitialDraft}
       />
     )
-  }, [highlightedText, resolvedInitialDraft])
+  }, [highlightedText, resolvedInitialDraft, openFrom, onRelayChoice])
 
   return (
     <>
@@ -288,6 +302,54 @@ export default function PostEditor({
                 {t('Discard')}
               </AlertDialogAction>
               <AlertDialogAction onClick={onConfirmSave}>{t('Save')}</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {isSmallScreen ? (
+        <Drawer open={relayChoiceOpen} onOpenChange={(open) => { if (!open) { relayChoiceResolveRef.current?.(null); relayChoiceResolveRef.current = null } setRelayChoiceOpen(open) }}>
+          <DrawerContent title="Where do you want to post?">
+            <div className="space-y-4 px-4 pb-2">
+              <div className="space-y-1 text-center">
+                <div className="text-base font-semibold">Where do you want to post?</div>
+                <div className="text-sm text-muted-foreground">
+                  Post only to {relayName}, or share with the wider Nostr network?
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button size="lg" className="w-full" onClick={() => { relayChoiceResolveRef.current?.('relay'); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }}>
+                  {relayName}
+                </Button>
+                <Button size="lg" variant="secondary" className="w-full" onClick={() => { relayChoiceResolveRef.current?.('network'); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }}>
+                  Wider network
+                </Button>
+                <Button size="lg" variant="ghost" className="w-full" onClick={() => { relayChoiceResolveRef.current?.(null); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <AlertDialog open={relayChoiceOpen} onOpenChange={(open) => { if (!open) { relayChoiceResolveRef.current?.(null); relayChoiceResolveRef.current = null } setRelayChoiceOpen(open) }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Where do you want to post?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Post only to {relayName}, or share with the wider Nostr network?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => { relayChoiceResolveRef.current?.(null); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }} className="sm:me-auto">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction variant="ghost" onClick={() => { relayChoiceResolveRef.current?.('network'); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }}>
+                Wider network
+              </AlertDialogAction>
+              <AlertDialogAction onClick={() => { relayChoiceResolveRef.current?.('relay'); relayChoiceResolveRef.current = null; setRelayChoiceOpen(false) }}>
+                {relayName}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

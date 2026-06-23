@@ -1,4 +1,4 @@
-import { IS_COMMUNITY_MODE, BIG_RELAY_URLS, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import { IS_COMMUNITY_MODE, BIG_RELAY_URLS, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS, DEFAULT_RELAY_URL } from '@/constants'
 import { getRelaySetFromEvent } from '@/lib/event-metadata'
 import { isWebsocketUrl, normalizeUrl } from '@/lib/url'
 import indexedDb from '@/services/indexed-db.service'
@@ -50,7 +50,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
           feedInfo = storedFeedInfo
         } else {
           if (!IS_COMMUNITY_MODE) {
-            feedInfo = { feedType: 'following' }
+            feedInfo = { feedType: 'relay', id: DEFAULT_RELAY_URL }
           }
         }
       } else if (
@@ -60,6 +60,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       ) {
         return await switchFeed(null)
       }
+      if (!feedInfo && !IS_COMMUNITY_MODE) {
+        feedInfo = { feedType: 'relay', id: DEFAULT_RELAY_URL }
+      }
+
       if (!feedInfo && IS_COMMUNITY_MODE) {
         feedInfo =
           COMMUNITY_RELAY_SETS.length > 0

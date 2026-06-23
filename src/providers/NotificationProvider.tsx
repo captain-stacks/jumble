@@ -1,5 +1,6 @@
 import { useDmUnread } from '@/hooks/useDmUnread'
 import { useNotificationFilter } from '@/hooks/useNotificationFilter'
+import { REACTION_KINDS } from '@/lib/notification'
 import { usePrimaryPage } from '@/PageManager'
 import notificationService from '@/services/notification.service'
 import storage from '@/services/local-storage.service'
@@ -20,6 +21,8 @@ type TNotificationContext = {
   getNotificationsSeenAt: () => number
   isNotificationRead: (id: string) => boolean
   markNotificationAsRead: (id: string) => void
+  hideReactions: boolean
+  setHideReactions: (hide: boolean) => void
 }
 
 const NotificationContext = createContext<TNotificationContext | undefined>(undefined)
@@ -39,8 +42,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const filterFn = useNotificationFilter()
   const [readNotificationIdSet, setReadNotificationIdSet] = useState<Set<string>>(new Set())
   const [filteredNewNotifications, setFilteredNewNotifications] = useState<NostrEvent[]>([])
+  const [hideReactions, setHideReactionsState] = useState(() => storage.getHideReactionNotifications())
   const { unreadCount: dmUnreadCount } = useDmUnread()
   const wasActiveRef = useRef(false)
+
+  const setHideReactions = useCallback((hide: boolean) => {
+    setHideReactionsState(hide)
+    storage.setHideReactionNotifications(hide)
+  }, [])
+
+  useEffect(() => {
+    notificationService.setExcludedKinds(hideReactions ? REACTION_KINDS : new Set())
+  }, [hideReactions])
 
   useEffect(() => {
     if (!pubkey) {
@@ -177,7 +190,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         hasNewNotification: filteredNewNotifications.length > 0,
         getNotificationsSeenAt,
         isNotificationRead,
-        markNotificationAsRead
+        markNotificationAsRead,
+        hideReactions,
+        setHideReactions
       }}
     >
       {children}

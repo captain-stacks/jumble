@@ -11,10 +11,12 @@ import Notification from './Notification'
 
 export function ReactionNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const { pubkey } = useNostr()
@@ -71,6 +73,7 @@ export function ReactionNotification({
       targetEvent={event}
       description={t('reacted to your note')}
       isNew={isNew}
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

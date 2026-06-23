@@ -10,10 +10,12 @@ import Notification from './Notification'
 
 export function ZapNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const { senderPubkey, eventId, amount, comment } = useMemo(
@@ -49,6 +51,7 @@ export function ZapNotification({
       }
       description={event ? t('zapped your note') : t('zapped you')}
       isNew={isNew}
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

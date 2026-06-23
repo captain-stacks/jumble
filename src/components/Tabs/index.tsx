@@ -1,8 +1,9 @@
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useDeepBrowsing } from '@/providers/DeepBrowsingProvider'
-import { SlidersHorizontal } from 'lucide-react'
+import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 import {
   Children,
   Fragment,
@@ -20,6 +21,8 @@ type TabDefinition = {
   label: string
   dot?: boolean
   count?: number
+  strikethrough?: boolean
+  menu?: ReactNode
 }
 
 export default function Tabs({
@@ -155,23 +158,37 @@ export default function Tabs({
               key={tab.value}
               ref={(el) => (tabRefs.current[index] = el)}
               className={cn(
-                `clickable relative my-1 w-fit cursor-pointer whitespace-nowrap rounded-xl px-3 py-2 text-center font-semibold transition-all duration-200`,
+                `clickable relative my-1 flex w-fit items-center whitespace-nowrap rounded-xl px-3 py-2 text-center font-semibold transition-all duration-200`,
                 value === tab.value
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
-              onClick={() => {
-                onTabChange?.(tab.value)
-              }}
             >
-              {t(tab.label)}
-              {tab.count != null && tab.count > 0 && (
-                <span className="ms-1 align-middle text-xs font-semibold tabular-nums text-muted-foreground">
-                  {tab.count >= 100 ? '99+' : tab.count}
-                </span>
-              )}
-              {tab.dot && (
-                <span className="relative -top-1 ms-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+              <span
+                className={cn('cursor-pointer', tab.strikethrough && 'line-through')}
+                onClick={() => onTabChange?.(tab.value)}
+              >
+                {t(tab.label)}
+                {tab.count != null && tab.count > 0 && (
+                  <span className="ms-1 align-middle text-xs font-semibold tabular-nums text-muted-foreground">
+                    {tab.count >= 100 ? '99+' : tab.count}
+                  </span>
+                )}
+                {tab.dot && (
+                  <span className="relative -top-1 ms-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
+              </span>
+              {tab.menu && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="ms-0.5 inline-flex items-center rounded opacity-50 hover:opacity-100">
+                      <ChevronDown size={12} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-auto min-w-36 p-2">
+                    {tab.menu}
+                  </PopoverContent>
+                </Popover>
               )}
             </div>
           ))}

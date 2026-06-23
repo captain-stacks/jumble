@@ -16,10 +16,12 @@ import Notification from './Notification'
 
 export function MentionNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
@@ -115,6 +117,7 @@ export function MentionNotification({
       }
       isNew={isNew}
       showStats
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

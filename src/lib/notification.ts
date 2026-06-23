@@ -2,6 +2,8 @@ import { kinds, NostrEvent } from 'nostr-tools'
 import { isMentioningMutedUsers } from './event'
 import { tagNameEquals } from './tag'
 
+export const REACTION_KINDS = new Set([kinds.Reaction, kinds.Repost, kinds.GenericRepost, 1018])
+
 export async function notificationFilter(
   event: NostrEvent,
   {

@@ -1,6 +1,8 @@
 import { ExtendedKind, SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { useInfiniteScroll } from '@/hooks'
 import { useNotificationFilter } from '@/hooks/useNotificationFilter'
+import { getAmountFromInvoice } from '@/lib/lightning'
+import { REACTION_KINDS } from '@/lib/notification'
 import { tagNameEquals } from '@/lib/tag'
 import { cn, isTouchDevice } from '@/lib/utils'
 import { usePrimaryPage } from '@/PageManager'
@@ -30,10 +32,15 @@ export default function NotificationList() {
   const { t } = useTranslation()
   const { current } = usePrimaryPage()
   const { pubkey } = useNostr()
-  const { getNotificationsSeenAt } = useNotification()
+  const { getNotificationsSeenAt, hideReactions, setHideReactions } = useNotification()
   const { mutePubkeySet } = useMuteList()
   const filterFn = useNotificationFilter()
-  const [notificationType, setNotificationType] = useState<TNotificationType>('all')
+  const [notificationType, setNotificationType] = useState<TNotificationType>(
+    () => localStorage.getLastNotificationType()
+  )
+  const notificationTypeRef = useRef(notificationType)
+  notificationTypeRef.current = notificationType
+  const [minZapAmount, setMinZapAmount] = useState(() => localStorage.getMinZapNotificationAmount())
   const [lastReadTime, setLastReadTime] = useState(0)
   const [mutedLastReadTime, setMutedLastReadTime] = useState(0)
   const [filteredEvents, setFilteredEvents] = useState<NostrEvent[]>([])
@@ -72,7 +79,13 @@ export default function NotificationList() {
   const wasActiveRef = useRef(false)
   useEffect(() => {
     if (current !== 'notifications' || !pubkey) {
-      wasActiveRef.current = false
+      if (wasActiveRef.current) {
+        wasActiveRef.current = false
+        const type = notificationTypeRef.current
+        if (type !== 'all' && type !== 'mentions') {
+          setNotificationType(localStorage.getLastNotificationType())
+        }
+      }
       return
     }
     if (wasActiveRef.current) return
@@ -165,15 +178,42 @@ export default function NotificationList() {
     [mutedFilteredEvents, mutedLastReadTime]
   )
 
+  const hasNewReactionNotifications = useMemo(
+    () =>
+      notificationType === 'mentions' &&
+      filteredEvents.some((e) => REACTION_KINDS.has(e.kind) && e.created_at > lastReadTime),
+    [notificationType, filteredEvents, lastReadTime]
+  )
+
+  const hasNewZapNotifications = useMemo(
+    () =>
+      notificationType === 'mentions' &&
+      filteredEvents.some((e) => {
+        if (e.kind !== kinds.Zap || e.created_at <= lastReadTime) return false
+        if (minZapAmount <= 0) return true
+        const bolt11 = e.tags.find((t) => t[0] === 'bolt11')?.[1]
+        return bolt11 ? getAmountFromInvoice(bolt11) >= minZapAmount : false
+      }),
+    [notificationType, filteredEvents, lastReadTime, minZapAmount]
+  )
+
   const handleLoadMore = useCallback(async () => {
     return notificationService.loadMore(LOAD_MORE_LIMIT)
   }, [])
 
   const notifications = useMemo(() => {
     if (notificationType === 'muted') return mutedFilteredEvents
-    if (!filterKinds) return filteredEvents
-    return filteredEvents.filter((evt) => filterKinds.has(evt.kind))
-  }, [filteredEvents, mutedFilteredEvents, filterKinds, notificationType])
+    const base =
+      minZapAmount > 0
+        ? filteredEvents.filter((evt) => {
+            if (evt.kind !== kinds.Zap) return true
+            const bolt11 = evt.tags.find((t) => t[0] === 'bolt11')?.[1]
+            return bolt11 ? getAmountFromInvoice(bolt11) >= minZapAmount : false
+          })
+        : filteredEvents
+    if (!filterKinds) return base
+    return base.filter((evt) => filterKinds.has(evt.kind))
+  }, [filteredEvents, mutedFilteredEvents, filterKinds, notificationType, minZapAmount])
 
   const { visibleItems, shouldShowLoadingIndicator, bottomRef, setShowCount } = useInfiniteScroll({
     items: notifications,
@@ -227,13 +267,54 @@ export default function NotificationList() {
         tabs={[
           { value: 'all', label: 'All' },
           { value: 'mentions', label: 'Mentions' },
-          { value: 'reactions', label: 'Reactions' },
-          { value: 'zaps', label: 'Zaps' },
+          {
+            value: 'reactions',
+            label: 'Reactions',
+            strikethrough: hideReactions,
+            dot: hasNewReactionNotifications,
+            menu: hideReactions ? undefined : (
+              <button
+                className="w-full cursor-pointer text-start text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setHideReactions(true)
+                  setNotificationType(localStorage.getLastNotificationType())
+                }}
+              >
+                {t('hide reactions')}
+              </button>
+            )
+          },
+          {
+            value: 'zaps',
+            label: 'Zaps',
+            dot: hasNewZapNotifications,
+            menu: (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{t('Min sats')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="w-20 rounded-lg border bg-background px-2 py-1 text-sm outline-none"
+                  value={minZapAmount}
+                  onChange={(e) => {
+                    const val = Math.max(0, parseInt(e.target.value) || 0)
+                    setMinZapAmount(val)
+                    localStorage.setMinZapNotificationAmount(val)
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )
+          },
           { value: 'muted', label: 'Muted', dot: hasNewMutedNotifications }
         ]}
         onTabChange={(type) => {
+          if (type === 'reactions' && hideReactions) {
+            setHideReactions(false)
+          }
           setShowCount(SHOW_COUNT)
           setNotificationType(type as TNotificationType)
+          if (type === 'all' || type === 'mentions') localStorage.setLastNotificationType(type)
           topRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
           if (type === 'muted' && pubkey) {
             const now = dayjs().unix()

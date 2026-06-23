@@ -8,10 +8,12 @@ import { useTranslation } from 'react-i18next'
 
 export function PollResponseNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const eventId = useMemo(() => {
@@ -33,6 +35,7 @@ export function PollResponseNotification({
       targetEvent={pollEvent}
       description={t('voted in your poll')}
       isNew={isNew}
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

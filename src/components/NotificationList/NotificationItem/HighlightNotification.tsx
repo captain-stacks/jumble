@@ -5,10 +5,12 @@ import Notification from './Notification'
 
 export function HighlightNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -21,6 +23,7 @@ export function HighlightNotification({
       targetEvent={notification}
       description={t('highlighted your note')}
       isNew={isNew}
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

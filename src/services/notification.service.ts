@@ -27,6 +27,7 @@ class NotificationService {
 
   private currentPubkey: string | null = null
   private events: NostrEvent[] = []
+  private excludedKinds: Set<number> = new Set()
   private timelineKey: string | undefined
   private until: number | undefined
   private subscriptionCloser: (() => void) | null = null
@@ -47,7 +48,13 @@ class NotificationService {
   }
 
   getEvents(): NostrEvent[] {
-    return this.events
+    if (this.excludedKinds.size === 0) return this.events
+    return this.events.filter((e) => !this.excludedKinds.has(e.kind))
+  }
+
+  setExcludedKinds(kinds: Set<number>): void {
+    this.excludedKinds = kinds
+    this.emitDataChanged()
   }
 
   getInitialLoading(): boolean {
@@ -133,7 +140,9 @@ class NotificationService {
       return false
     }
 
-    const filtered = newEvents.filter((evt) => evt.pubkey !== this.currentPubkey)
+    const filtered = newEvents
+      .filter((evt) => evt.pubkey !== this.currentPubkey)
+      .filter((evt) => !this.excludedKinds.has(evt.kind))
     if (filtered.length > 0) {
       const idSet = new Set(this.events.map((e) => e.id))
       for (const evt of filtered) {
@@ -185,7 +194,9 @@ class NotificationService {
       {
         onEvents: (events, eosed) => {
           if (this.currentPubkey !== pubkey) return
-          const filteredEvents = events.filter((evt) => evt.pubkey !== pubkey)
+          const filteredEvents = events
+            .filter((evt) => evt.pubkey !== pubkey)
+            .filter((evt) => !this.excludedKinds.has(evt.kind))
           if (eosed) {
             this.events = this.mergeWithStored(filteredEvents)
             this.until =
@@ -219,6 +230,7 @@ class NotificationService {
   }
 
   private handleNewEvent(event: NostrEvent): void {
+    if (this.excludedKinds.has(event.kind)) return
     const idx = this.events.findIndex((e) => compareEvents(e, event) <= 0)
     if (idx !== -1 && this.events[idx].id === event.id) {
       return

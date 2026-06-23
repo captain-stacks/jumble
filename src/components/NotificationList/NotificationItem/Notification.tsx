@@ -27,7 +27,8 @@ export default function Notification({
   middle = null,
   targetEvent,
   isNew = false,
-  showStats = false
+  showStats = false,
+  skipMuteCheck = false
 }: {
   icon: React.ReactNode
   notificationId: string
@@ -38,6 +39,7 @@ export default function Notification({
   targetEvent?: NostrEvent
   isNew?: boolean
   showStats?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
@@ -93,6 +95,7 @@ export default function Notification({
                 unread ? 'font-semibold' : 'text-muted-foreground'
               )}
               event={targetEvent}
+              skipMuteCheck={skipMuteCheck}
             />
           )}
         </div>
@@ -139,6 +142,7 @@ export default function Notification({
           <ContentPreview
             className={cn('line-clamp-2', !unread && 'text-muted-foreground')}
             event={targetEvent}
+            skipMuteCheck={skipMuteCheck}
           />
         )}
         <FormattedTimestamp timestamp={sentAt} className="shrink-0 text-sm text-muted-foreground" />

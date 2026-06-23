@@ -27,6 +27,7 @@ import {
   TMediaAutoLoadPolicy,
   TMediaUploadServiceConfig,
   TNotificationStyle,
+  TNotificationType,
   TNsfwDisplayPolicy,
   TProfilePictureAutoLoadPolicy,
   TRelaySet,
@@ -83,6 +84,9 @@ class LocalStorageService {
   private minTrustScoreMap: Record<string, number> = {}
   private trustDecay: number = 7
   private hideIndirectNotifications: boolean = false
+  private hideReactionNotifications: boolean = false
+  private minZapNotificationAmount: number = 0
+  private lastNotificationType: Exclude<TNotificationType, 'muted' | 'reactions' | 'zaps'> = 'all'
   private encryptionKeyPrivkeyMap: Record<string, string> = {}
   // Rotated-out encryption keys kept around (per account) so messages still
   // encrypted to them can be decrypted during the grace period. retiredAt is in ms.
@@ -538,6 +542,17 @@ class LocalStorageService {
 
     this.hideIndirectNotifications =
       window.localStorage.getItem(StorageKey.HIDE_INDIRECT_NOTIFICATIONS) === 'true'
+
+    this.hideReactionNotifications =
+      window.localStorage.getItem(StorageKey.HIDE_REACTION_NOTIFICATIONS) === 'true'
+
+    this.minZapNotificationAmount =
+      parseInt(window.localStorage.getItem(StorageKey.MIN_ZAP_NOTIFICATION_AMOUNT) ?? '0') || 0
+
+    const savedNotifType = window.localStorage.getItem(StorageKey.NOTIFICATION_TYPE)
+    if (savedNotifType === 'all' || savedNotifType === 'mentions') {
+      this.lastNotificationType = savedNotifType
+    }
 
     this.disableNotificationSync =
       window.localStorage.getItem(StorageKey.DISABLE_NOTIFICATION_SYNC) === 'true'
@@ -1302,6 +1317,33 @@ class LocalStorageService {
   setHideIndirectNotifications(onlyShow: boolean) {
     this.hideIndirectNotifications = onlyShow
     window.localStorage.setItem(StorageKey.HIDE_INDIRECT_NOTIFICATIONS, onlyShow.toString())
+  }
+
+  getHideReactionNotifications() {
+    return this.hideReactionNotifications
+  }
+
+  setHideReactionNotifications(hide: boolean) {
+    this.hideReactionNotifications = hide
+    window.localStorage.setItem(StorageKey.HIDE_REACTION_NOTIFICATIONS, hide.toString())
+  }
+
+  getMinZapNotificationAmount() {
+    return this.minZapNotificationAmount
+  }
+
+  setMinZapNotificationAmount(amount: number) {
+    this.minZapNotificationAmount = amount
+    window.localStorage.setItem(StorageKey.MIN_ZAP_NOTIFICATION_AMOUNT, amount.toString())
+  }
+
+  getLastNotificationType() {
+    return this.lastNotificationType
+  }
+
+  setLastNotificationType(type: Exclude<TNotificationType, 'muted' | 'reactions' | 'zaps'>) {
+    this.lastNotificationType = type
+    window.localStorage.setItem(StorageKey.NOTIFICATION_TYPE, type)
   }
 
   getEncryptionKeyPrivkey(accountPubkey: string): string | null {

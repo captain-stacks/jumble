@@ -56,6 +56,8 @@ export const StorageKey = {
   SEARCH_RELAY_URLS: 'searchRelayUrls',
   SEARCH_HISTORY: 'searchHistory',
   HIDE_INDIRECT_NOTIFICATIONS: 'hideIndirectNotifications',
+  HIDE_REACTION_NOTIFICATIONS: 'hideReactionNotifications',
+  MIN_ZAP_NOTIFICATION_AMOUNT: 'minZapNotificationAmount',
   ENCRYPTION_KEY_PRIVKEY_MAP: 'encryptionKeyPrivkeyMap',
   RETIRED_ENCRYPTION_KEY_PRIVKEY_MAP: 'retiredEncryptionKeyPrivkeyMap',
   CLIENT_KEY_PRIVKEY_MAP: 'clientKeyPrivkeyMap',

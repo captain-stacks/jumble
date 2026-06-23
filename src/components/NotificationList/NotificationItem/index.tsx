@@ -83,7 +83,7 @@ export function NotificationItem({
   if (!canShow) return null
 
   if (notification.kind === kinds.Reaction) {
-    return <ReactionNotification notification={notification} isNew={isNew} />
+    return <ReactionNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   if (
     notification.kind === kinds.ShortTextNote ||
@@ -91,19 +91,19 @@ export function NotificationItem({
     notification.kind === ExtendedKind.VOICE_COMMENT ||
     notification.kind === ExtendedKind.POLL
   ) {
-    return <MentionNotification notification={notification} isNew={isNew} />
+    return <MentionNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   if (notification.kind === kinds.Repost || notification.kind === kinds.GenericRepost) {
-    return <RepostNotification notification={notification} isNew={isNew} />
+    return <RepostNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   if (notification.kind === kinds.Zap) {
-    return <ZapNotification notification={notification} isNew={isNew} />
+    return <ZapNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   if (notification.kind === ExtendedKind.POLL_RESPONSE) {
-    return <PollResponseNotification notification={notification} isNew={isNew} />
+    return <PollResponseNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   if (notification.kind === kinds.Highlights) {
-    return <HighlightNotification notification={notification} isNew={isNew} />
+    return <HighlightNotification notification={notification} isNew={isNew} skipMuteCheck={skipMuteCheck} />
   }
   return null
 }

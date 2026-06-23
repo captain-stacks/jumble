@@ -9,10 +9,12 @@ import Notification from './Notification'
 
 export function RepostNotification({
   notification,
-  isNew = false
+  isNew = false,
+  skipMuteCheck = false
 }: {
   notification: Event
   isNew?: boolean
+  skipMuteCheck?: boolean
 }) {
   const { t } = useTranslation()
   const { pubkey } = useNostr()
@@ -42,6 +44,7 @@ export function RepostNotification({
       targetEvent={event}
       description={t('reposted your note')}
       isNew={isNew}
+      skipMuteCheck={skipMuteCheck}
     />
   )
 }

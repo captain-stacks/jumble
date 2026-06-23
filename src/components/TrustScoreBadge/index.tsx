@@ -16,7 +16,7 @@ export default function TrustScoreBadge({
 }) {
   const { t } = useTranslation()
   const { pubkey: currentPubkey } = useNostr()
-  const { computeTrustScore, isUserTrusted, wotReady } = useUserTrust()
+  const { computeTrustScore, isUserTrusted } = useUserTrust()
 
   if (!currentPubkey) return null
 

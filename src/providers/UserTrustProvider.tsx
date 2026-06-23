@@ -54,6 +54,20 @@ let _trustDecay = 7
 let _maxRaw = 0
 let _minRaw = 0
 
+function resetWotState() {
+  wotScoreMap.clear()
+  wotMuteMap.clear()
+  wotFollowersByTarget.clear()
+  wotMutersByTarget.clear()
+  myFollowSetSize = 0
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    resetWotState()
+  })
+}
+
 function recomputeDecayBounds(decay: number) {
   _trustDecay = decay
   _maxRaw = Math.exp((-decay * PRIOR_RATE * TRUST_PRIOR_MUTE_RATE) / (FOLLOW_RATE_CAP + PRIOR_RATE))
@@ -153,6 +167,8 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   // Snapshot used to diff against on next change. null = WoT not ready yet.
   const prevFollowingSetRef = useRef<Set<string> | null>(null)
+  const prevWotReadyRef = useRef(false)
+  const initInProgressRef = useRef(false)
 
   // Readable ref so the follow effect can see the latest value without re-subscribing.
   const followingSetRef = useRef(followingSet)
@@ -164,11 +180,9 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
     setWotReady(false)
     prevFollowingSetRef.current = null
-    wotScoreMap.clear()
-    wotMuteMap.clear()
-    wotFollowersByTarget.clear()
-    wotMutersByTarget.clear()
-    myFollowSetSize = 0
+    prevWotReadyRef.current = false
+    initInProgressRef.current = true
+    resetWotState()
 
     let cancelled = false
 
@@ -231,40 +245,47 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         })
       })
 
+      initInProgressRef.current = false
       setWotReady(true)
     }
     initWoT()
 
     return () => {
       cancelled = true
+      initInProgressRef.current = false
     }
   }, [currentPubkey])
 
-  // When WoT finishes loading, snapshot the current follow set as the baseline.
+  // Snapshot the follow set baseline once when WoT finishes loading.
   useEffect(() => {
     if (!wotReady) {
       prevFollowingSetRef.current = null
+      prevWotReadyRef.current = false
       return
     }
 
-    prevFollowingSetRef.current = new Set(followingSetRef.current)
-    setWotVersion((v) => v + 1)
+    if (!prevWotReadyRef.current) {
+      prevFollowingSetRef.current = new Set(followingSetRef.current)
+      myFollowSetSize = followingSetRef.current.size
+      setWotVersion((v) => v + 1)
+    }
+    prevWotReadyRef.current = true
   }, [wotReady])
 
   // Incremental update when the current user follows or unfollows someone.
   useEffect(() => {
     const prev = prevFollowingSetRef.current
-    if (prev === null) return // WoT not ready
+    if (prev === null || initInProgressRef.current) return // WoT not ready or rebuilding
 
     const added = [...followingSet].filter((pk) => !prev.has(pk))
     const removed = [...prev].filter((pk) => !followingSet.has(pk))
     if (added.length === 0 && removed.length === 0) return
 
     prevFollowingSetRef.current = new Set(followingSet)
+    myFollowSetSize = followingSet.size
 
     // Synchronously remove contributions from unfollowed people.
     removed.forEach((removedPubkey) => {
-      myFollowSetSize = Math.max(0, myFollowSetSize - 1)
       removeFollowerContribution(removedPubkey)
       removeMuterContribution(removedPubkey)
     })
@@ -275,8 +296,6 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     if (added.length > 0) {
       ;(async () => {
         for (const newPubkey of added) {
-          myFollowSetSize++
-
           const uniqueFollowings = [...new Set(await client.fetchFollowings(newPubkey, false))]
           addFollowerContribution(newPubkey, uniqueFollowings)
 

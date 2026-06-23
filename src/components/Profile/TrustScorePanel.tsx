@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { Users, VolumeX } from 'lucide-react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
@@ -10,10 +11,25 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
   const { pubkey: currentPubkey } = useNostr()
   const { computeTrustScore, getWotStats, wotReady } = useUserTrust()
 
-  if (!currentPubkey || !wotReady) return null
+  const { follows, mutes, myFollowSetSize, sampleFollowers, sampleMuters } = useMemo(
+    () =>
+      currentPubkey && wotReady
+        ? getWotStats(pubkey)
+        : { follows: 0, mutes: 0, myFollowSetSize: 0, sampleFollowers: [], sampleMuters: [] },
+    [currentPubkey, wotReady, getWotStats, pubkey]
+  )
+  const score = currentPubkey && wotReady ? computeTrustScore(pubkey) : 0
 
-  const { follows, mutes, myFollowSetSize, sampleFollowers, sampleMuters } = getWotStats(pubkey)
-  const score = computeTrustScore(pubkey)
+  const sortedFollowers = useMemo(
+    () => [...sampleFollowers].sort((a, b) => computeTrustScore(b) - computeTrustScore(a)),
+    [sampleFollowers, computeTrustScore]
+  )
+  const sortedMuters = useMemo(
+    () => [...sampleMuters].sort((a, b) => computeTrustScore(b) - computeTrustScore(a)),
+    [sampleMuters, computeTrustScore]
+  )
+
+  if (!currentPubkey || !wotReady) return null
 
   return (
     <div className="border-border mt-3 rounded-lg border p-3 text-sm">
@@ -36,7 +52,7 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
         </p>
       ) : (
         <>
-          {sampleFollowers.length > 0 && (
+          {sortedFollowers.length > 0 && (
             <div className="mt-3">
               <div className="text-muted-foreground mb-2 flex items-center gap-1.5">
                 <Users size={12} className="shrink-0" />
@@ -48,14 +64,14 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
                 </span>
               </div>
               <div className="flex flex-col">
-                {sampleFollowers.map((p) => (
+                {sortedFollowers.map((p) => (
                   <UserItem key={p} userId={p} hideFollowButton />
                 ))}
               </div>
             </div>
           )}
 
-          {sampleMuters.length > 0 && (
+          {sortedMuters.length > 0 && (
             <div className="mt-3">
               <div className="text-muted-foreground mb-2 flex items-center gap-1.5">
                 <VolumeX size={12} className="shrink-0" />
@@ -67,7 +83,7 @@ export default function TrustScorePanel({ pubkey }: { pubkey: string }) {
                 </span>
               </div>
               <div className="flex flex-col">
-                {sampleMuters.map((p) => (
+                {sortedMuters.map((p) => (
                   <UserItem key={p} userId={p} hideFollowButton />
                 ))}
               </div>

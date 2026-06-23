@@ -27,16 +27,19 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [visibleMutePubkeys, setVisibleMutePubkeys] = useState<string[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  const [showAll, setShowAll] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selectedPubkeys, setSelectedPubkeys] = useState<Set<string>>(new Set())
   const [bulkSwitching, setBulkSwitching] = useState(false)
   const lastClickedRef = useRef<string | null>(null)
 
   useEffect(() => {
+    setShowAll(false)
     setVisibleMutePubkeys(mutePubkeys.slice(0, 10))
   }, [mutePubkeys])
 
   useEffect(() => {
+    if (showAll) return
     const options = { root: null, rootMargin: '10px', threshold: 1 }
     const observerInstance = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && mutePubkeys.length > visibleMutePubkeys.length) {
@@ -51,7 +54,7 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
     return () => {
       if (observerInstance && currentBottomRef) observerInstance.unobserve(currentBottomRef)
     }
-  }, [visibleMutePubkeys, mutePubkeys])
+  }, [visibleMutePubkeys, mutePubkeys, showAll])
 
   const handleToggleSelect = useCallback(
     (pk: string, shiftKey = false) => {
@@ -206,7 +209,7 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
       )}
 
       <div className={`space-y-2 px-4 pt-2${selectMode ? ' select-none' : ''}`}>
-        {visibleMutePubkeys.map((pk, i) => (
+        {(showAll ? mutePubkeys : visibleMutePubkeys).map((pk, i) => (
           <UserItem
             key={`${i}-${pk}`}
             pubkey={pk}
@@ -215,7 +218,27 @@ const MuteListPage = forwardRef(({ index }: { index?: number }, ref) => {
             onToggle={handleToggleSelect}
           />
         ))}
-        {mutePubkeys.length > visibleMutePubkeys.length && <div ref={bottomRef} />}
+        {!showAll && mutePubkeys.length > visibleMutePubkeys.length && (
+          <div className="relative">
+            <div className="pointer-events-none select-none space-y-2 opacity-30 blur-sm">
+              {mutePubkeys.slice(visibleMutePubkeys.length, visibleMutePubkeys.length + 5).map((pk, i) => (
+                <UserItem
+                  key={`blur-${i}-${pk}`}
+                  pubkey={pk}
+                  selectMode={false}
+                  isSelected={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Button variant="secondary" size="sm" onClick={() => setShowAll(true)}>
+                Show all {mutePubkeys.length}
+              </Button>
+            </div>
+            <div ref={bottomRef} />
+          </div>
+        )}
       </div>
     </SecondaryPageLayout>
   )

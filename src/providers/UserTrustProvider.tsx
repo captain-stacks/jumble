@@ -382,13 +382,17 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   )
 
   const getWotStats = useCallback(
-    (pubkey: string): TWotStats => ({
-      follows: wotScoreMap.get(pubkey) ?? 0,
-      mutes: wotMuteMap.get(pubkey) ?? 0,
-      myFollowSetSize,
-      sampleFollowers: [...(wotFollowersByTarget.get(pubkey) ?? [])],
-      sampleMuters: [...(wotMutersByTarget.get(pubkey) ?? [])]
-    }),
+    (pubkey: string): TWotStats => {
+      const allFollowers = wotFollowersByTarget.get(pubkey) ?? new Set<string>()
+      const muters = wotMutersByTarget.get(pubkey) ?? new Set<string>()
+      return {
+        follows: wotScoreMap.get(pubkey) ?? 0,
+        mutes: wotMuteMap.get(pubkey) ?? 0,
+        myFollowSetSize,
+        sampleFollowers: [...allFollowers].filter((f) => !muters.has(f)),
+        sampleMuters: [...muters]
+      }
+    },
     [wotReady, wotVersion]
   )
 

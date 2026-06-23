@@ -12,8 +12,11 @@ const FollowingListPage = forwardRef(({ id, index }: { id?: string; index?: numb
   const { computeTrustScore } = useUserTrust()
 
   const sortedFollowings = useMemo(
-    () => [...followings].sort((a, b) => computeTrustScore(b) - computeTrustScore(a)),
-    [followings, computeTrustScore]
+    () =>
+      [...followings]
+        .filter((pk) => pk !== profile?.pubkey)
+        .sort((a, b) => computeTrustScore(b) - computeTrustScore(a)),
+    [followings, profile?.pubkey, computeTrustScore]
   )
 
   return (

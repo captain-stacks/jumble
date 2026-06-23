@@ -55,7 +55,8 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         }
       } else if (
         feedInfoRef.current?.feedType === 'following' ||
-        feedInfoRef.current?.feedType === 'pinned'
+        feedInfoRef.current?.feedType === 'pinned' ||
+        feedInfoRef.current?.feedType === 'global'
       ) {
         return await switchFeed(null)
       }
@@ -88,7 +89,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         return await switchFeed('pinned', { pubkey })
       }
 
-      if (feedInfo?.feedType === 'global') {
+      if (feedInfo?.feedType === 'global' && pubkey) {
         return await switchFeed('global')
       }
 

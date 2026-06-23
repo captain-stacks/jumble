@@ -1,4 +1,5 @@
 import NormalFeed from '@/components/NormalFeed'
+import { SPECIAL_FEED_ID } from '@/constants'
 import { checkAlgoRelay } from '@/lib/relay'
 import { useFeed } from '@/providers/FeedProvider'
 import relayInfoService from '@/services/relay-info.service'
@@ -9,6 +10,9 @@ export default function RelaysFeed() {
   const [isReady, setIsReady] = useState(false)
   const [areAlgoRelays, setAreAlgoRelays] = useState(false)
   const feedId = useMemo(() => {
+    if (feedInfo?.feedType === 'global') {
+      return SPECIAL_FEED_ID.GLOBAL
+    }
     if (feedInfo?.feedType === 'relay' && feedInfo.id) {
       return `relay-${feedInfo.id}`
     } else if (feedInfo?.feedType === 'relays' && feedInfo.id) {

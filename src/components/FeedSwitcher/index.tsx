@@ -100,7 +100,9 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
 
           <FeedSwitcherItem
             isActive={feedInfo?.feedType === 'global'}
+            disabled={!pubkey}
             onClick={() => {
+              if (!pubkey) return
               switchFeed('global')
               close?.()
             }}

@@ -17,6 +17,7 @@ import { TFeedSubRequest } from '@/types'
 import dayjs from 'dayjs'
 import { Event, kinds } from 'nostr-tools'
 import { decode } from 'nostr-tools/nip19'
+import { Loader } from 'lucide-react'
 import {
   forwardRef,
   useCallback,
@@ -81,7 +82,7 @@ const NoteList = forwardRef<
     const { t } = useTranslation()
     const active = usePageActive()
     const { startLogin } = useNostr()
-    const { isSpammer, meetsMinTrustScore } = useUserTrust()
+    const { isSpammer, meetsMinTrustScore, wotReady } = useUserTrust()
     const { mutePubkeySet } = useMuteList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
     const { isEventDeleted } = useDeletedEvent()
@@ -492,7 +493,12 @@ const NoteList = forwardRef<
           />
         ))}
         <div ref={bottomRef} />
-        {shouldShowLoadingIndicator || filtering || initialLoading ? (
+        {!wotReady && (trustScoreThreshold ?? 0) > 0 ? (
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+            <Loader className="animate-spin" size={24} />
+            <span className="text-sm">{t('Loading web of trust…')}</span>
+          </div>
+        ) : shouldShowLoadingIndicator || filtering || initialLoading ? (
           <NoteCardLoadingSkeleton />
         ) : events.length ? (
           <div className="text-muted-foreground mt-2 text-center text-sm">{t('no more notes')}</div>

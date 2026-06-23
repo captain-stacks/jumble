@@ -176,83 +176,99 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
 
   // Full rebuild when the account changes.
   useEffect(() => {
-    if (!currentPubkey) return
-
     setWotReady(false)
     prevFollowingSetRef.current = null
     prevWotReadyRef.current = false
-    initInProgressRef.current = true
+    initInProgressRef.current = false
     resetWotState()
+
+    if (!currentPubkey) return
+
+    initInProgressRef.current = true
 
     let cancelled = false
 
     const initWoT = async () => {
-      const followings = [...new Set(await client.fetchFollowings(currentPubkey, false))]
-      if (cancelled) return
-
-      myFollowSetSize = followings.length
-      followings.forEach((pubkey) => {
-        if (!wotScoreMap.has(pubkey)) wotScoreMap.set(pubkey, 0)
-      })
-
-      const batchSize = 20
-
-      // Phase 1: build WoT follow set
-      for (let i = 0; i < followings.length; i += batchSize) {
+      try {
+        const followings = [...new Set(await client.fetchFollowings(currentPubkey, false))]
         if (cancelled) return
-        const batch = followings.slice(i, i + batchSize)
-        await Promise.allSettled(
-          batch.map(async (pubkey) => {
-            const uniqueFollowings = [...new Set(await client.fetchFollowings(pubkey, false))]
-            if (!cancelled) addFollowerContribution(pubkey, uniqueFollowings)
-          })
-        )
-        await new Promise((resolve) => setTimeout(resolve, 200))
-      }
 
-      // Phase 2: load mute sets
-      for (let i = 0; i < followings.length; i += batchSize) {
-        if (cancelled) return
-        const batch = followings.slice(i, i + batchSize)
-        await Promise.allSettled(
-          batch.map(async (pubkey) => {
-            const muteListEvent = await client.fetchMuteListEvent(pubkey)
-            if (cancelled || !muteListEvent) return
-            const mutedPubkeys = [
-              ...new Set(
-                muteListEvent.tags
-                  .filter((tag) => tag[0] === 'p' && tag[1])
-                  .map((tag) => tag[1])
-              )
-            ]
-            addMuterContribution(pubkey, mutedPubkeys)
-          })
-        )
-        await new Promise((resolve) => setTimeout(resolve, 200))
-      }
-
-      if (cancelled) return
-
-      // If someone both follows and mutes a target, only the mute counts.
-      wotMutersByTarget.forEach((muters, target) => {
-        const followers = wotFollowersByTarget.get(target)
-        if (!followers) return
-        const followerSet = new Set(followers)
-        muters.forEach((muter) => {
-          if (followerSet.has(muter)) {
-            wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
-          }
+        myFollowSetSize = followings.length
+        followings.forEach((pubkey) => {
+          if (!wotScoreMap.has(pubkey)) wotScoreMap.set(pubkey, 0)
         })
-      })
 
-      initInProgressRef.current = false
-      setWotReady(true)
+        const batchSize = 20
+        const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T | undefined> =>
+          Promise.race([p, new Promise<undefined>((resolve) => setTimeout(resolve, ms))])
+
+        // Phase 1: build WoT follow set
+        for (let i = 0; i < followings.length; i += batchSize) {
+          if (cancelled) return
+          const batch = followings.slice(i, i + batchSize)
+          await Promise.allSettled(
+            batch.map(async (pubkey) => {
+              const result = await withTimeout(client.fetchFollowings(pubkey, false), 3000)
+              if (!cancelled) addFollowerContribution(pubkey, [...new Set(result ?? [])])
+            })
+          )
+        }
+
+        // Phase 2: load mute sets
+        for (let i = 0; i < followings.length; i += batchSize) {
+          if (cancelled) return
+          const batch = followings.slice(i, i + batchSize)
+          await Promise.allSettled(
+            batch.map(async (pubkey) => {
+              const muteListEvent = await withTimeout(client.fetchMuteListEvent(pubkey), 3000)
+              if (cancelled || !muteListEvent) return
+              const mutedPubkeys = [
+                ...new Set(
+                  muteListEvent.tags
+                    .filter((tag) => tag[0] === 'p' && tag[1])
+                    .map((tag) => tag[1])
+                )
+              ]
+              addMuterContribution(pubkey, mutedPubkeys)
+            })
+          )
+        }
+
+        if (cancelled) return
+
+        // If someone both follows and mutes a target, only the mute counts.
+        wotMutersByTarget.forEach((muters, target) => {
+          const followers = wotFollowersByTarget.get(target)
+          if (!followers) return
+          const followerSet = new Set(followers)
+          muters.forEach((muter) => {
+            if (followerSet.has(muter)) {
+              wotScoreMap.set(target, Math.max(0, (wotScoreMap.get(target) ?? 0) - 1))
+            }
+          })
+        })
+      } finally {
+        if (!cancelled) {
+          initInProgressRef.current = false
+          setWotReady(true)
+        }
+      }
     }
-    initWoT()
+    // Safety valve: if the WoT build hangs (e.g. relays never respond), unblock
+    // the feed after 60 seconds with whatever partial data was collected.
+    const wotTimeoutId = setTimeout(() => {
+      if (!cancelled) {
+        initInProgressRef.current = false
+        setWotReady(true)
+      }
+    }, 60_000)
+
+    initWoT().catch(() => undefined).finally(() => clearTimeout(wotTimeoutId))
 
     return () => {
       cancelled = true
       initInProgressRef.current = false
+      clearTimeout(wotTimeoutId)
     }
   }, [currentPubkey])
 
@@ -380,8 +396,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     async (pubkey: string, minScore: number) => {
       if (minScore === 0) return true
       if (pubkey === currentPubkey) return true
-      // Allow everything through until WoT data has finished loading
-      if (!wotReady) return true
+      if (!wotReady) return false
       return computeTrustScore(pubkey) >= minScore
     },
     [currentPubkey, wotReady]

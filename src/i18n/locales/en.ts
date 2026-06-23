@@ -1136,6 +1136,7 @@ export default {
     'Not known by any of your {{count}} follows': 'Not known by any of your {{count}} follows',
     'Followed by {{follows}} of your {{total}} follows':
       'Followed by {{follows}} of your {{total}} follows',
-    'Muted by {{mutes}} of your {{total}} follows': 'Muted by {{mutes}} of your {{total}} follows'
+    'Muted by {{mutes}} of your {{total}} follows': 'Muted by {{mutes}} of your {{total}} follows',
+    'Loading web of trust…': 'Loading web of trust…'
   }
 }

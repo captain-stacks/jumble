@@ -578,7 +578,13 @@ class ClientService extends EventTarget {
                     }
                   })
                   .catch(() => {
-                    // ignore
+                    // Auth failed — count relay as closed so the query can resolve
+                    closedCount++
+                    closeReasons.push(reason)
+                    onclose?.(url, reason)
+                    if (closedCount >= startedCount) {
+                      onAllClose?.(closeReasons)
+                    }
                   })
                 return
               }

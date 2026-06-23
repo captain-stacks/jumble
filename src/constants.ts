@@ -553,7 +553,8 @@ export const SPECIAL_TRUST_SCORE_FILTER_ID = {
 export const SPECIAL_FEED_ID = {
   ...SPECIAL_TRUST_SCORE_FILTER_ID,
   FOLLOWING: 'following',
-  PINNED: 'pinned'
+  PINNED: 'pinned',
+  GLOBAL: 'global-feed'
 }
 
 export const COMMUNITY_RELAY_SETS = import.meta.env.VITE_COMMUNITY_RELAY_SETS as TRelaySet[]

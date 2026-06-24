@@ -161,6 +161,9 @@ const NoteList = forwardRef<
       const _trustScoreThreshold = hideSpam
         ? SPAMMER_PERCENTILE_THRESHOLD
         : (trustScoreThreshold ?? 0)
+      // Capture wotReady at effect start — not in .finally(), where it may already be true
+      // even though this run used the pre-WoT meetsMinTrustScore.
+      const _wotReadyAtStart = wotReadyRef.current
 
       const processEvents = async () => {
         // Store processed event keys to avoid duplicates
@@ -280,7 +283,7 @@ const NoteList = forwardRef<
       processEvents().finally(() => {
         if (!cancelled) {
           setFiltering(false)
-          if (wotReadyRef.current || !_trustScoreThreshold || _trustScoreThreshold <= 0) {
+          if (_wotReadyAtStart || !_trustScoreThreshold || _trustScoreThreshold <= 0) {
             setWotFilteringDone(true)
           }
         }

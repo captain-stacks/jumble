@@ -19,6 +19,9 @@ type TUserTrustContext = {
   minTrustScoreMap: Record<string, number>
   getMinTrustScore: (id: string) => number
   updateMinTrustScore: (id: string, score: number) => void
+  maxTrustScoreMap: Record<string, number>
+  getMaxTrustScore: (id: string) => number
+  updateMaxTrustScore: (id: string, score: number) => void
   isUserTrusted: (pubkey: string) => boolean
   isSpammer: (pubkey: string) => Promise<boolean>
   meetsMinTrustScore: (pubkey: string, minScore: number) => Promise<boolean>
@@ -26,6 +29,10 @@ type TUserTrustContext = {
   computeTrustScore: (pubkey: string) => number
   trustDecay: number
   setTrustDecay: (decay: number) => void
+  muteSlider: number
+  setMuteSlider: (slider: number) => void
+  minFollowsToCount: number
+  setMinFollowsToCount: (n: number) => void
   wotReady: boolean
   getWotStats: (pubkey: string) => TWotStats
 }
@@ -51,6 +58,8 @@ const wotMutersByTarget = new Map<string, Set<string>>()
 let myFollowSetSize = 0
 
 let _trustDecay = 7
+let _muteWeight = 1
+let _minFollowsToCount = 1
 let _maxRaw = 0
 let _minRaw = 0
 
@@ -79,14 +88,15 @@ function computeTrustScore(pubkey: string): number {
   const follows = wotScoreMap.get(pubkey) ?? 0
   const mutes = wotMuteMap.get(pubkey) ?? 0
 
-  // Nobody in the network follows them → unknown stranger baseline
-  if (follows === 0 && mutes === 0) return 5
+  const effectiveFollows = follows >= _minFollowsToCount ? follows : 0
+  // Nobody in the network follows them (or not enough follows to count) → unknown stranger baseline
+  if (effectiveFollows === 0 && mutes === 0) return 5
   const size = myFollowSetSize > 0 ? myFollowSetSize : 1
-  const followRate = follows / size
+  const followRate = effectiveFollows / size
   const muteRate = mutes / size
   const cappedFollowRate = Math.min(followRate, FOLLOW_RATE_CAP)
   const smoothedRatio =
-    (muteRate + PRIOR_RATE * TRUST_PRIOR_MUTE_RATE) / (cappedFollowRate + PRIOR_RATE)
+    (muteRate * _muteWeight + PRIOR_RATE * TRUST_PRIOR_MUTE_RATE) / (cappedFollowRate + PRIOR_RATE)
   const raw = Math.exp(-_trustDecay * smoothedRatio)
   return Math.min(100, Math.max(0, Math.round(((raw - _minRaw) / (_maxRaw - _minRaw)) * 100)))
 }
@@ -156,9 +166,22 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
   const [minTrustScoreMap, setMinTrustScoreMap] = useState<Record<string, number>>(() =>
     storage.getMinTrustScoreMap()
   )
+  const [maxTrustScoreMap, setMaxTrustScoreMap] = useState<Record<string, number>>(() =>
+    storage.getMaxTrustScoreMap()
+  )
   const [trustDecay, setTrustDecayState] = useState(() => {
     const stored = storage.getTrustDecay()
     recomputeDecayBounds(stored) // sync module-level bounds with stored value
+    return stored
+  })
+  const [muteSlider, setMuteSliderState] = useState(() => {
+    const stored = storage.getMuteWeight()
+    _muteWeight = 0.1 * Math.pow(100 / 3, (stored - 1) / 9)
+    return stored
+  })
+  const [minFollowsToCount, setMinFollowsToCountState] = useState(() => {
+    const stored = storage.getMinFollowsToCount()
+    _minFollowsToCount = stored
     return stored
   })
   const [wotReady, setWotReady] = useState(false)
@@ -348,7 +371,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       if (!wotReady) return false
       return computeTrustScore(pubkey) < SPAMMER_PERCENTILE_THRESHOLD
     },
-    [wotReady]
+    [wotReady, wotVersion]
   )
 
   const pickRecommendedPubkeys = useCallback((count: number, excludeSet: Set<string>) => {
@@ -392,6 +415,21 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const getMaxTrustScore = useCallback(
+    (id: string) => {
+      if (id in maxTrustScoreMap) return maxTrustScoreMap[id]
+      return 100
+    },
+    [maxTrustScoreMap]
+  )
+
+  const updateMaxTrustScore = (id: string, score: number) => {
+    if (score < 0 || score > 100) return
+    const newMap = { ...maxTrustScoreMap, [id]: score }
+    setMaxTrustScoreMap(newMap)
+    storage.setMaxTrustScoreMap(newMap)
+  }
+
   const meetsMinTrustScore = useCallback(
     async (pubkey: string, minScore: number) => {
       if (minScore === 0) return true
@@ -399,7 +437,7 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
       if (!wotReady) return false
       return computeTrustScore(pubkey) >= minScore
     },
-    [currentPubkey, wotReady]
+    [currentPubkey, wotReady, wotVersion]
   )
 
   const setTrustDecay = useCallback((decay: number) => {
@@ -407,6 +445,22 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
     recomputeDecayBounds(decay)
     storage.setTrustDecay(decay)
     setTrustDecayState(decay)
+  }, [])
+
+  const setMuteSlider = useCallback((slider: number) => {
+    if (slider < 1 || slider > 10) return
+    _muteWeight = 0.1 * Math.pow(100 / 3, (slider - 1) / 9)
+    storage.setMuteWeight(slider)
+    setMuteSliderState(slider)
+    setWotVersion((v) => v + 1)
+  }, [])
+
+  const setMinFollowsToCount = useCallback((n: number) => {
+    if (n < 1 || n > 10) return
+    _minFollowsToCount = n
+    storage.setMinFollowsToCount(n)
+    setMinFollowsToCountState(n)
+    setWotVersion((v) => v + 1)
   }, [])
 
   // New function reference on every WoT update so consumers' useMemos re-run.
@@ -437,6 +491,9 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         minTrustScoreMap,
         getMinTrustScore,
         updateMinTrustScore,
+        maxTrustScoreMap,
+        getMaxTrustScore,
+        updateMaxTrustScore,
         isUserTrusted,
         isSpammer,
         meetsMinTrustScore,
@@ -444,6 +501,10 @@ export function UserTrustProvider({ children }: { children: React.ReactNode }) {
         computeTrustScore: computeTrustScoreCallback,
         trustDecay,
         setTrustDecay,
+        muteSlider,
+        setMuteSlider,
+        minFollowsToCount,
+        setMinFollowsToCount,
         wotReady,
         getWotStats
       }}

@@ -82,7 +82,10 @@ class LocalStorageService {
   private mutedWords: string[] = []
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
+  private maxTrustScoreMap: Record<string, number> = {}
   private trustDecay: number = 7
+  private muteWeight: number = 1
+  private minFollowsToCount: number = 1
   private hideIndirectNotifications: boolean = false
   private hideReactionNotifications: boolean = false
   private minZapNotificationAmount: number = 0
@@ -388,11 +391,39 @@ class LocalStorageService {
       }
     }
 
+    const maxTrustScoreMapStr = window.localStorage.getItem(StorageKey.MAX_TRUST_SCORE_MAP)
+    if (maxTrustScoreMapStr) {
+      try {
+        const map = JSON.parse(maxTrustScoreMapStr)
+        if (typeof map === 'object' && map !== null) {
+          this.maxTrustScoreMap = map
+        }
+      } catch {
+        // Invalid JSON, use default
+      }
+    }
+
     const trustDecayStr = window.localStorage.getItem(StorageKey.TRUST_DECAY)
     if (trustDecayStr) {
       const decay = parseInt(trustDecayStr, 10)
       if (!isNaN(decay) && decay >= 1 && decay <= 10) {
         this.trustDecay = decay
+      }
+    }
+
+    const muteWeightStr = window.localStorage.getItem(StorageKey.MUTE_WEIGHT)
+    if (muteWeightStr) {
+      const w = parseInt(muteWeightStr, 10)
+      if (!isNaN(w) && w >= 1 && w <= 10) {
+        this.muteWeight = w
+      }
+    }
+
+    const minFollowsToCountStr = window.localStorage.getItem(StorageKey.MIN_FOLLOWS_TO_COUNT)
+    if (minFollowsToCountStr) {
+      const n = parseInt(minFollowsToCountStr, 10)
+      if (!isNaN(n) && n >= 1 && n <= 10) {
+        this.minFollowsToCount = n
       }
     }
 
@@ -1258,6 +1289,15 @@ class LocalStorageService {
     window.localStorage.setItem(StorageKey.MIN_TRUST_SCORE_MAP, JSON.stringify(map))
   }
 
+  getMaxTrustScoreMap() {
+    return this.maxTrustScoreMap
+  }
+
+  setMaxTrustScoreMap(map: Record<string, number>) {
+    this.maxTrustScoreMap = map
+    window.localStorage.setItem(StorageKey.MAX_TRUST_SCORE_MAP, JSON.stringify(map))
+  }
+
   getTrustDecay() {
     return this.trustDecay
   }
@@ -1266,6 +1306,28 @@ class LocalStorageService {
     if (decay >= 1 && decay <= 10) {
       this.trustDecay = decay
       window.localStorage.setItem(StorageKey.TRUST_DECAY, decay.toString())
+    }
+  }
+
+  getMuteWeight() {
+    return this.muteWeight
+  }
+
+  setMuteWeight(weight: number) {
+    if (weight >= 1 && weight <= 10) {
+      this.muteWeight = weight
+      window.localStorage.setItem(StorageKey.MUTE_WEIGHT, weight.toString())
+    }
+  }
+
+  getMinFollowsToCount() {
+    return this.minFollowsToCount
+  }
+
+  setMinFollowsToCount(n: number) {
+    if (n >= 1 && n <= 10) {
+      this.minFollowsToCount = n
+      window.localStorage.setItem(StorageKey.MIN_FOLLOWS_TO_COUNT, n.toString())
     }
   }
 

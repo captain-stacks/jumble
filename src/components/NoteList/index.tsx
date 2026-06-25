@@ -53,6 +53,7 @@ const NoteList = forwardRef<
     hideReplies?: boolean
     hideSpam?: boolean
     trustScoreThreshold?: number
+    maxTrustScoreThreshold?: number
     areAlgoRelays?: boolean
     showRelayCloseReason?: boolean
     pinnedEventIds?: string[]
@@ -70,6 +71,7 @@ const NoteList = forwardRef<
       hideReplies = false,
       hideSpam = false,
       trustScoreThreshold,
+      maxTrustScoreThreshold,
       areAlgoRelays = false,
       showRelayCloseReason = false,
       pinnedEventIds,
@@ -83,7 +85,7 @@ const NoteList = forwardRef<
     const { t } = useTranslation()
     const active = usePageActive()
     const { startLogin } = useNostr()
-    const { isSpammer, meetsMinTrustScore, wotReady } = useUserTrust()
+    const { isSpammer, meetsMinTrustScore, computeTrustScore, wotReady } = useUserTrust()
     const { showRepliesToUnsupportedKinds } = useUserPreferences()
     const { mutePubkeySet } = useMuteList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
@@ -263,6 +265,9 @@ const NoteList = forwardRef<
               if (!(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
                 return null
               }
+              if (maxTrustScoreThreshold !== undefined && maxTrustScoreThreshold < 100) {
+                if (computeTrustScore(evt.pubkey) > maxTrustScoreThreshold) return null
+              }
               if (cancelled) return null
               const key = keys[i]
               return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
@@ -299,7 +304,9 @@ const NoteList = forwardRef<
       hideReplies,
       hideSpam,
       meetsMinTrustScore,
+      computeTrustScore,
       trustScoreThreshold,
+      maxTrustScoreThreshold,
       showRepliesToUnsupportedKinds
     ])
 
@@ -346,6 +353,9 @@ const NoteList = forwardRef<
               if (!(await meetsMinTrustScore(evt.pubkey, _trustScoreThreshold))) {
                 return null
               }
+              if (maxTrustScoreThreshold !== undefined && maxTrustScoreThreshold < 100) {
+                if (computeTrustScore(evt.pubkey) > maxTrustScoreThreshold) return null
+              }
               return evt
             })
           )
@@ -353,7 +363,7 @@ const NoteList = forwardRef<
         setFilteredNewEvents(_filteredNotes)
       }
       processNewEvents()
-    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, trustScoreThreshold, showRepliesToUnsupportedKinds])
+    }, [newEvents, shouldHideEvent, isSpammer, hideSpam, meetsMinTrustScore, computeTrustScore, trustScoreThreshold, maxTrustScoreThreshold, showRepliesToUnsupportedKinds])
 
     useEffect(() => {
       if (!wotReady) {

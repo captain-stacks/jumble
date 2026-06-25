@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { Shield, ShieldCheck } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const TRUST_LEVELS = [
@@ -36,44 +36,41 @@ export default function TrustScoreFilter({
 }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
-  const { getMinTrustScore, updateMinTrustScore } = useUserTrust()
+  const {
+    getMinTrustScore,
+    updateMinTrustScore,
+    getMaxTrustScore,
+    updateMaxTrustScore,
+    muteSlider,
+    setMuteSlider,
+    minFollowsToCount,
+    setMinFollowsToCount
+  } = useUserTrust()
   const [open, setOpen] = useState(false)
   const [temporaryScore, setTemporaryScore] = useState(0)
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [temporaryMaxScore, setTemporaryMaxScore] = useState(100)
+  const [temporaryMuteSlider, setTemporaryMuteSlider] = useState(muteSlider)
+  const [temporaryMinFollows, setTemporaryMinFollows] = useState(minFollowsToCount)
 
+  // Sync local state from stored values whenever the popover opens or filterId changes.
   useEffect(() => {
+    if (!open) return
     setTemporaryScore(getMinTrustScore(filterId))
-  }, [getMinTrustScore, filterId])
+    setTemporaryMaxScore(getMaxTrustScore(filterId))
+    setTemporaryMuteSlider(muteSlider)
+    setTemporaryMinFollows(minFollowsToCount)
+  }, [open, filterId])
 
-  // Debounced update function
-  const handleScoreChange = (newScore: number) => {
-    setTemporaryScore(newScore)
-
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      updateMinTrustScore(filterId, temporaryScore)
+      updateMaxTrustScore(filterId, temporaryMaxScore)
+      setMuteSlider(temporaryMuteSlider)
+      setMinFollowsToCount(temporaryMinFollows)
     }
-
-    // Set new timer for debounced update
-    debounceTimerRef.current = setTimeout(() => {
-      updateMinTrustScore(filterId, newScore)
-    }, 300) // 300ms debounce delay
+    setOpen(newOpen)
+    onOpenChange?.(newOpen)
   }
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (onOpenChange) {
-      onOpenChange(open)
-    }
-  }, [open, onOpenChange])
 
   const description = getDescription(temporaryScore, t)
 
@@ -87,9 +84,7 @@ export default function TrustScoreFilter({
           ? 'text-muted-foreground hover:text-foreground'
           : 'text-primary hover:text-primary-hover'
       )}
-      onClick={() => {
-        setOpen(true)
-      }}
+      onClick={() => handleOpenChange(true)}
     >
       {temporaryScore < 100 ? <Shield size={16} /> : <ShieldCheck size={16} />}
       {temporaryScore > 0 && temporaryScore < 100 && (
@@ -114,10 +109,60 @@ export default function TrustScoreFilter({
         </div>
         <Slider
           value={[temporaryScore]}
-          onValueChange={([value]) => handleScoreChange(value)}
+          onValueChange={([value]) => setTemporaryScore(value)}
           min={0}
           max={100}
           step={5}
+          className="w-full"
+        />
+      </div>
+
+      {/* Upper limit */}
+      <div className="space-y-2">
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">Upper limit</span>
+          <span className="text-lg font-semibold text-primary">
+            {temporaryMaxScore >= 100 ? t('trust-filter.off') : `${temporaryMaxScore}%`}
+          </span>
+        </div>
+        <Slider
+          value={[temporaryMaxScore]}
+          onValueChange={([value]) => setTemporaryMaxScore(value)}
+          min={0}
+          max={100}
+          step={5}
+          className="w-full"
+        />
+      </div>
+
+      {/* Mute sensitivity */}
+      <div className="space-y-2">
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">Mute sensitivity</span>
+          <span className="text-lg font-semibold text-primary">{temporaryMuteSlider}/10</span>
+        </div>
+        <Slider
+          value={[temporaryMuteSlider]}
+          onValueChange={([value]) => setTemporaryMuteSlider(value)}
+          min={1}
+          max={10}
+          step={1}
+          className="w-full"
+        />
+      </div>
+
+      {/* Min follows to count */}
+      <div className="space-y-2">
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">Min. follows to count</span>
+          <span className="text-lg font-semibold text-primary">{temporaryMinFollows}</span>
+        </div>
+        <Slider
+          value={[temporaryMinFollows]}
+          onValueChange={([value]) => setTemporaryMinFollows(value)}
+          min={1}
+          max={10}
+          step={1}
           className="w-full"
         />
       </div>
@@ -129,7 +174,7 @@ export default function TrustScoreFilter({
           {TRUST_LEVELS.map((level) => (
             <button
               key={level.value}
-              onClick={() => handleScoreChange(level.value)}
+              onClick={() => setTemporaryScore(level.value)}
               className={cn(
                 'flex-1 rounded px-2 py-1.5 text-center text-xs transition-all duration-200',
                 temporaryScore === level.value
@@ -157,7 +202,7 @@ export default function TrustScoreFilter({
     return (
       <>
         {trigger}
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerContent className="px-4">
             <div className="grid gap-1.5 p-4 text-center sm:text-start">
               <DrawerTitle className="text-base">{t('trust-filter.title')}</DrawerTitle>
@@ -170,7 +215,7 @@ export default function TrustScoreFilter({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent className="w-96 space-y-4 p-4" collisionPadding={16} sideOffset={0}>
         {content}

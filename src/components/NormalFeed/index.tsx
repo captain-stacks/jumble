@@ -31,7 +31,7 @@ export default function NormalFeed({
   isPubkeyFeed?: boolean
 }) {
   const { getShowKinds } = useKindFilter()
-  const { getMinTrustScore } = useUserTrust()
+  const { getMinTrustScore, getMaxTrustScore } = useUserTrust()
   const { feedTabs } = useUserPreferences()
   const feedShowKinds = useMemo(() => getShowKinds(feedId), [getShowKinds, feedId])
   const [temporaryShowKinds, setTemporaryShowKinds] = useState(feedShowKinds)
@@ -66,6 +66,9 @@ export default function NormalFeed({
   const trustScoreThreshold = useMemo(() => {
     return showTrustScoreFilter ? getMinTrustScore(feedId) : undefined
   }, [feedId, showTrustScoreFilter, getMinTrustScore])
+  const maxTrustScoreThreshold = useMemo(() => {
+    return showTrustScoreFilter ? getMaxTrustScore(feedId) : undefined
+  }, [feedId, showTrustScoreFilter, getMaxTrustScore])
 
   const tabHasFixedKinds = !!selectedTab?.kinds
   const is24hMode = selectedTab?.builtin === '24h'
@@ -150,6 +153,7 @@ export default function NormalFeed({
             showRelayCloseReason={showRelayCloseReason}
             isPubkeyFeed={isPubkeyFeed}
             trustScoreThreshold={trustScoreThreshold}
+            maxTrustScoreThreshold={maxTrustScoreThreshold}
           />
         )
       ) : null}

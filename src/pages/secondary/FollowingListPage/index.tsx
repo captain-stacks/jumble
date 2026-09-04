@@ -1,13 +1,23 @@
 import ProfileList from '@/components/ProfileList'
 import { useFetchFollowings, useFetchProfile } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import { forwardRef } from 'react'
+import { useUserTrust } from '@/providers/UserTrustProvider'
+import { forwardRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const FollowingListPage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
   const { profile } = useFetchProfile(id)
   const { followings } = useFetchFollowings(profile?.pubkey)
+  const { computeTrustScore } = useUserTrust()
+
+  const sortedFollowings = useMemo(
+    () =>
+      [...followings]
+        .filter((pk) => pk !== profile?.pubkey)
+        .sort((a, b) => computeTrustScore(b) - computeTrustScore(a)),
+    [followings, profile?.pubkey, computeTrustScore]
+  )
 
   return (
     <SecondaryPageLayout
@@ -20,7 +30,7 @@ const FollowingListPage = forwardRef(({ id, index }: { id?: string; index?: numb
       }
       displayScrollToTopButton
     >
-      <ProfileList pubkeys={followings} />
+      <ProfileList pubkeys={sortedFollowings} />
     </SecondaryPageLayout>
   )
 })

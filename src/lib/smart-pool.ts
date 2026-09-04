@@ -108,7 +108,7 @@ export class SmartPool implements IRelayPool {
     set.add(relay)
   }
 
-  listConnectionStatus(): Map<string, boolean> {
+  async listConnectionStatus(): Promise<Map<string, boolean>> {
     return new Map(
       Array.from(this.relays, ([url, relay]) => [url, relay] as const)
         .filter(([, relay]) => relay.connected)

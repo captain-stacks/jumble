@@ -1,4 +1,5 @@
 import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import { useRelayConnectionStatus } from '@/hooks/useRelayConnectionStatus'
 import { toRelaySettings } from '@/lib/link'
 import { simplifyUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
@@ -7,9 +8,10 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinnedUsers } from '@/providers/PinnedUsersProvider'
-import { Settings2, Star, UsersRound } from 'lucide-react'
+import { Settings2, Star, Globe, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Checkbox } from '../ui/checkbox'
 import RelayIcon from '../RelayIcon'
 import RelaySetCard from '../RelaySetCard'
 
@@ -26,40 +28,45 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
 
   if (IS_COMMUNITY_MODE) {
     return (
-      <div className="space-y-1.5">
-        {COMMUNITY_RELAY_SETS.map((set) => (
-          <RelaySetCard
-            key={set.id}
-            relaySet={set}
-            select={feedInfo?.feedType === 'relays' && set.id === feedInfo.id}
-            onSelectChange={(select) => {
-              if (!select) return
-              switchFeed('relays', { activeRelaySetId: set.id })
-              close?.()
-            }}
-          />
-        ))}
-        {COMMUNITY_RELAYS.map((relay) => (
-          <FeedSwitcherItem
-            key={relay}
-            isActive={feedInfo?.feedType === 'relay' && feedInfo.id === relay}
-            onClick={() => {
-              switchFeed('relay', { relay })
-              close?.()
-            }}
-          >
-            <div className="flex w-full items-center gap-3">
-              <RelayIcon url={relay} className="shrink-0" />
-              <div className="w-0 flex-1 truncate">{simplifyUrl(relay)}</div>
-            </div>
-          </FeedSwitcherItem>
-        ))}
+      <div className="space-y-4">
+        <CurrentFeedRelays />
+        <div className="space-y-1.5">
+          {COMMUNITY_RELAY_SETS.map((set) => (
+            <RelaySetCard
+              key={set.id}
+              relaySet={set}
+              select={feedInfo?.feedType === 'relays' && set.id === feedInfo.id}
+              onSelectChange={(select) => {
+                if (!select) return
+                switchFeed('relays', { activeRelaySetId: set.id })
+                close?.()
+              }}
+            />
+          ))}
+          {COMMUNITY_RELAYS.map((relay) => (
+            <FeedSwitcherItem
+              key={relay}
+              isActive={feedInfo?.feedType === 'relay' && feedInfo.id === relay}
+              onClick={() => {
+                switchFeed('relay', { relay })
+                close?.()
+              }}
+            >
+              <div className="flex w-full items-center gap-3">
+                <RelayIcon url={relay} className="shrink-0" />
+                <div className="w-0 flex-1 truncate">{simplifyUrl(relay)}</div>
+              </div>
+            </FeedSwitcherItem>
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      <CurrentFeedRelays />
+
       {/* Personal Feeds Section */}
       <div className="space-y-2">
         <SectionHeader title={t('Personal Feeds')} />
@@ -95,6 +102,23 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 <Star className="size-5" />
               </div>
               <div className="flex-1">{t('Special Follow')}</div>
+            </div>
+          </FeedSwitcherItem>
+
+          <FeedSwitcherItem
+            isActive={feedInfo?.feedType === 'global'}
+            disabled={!pubkey}
+            onClick={() => {
+              if (!pubkey) return
+              switchFeed('global')
+              close?.()
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex size-6 shrink-0 items-center justify-center">
+                <Globe className="size-5" />
+              </div>
+              <div className="flex-1">{t('Global')}</div>
             </div>
           </FeedSwitcherItem>
         </div>
@@ -147,6 +171,60 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function CurrentFeedRelays() {
+  const { t } = useTranslation()
+  const { feedInfo, relayUrls, disabledRelayUrls, toggleRelayUrl } = useFeed()
+  const { relays } = useRelayConnectionStatus(relayUrls)
+  const enabledCount = relayUrls.length - disabledRelayUrls.length
+
+  const feedType = feedInfo?.feedType
+  if (
+    (feedType !== 'relay' && feedType !== 'relays' && feedType !== 'global') ||
+    relayUrls.length === 0
+  ) {
+    return null
+  }
+
+  return (
+    <div className="space-y-2">
+      <SectionHeader title={t('Relays')} />
+      <div className="space-y-1.5">
+        {relays.map(({ url, connected }) => {
+          const enabled = !disabledRelayUrls.includes(url)
+          const isLastEnabled = enabled && enabledCount <= 1
+          return (
+            <label
+              key={url}
+              className={cn(
+                'flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2.5 transition-all duration-200',
+                !isLastEnabled && 'clickable',
+                !enabled && 'opacity-50'
+              )}
+              title={isLastEnabled ? t('At least one relay must stay active') : undefined}
+            >
+              <Checkbox
+                checked={enabled}
+                disabled={isLastEnabled}
+                onCheckedChange={() => toggleRelayUrl(url)}
+                className="shrink-0"
+              />
+              <RelayIcon url={url} className="shrink-0" />
+              <div className="w-0 flex-1 truncate font-medium">{simplifyUrl(url)}</div>
+              <span
+                className={cn(
+                  'size-1.5 shrink-0 rounded-full',
+                  connected ? 'bg-emerald-500' : 'bg-destructive'
+                )}
+                title={connected ? t('Connected') : t('Disconnected')}
+              />
+            </label>
+          )
+        })}
+      </div>
     </div>
   )
 }

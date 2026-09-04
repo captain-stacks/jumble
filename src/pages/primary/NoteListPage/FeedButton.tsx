@@ -3,12 +3,13 @@ import RelayIcon from '@/components/RelayIcon'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import { useRelayConnectionStatus } from '@/hooks/useRelayConnectionStatus'
 import { simplifyUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { ChevronDown, FolderClosed, Server, Star, UsersRound } from 'lucide-react'
+import { ChevronDown, FolderClosed, Globe, Server, Star, UsersRound } from 'lucide-react'
 import { forwardRef, HTMLAttributes, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -74,7 +75,7 @@ const FeedSwitcherTrigger = forwardRef<
   HTMLAttributes<HTMLDivElement> & { compact?: boolean }
 >(({ className, compact = false, ...props }, ref) => {
   const { t } = useTranslation()
-  const { feedInfo, relayUrls } = useFeed()
+  const { feedInfo, relayUrls, noteEvaluationFlashCount } = useFeed()
   const { relaySets } = useFavoriteRelays()
   const activeRelaySet = useMemo(() => {
     return feedInfo?.feedType === 'relays' && feedInfo.id
@@ -88,6 +89,9 @@ const FeedSwitcherTrigger = forwardRef<
     }
     if (feedInfo?.feedType === 'pinned') {
       return t('Special Follow')
+    }
+    if (feedInfo?.feedType === 'global') {
+      return t('Global')
     }
     if (relayUrls.length === 0) {
       return t('Choose a feed')
@@ -109,6 +113,7 @@ const FeedSwitcherTrigger = forwardRef<
       if (feedInfo?.feedType === 'following')
         return <UsersRound className={compact ? 'size-3.5!' : ''} />
       if (feedInfo?.feedType === 'pinned') return <Star className={compact ? 'size-3.5!' : ''} />
+      if (feedInfo?.feedType === 'global') return <Globe className={compact ? 'size-3.5!' : ''} />
       if (feedInfo?.feedType === 'relays')
         return <FolderClosed className={compact ? 'size-3.5!' : ''} />
       return <Server className={compact ? 'size-3.5!' : ''} />
@@ -126,12 +131,13 @@ const FeedSwitcherTrigger = forwardRef<
   }, [feedInfo, compact])
 
   const clickable = !IS_COMMUNITY_MODE || COMMUNITY_RELAY_SETS.length + COMMUNITY_RELAYS.length > 1
+  const { relays } = useRelayConnectionStatus()
 
   return (
     <div
       className={cn(
         'clickable flex items-center',
-        compact ? 'h-8 gap-1.5 rounded-full bg-muted ps-1 pe-1.5' : 'h-full gap-2 rounded-xl px-3',
+        compact ? 'bg-muted h-8 gap-1.5 rounded-full ps-1 pe-1.5' : 'h-full gap-2 rounded-xl px-3',
         !clickable && 'cursor-default!',
         className
       )}
@@ -139,8 +145,35 @@ const FeedSwitcherTrigger = forwardRef<
       {...props}
     >
       <div className="shrink-0">{icon}</div>
-      <div className={cn('truncate font-semibold', compact ? 'text-sm' : 'text-lg')}>{title}</div>
-      {clickable && <ChevronDown className={compact ? 'size-3!' : ''} />}
+      <div className={cn('min-w-0 flex-1 truncate font-semibold', compact ? 'text-sm' : 'text-lg')}>
+        {title}
+      </div>
+      {clickable && <ChevronDown className={cn('shrink-0', compact ? 'size-3!' : '')} />}
+      {noteEvaluationFlashCount > 0 && (
+        <span
+          key={noteEvaluationFlashCount}
+          aria-hidden="true"
+          className="bg-destructive size-1.5 shrink-0 [animation:dotFlash_0.6s_ease-out_forwards] rounded-full"
+        />
+      )}
+      {relays.length > 0 && (
+        <div
+          className="min-w-0 shrink truncate text-xs"
+          title={relays
+            .map(
+              ({ url, connected }) =>
+                `${simplifyUrl(url)}: ${connected ? t('Connected') : t('Disconnected')}`
+            )
+            .join('\n')}
+        >
+          {relays.map(({ url, connected }, i) => (
+            <span key={url} className={connected ? 'text-emerald-500' : 'text-destructive'}>
+              {i > 0 && <span className="text-muted-foreground">, </span>}
+              {simplifyUrl(url)}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 })

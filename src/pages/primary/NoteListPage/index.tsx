@@ -18,7 +18,7 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
   const { t } = useTranslation()
   const { addRelayUrls, removeRelayUrls } = useCurrentRelays()
   const layoutRef = useRef<TPageRef>(null)
-  const { feedInfo, relayUrls, isReady } = useFeed()
+  const { feedInfo, relayUrls, activeRelayUrls, isReady } = useFeed()
   const [showRelayDetails, setShowRelayDetails] = useState(false)
 
   useImperativeHandle(ref, () => layoutRef.current as TPageRef)
@@ -30,13 +30,13 @@ const NoteListPage = forwardRef<TPageRef>((_, ref) => {
   }, [JSON.stringify(relayUrls), feedInfo])
 
   useEffect(() => {
-    if (relayUrls.length) {
-      addRelayUrls(relayUrls)
+    if (activeRelayUrls.length) {
+      addRelayUrls(activeRelayUrls)
       return () => {
-        removeRelayUrls(relayUrls)
+        removeRelayUrls(activeRelayUrls)
       }
     }
-  }, [relayUrls])
+  }, [activeRelayUrls])
 
   let content: React.ReactNode = null
   if (!isReady) {

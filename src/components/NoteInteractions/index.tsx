@@ -20,7 +20,7 @@ export default function NoteInteractions({ event, opPubkey }: { event: Event; op
   const [type, setType] = useState<TTabValue>('replies')
   const { stuffKey } = useStuff(event)
   const noteStats = useStuffStatsById(stuffKey)
-  const { replies } = useFilteredAllReplies(stuffKey)
+  const { replies } = useFilteredAllReplies(stuffKey, false)
   const repostCount = useFilteredRepostCount(stuffKey)
   const reactionCount = useFilteredLikeCount(stuffKey)
   const zapCount = noteStats?.zaps?.length ?? 0

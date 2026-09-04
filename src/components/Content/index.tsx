@@ -11,12 +11,13 @@ import {
   EmbeddedWebsocketUrlParser,
   parseContent
 } from '@/lib/content-parser'
-import { getImetaInfosFromEvent } from '@/lib/event'
+import { getEventAuthorPubkey, getImetaInfosFromEvent } from '@/lib/event'
 import { containsMarkdown } from '@/lib/markdown'
 import { getEmojiInfosFromEmojiTags, getImetaInfoFromImetaTag } from '@/lib/tag'
 import { EMOJI_REGEX } from '@/constants'
 import { cn } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
+import { useUserTrust } from '@/providers/UserTrustProvider'
 import mediaUpload from '@/services/media-upload.service'
 import { TImetaInfo } from '@/types'
 import { Event } from 'nostr-tools'
@@ -57,7 +58,9 @@ export default function Content({
   const [showHighlightEditor, setShowHighlightEditor] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [mediaRevealed, setMediaRevealed] = useState(false)
-  const { autoLoadMedia } = useContentPolicy()
+  const { autoLoadMedia, blockMediaFromUnknownProfiles } = useContentPolicy()
+  const { isUnknownProfile, wotReady } = useUserTrust()
+  const authorPubkey = event ? getEventAuthorPubkey(event) : undefined
   const translatedEvent = useTranslatedEvent(event?.id)
   const resolvedContent = translatedEvent?.content ?? event?.content ?? content
   const isMarkdown = useMemo(
@@ -184,7 +187,9 @@ export default function Content({
   }
 
   const effectiveMustLoad = !!mustLoadMedia || mediaRevealed
-  const mediaHidden = !effectiveMustLoad && !autoLoadMedia
+  const isFromUnknownProfile =
+    !!authorPubkey && blockMediaFromUnknownProfiles && wotReady && isUnknownProfile(authorPubkey)
+  const mediaHidden = !effectiveMustLoad && (!autoLoadMedia || isFromUnknownProfile)
   let imageIndex = 0
   return (
     <>
@@ -297,7 +302,9 @@ export default function Content({
         {mediaHidden && hiddenMediaCount > 0 && (
           <HiddenMediaBar count={hiddenMediaCount} onClick={() => setMediaRevealed(true)} />
         )}
-        {lastNormalUrl && <WebPreview className="mt-2" url={lastNormalUrl} />}
+        {lastNormalUrl && (!isFromUnknownProfile || effectiveMustLoad) && (
+          <WebPreview className="mt-2" url={lastNormalUrl} />
+        )}
       </div>
       {enableHighlight && (
         <HighlightButton onHighlight={handleHighlight} containerRef={contentRef} />

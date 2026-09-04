@@ -42,17 +42,22 @@ export async function notificationFilter(
     pubkey,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
-    meetsMinTrustScore
+    meetsMinTrustScore,
+    mutedOnly = false
   }: {
     pubkey?: string | null
     mutePubkeySet: Set<string>
     hideContentMentioningMutedUsers?: boolean
     meetsMinTrustScore: (pubkey: string) => Promise<boolean>
+    mutedOnly?: boolean
   }
 ): Promise<boolean> {
   const authorPubkey = getEventAuthorPubkey(event)
-  if (
-    mutePubkeySet.has(authorPubkey) ||
+  const authorMuted = mutePubkeySet.has(authorPubkey)
+  if (mutedOnly) {
+    if (!authorMuted) return false
+  } else if (
+    authorMuted ||
     (hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) ||
     !(await meetsMinTrustScore(authorPubkey))
   ) {

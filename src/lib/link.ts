@@ -85,6 +85,7 @@ export const toProfileEditor = () => '/profile-editor'
 export const toRelay = (url: string) => `/relays/${encodeURIComponent(url)}`
 export const toRelayReviews = (url: string) => `/relays/${encodeURIComponent(url)}/reviews`
 export const toMuteList = () => '/mutes'
+export const toProfileMuteList = (pubkey: string) => `/mutes/${encodeURIComponent(pubkey)}`
 export const toRizful = () => '/rizful'
 export const toBookmarks = () => '/bookmarks'
 export const toFollowPack = (eventOrId: Event | string) => {
@@ -100,6 +101,9 @@ export const toUserAggregationDetail = (feedId: string, pubkey: string) => {
   const npub = nip19.npubEncode(pubkey)
   return `/user-aggregation/${feedId}/${npub}`
 }
+
+export const toEligibleProfiles = (min: number, max: number) =>
+  `/eligible-profiles?min=${min}&max=${max}`
 
 export const toDmConversation = (pubkey: string) => {
   const npub = pubkey.startsWith('npub') ? pubkey : nip19.npubEncode(pubkey)

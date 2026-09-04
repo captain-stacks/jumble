@@ -32,7 +32,6 @@ export default function NotificationList() {
   const { pubkey } = useNostr()
   const { getNotificationsSeenAt } = useNotification()
   const { notificationTabs } = useUserPreferences()
-  const filterFn = useNotificationFilter()
   const visibleTabs = useMemo(
     () => notificationTabs.filter((tab) => !tab.hidden),
     [notificationTabs]
@@ -45,6 +44,8 @@ export default function NotificationList() {
   const prefersTouch = useMemo(() => prefersTouchInteraction(), [])
   const topRef = useRef<HTMLDivElement | null>(null)
   const selectedTab = visibleTabs.find((tab) => tab.id === notificationType) ?? visibleTabs[0]
+  const isMutedTab = selectedTab.builtin === 'muted'
+  const filterFn = useNotificationFilter({ mutedOnly: isMutedTab })
 
   useEffect(() => {
     if (!visibleTabs.some((tab) => tab.id === notificationType)) {
@@ -143,7 +144,12 @@ export default function NotificationList() {
   const list = (
     <div>
       {groupedNotifications.map((group) => (
-        <NotificationGroup key={group.key} group={group} lastReadTime={lastReadTime} />
+        <NotificationGroup
+          key={group.key}
+          group={group}
+          lastReadTime={lastReadTime}
+          isMutedTab={isMutedTab}
+        />
       ))}
       <div ref={bottomRef} />
       <div className="text-muted-foreground text-center text-sm">
@@ -227,10 +233,12 @@ type TNotificationGroup = ReturnType<typeof groupNotifications>[number]
 
 function NotificationGroup({
   group,
-  lastReadTime
+  lastReadTime,
+  isMutedTab
 }: {
   group: TNotificationGroup
   lastReadTime: number
+  isMutedTab: boolean
 }) {
   const [visibleNotificationIds, setVisibleNotificationIds] = useState<Set<string>>(() => new Set())
 
@@ -259,6 +267,7 @@ function NotificationGroup({
           key={notification.id}
           notification={notification}
           isNew={notification.created_at > lastReadTime}
+          isMutedTab={isMutedTab}
           onVisibilityChange={(isVisible) => handleVisibilityChange(notification.id, isVisible)}
         />
       ))}

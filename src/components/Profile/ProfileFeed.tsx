@@ -2,24 +2,21 @@ import FeedTabsCustomizeDialog from '@/components/FeedTabsCustomizeDialog'
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import Tabs from '@/components/Tabs'
-import { MAX_PINNED_NOTES } from '@/constants'
 import { prefersTouchInteraction } from '@/lib/device'
 import { getDefaultRelayUrls, getSearchRelayUrls } from '@/lib/relay'
-import { generateBech32IdFromETag } from '@/lib/tag'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import client from '@/services/client.service'
 import relayInfoService from '@/services/relay-info.service'
 import { TFeedSubRequest, TFeedTabConfig } from '@/types'
-import { NostrEvent } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { RefreshButton } from '../RefreshButton'
 
 const YOU_TAB: TFeedTabConfig = { id: 'you', label: 'YouTabName' }
 
 export default function ProfileFeed({ pubkey, search = '' }: { pubkey: string; search?: string }) {
-  const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
+  const { pubkey: myPubkey } = useNostr()
   const { getShowKinds } = useKindFilter()
   const { feedTabs } = useUserPreferences()
   const feedId = `profile-${pubkey}`
@@ -46,7 +43,6 @@ export default function ProfileFeed({ pubkey, search = '' }: { pubkey: string; s
   }, [selectedTab, selectedTabId])
 
   const [subRequests, setSubRequests] = useState<TFeedSubRequest[]>([])
-  const [pinnedEventIds, setPinnedEventIds] = useState<string[]>([])
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const prefersTouch = useMemo(() => prefersTouchInteraction(), [])
   const noteListRef = useRef<TNoteListRef>(null)
@@ -55,38 +51,6 @@ export default function ProfileFeed({ pubkey, search = '' }: { pubkey: string; s
   const tabHasFixedKinds = !!selectedTab?.kinds
   const effectiveShowKinds = selectedTab?.kinds ?? temporaryShowKinds
   const hideReplies = selectedTab?.hideReplies ?? false
-
-  useEffect(() => {
-    const initPinnedEventIds = async () => {
-      let evt: NostrEvent | null = null
-      if (pubkey === myPubkey) {
-        evt = myPinListEvent
-      } else {
-        evt = await client.fetchPinListEvent(pubkey)
-      }
-      const hexIdSet = new Set<string>()
-      const ids =
-        (evt?.tags
-          .filter((tag) => tag[0] === 'e')
-          .reverse()
-          .slice(0, MAX_PINNED_NOTES)
-          .map((tag) => {
-            const [, hexId, relay, _pubkey] = tag
-            if (!hexId || hexIdSet.has(hexId) || (_pubkey && _pubkey !== pubkey)) {
-              return undefined
-            }
-
-            const id = generateBech32IdFromETag(['e', hexId, relay ?? '', pubkey])
-            if (id) {
-              hexIdSet.add(hexId)
-            }
-            return id
-          })
-          .filter(Boolean) as string[]) ?? []
-      setPinnedEventIds(ids)
-    }
-    initPinnedEventIds()
-  }, [pubkey, myPubkey, myPinListEvent])
 
   useEffect(() => {
     const init = async () => {
@@ -184,7 +148,6 @@ export default function ProfileFeed({ pubkey, search = '' }: { pubkey: string; s
         showKinds={effectiveShowKinds}
         hideReplies={hideReplies}
         filterMutedNotes={false}
-        pinnedEventIds={isYouMode || tabHasFixedKinds || !!search ? [] : pinnedEventIds}
         showNewNotesDirectly={myPubkey === pubkey}
       />
       <FeedTabsCustomizeDialog open={customizeOpen} onOpenChange={setCustomizeOpen} />

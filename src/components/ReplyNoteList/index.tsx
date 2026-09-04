@@ -23,7 +23,7 @@ export default function ReplyNoteList({
   const { t } = useTranslation()
   const { stuffKey } = useStuff(stuff)
   const [initialLoading, setInitialLoading] = useState(false)
-  const { replies, isLoading: isHydratingReplies } = useFilteredReplies(stuffKey)
+  const { replies, isLoading: isHydratingReplies } = useFilteredReplies(stuffKey, false)
   const isReplyLoading = initialLoading || isHydratingReplies
 
   // Initial subscription

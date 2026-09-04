@@ -25,7 +25,6 @@ export const StorageKey = {
   CURRENT_ACCOUNT: 'currentAccount',
   ADD_CLIENT_TAG: 'addClientTag',
   DEFAULT_MIN_POW: 'defaultMinPow',
-  NOTIFICATION_TYPE: 'notificationType',
   NOTIFICATION_TABS: 'notificationTabs',
   NOTIFICATION_TABS_VERSION: 'notificationTabsVersion',
   DEFAULT_ZAP_SATS: 'defaultZapSats',
@@ -46,6 +45,7 @@ export const StorageKey = {
   NOTIFICATION_LIST_STYLE: 'notificationListStyle',
   MEDIA_AUTO_LOAD_POLICY: 'mediaAutoLoadPolicy',
   SHOW_LINK_PREVIEWS: 'showLinkPreviews',
+  BLOCK_MEDIA_FROM_UNKNOWN_PROFILES: 'blockMediaFromUnknownProfiles',
   PROFILE_PICTURE_AUTO_LOAD_POLICY: 'profilePictureAutoLoadPolicy',
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
   SIDEBAR_COLLAPSE: 'sidebarCollapse',
@@ -63,6 +63,11 @@ export const StorageKey = {
   MUTED_WORDS: 'mutedWords',
   MIN_TRUST_SCORE: 'minTrustScore',
   MIN_TRUST_SCORE_MAP: 'minTrustScoreMap',
+  MAX_TRUST_SCORE_MAP: 'maxTrustScoreMap',
+  SHOW_UNKNOWN_REPLIES_MAP: 'showUnknownRepliesMap',
+  TRUST_DECAY: 'trustDecay',
+  MUTE_WEIGHT: 'muteWeight',
+  MIN_FOLLOWS_TO_COUNT: 'minFollowsToCount',
   SEARCH_RELAY_URLS: 'searchRelayUrls',
   SEARCH_HISTORY: 'searchHistory',
   HIDE_INDIRECT_NOTIFICATIONS: 'hideIndirectNotifications',
@@ -74,6 +79,8 @@ export const StorageKey = {
   DM_BACKWARD_CURSOR_MAP: 'dmBackwardCursorMap',
   PROCESSED_SYNC_REQUEST_IDS: 'processedSyncRequestIds',
   DISABLE_NOTIFICATION_SYNC: 'disableNotificationSync',
+  ALWAYS_SHOW_THREAD_CONTEXT: 'alwaysShowThreadContext',
+  SHOW_REPLIES_TO_UNSUPPORTED_KINDS: 'showRepliesToUnsupportedKinds',
   DISMISSED_DESKTOP_APP_TIP: 'dismissedDesktopAppTip',
   NOTE_LIST_MODE: 'noteListMode', // deprecated
   ENABLE_LIVE_FEED: 'enableLiveFeed', // deprecated
@@ -118,7 +125,8 @@ export const DEFAULT_NOTIFICATION_TABS: TNotificationTabConfig[] = [
     label: 'Reactions',
     filters: ['likes', 'reposts', 'pollResponses']
   },
-  { id: 'zaps', builtin: 'zaps', label: 'Zaps', filters: ['zaps'] }
+  { id: 'zaps', builtin: 'zaps', label: 'Zaps', filters: ['zaps'] },
+  { id: 'muted', builtin: 'muted', label: 'Muted', filters: DEFAULT_NOTIFICATION_FILTERS }
 ]
 
 export const ApplicationDataKey = {
@@ -593,7 +601,8 @@ export const SPECIAL_TRUST_SCORE_FILTER_ID = {
 export const SPECIAL_FEED_ID = {
   ...SPECIAL_TRUST_SCORE_FILTER_ID,
   FOLLOWING: 'following',
-  PINNED: 'pinned'
+  PINNED: 'pinned',
+  GLOBAL: 'global-feed'
 }
 
 export const COMMUNITY_RELAY_SETS = import.meta.env.VITE_COMMUNITY_RELAY_SETS as TRelaySet[]

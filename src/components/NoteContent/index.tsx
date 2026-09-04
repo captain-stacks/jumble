@@ -31,13 +31,15 @@ export default function NoteContent({
   event,
   originalNoteId,
   showFull = false,
-  size = 'normal'
+  size = 'normal',
+  filterMutedNotes = true
 }: {
   className?: string
   event: Event
   originalNoteId?: string
   showFull?: boolean
   size?: 'normal' | 'small'
+  filterMutedNotes?: boolean
 }) {
   const { nsfwDisplayPolicy } = useContentPolicy()
   const [showNsfw, setShowNsfw] = useState(false)
@@ -52,7 +54,7 @@ export default function NoteContent({
     return <UnknownNote className={cn('mt-2', className)} event={event} />
   }
 
-  if (mutePubkeySet.has(getEventAuthorPubkey(event)) && !showMuted) {
+  if (filterMutedNotes && mutePubkeySet.has(getEventAuthorPubkey(event)) && !showMuted) {
     return <MutedNote show={() => setShowMuted(true)} />
   }
 

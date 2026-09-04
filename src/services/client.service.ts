@@ -49,6 +49,8 @@ const PROFILE_CACHE_MAX_SIZE = 5_000
 const SEEN_ON_CACHE_MAX_SIZE = 10_000
 const TIMELINE_CACHE_MAX_SIZE = 200
 const TIMELINE_MAX_REFS = 2_000
+const SUBSCRIPTION_RETRY_BASE_DELAY_MS = 5_000
+const SUBSCRIPTION_RETRY_MAX_DELAY_MS = 60_000
 
 class ClientService extends EventTarget {
   static instance: ClientService
@@ -76,6 +78,10 @@ class ClientService extends EventTarget {
   setOwnRelayUrls(urls: string[]) {
     this.ownRelays = urls
     this.refreshTrustedInsecureRelays()
+  }
+
+  getRelayConnectionStatus(): Promise<Map<string, boolean>> {
+    return this.pool.listConnectionStatus()
   }
 
   // SmartPool normalizes these URLs, so we collect them raw here.
@@ -511,13 +517,19 @@ class ClientService extends EventTarget {
       oneose,
       onclose,
       startLogin,
-      onAllClose
+      onAllClose,
+      retryOnClose = false
     }: {
       onevent?: (evt: NEvent) => void
       oneose?: (eosed: boolean) => void
       onclose?: (url: string, reason: string) => void
       startLogin?: () => void
       onAllClose?: (reasons: string[]) => void
+      // Long-lived feed subscriptions should keep retrying a relay that
+      // exhausted its own fast reconnect attempts instead of leaving that
+      // relay's stream dead for the rest of the subscription's lifetime.
+      // One-shot queries leave this off so a dead relay still resolves them.
+      retryOnClose?: boolean
     }
   ) {
     const relays = Array.from(new Set(urls))
@@ -530,10 +542,13 @@ class ClientService extends EventTarget {
     let eosedCount = 0
     let eosed = false
     let closedCount = 0
+    let cancelled = false
     const closeReasons: string[] = []
+    const retryTimers = new Set<ReturnType<typeof setTimeout>>()
     const subPromises: Promise<{ close: () => void }>[] = []
     relays.forEach((url) => {
       let hasAuthed = false
+      let retryDelay = SUBSCRIPTION_RETRY_BASE_DELAY_MS
 
       subPromises.push(startSub())
 
@@ -552,6 +567,8 @@ class ClientService extends EventTarget {
             close: () => {}
           }
         }
+
+        retryDelay = SUBSCRIPTION_RETRY_BASE_DELAY_MS
 
         return relay.subscribe(filters, {
           receivedEvent: (relay, id) => {
@@ -596,7 +613,13 @@ class ClientService extends EventTarget {
                     }
                   })
                   .catch(() => {
-                    // ignore
+                    // Auth failed — count relay as closed so the query can resolve
+                    closedCount++
+                    closeReasons.push(reason)
+                    onclose?.(url, reason)
+                    if (closedCount >= startedCount) {
+                      onAllClose?.(closeReasons)
+                    }
                   })
                 return
               }
@@ -606,6 +629,16 @@ class ClientService extends EventTarget {
                 startLogin()
                 return
               }
+            }
+
+            if (retryOnClose && !cancelled) {
+              const timer = setTimeout(() => {
+                retryTimers.delete(timer)
+                subPromises.push(startSub())
+              }, retryDelay)
+              retryTimers.add(timer)
+              retryDelay = Math.min(retryDelay * 2, SUBSCRIPTION_RETRY_MAX_DELAY_MS)
+              return
             }
 
             // close the subscription
@@ -643,6 +676,9 @@ class ClientService extends EventTarget {
 
     return {
       close: () => {
+        cancelled = true
+        retryTimers.forEach((timer) => clearTimeout(timer))
+        retryTimers.clear()
         this.removeEventListener('newEvent', handleNewEventFromInternal)
         subPromises.forEach((subPromise) => {
           subPromise
@@ -786,7 +822,8 @@ class ClientService extends EventTarget {
           onEvents([...events.concat(cachedEvents).slice(0, filter.limit)], true)
         }
       },
-      onclose: onClose
+      onclose: onClose,
+      retryOnClose: true
     })
 
     return {

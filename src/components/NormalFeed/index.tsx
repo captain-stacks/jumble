@@ -5,6 +5,7 @@ import TrustScoreFilter from '@/components/TrustScoreFilter'
 import UserAggregationList, { TUserAggregationListRef } from '@/components/UserAggregationList'
 import { SPECIAL_FEED_ID } from '@/constants'
 import { prefersTouchInteraction } from '@/lib/device'
+import { useFeed } from '@/providers/FeedProvider'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
@@ -30,8 +31,9 @@ export default function NormalFeed({
   onRefresh?: () => void
   isPubkeyFeed?: boolean
 }) {
+  const { triggerNoteEvaluationFlash } = useFeed()
   const { getShowKinds } = useKindFilter()
-  const { getMinTrustScore } = useUserTrust()
+  const { getMinTrustScore, getMaxTrustScore, getShowUnknownReplies } = useUserTrust()
   const { feedTabs } = useUserPreferences()
   const feedShowKinds = useMemo(() => getShowKinds(feedId), [getShowKinds, feedId])
   const [temporaryShowKinds, setTemporaryShowKinds] = useState(feedShowKinds)
@@ -66,6 +68,13 @@ export default function NormalFeed({
   const trustScoreThreshold = useMemo(() => {
     return showTrustScoreFilter ? getMinTrustScore(feedId) : undefined
   }, [feedId, showTrustScoreFilter, getMinTrustScore])
+  const maxTrustScoreThreshold = useMemo(() => {
+    return showTrustScoreFilter ? getMaxTrustScore(feedId) : undefined
+  }, [feedId, showTrustScoreFilter, getMaxTrustScore])
+  const isGlobalFeed = feedId === SPECIAL_FEED_ID.GLOBAL
+  const showUnknownReplies = useMemo(() => {
+    return isGlobalFeed ? getShowUnknownReplies(feedId) : false
+  }, [feedId, isGlobalFeed, getShowUnknownReplies])
 
   const tabHasFixedKinds = !!selectedTab?.kinds
   const is24hMode = selectedTab?.builtin === '24h'
@@ -115,7 +124,11 @@ export default function NormalFeed({
               />
             )}
             {showTrustScoreFilter && (
-              <TrustScoreFilter filterId={feedId} onOpenChange={handleTrustFilterOpenChange} />
+              <TrustScoreFilter
+                filterId={feedId}
+                onOpenChange={handleTrustFilterOpenChange}
+                showUnknownRepliesToggle={isGlobalFeed}
+              />
             )}
             {!subRequestsHaveKinds && !tabHasFixedKinds && (
               <KindFilter
@@ -150,6 +163,9 @@ export default function NormalFeed({
             showRelayCloseReason={showRelayCloseReason}
             isPubkeyFeed={isPubkeyFeed}
             trustScoreThreshold={trustScoreThreshold}
+            maxTrustScoreThreshold={maxTrustScoreThreshold}
+            showUnknownReplies={showUnknownReplies}
+            onNoteEvaluated={triggerNoteEvaluationFlash}
           />
         )
       ) : null}

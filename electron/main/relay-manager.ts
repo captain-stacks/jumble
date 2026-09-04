@@ -57,6 +57,11 @@ export class RelayManager {
     await this.pool.checkRelays()
   }
 
+  async listConnectionStatus(): Promise<[string, boolean][]> {
+    const status = await this.pool.listConnectionStatus()
+    return Array.from(status.entries())
+  }
+
   setNetworkOnline(online: boolean) {
     this.pool.setNetworkOnline(online)
   }
@@ -70,31 +75,28 @@ export class RelayManager {
   subscribe(subId: string, url: string, filters: Filter[]) {
     if (this.subs.has(subId)) return
     const known = new Set<string>()
-    const sub = this.pool.getRelay(url).subscribe(
-      filters,
-      {
-        alreadyHaveEvent: (id: string) => {
-          if (known.has(id)) return true
-          known.add(id)
-          return false
-        },
-        onevent: (evt: NEvent) => {
-          this.sendToRenderer<TSubEventPayload>(IPC_CHANNELS.subEvent, {
-            subId,
-            event: evt,
-            relayUrl: url
-          })
-        },
-        oneose: () => {
-          this.sendToRenderer<TSubEosePayload>(IPC_CHANNELS.subEose, { subId })
-        },
-        onclose: (reason: string) => {
-          this.sendToRenderer<TSubClosePayload>(IPC_CHANNELS.subClose, { subId, reason })
-          this.subs.delete(subId)
-        },
-        eoseTimeout: 10_000
-      }
-    )
+    const sub = this.pool.getRelay(url).subscribe(filters, {
+      alreadyHaveEvent: (id: string) => {
+        if (known.has(id)) return true
+        known.add(id)
+        return false
+      },
+      onevent: (evt: NEvent) => {
+        this.sendToRenderer<TSubEventPayload>(IPC_CHANNELS.subEvent, {
+          subId,
+          event: evt,
+          relayUrl: url
+        })
+      },
+      oneose: () => {
+        this.sendToRenderer<TSubEosePayload>(IPC_CHANNELS.subEose, { subId })
+      },
+      onclose: (reason: string) => {
+        this.sendToRenderer<TSubClosePayload>(IPC_CHANNELS.subClose, { subId, reason })
+        this.subs.delete(subId)
+      },
+      eoseTimeout: 10_000
+    })
     this.subs.set(subId, sub)
   }
 

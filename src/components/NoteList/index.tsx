@@ -1,6 +1,6 @@
 import NewNotesButton from '@/components/NewNotesButton'
 import { Button } from '@/components/ui/button'
-import { SPAMMER_PERCENTILE_THRESHOLD } from '@/constants'
+import { ALLOWED_FILTER_KINDS, SPAMMER_PERCENTILE_THRESHOLD } from '@/constants'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import {
   compareEvents,
@@ -9,6 +9,9 @@ import {
   getEventKey,
   getSafeFeedItemCount,
   getKeyFromTag,
+  getParentKind,
+  getRootAuthorPubkeyFromTags,
+  getRootTag,
   isMentioningMutedUsers,
   isReplyNoteEvent,
   partitionIncomingFeedEvents,
@@ -23,13 +26,14 @@ import { useDeletedEvent } from '@/providers/DeletedEventProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePageActive } from '@/providers/PageActiveProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import client from '@/services/client.service'
 import threadService from '@/services/thread.service'
 import { TFeedSubRequest } from '@/types'
 import dayjs from 'dayjs'
 import { Event, kinds } from 'nostr-tools'
-import { decode } from 'nostr-tools/nip19'
+import { Loader } from 'lucide-react'
 import {
   forwardRef,
   useCallback,
@@ -44,7 +48,6 @@ import PullToRefresh from '../PullToRefresh'
 import { toast } from 'sonner'
 import { LoadingBar } from '../LoadingBar'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
-import PinnedNoteCard from '../PinnedNoteCard'
 
 const LIMIT = 200
 const ALGO_LIMIT = 500
@@ -64,13 +67,15 @@ const NoteList = forwardRef<
     hideReplies?: boolean
     hideSpam?: boolean
     trustScoreThreshold?: number
+    maxTrustScoreThreshold?: number
+    showUnknownReplies?: boolean
     areAlgoRelays?: boolean
     showRelayCloseReason?: boolean
-    pinnedEventIds?: string[]
     filterFn?: (event: Event) => boolean
     showNewNotesDirectly?: boolean
     isPubkeyFeed?: boolean
     onFilteredCountChange?: (count: number) => void
+    onNoteEvaluated?: () => void
   }
 >(
   (
@@ -81,20 +86,24 @@ const NoteList = forwardRef<
       hideReplies = false,
       hideSpam = false,
       trustScoreThreshold,
+      maxTrustScoreThreshold,
+      showUnknownReplies = false,
       areAlgoRelays = false,
       showRelayCloseReason = false,
-      pinnedEventIds,
       filterFn,
       showNewNotesDirectly = false,
       isPubkeyFeed = false,
-      onFilteredCountChange
+      onFilteredCountChange,
+      onNoteEvaluated
     },
     ref
   ) => {
     const { t } = useTranslation()
     const active = usePageActive()
     const { startLogin } = useNostr()
-    const { isSpammer, meetsMinTrustScore } = useUserTrust()
+    const { isSpammer, meetsMinTrustScore, computeTrustScore, isUnknownProfile, wotReady } =
+      useUserTrust()
+    const { showRepliesToUnsupportedKinds } = useUserPreferences()
     const { mutePubkeySet } = useMuteList()
     const { hideContentMentioningMutedUsers, mutedWords } = useContentPolicy()
     const { isEventDeleted } = useDeletedEvent()
@@ -110,6 +119,9 @@ const NoteList = forwardRef<
     const [filteredNewEvents, setFilteredNewEvents] = useState<Event[]>([])
     const [refreshCount, setRefreshCount] = useState(0)
     const [reachedTimelineEnd, setReachedTimelineEnd] = useState(false)
+    const [wotFilteringDone, setWotFilteringDone] = useState(false)
+    const wotReadyRef = useRef(wotReady)
+    wotReadyRef.current = wotReady
     const topRef = useRef<HTMLDivElement | null>(null)
     const eventsRef = useRef(events)
     eventsRef.current = events
@@ -124,24 +136,8 @@ const NoteList = forwardRef<
     const showNewNotesDirectlyRef = useRef(showNewNotesDirectly)
     showNewNotesDirectlyRef.current = showNewNotesDirectly
 
-    const pinnedEventHexIdSet = useMemo(() => {
-      const set = new Set<string>()
-      pinnedEventIds?.forEach((id) => {
-        try {
-          const { type, data } = decode(id)
-          if (type === 'nevent') {
-            set.add(data.id)
-          }
-        } catch {
-          // ignore
-        }
-      })
-      return set
-    }, [pinnedEventIds?.join(',')])
-
     const shouldHideEvent = useCallback(
       (evt: Event) => {
-        if (pinnedEventHexIdSet.has(evt.id)) return true
         if (isEventDeleted(evt)) return true
         const authorPubkey = getEventAuthorPubkey(evt)
         if (filterMutedNotes && mutePubkeySet.has(authorPubkey)) return true
@@ -166,10 +162,42 @@ const NoteList = forwardRef<
 
         return false
       },
-      [mutePubkeySet, isEventDeleted, filterFn, mutedWords, pinnedEventHexIdSet]
+      [mutePubkeySet, isEventDeleted, filterFn, mutedWords]
+    )
+
+    // Whether an unknown-author reply may skip the trust check: only if its thread's root
+    // post was itself authored by someone within the current trust threshold and not muted.
+    const isReplyRootAuthorTrusted = useCallback(
+      async (evt: Event, minScore: number, maxScore: number | undefined) => {
+        const rootTag = getRootTag(evt)
+        if (!rootTag) return false
+
+        let rootAuthorPubkey = getRootAuthorPubkeyFromTags(evt)
+        if (!rootAuthorPubkey && rootTag.type === 'e') {
+          const rootEvent = await client.fetchEvent(rootTag.tag[1])
+          rootAuthorPubkey = rootEvent?.pubkey
+        }
+        if (!rootAuthorPubkey) return false
+        if (mutePubkeySet.has(rootAuthorPubkey)) return false
+
+        if (!(await meetsMinTrustScore(rootAuthorPubkey, minScore))) return false
+        if (maxScore !== undefined && maxScore < 100) {
+          if (computeTrustScore(rootAuthorPubkey) > maxScore) return false
+        }
+        return true
+      },
+      [meetsMinTrustScore, computeTrustScore, mutePubkeySet]
     )
 
     useEffect(() => {
+      let cancelled = false
+      const _trustScoreThreshold = hideSpam
+        ? SPAMMER_PERCENTILE_THRESHOLD
+        : (trustScoreThreshold ?? 0)
+      // Capture wotReady at effect start — not in .finally(), where it may already be true
+      // even though this run used the pre-WoT meetsMinTrustScore.
+      const _wotReadyAtStart = wotReadyRef.current
+
       const processEvents = async () => {
         // Store processed event keys to avoid duplicates
         const keySet = new Set<string>()
@@ -192,7 +220,11 @@ const NoteList = forwardRef<
           keySet.add(key)
 
           if (shouldHideEvent(evt)) return
-          if (hideReplies && isReplyNoteEvent(evt)) return
+          if (hideReplies && isReplyNoteEvent(evt)) {
+            if (!showRepliesToUnsupportedKinds) return
+            const parentKind = getParentKind(evt)
+            if (parentKind === undefined || ALLOWED_FILTER_KINDS.includes(parentKind)) return
+          }
           if (evt.kind !== kinds.Repost && evt.kind !== kinds.GenericRepost) {
             filteredEvents.push(evt)
             keys.push(key)
@@ -244,27 +276,42 @@ const NoteList = forwardRef<
           }
         })
 
-        const _trustScoreThreshold = hideSpam
-          ? SPAMMER_PERCENTILE_THRESHOLD
-          : (trustScoreThreshold ?? 0)
         if (!_trustScoreThreshold || _trustScoreThreshold <= 0) {
           const notes = filteredEvents.map((evt, i) => {
             const key = keys[i]
             return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
           })
-          setFilteredNotes(
-            areAlgoRelays ? notes : sortRevisionOrderedFeedItemsDesc(notes, ({ event }) => event)
-          )
+          if (!cancelled) {
+            setFilteredNotes(
+              areAlgoRelays ? notes : sortRevisionOrderedFeedItemsDesc(notes, ({ event }) => event)
+            )
+          }
           return
         }
 
         const _filteredNotes = (
           await Promise.all(
             filteredEvents.map(async (evt, i) => {
-              // Check trust score filter
-              if (!(await meetsMinTrustScore(getEventAuthorPubkey(evt), _trustScoreThreshold))) {
-                return null
+              if (cancelled) return null
+              const authorPubkey = getEventAuthorPubkey(evt)
+              let skipTrustCheck = false
+              if (showUnknownReplies && isReplyNoteEvent(evt) && isUnknownProfile(authorPubkey)) {
+                skipTrustCheck = await isReplyRootAuthorTrusted(
+                  evt,
+                  _trustScoreThreshold,
+                  maxTrustScoreThreshold
+                )
               }
+              if (!skipTrustCheck) {
+                // Check trust score filter
+                if (!(await meetsMinTrustScore(authorPubkey, _trustScoreThreshold))) {
+                  return null
+                }
+                if (maxTrustScoreThreshold !== undefined && maxTrustScoreThreshold < 100) {
+                  if (computeTrustScore(evt.pubkey) > maxTrustScoreThreshold) return null
+                }
+              }
+              if (cancelled) return null
               const key = keys[i]
               return { key, event: evt, reposters: Array.from(repostersMap.get(key) ?? []) }
             })
@@ -275,15 +322,28 @@ const NoteList = forwardRef<
           reposters: string[]
         }[]
 
-        setFilteredNotes(
-          areAlgoRelays
-            ? _filteredNotes
-            : sortRevisionOrderedFeedItemsDesc(_filteredNotes, ({ event }) => event)
-        )
+        if (!cancelled) {
+          setFilteredNotes(
+            areAlgoRelays
+              ? _filteredNotes
+              : sortRevisionOrderedFeedItemsDesc(_filteredNotes, ({ event }) => event)
+          )
+        }
       }
 
       setFiltering(true)
-      processEvents().finally(() => setFiltering(false))
+      processEvents().finally(() => {
+        if (!cancelled) {
+          setFiltering(false)
+          if (_wotReadyAtStart || !_trustScoreThreshold || _trustScoreThreshold <= 0) {
+            setWotFilteringDone(true)
+          }
+        }
+      })
+
+      return () => {
+        cancelled = true
+      }
     }, [
       events,
       storedEvents,
@@ -291,7 +351,13 @@ const NoteList = forwardRef<
       hideReplies,
       hideSpam,
       meetsMinTrustScore,
+      computeTrustScore,
+      isUnknownProfile,
+      isReplyRootAuthorTrusted,
       trustScoreThreshold,
+      maxTrustScoreThreshold,
+      showUnknownReplies,
+      showRepliesToUnsupportedKinds,
       areAlgoRelays
     ])
 
@@ -306,7 +372,11 @@ const NoteList = forwardRef<
 
         newEvents.forEach((event) => {
           if (shouldHideEvent(event)) return
-          if (hideReplies && isReplyNoteEvent(event)) return
+          if (hideReplies && isReplyNoteEvent(event)) {
+            if (!showRepliesToUnsupportedKinds) return
+            const parentKind = getParentKind(event)
+            if (parentKind === undefined || ALLOWED_FILTER_KINDS.includes(parentKind)) return
+          }
 
           const key = getEventKey(event)
           if (keySet.has(key)) {
@@ -333,9 +403,22 @@ const NoteList = forwardRef<
               if (hideSpam && (await isSpammer(authorPubkey))) {
                 return null
               }
-              // Check trust score filter
-              if (!(await meetsMinTrustScore(authorPubkey, _trustScoreThreshold))) {
-                return null
+              let skipTrustCheck = false
+              if (showUnknownReplies && isReplyNoteEvent(evt) && isUnknownProfile(authorPubkey)) {
+                skipTrustCheck = await isReplyRootAuthorTrusted(
+                  evt,
+                  _trustScoreThreshold,
+                  maxTrustScoreThreshold
+                )
+              }
+              if (!skipTrustCheck) {
+                // Check trust score filter
+                if (!(await meetsMinTrustScore(authorPubkey, _trustScoreThreshold))) {
+                  return null
+                }
+                if (maxTrustScoreThreshold !== undefined && maxTrustScoreThreshold < 100) {
+                  if (computeTrustScore(evt.pubkey) > maxTrustScoreThreshold) return null
+                }
               }
               return evt
             })
@@ -352,9 +435,21 @@ const NoteList = forwardRef<
       isSpammer,
       hideSpam,
       meetsMinTrustScore,
+      computeTrustScore,
+      isUnknownProfile,
+      isReplyRootAuthorTrusted,
       trustScoreThreshold,
+      maxTrustScoreThreshold,
+      showUnknownReplies,
+      showRepliesToUnsupportedKinds,
       areAlgoRelays
     ])
+
+    useEffect(() => {
+      if (!wotReady) {
+        setWotFilteringDone(false)
+      }
+    }, [wotReady])
 
     const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
       setTimeout(() => {
@@ -417,6 +512,8 @@ const NoteList = forwardRef<
         )
 
         const handleNewEvents = (incomingEvents: Event[]) => {
+          incomingEvents.forEach(() => onNoteEvaluated?.())
+
           let recentEvents = incomingEvents
           if (!areAlgoRelays) {
             const visibleHeadEvent = filteredNotesRef.current[0]?.event
@@ -569,18 +666,23 @@ const NoteList = forwardRef<
 
     const list = (
       <div className="min-h-screen">
-        {pinnedEventIds?.map((id) => <PinnedNoteCard key={id} eventId={id} className="w-full" />)}
-        {visibleItems.map(({ key, event, reposters }) => (
-          <NoteCard
-            key={key}
-            className="w-full"
-            event={event}
-            filterMutedNotes={filterMutedNotes}
-            reposters={reposters}
-          />
-        ))}
+        {(wotFilteringDone || (trustScoreThreshold ?? 0) <= 0) &&
+          visibleItems.map(({ key, event, reposters }) => (
+            <NoteCard
+              key={key}
+              className="w-full"
+              event={event}
+              filterMutedNotes={filterMutedNotes}
+              reposters={reposters}
+            />
+          ))}
         <div ref={bottomRef} />
-        {shouldShowLoadingIndicator || filtering || initialLoading ? (
+        {(!wotReady || !wotFilteringDone) && (trustScoreThreshold ?? 0) > 0 ? (
+          <div className="text-muted-foreground mt-8 flex flex-col items-center justify-center gap-3">
+            <Loader className="animate-spin" size={24} />
+            <span className="text-sm">{t('Loading web of trust…')}</span>
+          </div>
+        ) : shouldShowLoadingIndicator || filtering || initialLoading ? (
           <NoteCardLoadingSkeleton />
         ) : events.length ? (
           <div className="mt-2 flex flex-col items-center gap-3">

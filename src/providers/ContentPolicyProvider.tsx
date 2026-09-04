@@ -20,6 +20,9 @@ type TContentPolicyContext = {
   mediaAutoLoadPolicy: TMediaAutoLoadPolicy
   setMediaAutoLoadPolicy: (policy: TMediaAutoLoadPolicy) => void
 
+  blockMediaFromUnknownProfiles: boolean
+  setBlockMediaFromUnknownProfiles: (block: boolean) => void
+
   autoLoadProfilePicture: boolean
   profilePictureAutoLoadPolicy: TProfilePictureAutoLoadPolicy
   setProfilePictureAutoLoadPolicy: (policy: TProfilePictureAutoLoadPolicy) => void
@@ -49,6 +52,9 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
     storage.getHideContentMentioningMutedUsers()
   )
   const [mediaAutoLoadPolicy, setMediaAutoLoadPolicy] = useState(storage.getMediaAutoLoadPolicy())
+  const [blockMediaFromUnknownProfiles, setBlockMediaFromUnknownProfiles] = useState(
+    storage.getBlockMediaFromUnknownProfiles()
+  )
   const [profilePictureAutoLoadPolicy, setProfilePictureAutoLoadPolicy] = useState(
     storage.getProfilePictureAutoLoadPolicy()
   )
@@ -112,6 +118,11 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
     setMediaAutoLoadPolicy(policy)
   }
 
+  const updateBlockMediaFromUnknownProfiles = (block: boolean) => {
+    storage.setBlockMediaFromUnknownProfiles(block)
+    setBlockMediaFromUnknownProfiles(block)
+  }
+
   const updateProfilePictureAutoLoadPolicy = (policy: TProfilePictureAutoLoadPolicy) => {
     storage.setProfilePictureAutoLoadPolicy(policy)
     setProfilePictureAutoLoadPolicy(policy)
@@ -141,6 +152,8 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
         autoLoadMedia,
         mediaAutoLoadPolicy,
         setMediaAutoLoadPolicy: updateMediaAutoLoadPolicy,
+        blockMediaFromUnknownProfiles,
+        setBlockMediaFromUnknownProfiles: updateBlockMediaFromUnknownProfiles,
         autoLoadProfilePicture,
         profilePictureAutoLoadPolicy,
         setProfilePictureAutoLoadPolicy: updateProfilePictureAutoLoadPolicy,

@@ -17,7 +17,7 @@ function collectReplyIds(threads: Map<string, string[]>): string[] {
   return Array.from(ids)
 }
 
-export function useFilteredReplies(stuffKey: string) {
+export function useFilteredReplies(stuffKey: string, filterMutedNotes = true) {
   const { pubkey } = useNostr()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
   const { mutePubkeySet } = useMuteList()
@@ -44,8 +44,13 @@ export function useFilteredReplies(stuffKey: string) {
           if (replyKeySet.has(key)) return
           replyKeySet.add(key)
 
-          if (mutePubkeySet.has(evt.pubkey)) return
-          if (hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet)) return
+          if (filterMutedNotes && mutePubkeySet.has(evt.pubkey)) return
+          if (
+            filterMutedNotes &&
+            hideContentMentioningMutedUsers &&
+            isMentioningMutedUsers(evt, mutePubkeySet)
+          )
+            return
 
           const meetsTrust = await meetsMinTrustScore(evt.pubkey, trustScoreThreshold)
           if (!meetsTrust) {
@@ -85,6 +90,7 @@ export function useFilteredReplies(stuffKey: string) {
     eventsById,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    filterMutedNotes,
     getMinTrustScore,
     meetsMinTrustScore
   ])
@@ -103,7 +109,7 @@ export function useFilteredReplies(stuffKey: string) {
   return { replies, hasReplied, isLoading: isFetching }
 }
 
-export function useFilteredAllReplies(stuffKey: string) {
+export function useFilteredAllReplies(stuffKey: string, filterMutedNotes = true) {
   const { pubkey } = useNostr()
   const allThreads = useAllDescendantThreads(stuffKey)
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
@@ -129,8 +135,13 @@ export function useFilteredAllReplies(stuffKey: string) {
           if (replyKeySet.has(key)) return
           replyKeySet.add(key)
 
-          if (mutePubkeySet.has(evt.pubkey)) return
-          if (hideContentMentioningMutedUsers && isMentioningMutedUsers(evt, mutePubkeySet)) return
+          if (filterMutedNotes && mutePubkeySet.has(evt.pubkey)) return
+          if (
+            filterMutedNotes &&
+            hideContentMentioningMutedUsers &&
+            isMentioningMutedUsers(evt, mutePubkeySet)
+          )
+            return
 
           const meetsTrust = await meetsMinTrustScore(evt.pubkey, trustScoreThreshold)
           if (!meetsTrust) {
@@ -168,6 +179,7 @@ export function useFilteredAllReplies(stuffKey: string) {
     eventsById,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    filterMutedNotes,
     getMinTrustScore,
     meetsMinTrustScore
   ])

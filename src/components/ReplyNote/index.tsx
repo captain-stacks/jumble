@@ -1,19 +1,16 @@
 import { useSecondaryPage } from '@/PageManager'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SPECIAL_TRUST_SCORE_FILTER_ID } from '@/constants'
 import { useFetchEvents } from '@/hooks/useFetchEvent'
 import { useThread } from '@/hooks/useThread'
-import { getEventKey, isMentioningMutedUsers } from '@/lib/event'
+import { getEventKey } from '@/lib/event'
 import { toNote } from '@/lib/link'
 import { cn } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
-import { useMuteList } from '@/providers/MuteListProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import { Event } from 'nostr-tools'
 import { useEffect, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import ClickableCard from '../ClickableCard'
 import ClientTag from '../ClientTag'
 import Collapsible from '../Collapsible'
@@ -47,12 +44,10 @@ export default function ReplyNote({
   className?: string
   opPubkey?: string
 }) {
-  const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const { push } = useSecondaryPage()
-  const { mutePubkeySet } = useMuteList()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
-  const { hideContentMentioningMutedUsers, autoLoadProfilePicture } = useContentPolicy()
+  const { autoLoadProfilePicture } = useContentPolicy()
   const eventKey = useMemo(() => getEventKey(event), [event])
   const replyIds = useThread(eventKey)
   const { eventsById: replyEventsById } = useFetchEvents(replyIds)
@@ -60,21 +55,7 @@ export default function ReplyNote({
     () => replyIds.flatMap((id) => (replyEventsById.get(id) ? [replyEventsById.get(id)!] : [])),
     [replyIds, replyEventsById]
   )
-  const [showMuted, setShowMuted] = useState(false)
   const [hasReplies, setHasReplies] = useState(false)
-
-  const show = useMemo(() => {
-    if (showMuted) {
-      return true
-    }
-    if (mutePubkeySet.has(event.pubkey)) {
-      return false
-    }
-    if (hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) {
-      return false
-    }
-    return true
-  }, [showMuted, mutePubkeySet, event, hideContentMentioningMutedUsers])
 
   useEffect(() => {
     const checkHasReplies = async () => {
@@ -85,12 +66,6 @@ export default function ReplyNote({
 
       const trustScoreThreshold = getMinTrustScore(SPECIAL_TRUST_SCORE_FILTER_ID.INTERACTIONS)
       for (const reply of replies) {
-        if (mutePubkeySet.has(reply.pubkey)) {
-          continue
-        }
-        if (hideContentMentioningMutedUsers && isMentioningMutedUsers(reply, mutePubkeySet)) {
-          continue
-        }
         if (trustScoreThreshold && !(await meetsMinTrustScore(reply.pubkey, trustScoreThreshold))) {
           continue
         }
@@ -101,13 +76,7 @@ export default function ReplyNote({
     }
 
     checkHasReplies()
-  }, [
-    replies,
-    getMinTrustScore,
-    meetsMinTrustScore,
-    mutePubkeySet,
-    hideContentMentioningMutedUsers
-  ])
+  }, [replies, getMinTrustScore, meetsMinTrustScore])
 
   return (
     <ClickableCard
@@ -171,43 +140,28 @@ export default function ReplyNote({
                 }}
               />
             )}
-            {show ? (
-              <Content className="mt-2" event={event} />
-            ) : (
-              <Button
-                variant="outline"
-                className="text-muted-foreground mt-2 font-medium"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowMuted(true)
-                }}
-              >
-                {t('Temporarily display this reply')}
-              </Button>
-            )}
+            <Content className="mt-2" event={event} />
           </div>
         </div>
       </Collapsible>
-      {show && (
-        <StuffStats
-          className={cn(
-            'me-4 mt-2 ps-1',
-            autoLoadProfilePicture ? 'ms-14' : hideThreadGuide ? 'ms-4' : 'ms-7'
-          )}
-          classNames={{
-            topList: cn(
-              '-me-4',
-              autoLoadProfilePicture ? '-ms-14' : hideThreadGuide ? '-ms-4' : '-ms-7'
-            ),
-            topListContent: cn(
-              'pe-4',
-              autoLoadProfilePicture ? 'ps-14' : hideThreadGuide ? 'ps-4' : 'ps-7'
-            )
-          }}
-          stuff={event}
-          displayTopZapsAndLikes
-        />
-      )}
+      <StuffStats
+        className={cn(
+          'me-4 mt-2 ps-1',
+          autoLoadProfilePicture ? 'ms-14' : hideThreadGuide ? 'ms-4' : 'ms-7'
+        )}
+        classNames={{
+          topList: cn(
+            '-me-4',
+            autoLoadProfilePicture ? '-ms-14' : hideThreadGuide ? '-ms-4' : '-ms-7'
+          ),
+          topListContent: cn(
+            'pe-4',
+            autoLoadProfilePicture ? 'ps-14' : hideThreadGuide ? 'ps-4' : 'ps-7'
+          )
+        }}
+        stuff={event}
+        displayTopZapsAndLikes
+      />
     </ClickableCard>
   )
 }

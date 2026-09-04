@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator'
 import { POMEGRANATE_ENABLED } from '@/constants'
-import { cn, isDevEnv } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import { ChevronRight, Eye, KeyRound, Puzzle, Server } from 'lucide-react'
 import { useState } from 'react'
@@ -83,7 +83,7 @@ function AccountManagerNav({
       label: t('Public Key'),
       icon: <Eye />,
       onClick: () => setPage('npub'),
-      show: isDevEnv()
+      show: true
     }
   ]
 

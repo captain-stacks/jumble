@@ -17,10 +17,12 @@ import { ZapNotification } from './ZapNotification'
 export function NotificationItem({
   notification,
   isNew = false,
+  isMutedTab = false,
   onVisibilityChange
 }: {
   notification: Event
   isNew?: boolean
+  isMutedTab?: boolean
   onVisibilityChange?: (isVisible: boolean) => void
 }) {
   const { pubkey } = useNostr()
@@ -32,24 +34,29 @@ export function NotificationItem({
   useEffect(() => {
     const checkCanShow = async () => {
       const authorPubkey = getEventAuthorPubkey(notification)
-      // Check muted users
-      if (mutePubkeySet.has(authorPubkey)) {
-        setCanShow(false)
-        return
-      }
-
-      // Check content mentioning muted users
-      if (hideContentMentioningMutedUsers && isMentioningMutedUsers(notification, mutePubkeySet)) {
-        setCanShow(false)
-        return
-      }
-
-      // Check trust score
-      if (notification.kind !== kinds.Zap) {
-        const threshold = getMinTrustScore(SPECIAL_TRUST_SCORE_FILTER_ID.NOTIFICATIONS)
-        if (!(await meetsMinTrustScore(authorPubkey, threshold))) {
+      if (!isMutedTab) {
+        // Check muted users
+        if (mutePubkeySet.has(authorPubkey)) {
           setCanShow(false)
           return
+        }
+
+        // Check content mentioning muted users
+        if (
+          hideContentMentioningMutedUsers &&
+          isMentioningMutedUsers(notification, mutePubkeySet)
+        ) {
+          setCanShow(false)
+          return
+        }
+
+        // Check trust score
+        if (notification.kind !== kinds.Zap) {
+          const threshold = getMinTrustScore(SPECIAL_TRUST_SCORE_FILTER_ID.NOTIFICATIONS)
+          if (!(await meetsMinTrustScore(authorPubkey, threshold))) {
+            setCanShow(false)
+            return
+          }
         }
       }
 
@@ -72,7 +79,8 @@ export function NotificationItem({
     mutePubkeySet,
     hideContentMentioningMutedUsers,
     getMinTrustScore,
-    meetsMinTrustScore
+    meetsMinTrustScore,
+    isMutedTab
   ])
 
   if (!canShow) return null

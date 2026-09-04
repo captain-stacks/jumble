@@ -37,6 +37,8 @@ export function registerIpcHandlers(
 ) {
   ipcMain.handle(IPC_CHANNELS.checkRelays, () => manager.checkRelays())
 
+  ipcMain.handle(IPC_CHANNELS.listConnectionStatus, () => manager.listConnectionStatus())
+
   ipcMain.handle(IPC_CHANNELS.setNetworkOnline, (_e, online: boolean) =>
     manager.setNetworkOnline(online)
   )
@@ -45,10 +47,8 @@ export function registerIpcHandlers(
     manager.publish(url, event, timeoutMs)
   )
 
-  ipcMain.handle(
-    IPC_CHANNELS.subscribe,
-    (_e, subId: string, url: string, filters: Filter[]) =>
-      manager.subscribe(subId, url, filters)
+  ipcMain.handle(IPC_CHANNELS.subscribe, (_e, subId: string, url: string, filters: Filter[]) =>
+    manager.subscribe(subId, url, filters)
   )
 
   ipcMain.handle(IPC_CHANNELS.closeSub, (_e, subId: string) => manager.closeSub(subId))

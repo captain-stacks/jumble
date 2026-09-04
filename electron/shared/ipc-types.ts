@@ -2,6 +2,7 @@ import type { Event as NEvent, EventTemplate, Filter, VerifiedEvent } from 'nost
 
 export const IPC_CHANNELS = {
   checkRelays: 'relay:check-relays',
+  listConnectionStatus: 'relay:list-connection-status',
   setNetworkOnline: 'relay:set-network-online',
   publish: 'relay:publish',
   subscribe: 'relay:subscribe',
@@ -114,6 +115,7 @@ export type TAuthResponsePayload = {
 
 export type TElectronRelayBridge = {
   checkRelays: () => Promise<void>
+  listConnectionStatus: () => Promise<[string, boolean][]>
   setNetworkOnline: (online: boolean) => Promise<void>
   publish: (url: string, event: NEvent, timeoutMs: number) => Promise<void>
   subscribe: (subId: string, url: string, filters: Filter[]) => Promise<void>

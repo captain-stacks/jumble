@@ -173,6 +173,24 @@ export function getParentTag(event?: Event): { type: 'e' | 'a' | 'i'; tag: strin
   return parentITag ? { type: 'i', tag: parentITag } : undefined
 }
 
+export function getParentKind(event: Event): number | undefined {
+  // NIP-22: k tag explicitly names the parent event's kind
+  const kTag = event.tags.find(tagNameEquals('k'))?.[1]
+  if (kTag !== undefined) {
+    const k = parseInt(kTag)
+    if (!isNaN(k)) return k
+  }
+
+  // 'a' tag encodes the kind in its value: "kind:pubkey:d-tag"
+  const parentTag = getParentTag(event)
+  if (parentTag?.type === 'a') {
+    const k = parseInt(parentTag.tag[1]?.split(':')[0] ?? '')
+    if (!isNaN(k)) return k
+  }
+
+  return undefined
+}
+
 export function getParentBech32Id(event?: Event) {
   const parentTag = getParentTag(event)
   if (!parentTag) return undefined
@@ -261,6 +279,21 @@ export function getRootTag(event?: Event): { type: 'e' | 'a' | 'i'; tag: string[
 
   const rootITag = getRootITag(event)
   return rootITag ? { type: 'i', tag: rootITag } : undefined
+}
+
+// Recovers the root post's author pubkey without fetching the root event, when it's
+// already embedded in the reply's own tags: NIP-22 'A' coordinates ("kind:pubkey:d-tag")
+// and NIP-10 marked 'e' tags with the optional trailing pubkey both carry it inline.
+export function getRootAuthorPubkeyFromTags(event?: Event): string | undefined {
+  const rootTag = getRootTag(event)
+  if (!rootTag) return undefined
+  if (rootTag.type === 'a') {
+    return rootTag.tag[1]?.split(':')[1] || undefined
+  }
+  if (rootTag.type === 'e') {
+    return rootTag.tag[4] || undefined
+  }
+  return undefined
 }
 
 export function getRootBech32Id(event?: Event) {

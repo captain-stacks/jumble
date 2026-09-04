@@ -11,6 +11,7 @@ import ClientTag from '../ClientTag'
 import FollowingBadge from '../FollowingBadge'
 import { FormattedTimestamp } from '../FormattedTimestamp'
 import Nip05 from '../Nip05'
+import MuteBell from '../MuteBell'
 import NoteContent from '../NoteContent'
 import NoteOptions from '../NoteOptions'
 import OpBadge from '../OpBadge'
@@ -30,7 +31,8 @@ export default function Note({
   hideParentNotePreview = false,
   showFull = false,
   hideHeader = false,
-  opPubkey
+  opPubkey,
+  filterMutedNotes = true
 }: {
   event: Event
   originalNoteId?: string
@@ -40,6 +42,7 @@ export default function Note({
   showFull?: boolean
   hideHeader?: boolean
   opPubkey?: string
+  filterMutedNotes?: boolean
 }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
@@ -90,6 +93,7 @@ export default function Note({
             </div>
           </div>
           <div className="flex shrink-0 items-center">
+            <MuteBell stuff={event} />
             <TranslateButton
               event={event}
               showFull={showFull}
@@ -127,7 +131,13 @@ export default function Note({
           }}
         />
       )}
-      <NoteContent event={event} originalNoteId={originalNoteId} showFull={showFull} size={size} />
+      <NoteContent
+        event={event}
+        originalNoteId={originalNoteId}
+        showFull={showFull}
+        size={size}
+        filterMutedNotes={filterMutedNotes}
+      />
     </div>
   )
 }

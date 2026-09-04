@@ -9,6 +9,7 @@ import FollowingListPage from '@/pages/secondary/FollowingListPage'
 import FollowPackPage from '@/pages/secondary/FollowPackPage'
 import GeneralSettingsPage from '@/pages/secondary/GeneralSettingsPage'
 import MuteListPage from '@/pages/secondary/MuteListPage'
+import ProfileMuteListPage from '@/pages/secondary/ProfileMuteListPage'
 import NoteListPage from '@/pages/secondary/NoteListPage'
 import NotePage from '@/pages/secondary/NotePage'
 import OthersRelaySettingsPage from '@/pages/secondary/OthersRelaySettingsPage'
@@ -26,6 +27,7 @@ import StandaloneEmojiEditorPage from '@/pages/secondary/StandaloneEmojiEditorPa
 import SystemSettingsPage from '@/pages/secondary/SystemSettingsPage'
 import TranslationPage from '@/pages/secondary/TranslationPage'
 import UserAggregationDetailPage from '@/pages/secondary/UserAggregationDetailPage'
+import EligibleProfilesPage from '@/pages/secondary/EligibleProfilesPage'
 import WalletPage from '@/pages/secondary/WalletPage'
 import { match } from 'path-to-regexp'
 import { isValidElement } from 'react'
@@ -61,11 +63,13 @@ const SECONDARY_ROUTE_CONFIGS: {
   { path: '/settings/account', element: <AccountSettingsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },
   { path: '/mutes', element: <MuteListPage /> },
+  { path: '/mutes/:pubkey', element: <ProfileMuteListPage /> },
   { path: '/rizful', element: <RizfulPage /> },
   { path: '/bookmarks', element: <BookmarkPage /> },
   { path: '/follow-packs/:id', element: <FollowPackPage /> },
   { path: '/user-aggregation/:feedId/:npub', element: <UserAggregationDetailPage /> },
-  { path: '/dms/:pubkey', element: <DmConversationPage />, hideBottomBar: true }
+  { path: '/dms/:pubkey', element: <DmConversationPage />, hideBottomBar: true },
+  { path: '/eligible-profiles', element: <EligibleProfilesPage /> }
 ]
 
 export const SECONDARY_ROUTES = SECONDARY_ROUTE_CONFIGS.map(

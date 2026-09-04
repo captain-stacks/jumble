@@ -21,7 +21,7 @@ export default function SubReplies({
   const { push } = useSecondaryPage()
   const { autoLoadProfilePicture } = useContentPolicy()
   const [isExpanded, setIsExpanded] = useState(false)
-  const { replies } = useFilteredAllReplies(parentKey)
+  const { replies } = useFilteredAllReplies(parentKey, false)
   const [highlightReplyKey, setHighlightReplyKey] = useState<string | undefined>(undefined)
   const replyRefs = useRef<Record<string, HTMLDivElement | null>>({})
 

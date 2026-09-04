@@ -20,7 +20,6 @@ import { SelectValue } from '@radix-ui/react-select'
 import { RotateCcw } from 'lucide-react'
 import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import DefaultTrustScoreFilter from './DefaultTrustScoreFilter'
 import MutedWords from './MutedWords'
 
 const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
@@ -36,7 +35,9 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     hideContentMentioningMutedUsers,
     setHideContentMentioningMutedUsers,
     mediaAutoLoadPolicy,
-    setMediaAutoLoadPolicy
+    setMediaAutoLoadPolicy,
+    blockMediaFromUnknownProfiles,
+    setBlockMediaFromUnknownProfiles
   } = useContentPolicy()
   const {
     quickReaction,
@@ -44,7 +45,11 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     quickReactionEmoji,
     updateQuickReactionEmoji,
     showLinkPreviews,
-    updateShowLinkPreviews
+    updateShowLinkPreviews,
+    alwaysShowThreadContext,
+    updateAlwaysShowThreadContext,
+    showRepliesToUnsupportedKinds,
+    updateShowRepliesToUnsupportedKinds
   } = useUserPreferences()
   const [disableNotificationSync, setDisableNotificationSync] = useState(
     localStorage.getDisableNotificationSync()
@@ -119,6 +124,20 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             }
           />
           <SettingsRow
+            htmlFor="block-media-from-unknown-profiles"
+            title={t('Block media from unknown profiles')}
+            description={t(
+              "Don't auto-load images, videos, or previews from accounts outside your network"
+            )}
+            control={
+              <Switch
+                id="block-media-from-unknown-profiles"
+                checked={blockMediaFromUnknownProfiles}
+                onCheckedChange={setBlockMediaFromUnknownProfiles}
+              />
+            }
+          />
+          <SettingsRow
             htmlFor="autoplay"
             title={t('Autoplay')}
             description={t('Enable video autoplay on this device')}
@@ -167,8 +186,36 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
               </Select>
             }
           />
-          <DefaultTrustScoreFilter />
           <MutedWords />
+        </SettingsGroup>
+
+        <SettingsGroup title={t('Notes')}>
+          <SettingsRow
+            htmlFor="always-show-thread-context"
+            title={t('Always show thread context')}
+            description={t('Always expand the full thread when viewing a note')}
+            control={
+              <Switch
+                id="always-show-thread-context"
+                checked={alwaysShowThreadContext}
+                onCheckedChange={updateAlwaysShowThreadContext}
+              />
+            }
+          />
+          <SettingsRow
+            htmlFor="show-replies-to-unsupported-kinds"
+            title={t('Show replies to unsupported event types')}
+            description={t(
+              'Show kind 1 and 1111 notes that reply to event types that cannot be displayed'
+            )}
+            control={
+              <Switch
+                id="show-replies-to-unsupported-kinds"
+                checked={showRepliesToUnsupportedKinds}
+                onCheckedChange={updateShowRepliesToUnsupportedKinds}
+              />
+            }
+          />
         </SettingsGroup>
 
         <SettingsGroup title={t('Reactions')}>

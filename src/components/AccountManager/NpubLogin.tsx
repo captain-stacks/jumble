@@ -35,6 +35,7 @@ export default function NpubLogin({
 
   return (
     <>
+      <p className="text-muted-foreground text-sm">{t('Read-only. You can browse but not post or interact.')}</p>
       <div className="space-y-1">
         <Input
           placeholder="npub..."

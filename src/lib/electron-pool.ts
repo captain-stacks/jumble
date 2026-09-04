@@ -121,6 +121,11 @@ export class ElectronPool implements IRelayPool {
     await this.bridge.relay.checkRelays()
   }
 
+  async listConnectionStatus(): Promise<Map<string, boolean>> {
+    const entries = await this.bridge.relay.listConnectionStatus()
+    return new Map(entries)
+  }
+
   setNetworkOnline(online: boolean): Promise<void> {
     return this.bridge.relay.setNetworkOnline(online)
   }

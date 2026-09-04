@@ -588,6 +588,7 @@ export default {
     'Unfollow Special': 'Unfollow Special',
     'Personal Feeds': 'Personal Feeds',
     'Relay Feeds': 'Relay Feeds',
+    'At least one relay must stay active': 'At least one relay must stay active',
     'Create Highlight': 'Create Highlight',
     'Write your thoughts about this highlight...': 'Write your thoughts about this highlight...',
     'Publish Highlight': 'Publish Highlight',
@@ -656,6 +657,7 @@ export default {
     'trust-filter.hide-bottom-percent': 'Filter out bottom {{score}}% of users by trust rank',
     'trust-filter.trust-score-description':
       'Calculated based on user reputation and social network percentile',
+    'trust-filter.show-unknown-replies': 'Show replies from unknown profiles',
     'Auto-load profile pictures': 'Auto-load profile pictures',
     'Disable live feed': 'Disable live feed',
     'Enable live feed': 'Enable live feed',
@@ -1153,6 +1155,24 @@ export default {
     'Copy link': 'Copy link',
     'Link previews': 'Link previews',
     'Show previews for links in notes': 'Show previews for links in notes',
-    'Avatar image must be {{size}} MB or smaller': 'Avatar image must be {{size}} MB or smaller'
+    'Block media from unknown profiles': 'Block media from unknown profiles',
+    "Don't auto-load images, videos, or previews from accounts outside your network":
+      "Don't auto-load images, videos, or previews from accounts outside your network",
+    Connected: 'Connected',
+    Disconnected: 'Disconnected',
+    'Avatar image must be {{size}} MB or smaller': 'Avatar image must be {{size}} MB or smaller',
+    'WoT score: {{score}} — green means someone you follow also follows this person':
+      'WoT score: {{score}} — green means someone you follow also follows this person',
+    'WoT score: {{score}} — red means nobody in your network follows this person':
+      'WoT score: {{score}} — red means nobody in your network follows this person',
+    'Network trust score': 'Network trust score',
+    'Not known by any of your {{count}} follows': 'Not known by any of your {{count}} follows',
+    'Followed by {{follows}} of your {{total}} follows':
+      'Followed by {{follows}} of your {{total}} follows',
+    'Muted by {{mutes}} of your {{total}} follows': 'Muted by {{mutes}} of your {{total}} follows',
+    'Loading web of trust…': 'Loading web of trust…',
+    'Show replies to unsupported event types': 'Show replies to unsupported event types',
+    'Show kind 1 and 1111 notes that reply to event types that cannot be displayed':
+      'Show kind 1 and 1111 notes that reply to event types that cannot be displayed'
   }
 }

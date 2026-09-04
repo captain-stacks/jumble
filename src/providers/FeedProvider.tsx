@@ -1,22 +1,40 @@
-import { IS_COMMUNITY_MODE, COMMUNITY_RELAY_SETS, COMMUNITY_RELAYS } from '@/constants'
+import {
+  IS_COMMUNITY_MODE,
+  BIG_RELAY_URLS,
+  COMMUNITY_RELAY_SETS,
+  COMMUNITY_RELAYS
+} from '@/constants'
 import { getRelaySetFromEvent } from '@/lib/event-metadata'
 import { isWebsocketUrl, normalizeUrl } from '@/lib/url'
 import indexedDb from '@/services/indexed-db.service'
 import storage from '@/services/local-storage.service'
 import { TFeedInfo, TFeedType, TRelaySet } from '@/types'
 import { kinds } from 'nostr-tools'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useFavoriteRelays } from './FavoriteRelaysProvider'
 import { useNostr } from './NostrProvider'
 
 type TFeedContext = {
   feedInfo: TFeedInfo
   relayUrls: string[]
+  activeRelayUrls: string[]
+  disabledRelayUrls: string[]
+  toggleRelayUrl: (url: string) => void
   isReady: boolean
   switchFeed: (
     feedType: TFeedType | null,
     options?: { activeRelaySetId?: string; pubkey?: string; relay?: string | null }
   ) => Promise<void>
+  noteEvaluationFlashCount: number
+  triggerNoteEvaluationFlash: () => void
 }
 
 const FeedContext = createContext<TFeedContext | undefined>(undefined)
@@ -33,9 +51,43 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
   const { pubkey, isInitialized } = useNostr()
   const { relaySets } = useFavoriteRelays()
   const [relayUrls, setRelayUrls] = useState<string[]>([])
+  const [disabledRelayUrls, setDisabledRelayUrls] = useState<string[]>([])
   const [isReady, setIsReady] = useState(false)
   const [feedInfo, setFeedInfo] = useState<TFeedInfo>(null)
   const feedInfoRef = useRef<TFeedInfo>(feedInfo)
+  // Flashes a dot next to the feed dropdown each time a new note arrives in
+  // the feed, so the reader has a lightweight cue that fresh content landed.
+  const [noteEvaluationFlashCount, setNoteEvaluationFlashCount] = useState(0)
+  const triggerNoteEvaluationFlash = useCallback(() => {
+    setNoteEvaluationFlashCount((count) => count + 1)
+  }, [])
+
+  // Relays a user has unchecked to stop loading from, for the currently active feed only.
+  // Reset whenever the feed's relay set changes (see setRelayUrls call sites in switchFeed).
+  useEffect(() => {
+    setDisabledRelayUrls([])
+  }, [relayUrls])
+
+  const activeRelayUrls = useMemo(
+    () => relayUrls.filter((url) => !disabledRelayUrls.includes(url)),
+    [relayUrls, disabledRelayUrls]
+  )
+
+  const toggleRelayUrl = useCallback(
+    (url: string) => {
+      setDisabledRelayUrls((prev) => {
+        if (prev.includes(url)) {
+          return prev.filter((u) => u !== url)
+        }
+        // Always keep at least one relay active for the feed
+        if (relayUrls.length - prev.length <= 1) {
+          return prev
+        }
+        return [...prev, url]
+      })
+    },
+    [relayUrls]
+  )
 
   useEffect(() => {
     const init = async () => {
@@ -47,7 +99,8 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       if (currentFeedInfo) {
         if (
           currentFeedInfo.feedType !== 'following' &&
-          currentFeedInfo.feedType !== 'pinned'
+          currentFeedInfo.feedType !== 'pinned' &&
+          currentFeedInfo.feedType !== 'global'
         ) {
           return
         }
@@ -94,6 +147,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       // update pinned feed if pubkey changes
       if (feedInfo?.feedType === 'pinned' && pubkey) {
         return await switchFeed('pinned', { pubkey })
+      }
+
+      if (feedInfo?.feedType === 'global' && pubkey) {
+        return await switchFeed('global')
       }
 
       setIsReady(true)
@@ -201,6 +258,15 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       setIsReady(true)
       return
     }
+    if (feedType === 'global') {
+      const newFeedInfo = { feedType }
+      setFeedInfo(newFeedInfo)
+      feedInfoRef.current = newFeedInfo
+      storage.setFeedInfo(newFeedInfo, pubkey)
+      setRelayUrls(BIG_RELAY_URLS)
+      setIsReady(true)
+      return
+    }
     setIsReady(true)
   }
 
@@ -209,8 +275,13 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       value={{
         feedInfo,
         relayUrls,
+        activeRelayUrls,
+        disabledRelayUrls,
+        toggleRelayUrl,
         isReady,
-        switchFeed
+        switchFeed,
+        noteEvaluationFlashCount,
+        triggerNoteEvaluationFlash
       }}
     >
       {children}

@@ -59,13 +59,14 @@ class LocalStorageService {
   private translationServiceConfigMap: Record<string, TTranslationServiceConfig> = {}
   private mediaUploadServiceConfigMap: Record<string, TMediaUploadServiceConfig> = {}
   private dismissedTooManyRelaysAlert: boolean = false
-  private dismissedDesktopAppTip: boolean = false
+  private dismissedDesktopAppTip: boolean = true
   private showKinds: number[] = []
   private showKindsMap: Record<string, number[]> = {}
   private hideContentMentioningMutedUsers: boolean = false
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private showLinkPreviews: boolean = true
+  private blockMediaFromUnknownProfiles: boolean = true
   private profilePictureAutoLoadPolicy: TProfilePictureAutoLoadPolicy =
     PROFILE_PICTURE_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
@@ -88,6 +89,11 @@ class LocalStorageService {
   private mutedWords: string[] = []
   private minTrustScore: number = 0
   private minTrustScoreMap: Record<string, number> = {}
+  private maxTrustScoreMap: Record<string, number> = {}
+  private showUnknownRepliesMap: Record<string, boolean> = {}
+  private trustDecay: number = 7
+  private muteWeight: number = 1
+  private minFollowsToCount: number = 1
   private hideIndirectNotifications: boolean = false
   private encryptionKeyPrivkeyMap: Record<string, string> = {}
   // Rotated-out encryption keys kept around (per account) so messages still
@@ -108,6 +114,8 @@ class LocalStorageService {
   private dmBackwardCursorMap: Record<string, number> = {}
   private processedSyncRequestIds: TProcessedSyncRequestIdMap = {}
   private disableNotificationSync: boolean = false
+  private alwaysShowThreadContext: boolean = false
+  private showRepliesToUnsupportedKinds: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -199,6 +207,12 @@ class LocalStorageService {
               }
             ]
           })
+          if (!valid.some((tab) => tab.id === 'muted')) {
+            const mutedDefault = DEFAULT_NOTIFICATION_TABS.find((tab) => tab.builtin === 'muted')
+            if (mutedDefault) {
+              valid.push({ ...mutedDefault, filters: [...mutedDefault.filters] })
+            }
+          }
           if (
             valid.length > 0 &&
             new Set(valid.map((tab) => tab.id)).size === valid.length &&
@@ -206,13 +220,17 @@ class LocalStorageService {
             valid.some((tab) => !tab.hidden)
           ) {
             this.notificationTabs = valid
+            // Persist migrated filters/tabs immediately - otherwise only the
+            // in-memory copy has them and the next load (with the version
+            // already bumped below) would silently drop the migration.
+            window.localStorage.setItem(StorageKey.NOTIFICATION_TABS, JSON.stringify(valid))
           }
         }
       } catch {
         // ignore, fall back to defaults
       }
     }
-    window.localStorage.setItem(StorageKey.NOTIFICATION_TABS_VERSION, '3')
+    window.localStorage.setItem(StorageKey.NOTIFICATION_TABS_VERSION, '4')
 
     const relaySetsStr = window.localStorage.getItem(StorageKey.RELAY_SETS)
     if (!relaySetsStr) {
@@ -287,7 +305,7 @@ class LocalStorageService {
       window.localStorage.getItem(StorageKey.DISMISSED_TOO_MANY_RELAYS_ALERT) === 'true'
 
     this.dismissedDesktopAppTip =
-      window.localStorage.getItem(StorageKey.DISMISSED_DESKTOP_APP_TIP) === 'true'
+      window.localStorage.getItem(StorageKey.DISMISSED_DESKTOP_APP_TIP) !== 'false'
 
     const showKindsStr = window.localStorage.getItem(StorageKey.SHOW_KINDS)
     if (!showKindsStr) {
@@ -346,6 +364,9 @@ class LocalStorageService {
     }
 
     this.showLinkPreviews = window.localStorage.getItem(StorageKey.SHOW_LINK_PREVIEWS) !== 'false'
+
+    this.blockMediaFromUnknownProfiles =
+      window.localStorage.getItem(StorageKey.BLOCK_MEDIA_FROM_UNKNOWN_PROFILES) !== 'false'
 
     const profilePictureAutoLoadPolicy = window.localStorage.getItem(
       StorageKey.PROFILE_PICTURE_AUTO_LOAD_POLICY
@@ -448,6 +469,56 @@ class LocalStorageService {
         }
       } catch {
         // Invalid JSON, use default
+      }
+    }
+
+    const maxTrustScoreMapStr = window.localStorage.getItem(StorageKey.MAX_TRUST_SCORE_MAP)
+    if (maxTrustScoreMapStr) {
+      try {
+        const map = JSON.parse(maxTrustScoreMapStr)
+        if (typeof map === 'object' && map !== null) {
+          this.maxTrustScoreMap = map
+        }
+      } catch {
+        // Invalid JSON, use default
+      }
+    }
+
+    const showUnknownRepliesMapStr = window.localStorage.getItem(
+      StorageKey.SHOW_UNKNOWN_REPLIES_MAP
+    )
+    if (showUnknownRepliesMapStr) {
+      try {
+        const map = JSON.parse(showUnknownRepliesMapStr)
+        if (typeof map === 'object' && map !== null) {
+          this.showUnknownRepliesMap = map
+        }
+      } catch {
+        // Invalid JSON, use default
+      }
+    }
+
+    const trustDecayStr = window.localStorage.getItem(StorageKey.TRUST_DECAY)
+    if (trustDecayStr) {
+      const decay = parseInt(trustDecayStr, 10)
+      if (!isNaN(decay) && decay >= 1 && decay <= 10) {
+        this.trustDecay = decay
+      }
+    }
+
+    const muteWeightStr = window.localStorage.getItem(StorageKey.MUTE_WEIGHT)
+    if (muteWeightStr) {
+      const w = parseInt(muteWeightStr, 10)
+      if (!isNaN(w) && w >= 1 && w <= 10) {
+        this.muteWeight = w
+      }
+    }
+
+    const minFollowsToCountStr = window.localStorage.getItem(StorageKey.MIN_FOLLOWS_TO_COUNT)
+    if (minFollowsToCountStr) {
+      const n = parseInt(minFollowsToCountStr, 10)
+      if (!isNaN(n) && n >= 1 && n <= 10) {
+        this.minFollowsToCount = n
       }
     }
 
@@ -591,6 +662,10 @@ class LocalStorageService {
 
     this.disableNotificationSync =
       window.localStorage.getItem(StorageKey.DISABLE_NOTIFICATION_SYNC) === 'true'
+    this.alwaysShowThreadContext =
+      window.localStorage.getItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT) === 'true'
+    this.showRepliesToUnsupportedKinds =
+      window.localStorage.getItem(StorageKey.SHOW_REPLIES_TO_UNSUPPORTED_KINDS) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.PINNED_PUBKEYS)
@@ -1154,6 +1229,15 @@ class LocalStorageService {
     window.localStorage.setItem(StorageKey.SHOW_LINK_PREVIEWS, show.toString())
   }
 
+  getBlockMediaFromUnknownProfiles() {
+    return this.blockMediaFromUnknownProfiles
+  }
+
+  setBlockMediaFromUnknownProfiles(block: boolean) {
+    this.blockMediaFromUnknownProfiles = block
+    window.localStorage.setItem(StorageKey.BLOCK_MEDIA_FROM_UNKNOWN_PROFILES, block.toString())
+  }
+
   setProfilePictureAutoLoadPolicy(policy: TProfilePictureAutoLoadPolicy) {
     this.profilePictureAutoLoadPolicy = policy
     window.localStorage.setItem(StorageKey.PROFILE_PICTURE_AUTO_LOAD_POLICY, policy)
@@ -1316,6 +1400,57 @@ class LocalStorageService {
   setMinTrustScoreMap(map: Record<string, number>) {
     this.minTrustScoreMap = map
     window.localStorage.setItem(StorageKey.MIN_TRUST_SCORE_MAP, JSON.stringify(map))
+  }
+
+  getMaxTrustScoreMap() {
+    return this.maxTrustScoreMap
+  }
+
+  setMaxTrustScoreMap(map: Record<string, number>) {
+    this.maxTrustScoreMap = map
+    window.localStorage.setItem(StorageKey.MAX_TRUST_SCORE_MAP, JSON.stringify(map))
+  }
+
+  getShowUnknownRepliesMap() {
+    return this.showUnknownRepliesMap
+  }
+
+  setShowUnknownRepliesMap(map: Record<string, boolean>) {
+    this.showUnknownRepliesMap = map
+    window.localStorage.setItem(StorageKey.SHOW_UNKNOWN_REPLIES_MAP, JSON.stringify(map))
+  }
+
+  getTrustDecay() {
+    return this.trustDecay
+  }
+
+  setTrustDecay(decay: number) {
+    if (decay >= 1 && decay <= 10) {
+      this.trustDecay = decay
+      window.localStorage.setItem(StorageKey.TRUST_DECAY, decay.toString())
+    }
+  }
+
+  getMuteWeight() {
+    return this.muteWeight
+  }
+
+  setMuteWeight(weight: number) {
+    if (weight >= 1 && weight <= 10) {
+      this.muteWeight = weight
+      window.localStorage.setItem(StorageKey.MUTE_WEIGHT, weight.toString())
+    }
+  }
+
+  getMinFollowsToCount() {
+    return this.minFollowsToCount
+  }
+
+  setMinFollowsToCount(n: number) {
+    if (n >= 1 && n <= 10) {
+      this.minFollowsToCount = n
+      window.localStorage.setItem(StorageKey.MIN_FOLLOWS_TO_COUNT, n.toString())
+    }
   }
 
   getDefaultRelayUrls() {
@@ -1503,6 +1638,24 @@ class LocalStorageService {
   setDisableNotificationSync(disable: boolean) {
     this.disableNotificationSync = disable
     window.localStorage.setItem(StorageKey.DISABLE_NOTIFICATION_SYNC, disable.toString())
+  }
+
+  getAlwaysShowThreadContext() {
+    return this.alwaysShowThreadContext
+  }
+
+  setAlwaysShowThreadContext(always: boolean) {
+    this.alwaysShowThreadContext = always
+    window.localStorage.setItem(StorageKey.ALWAYS_SHOW_THREAD_CONTEXT, always.toString())
+  }
+
+  getShowRepliesToUnsupportedKinds() {
+    return this.showRepliesToUnsupportedKinds
+  }
+
+  setShowRepliesToUnsupportedKinds(show: boolean) {
+    this.showRepliesToUnsupportedKinds = show
+    window.localStorage.setItem(StorageKey.SHOW_REPLIES_TO_UNSUPPORTED_KINDS, show.toString())
   }
 }
 

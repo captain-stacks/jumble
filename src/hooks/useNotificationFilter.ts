@@ -7,7 +7,7 @@ import { useUserTrust } from '@/providers/UserTrustProvider'
 import { NostrEvent } from 'nostr-tools'
 import { useCallback } from 'react'
 
-export function useNotificationFilter() {
+export function useNotificationFilter({ mutedOnly = false }: { mutedOnly?: boolean } = {}) {
   const { pubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
   const { getMinTrustScore, meetsMinTrustScore } = useUserTrust()
@@ -20,6 +20,7 @@ export function useNotificationFilter() {
         pubkey,
         mutePubkeySet,
         hideContentMentioningMutedUsers,
+        mutedOnly,
         meetsMinTrustScore: async (target: string) => {
           if (trustScoreThreshold === 0) return true
           return meetsMinTrustScore(target, trustScoreThreshold)
@@ -29,6 +30,7 @@ export function useNotificationFilter() {
       pubkey,
       mutePubkeySet,
       hideContentMentioningMutedUsers,
+      mutedOnly,
       trustScoreThreshold,
       meetsMinTrustScore
     ]
